@@ -51,6 +51,7 @@ global.RBTESTS = T => {
   if (global.CH2) ch2(T);
   if (global.CH3) ch3(T);
   if (global.CH4) ch4(T);
+  if (global.CH5) ch5(T);
 };
 /* ---------------- chapter 3: forward kinematics (Craig ch. 3) ---------------- */
 function ch3(T) {
@@ -205,5 +206,53 @@ function ch4(T) {
   T('ex SOLVE: tool frame of the chosen solution = {G}', near(RB.Tm(CH4.gp8FK(X.solve.best.s.q), RB.trans(0, 0, X.solve.LT)), X.solve.G), 0, 1e-9);
   T('HW 4: (x, y, z) = (0.5427, 0.3800, 0.6690)', dd(X.hw.p, [0.5427, 0.3800, 0.6690]), 0, 1e-4); T('HW 4: second solution (−145°, 170.04°, 0.9773)', Math.abs(dg(X.hw.sols[1][0]) + 145) + Math.abs(dg(X.hw.sols[1][1]) - 170.04) + Math.abs(X.hw.sols[1][2] - 0.9773), 0, 0.01);
   T('HW 4: both solutions reach the goal', Math.max(...X.hw.sols.map(q => dd(CH4.rrp.P(X.hw.L, q), X.hw.p))), 0, 1e-12); T('HW 4: closed form = product of the link transforms', dd(RB.Tp(CH4.rrp.T03(X.hw.L, X.hw.q)), X.hw.p), 0, 1e-12);
+}
+/* ---------------- chapter 5: the Jacobian ---------------- */
+function ch5(T) { const RB = global.RB, CH3 = global.CH3, CH4 = global.CH4, CH5 = global.CH5, X = CH5.EX, d2r = RB.rad, dg = RB.deg;
+  const near = (A, B) => { let e = 0; A.forEach((r, i) => r.forEach((x, j) => { e = Math.max(e, Math.abs(x - B[i][j])); })); return e; }, dd = (p, q) => Math.hypot(...p.map((x, i) => x - q[i]));
+  let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }, ang = () => d2r(-170 + 340 * rnd());
+  /* every closed form against the numerical derivative of the forward kinematics, at 100 random poses each */
+  let e2 = 0, e23 = 0, erp = 0, e3 = 0, err = 0, est = 0, egp = 0, ej0v = 0, ej0w = 0, ed = 0;
+  for (let k = 0; k < 100; k++) { const L = [0.2 + 0.6 * rnd(), 0.2 + 0.6 * rnd()], q = [ang(), ang()], J = CH5.two.J(L, q); e2 = Math.max(e2, near(J, CH5.numJ(x => CH5.two.P(L, x), q)));
+    const a = q[0] + q[1], Rz = [[Math.cos(a), -Math.sin(a)], [Math.sin(a), Math.cos(a)]]; e23 = Math.max(e23, near(J, CH5.mm(Rz, CH5.two.J3(L, q)))); ed = Math.max(ed, Math.abs(CH5.det2(J) - CH5.two.det(L, q)));
+    const qr = [ang(), 0.1 + rnd()]; erp = Math.max(erp, near(CH5.rp.J(qr), CH5.numJ(CH5.rp.P, qr)));
+    const L3 = [0.3 + rnd(), 0.3 + rnd(), 0.1 + rnd()], q3 = [d2r(-80 + 160 * rnd()), d2r(-80 + 160 * rnd()), d2r(-80 + 160 * rnd())]; e3 = Math.max(e3, near(CH5.p3r.J(L3, q3), CH5.numJ(x => CH5.p3r.X(L3, x), q3)));
+    const qq = [ang(), ang(), 0.1 + rnd()]; err = Math.max(err, near(CH5.rrp.J(CH5.rrp.L, qq), CH5.numJ(x => CH5.rrp.P(CH5.rrp.L, x), qq))); est = Math.max(est, near(CH5.stan.Jv(0.15, qq), CH5.numJ(x => CH5.stan.P(0.15, x), qq)));
+    const g = [ang(), ang(), ang(), ang(), ang(), ang()], G = CH3.EX.gp8, J0 = CH5.J0(G.rows(), g), Jn = CH5.numJ(x => CH5.gp8.P(x), g); egp = Math.max(egp, near(CH5.gp8.Jv(g), Jn.map(r => r.slice(0, 3)))); ej0v = Math.max(ej0v, near(J0.slice(0, 3), Jn));
+    /* the angular part: ω of joint j alone, read from Ṙ Rᵀ with a numerical Ṙ */
+    const R = x => RB.TR(G.T06(x)), h = 1e-6; g.forEach((_, j) => { const a2 = g.slice(), b2 = g.slice(); a2[j] += h; b2[j] -= h; const Ra = R(a2), Rb = R(b2), Rd = Ra.map((r, i) => r.map((x, m) => (x - Rb[i][m]) / (2 * h))), w = CH5.omegaOf(R(g), Rd); ej0w = Math.max(ej0w, dd(w, [J0[3][j], J0[4][j], J0[5][j]])); }); }
+  T('two-link: J = numerical derivative of (x, y) (100 poses)', e2, 0, 1e-8); T('two-link: ^0J = R_Z(θ1 + θ2) ^3J (Craig 5.66 and 5.67)', e23, 0, 1e-12); T('two-link: det J = l1 l2 s2', ed, 0, 1e-12);
+  T('RP arm: J = numerical derivative', erp, 0, 1e-8); T('planar 3R with tool: 3 × 3 J of (x, y, φ) = numerical derivative', e3, 0, 1e-8); T('RRP arm of homework 4: J = numerical derivative', err, 0, 1e-8);
+  T('Stanford arm: position Jacobian = numerical derivative', est, 0, 1e-8); T('Stanford arm: position = column 4 of its DH chain', dd(CH5.stan.P(0.15, CH5.stan.q), RB.Tp(RB.fkDH(CH5.stan.rows(0.15), CH5.stan.q).pop())), 0, 1e-12);
+  T('GP8: closed-form wrist-centre Jacobian = numerical derivative (columns 1–3)', egp, 0, 1e-8); T('GP8: basic Jacobian, linear part = numerical derivative (6 columns)', ej0v, 0, 1e-8); T('GP8: basic Jacobian, angular part = ω from Ṙ Rᵀ', ej0w, 0, 1e-7);
+  T('GP8: joints 4–6 do not move the wrist centre', Math.max(...X.gp8.J0.slice(0, 3).flatMap(r => r.slice(3).map(Math.abs))), 0, 1e-12);
+  T('basic Jacobian of the planar 3R arm: ω_z row = (1, 1, 1)', (() => { const J = CH5.J0(CH3.EX.p3r.rows(CH3.EX.p3r.L), CH3.EX.p3r.q); return J[5].join(','); })(), '1,1,1');
+  T('basic Jacobian of the homework RRP arm: linear part = its closed form', near(CH5.J0(CH4.rrp.rows(CH4.rrp.L), CH4.rrp.q).slice(0, 3), X.rrp.J), 0, 1e-12);
+  T('sliding joint: no angular velocity (RRP column 3 of ω)', Math.hypot(...CH5.J0(CH4.rrp.rows(CH4.rrp.L), CH4.rrp.q).slice(3).map(r => r[2])), 0, 1e-12);
+  /* representations */
+  let ec = 0, es = 0, ee = 0; for (let k = 0; k < 100; k++) { const p = [0.2 + rnd(), 0.2 + rnd(), 0.2 + rnd()]; ec = Math.max(ec, near(CH5.rep.Ecyl(p), CH5.numJ(CH5.rep.cyl, p))); es = Math.max(es, near(CH5.rep.Esph(p), CH5.numJ(CH5.rep.sph, p)));
+    const e = [d2r(-150 + 300 * rnd()), d2r(20 + 140 * rnd()), d2r(-150 + 300 * rnd())], ed3 = [rnd() - 0.5, rnd() - 0.5, rnd() - 0.5], h = 1e-6, Rt = t => CH5.rep.Rzxz(e[0] + ed3[0] * t, e[1] + ed3[1] * t, e[2] + ed3[2] * t), Ra = Rt(h), Rb = Rt(-h);
+    const w = CH5.omegaOf(Rt(0), Ra.map((r, i) => r.map((x, m) => (x - Rb[i][m]) / (2 * h)))); ee = Math.max(ee, dd(CH5.mul(CH5.rep.Ezxz(e[0], e[1]), w), ed3)); const back = CH5.rep.zxz(Rt(0)); ee = Math.max(ee, dd(back, e)); }
+  T('cylindrical coordinates: E_P = derivative of (ρ, θ, z) by (x, y, z)', ec, 0, 1e-7); T('spherical coordinates: E_P = derivative of (ρ, θ, φ)', es, 0, 1e-6); T('Z–X–Z Euler angles: E_R ω = (α̇, β̇, γ̇), and the angles are read back', ee, 0, 1e-6);
+  /* the worked numbers */
+  T('ex two-link: tool point (0.5365, 0.6364)', dd(X.two.p, [0.5365, 0.6364]), 0, 1e-4); T('ex two-link: J = [−0.6364 −0.3864; 0.5365 0.1035]', near(X.two.J, [[-0.6364, -0.3864], [0.5365, 0.1035]]), 0, 1e-4); T('ex two-link: det J = 0.1414', X.two.det, 0.1414, 1e-4);
+  T('ex two-link: θ̇ = (0.5, −1) rad/s gives v = (0.0682, 0.1647) m/s', dd(X.two.v, [0.0682, 0.1647]), 0, 1e-4); T('ex two-link: the two column parts add up to v', dd(X.two.cols[0].map((x, i) => x + X.two.cols[1][i]), X.two.v), 0, 1e-12);
+  T('ex small step (2°, −3°): predicted (−0.0020, 0.0133) m', dd(X.two.step.pred, [-0.0020, 0.0133]), 0, 1e-4); T('ex small step: actual (−0.0023, 0.0131) m', dd(X.two.step.act, [-0.0023, 0.0131]), 0, 1e-4);
+  T('the prediction gets worse as the step grows (1°, 5°, 20°)', X.two.sizes[0].rel < X.two.sizes[1].rel && X.two.sizes[1].rel < X.two.sizes[2].rel ? 'yes' : 'no', 'yes'); T('1° step: prediction within 2 %', X.two.sizes[0].rel < 0.02 ? 'yes' : 'no', 'yes');
+  T('ex RP: v = (−0.1232, 0.1866) m/s', dd(X.rp.v, [-0.1232, 0.1866]), 0, 1e-4); T('ex RP: det J = −d2', CH5.det2(X.rp.J), -0.5, 1e-12);
+  T('HW 5.1: J row 1 = (−0.6752, −0.4252, −0.0388)', dd(X.p3r.J[0], [-0.6752, -0.4252, -0.0388]), 0, 1e-4); T('HW 5.1: Ẋ = (0.0117, 0.1239, 0.4)', dd(X.p3r.Xd, [0.0117, 0.1239, 0.4]), 0, 1e-4);
+  T('HW 5.2: predicted step = J δq agrees with the real step to 0.3 mm', dd(X.rrp.pred, X.rrp.act) < 3e-4 ? 'yes' : 'no', 'yes'); T('HW 5.2: v = (−0.0492, 0.2082, −0.0514) m/s', dd(X.rrp.v, [-0.0492, 0.2082, -0.0514]), 0, 1e-4); T('HW 5.2: v = J q̇', dd(X.rrp.v, CH5.mul(X.rrp.J, X.rrp.qd)), 0, 1e-12);
+  T('ex cylindrical: p = (0.3, 0.4, 0.25) is ρ = 0.5, θ = 53.13°', Math.abs(X.rep.cyl[0] - 0.5) + Math.abs(dg(X.rep.cyl[1]) - 53.13), 0, 0.005); T('ex cylindrical: (ρ̇, θ̇, ż) = (0.02, −0.22, 0.02)', dd(X.rep.rate, [0.02, -0.22, 0.02]), 0, 1e-9);
+  T('ex train and car: ^C(^UV_TORG) = (0, 100, 0) km/h', dd(X.train.b, [0, 100, 0]), 0, 1e-9); T('ex train and car: ^C(^TV_CORG) = (0, −70, 0) km/h', dd(X.train.c, [0, -70, 0]), 0, 1e-9);
+  /* using the Jacobian: Craig examples 5.4–5.6 */
+  T('ex inverse: v = (0.1, 0) m/s needs θ̇ = (0.0732, −0.3794) rad/s', dd(X.inv.qd, [0.0732, -0.3794]), 0, 1e-4); T('ex inverse: J θ̇ gives v back', dd(CH5.mul(X.two.J, X.inv.qd), X.inv.v), 0, 1e-12);
+  let e55 = 0; for (let k = 0; k < 50; k++) { const L = [0.3 + rnd(), 0.3 + rnd()], q = [ang(), d2r(10 + 160 * rnd())], r = CH5.two.rates(L, q, [1, 0]), c12 = Math.cos(q[0] + q[1]), s2 = Math.sin(q[1]); e55 = Math.max(e55, Math.abs(r[0] - c12 / (L[0] * s2)) + Math.abs(r[1] - (-Math.cos(q[0]) / (L[1] * s2) - c12 / (L[0] * s2)))); }
+  T('Craig example 5.5: θ̇1 = c12 / (l1 s2), θ̇2 = −c1 / (l2 s2) − c12 / (l1 s2) for 1 m/s along X', e55, 0, 1e-9);
+  T('singular when the arm is straight: det J = 0 at θ2 = 0 and 180°', Math.abs(CH5.two.det([0.5, 0.4], [1, 0])) + Math.abs(CH5.two.det([0.5, 0.4], [1, Math.PI])), 0, 1e-12); T('at a singularity there are no joint rates', CH5.two.rates([0.5, 0.4], [1, 0], [0.1, 0]) === null ? 'yes' : 'no', 'yes');
+  T('joint rates grow towards the singularity (x = 0.6 … 0.898)', X.near.every((r, i) => !i || Math.hypot(...r.qd) > Math.hypot(...X.near[i - 1].qd)) ? 'yes' : 'no', 'yes'); T('ex near the singularity: the tool point is on the X axis', Math.max(...X.near.map(r => dd(CH5.two.P(X.two.L, r.q), [r.x, 0]))), 0, 1e-12);
+  T('ex static force: F = (0, −10) N needs τ = (−5.365, −1.035) N·m', dd(X.force.tau, [-5.365, -1.035]), 0, 1e-3);
+  T('static force: τ1 is the moment of F about joint 1, τ2 about joint 2', (() => { const L = X.two.L, q = X.two.q, p = X.two.p, e = [L[0] * Math.cos(q[0]), L[0] * Math.sin(q[0])], F = X.force.F; return Math.abs(X.force.tau[0] - (p[0] * F[1] - p[1] * F[0])) + Math.abs(X.force.tau[1] - ((p[0] - e[0]) * F[1] - (p[1] - e[1]) * F[0])); })(), 0, 1e-12);
+  T('Craig example 5.6: τ1 = l1 s2 fx + (l2 + l1 c2) fy, τ2 = l2 fy (force written in {3})', (() => { const L = [0.5, 0.4], q = [0.3, 0.9], f = [3, -2], t = CH5.mul(CH5.tr(CH5.two.J3(L, q)), f); return Math.abs(t[0] - (L[0] * Math.sin(q[1]) * f[0] + (L[1] + L[0] * Math.cos(q[1])) * f[1])) + Math.abs(t[1] - L[1] * f[1]); })(), 0, 1e-12);
+  T('power is the same on both sides: F · v = τ · θ̇', (() => { const v = X.two.v, t = CH5.two.tau(X.two.L, X.two.q, [3, -2]); return Math.abs(3 * v[0] - 2 * v[1] - (t[0] * X.two.qd[0] + t[1] * X.two.qd[1])); })(), 0, 1e-12);
 }
 })(typeof window !== 'undefined' ? window : globalThis);

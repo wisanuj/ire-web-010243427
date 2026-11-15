@@ -5,6 +5,7 @@ await import(new URL("./ch1.js", import.meta.url).href);
 await import(new URL("./ch2.js", import.meta.url).href);
 await import(new URL("./ch3.js", import.meta.url).href);
 await import(new URL("./ch4.js", import.meta.url).href);
+await import(new URL("./ch5.js", import.meta.url).href);
 /* the scene files too: the tip readout of the simulations is tested against the kinematics */
 for (const m of ["scene3d.js", "ch1_3d.js", "ch2_3d.js", "ch3_3d.js"]) await import(new URL("./" + m, import.meta.url).href);
 await import(new URL("./tests.js", import.meta.url).href);
