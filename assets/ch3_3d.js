@@ -30,7 +30,7 @@ const drawDH = CH3.drawDH = (s, rows, F, op = {}) => { const n = rows.length, fl
   fr.forEach(i => { const O = P(F[i]); [0, 2].concat(op.y ? [1] : []).forEach(j => { arrow(s, O, v(O, col(F[i], j), fl), axc(s, j), 0.0045);
       if (op.lab !== false) lab(s, v(O, col(F[i], j), fl + 0.04), 'XYZ'[j], { sub: String(i), m: 1, c: 'xyz'[j], s: op.ls || 28, a: 'c', dy: 10, ...((op.labAt && op.labAt[i] && op.labAt[i][j]) || {}) }); });
     sph(s, O, 0.011, s.pal.ink); if (op.tags) lab(s, O, `{${i}}`, { s: 26, a: 'r', dx: -12, dy: 30, ...((op.tagAt && op.tagAt[i]) || {}) }); });
-  if (op.grip) { const E = F[n], d = col(E, op.grip === 'z' ? 2 : 0), sd = col(E, 1); grip(s, P(E), d, sd, { w: 0.03, L: 0.06, al: op.al }); }
+  if (op.grip) { const E = F[n], d = col(E, op.grip === 'z' ? 2 : 0), sd = col(E, 1); if (op.soft) S3.softGrip(s, P(E), d, sd, { k: 0.8, al: op.al }); else grip(s, P(E), d, sd, { w: 0.03, L: 0.06, al: op.al }); }   // soft: the GP8's three-finger soft gripper
   if (op.show) { const k = op.show, r = rows[k - 1], Op = P(F[k - 1]), Xp = col(F[k - 1], 0), Zp = col(F[k - 1], 2), Ok = P(F[k]), Zk = col(F[k], 2), Xk = col(F[k], 0), Q = v(Op, Xp, r.a);
     const m1 = dim(s, Op, Q, C.am, RB.sc(Zp, -0.06)); if (m1) lab(s, m1, 'a', { sub: (k - 1) + '', m: 1, c: 'am', s: 34, a: 'c', dy: 36 });
     const m2 = dim(s, Q, Ok, C.p, RB.sc(Xp, -0.07)); if (m2) lab(s, m2, 'd', { sub: k + '', m: 1, c: 'p', s: 34, a: 'r', dx: -14 });
@@ -49,7 +49,7 @@ const EXV = { p3r: { T0: [0, 0, 0.11], cam: [[0.35, 0.3, 0.05], 3.0, -90, 58], g
   twist: { T0: [0, 0, 0.35], cam: [[0.3, 0.1, 0.4], 3.2, -62, 20], grip: 'x', base: true },
   arm4: { T0: [0, 0, 0], cam: [[0.35, 0.1, 0.45], 3.6, -62, 18], grip: 'x', base: false },
   scara: { T0: [0, 0, 0.6], cam: [[0.3, 0.15, 0.35], 3.4, -60, 22], grip: 'z', base: true },
-  gp8: { T0: [0, 0, 0.33], cam: [[0.22, 0, 0.5], 4.0, -60, 16], grip: 'z', base: true } };
+  gp8: { T0: [0, 0, 0.33], cam: [[0.22, 0, 0.5], 4.0, -60, 16], grip: 'z', soft: true, base: true } };
 CH3.EXV = EXV;   // chapter 4 shows the same arms
 /* the frames of example `ex` (CH3.EX) at joint values q, in world coordinates */
 CH3.exFrames = (ex, q, conv) => { const E = CH3.EX[ex === 'rprHW' ? 'rpr' : ex], L = E.L, rows = ex === 'rprHW' ? E.hwRows(L) : conv === 'c' ? E.rowsC(L) : E.rows(L), V = EXV[ex];
@@ -61,7 +61,7 @@ const armPts = (F, T0, grip) => { const E = F[F.length - 1], g = grip ? v(P(E), 
 SC.dh = (st = {}, o = {}) => { const ex = st.ex || 'p3r', V = EXV[ex], q = st.q || CH3.EX[ex === 'rprHW' ? 'rpr' : ex].q, c0 = V.cam, w = st.w || 1300, h = st.h || 1000;
   const { rows, F } = CH3.exFrames(ex, st.tool ? [...q, 0] : q, st.conv);   // st.fit (the pages): the camera follows the arm, which the sliders can swing anywhere
   const s = scene(st.name || 'dh_' + ex, w, h, st.fit ? camFit(st, armPts(F, V.T0, V.grip), c0[2], c0[3], w, h, { m: 0.16, minD: 2.4 }) : cam(st, c0[0], c0[1], c0[2], c0[3]), o); floor(s, 1.3, [c0[0][0], c0[0][1]]); if (V.base) pedestal(s, [V.T0[0], V.T0[1]], V.T0[2] - 0.02, 0.09);
-  drawDH(s, rows, F, { frames: st.frames, lab: st.lab, tags: !!st.tags, show: st.show, grip: st.grip === false ? null : V.grip, axes: st.axes, fl: st.fl, labAt: st.labAt, tagAt: st.tagAt, conv: st.conv, q });
+  drawDH(s, rows, F, { frames: st.frames, lab: st.lab, tags: !!st.tags, show: st.show, grip: st.grip === false ? null : V.grip, soft: V.soft, axes: st.axes, fl: st.fl, labAt: st.labAt, tagAt: st.tagAt, conv: st.conv, q });
   if (st.fk) { const On = P(F[F.length - 1]), O = P(F[0]); CH2.H.dvec(s, O, On, C.pk, { key: 'pk', t: 'T', pre: '0', sub: 'N', s: 38, at: 0.5, dx: 26, dy: 20, a: 'l', r: 0.0055 }); }
   if (st.xyz) s.tip = tipXYZ(s, F, st.xyzAt);   // the pages turn this on; the slide figures leave it off (the examples' answers are the tip position)
   s.F = F; s.rows = rows; return s; };

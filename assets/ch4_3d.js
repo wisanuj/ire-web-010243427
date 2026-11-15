@@ -19,7 +19,7 @@ const ARM = { rrp: { T0: [0, 0, 0], cam: [[0.3, 0.12, 0.42], 3.3, -58, 16], grip
 const armOf = (ex, q) => { if (ex === 'rrp') { const rows = CH4.rrp.rows(CH4.rrp.L); return { rows, F: CH3.frames(rows, q, null, RB.trans(0, 0, 0)), V: ARM.rrp }; }
   const r = CH3.exFrames(ex, q); return { ...r, V: EXV[ex] }; };
 const drawArm = (s, ex, q, op = {}) => { const { rows, F, V } = armOf(ex, q); if (V.base && !op.al) pedestal(s, [V.T0[0], V.T0[1]], V.T0[2] - 0.02, 0.09);
-  CH3.drawDH(s, rows, F, { frames: op.frames || [], lab: op.lab, grip: op.grip === false ? null : V.grip, al: op.al, q, fl: op.fl || 0.15, ls: op.ls || 26, labAt: op.labAt }); return F; };
+  CH3.drawDH(s, rows, F, { frames: op.frames || [], lab: op.lab, grip: op.grip === false ? null : V.grip, soft: V.soft, al: op.al, q, fl: op.fl || 0.15, ls: op.ls || 26, labAt: op.labAt }); return F; };
 /* the goal: a see-through pink ball where the last frame must go, named */
 const goalMark = (s, p, o = {}) => { sph(s, p, o.r || 0.034, C.pk, 0.35); lab(s, p, o.t || GOAL(), { c: 'pk', s: o.s || 26, dx: o.dx === undefined ? 30 : o.dx, dy: o.dy === undefined ? 44 : o.dy, b: true }); };
 
@@ -99,7 +99,8 @@ SC.hw = (st = {}, o = {}) => { const q = st.q || CH4.rrp.q, L = CH4.rrp.L, { F }
 /* ---- decoupling (Craig 4.6; old part 2): axes 4, 5, 6 of the GP8 meet at the wrist centre. With a tool L_T long, the wrist centre is the goal
    moved back L_T along its own Z: the first three joints place it, the last three turn the tool ---- */
 SC.wc = (st = {}, o = {}) => { const X0 = CH4.EX.solve, LT = st.LT === undefined ? X0.LT : st.LT, X = { ...X0, LT }, sw = CH4.gp8IK(RB.Tm(X0.G, RB.trans(0, 0, -LT))), ok = sw.filter(x => CH4.inLim(x.q)), pick = CH4.nearest(ok.length ? ok : sw, CH3.EX.gp8.home), q = st.q || (pick ? pick.s.q : X0.best.s.q), { F, V } = armOf('gp8', q), T0 = RB.trans(...V.T0), G = RB.Tm(T0, X.G), s = scene(st.name || 'wc', 1300, 1050, cam(st, [0.3, 0.06, 0.5], 2.5, -50, 14), o); floor(s, 1.4, [0.25, 0]);
-  drawArm(s, 'gp8', q, { frames: [0], grip: false }); const W = P(F[6]), Z6 = col(F[6], 2), Tt = v(W, Z6, X.LT); bar(s, W, Tt, 0.012, s.pal.joint); grip(s, Tt, Z6, col(F[6], 1), { w: 0.03, L: 0.05 });
+  drawArm(s, 'gp8', q, { frames: [0], grip: false }); const W = P(F[6]), Z6 = col(F[6], 2), Tt = v(W, Z6, X.LT), gk = Math.min(0.8, Math.max(0.25, X.LT / S3.SOFT.LEN));   // the soft gripper ends at the tool point; a short tool makes it smaller
+  const gm = S3.softGrip(s, Tt, Z6, col(F[6], 1), { k: gk, tip: true }).mount; if (X.LT > S3.SOFT.LEN * gk + 1e-6) bar(s, W, gm, 0.012, s.pal.joint);
   frame(s, RB.TR(G), P(G), { name: 'G', L: 0.16, r: 0.0045, ls: 28, lab: [{ dx: 14 }, {}, { dx: 16, dy: 30 }] }); sph(s, W, 0.03, C.pk, 0.55);
   lab(s, W, T('จุดศูนย์กลางข้อมือ', 'wrist centre'), { c: 'pk', s: 26, dx: -36, dy: -36, a: 'r' }); lab(s, v(W, Z6, X.LT / 2), 'L', { sub: 'T', m: 1, s: 28, dx: 22, dy: 6 });
   lab(s, P(F[3]), T('ข้อต่อ 1–3 วางจุดศูนย์กลางข้อมือ', 'joints 1–3 place the wrist centre'), { c: 'b', s: 24, dx: 20, dy: 70, a: 'l' }); lab(s, W, T('ข้อต่อ 4–6 หมุนเครื่องมือ', 'joints 4–6 turn the tool'), { c: 'p', s: 24, dx: 40, dy: -64 });

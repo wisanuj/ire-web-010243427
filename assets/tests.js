@@ -84,6 +84,12 @@ function ch3(T) {
     for (let k = 0; k < 100; k++) { const y = [170, 105, 130, 190, 135, 360].map(m => d2r((2 * rn() - 1) * m)), L = I.links(y), G6 = RB.Tm(T0, RB.fkDH(I.rows(), I.fromY(y))[6]), dd = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
       ep = Math.max(ep, dd(RB.Tp(L[4]), RB.Tp(G6))); ea = Math.max(ea, dd(RB.col(RB.TR(L[6]), 0), RB.col(RB.TR(G6), 2))); ex = Math.max(ex, dd(RB.col(RB.TR(L[6]), 2), RB.col(RB.TR(G6), 0))); }
     T('GP8: DH wrist centre = the robot description\'s, θ = (S, L − 90°, −U, −R, −B, −T)', ep, 0, 1e-12); T('GP8: Z6 = the flange axis of the description', ea, 0, 1e-12); T('GP8: X6 = the description\'s link_6 z axis (no offset on θ6)', ex, 0, 1e-12); }
+  /* the soft gripper drawn on the GP8 (scene3d.js): its tool point is 0.12 m × size from the mounting point along the tool direction */
+  if (global.S3 && global.S3.softGrip) { const S3 = global.S3, sc = S3.scene('t', 100, 100, S3.camAt([0, 0, 0], 1, 0, 0)), g = S3.softGrip(sc, [0.1, 0.2, 0.3], [0, 0, -2], [1, 0, 0], { k: 0.8 });
+    T('soft gripper: tool point 0.096 m below the mount (size 0.8)', Math.hypot(g.tip[0] - 0.1, g.tip[1] - 0.2, g.tip[2] - (0.3 - 0.096)), 0, 1e-12);
+    const far = Math.max(...sc.items.map(o => Math.max(...[o.a, o.b].map(p => Math.hypot(p[0] - 0.1, p[1] - 0.2, p[2] - 0.3))))); T('soft gripper: every part within 0.115 m of the mount (size 0.8)', far < 0.115 ? 'yes' : 'no', 'yes');
+    const sc2 = S3.scene('t', 100, 100, S3.camAt([0, 0, 0], 1, 0, 0)), g2 = S3.softGrip(sc2, [0, 0, 0], [1, 0, 0], [0, 1, 0], { tip: true }); T('soft gripper: given the tool point, the mount is 0.12 m back', Math.hypot(g2.mount[0] + 0.12, g2.mount[1], g2.mount[2]), 0, 1e-12);
+    T('soft gripper: three fingers of seven folds each', sc.items.filter(o => o.t === 'cyl').length, 2 + 3 * 7, 0); }
   T('GP8: home (pendant all zero) puts the wrist centre at (0.380, 0, 0.385) in {0}', Math.hypot(I.T06(I.home)[0][3] - 0.38, I.T06(I.home)[2][3] - 0.385), 0, 1e-12);
   T('GP8: reach 0.040 + 0.345 + √(0.340² + 0.040²) = 0.727 m (data sheet)', I.a1 + I.a2 + Math.hypot(I.d4, I.a3), 0.727, 5e-4);
   /* the six-axis kinematic equations (Craig 3.7 method, GP8 numbers) against the product of the link transforms */

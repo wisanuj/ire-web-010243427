@@ -56,6 +56,24 @@ S3.arcV = (s, o, r, a0, a1, c, tr = 0.005, n = 24) => tube(s, Array.from({ lengt
 const rj = S3.rj = (s, p, ax, o = {}) => { const r = o.r || 0.056, h = o.h || 0.07; cyl(s, v(p, ax, -h), v(p, ax, h), r, o.c || s.pal.joint, o.al); cyl(s, v(p, ax, -h - 0.012), v(p, ax, h + 0.012), r * 0.42, s.pal.cap, o.al); };
 S3.pj = (s, p, d, o = {}) => box(s, v(p, d, -(o.len || 0.075)), v(p, d, o.len || 0.075), o.w || 0.085, o.w || 0.085, s.pal.sleeve, o.al, o.up);
 const grip = S3.grip = (s, p, d, sd, o = {}) => { const w = o.w || 0.045, L = o.L || 0.085, c = o.c || s.pal.ink, a = v(p, sd, -w), b = v(p, sd, w); box(s, a, b, 0.024, 0.03, c, o.al); [a, b].forEach(q => box(s, q, v(q, d, L), 0.018, 0.03, c, o.al)); };
+/* a soft gripper: three air-driven bellows fingers on a grey holder (the user asked for this kind on the GP8, 15 Nov 2026), built from boxes and cylinders.
+   p the mounting point (centre of the flange), d the tool direction, sd any direction across it. o.k size (1 = tool point 0.12 m from p),
+   o.n fingers, o.open splay of the fingers outwards in degrees, o.curl bend of each finger towards the axis in degrees (closing on a part),
+   o.tip: p is the tool point between the fingertips instead of the mounting point, o.al see-through. Returns { mount, tip }. */
+const SOFT = S3.SOFT = { blue: [0.15, 0.46, 0.65], grey: [0.5, 0.51, 0.53], dark: [0.27, 0.29, 0.32], LEN: 0.12 };
+S3.softGrip = (s, p, d, sd, o = {}) => { const k = o.k || 1, n = o.n || 3, al = o.al, op = rad(o.open === undefined ? 12 : o.open), cu = rad(o.curl || 0) , N = 7;
+  d = un(d); const e1 = un(cr(cr(d, sd), d)), e2 = cr(d, e1), H = 0.034 * k, R = 0.027 * k, Lf = 0.088 * k, sg = Lf / N, wd = 0.024 * k, th = 0.012 * k, m = o.tip ? v(p, d, -SOFT.LEN * k) : p;
+  cyl(s, m, v(m, d, 0.008 * k), 0.026 * k, SOFT.dark, al); cyl(s, v(m, d, 0.008 * k), v(m, d, 0.024 * k), 0.02 * k, SOFT.grey, al);   // adapter plate on the flange, hub
+  for (let i = 0; i < n; i++) { const a = 2 * PI * i / n + rad(o.turn || 0), out = [0, 1, 2].map(j => e1[j] * cos(a) + e2[j] * sin(a)), side = cr(d, out);
+    box(s, v(m, d, 0.016 * k), v(v(m, d, 0.016 * k), out, R), 0.022 * k, 0.016 * k, SOFT.grey, al, d);                                // arm from the hub to the finger holder
+    box(s, v(v(m, d, 0.008 * k), out, R + 0.002 * k), v(v(m, d, H), out, R + 0.002 * k), 0.036 * k, 0.031 * k, SOFT.grey, al, out);                             // the holder: a grey block over the finger's root
+    let q = v(v(m, d, H), out, R), t = [0, 1, 2].map(j => d[j] * cos(op) + out[j] * sin(op)), nn = [0, 1, 2].map(j => out[j] * cos(op) - d[j] * sin(op));
+    for (let j = 0; j < N; j++) { const b = v(q, t, sg), mid = v(q, t, sg / 2), f = 1 - 0.32 * j / N, top = v(mid, nn, th * f * 0.5);
+      box(s, q, b, wd, th * f, SOFT.blue, al, nn);                                                                                    // the flat inner strip that touches the part
+      cyl(s, v(top, side, -wd / 2), v(top, side, wd / 2), sg * 0.5 * f + 0.002 * k, SOFT.blue, al);                                 // one fold of the bellows on the outer side
+      q = b; if (cu) { const c = cu / N, t2 = [0, 1, 2].map(i2 => t[i2] * cos(c) - nn[i2] * sin(c)); nn = [0, 1, 2].map(i2 => nn[i2] * cos(c) + t[i2] * sin(c)); t = t2; } }
+    box(s, q, v(q, t, 0.012 * k), wd, th * 0.55, SOFT.blue, al, nn); }                                                                // the fingertip pad
+  return { mount: m, tip: v(m, d, SOFT.LEN * k) }; };
 const pedestal = S3.pedestal = (s, p, h, r = 0.085) => { cyl(s, [p[0], p[1], 0], [p[0], p[1], 0.03], r * 1.7, s.pal.base); cyl(s, [p[0], p[1], 0.03], [p[0], p[1], h], r * 0.75, s.pal.base); shadow(s, [p[0], p[1], 0.02], [p[0], p[1], 0.021], r * 1.7); };
 const mesh = S3.mesh = (s, quads, c, al) => { const vv = [], ii = []; quads.forEach(q => { const n = vv.length / 3; q.forEach(p => vv.push(p[0], p[1], p[2])); ii.push(n, n + 1, n + 2, n, n + 2, n + 3); }); if (ii.length) add(s, { t: 'mesh', v: vv, i: ii, c, al }); };
 /* a smooth surface: a grid of shared vertices, f(u, w) → point for u, w in 0…1 */
