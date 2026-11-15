@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/ch4.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script><script src="assets/ch4_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/ch4.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script><script src="assets/ch4_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -124,10 +124,19 @@ CH2.sim('cvA', SA, () => 'reach', { aspect: 0.86, maxH: 540, drag: { grab: p => 
 /* ---------- 1: sketch the workspace ---------- */
 const S1 = { l1: 0.4, l2: 0.4 };
 ui.radio(document.getElementById('ctl1'), [{ id: 'eq', label: '(a) L₁ = L₂', on: true }, { id: 'ne', label: '(b) L₁ ≠ L₂' }], id => { S1.l2 = id === 'eq' ? 0.4 : 0.2; S1.q = id === 'eq' ? undefined : [rad(40), rad(80)]; });
+/* the open step: 1 the arm fully stretched and fully folded (where the two radii come from), 2 the radius 2L₁, 3 the folded arm turning about the origin, 4 the folded arm ending on the hole's edge */
+const OV = CH4.OV, SC3 = window.S3, z0 = 0.11, at = (r, a, h = 0) => [r * Math.cos(a), r * Math.sin(a), z0 + h];
+S1.ov = (s, st) => { const k = st.step, l1 = st.l1, l2 = st.l2, eq = Math.abs(l1 - l2) < 1e-9; if (!k) return;
+  if (k === 1) { const a = rad(125), b = rad(215); SC3.harm(s, [l1, l2], [a, 0], { al: 0.35, grip: false }); SC3.harm(s, [l1, l2], [b, Math.PI], { al: 0.35, grip: false });
+    OV.name(s, at(l1 + l2, a), 'b', t('เหยียดสุด: L₁ + L₂', 'fully stretched: L₁ + L₂'), { m: 0, s: 22, a: 'r', dx: -12, dy: -14 }); OV.name(s, at(Math.abs(l1 - l2), b), 'pk', t('พับสุด: |L₁ − L₂|', 'fully folded: |L₁ − L₂|'), { m: 0, s: 22, a: 'r', dx: -14, dy: 26 }); }
+  if (k === 2 && eq) OV.name(s, at(l1 + l2, rad(-35)), 'b', '= 2L₁', { m: 0, s: 26, a: 'l', dx: 16, dy: 34 });
+  if (k === 3 && eq) { [0, 90, 180, 270].forEach(d => SC3.harm(s, [l1, l2], [rad(d), Math.PI], { al: 0.3, grip: false })); CH2.H.turn(s, [0, 0, z0 + 0.06], [0, 0, 1], 0.09, SC3.C.gr);
+    OV.name(s, at(0, 0, 0.06), 'gr', t('ปลายอยู่ที่จุดกำเนิด หมุนข้อ 1 ชี้ได้ทุกทิศ', 'the end at the origin: joint 1 points it anywhere'), { m: 0, s: 22, a: 'l', dx: 60, dy: -40 }); }
+  if (k === 4 && !eq) { SC3.harm(s, [l1, l2], [Math.PI, Math.PI], { al: 0.35, grip: false }); OV.name(s, at(l1, Math.PI), 'pk', t('พับสุด', 'fully folded'), { m: 0, s: 22, a: 'c', dy: -26 }); } };
 CH2.sim('cv1', S1, 'reach', { aspect: 0.86, maxH: 480 });
 LS.choose(document.getElementById('ask1'), { options: [t('ทั้งแผ่นกลม', 'the whole disc'), t('วงแหวน', 'a ring'), t('จุดกำเนิดจุดเดียว', 'the origin only'), t('ไม่มีเลย', 'nothing')], answer: 2 });
 document.querySelector('#ask1 .asklab').textContent = t('เมื่อ L₁ = L₂ ปริภูมิทำงานแบบคล่องแคล่ว (ทุกทิศ) คืออะไร?', 'When L₁ = L₂, what is the dexterous workspace (every orientation)?');
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; }, steps: [
   { why: t('<b>ไปถึงได้</b>: ปลายแขนอยู่ห่างจุดกำเนิดได้ตั้งแต่ |L₁ − L₂| (พับ) ถึง L₁ + L₂ (เหยียด) และหมุนข้อ 1 ได้รอบ จึงเป็นวงแหวน', '<b>Reachable</b>: the end can be from |L₁ − L₂| (folded) to L₁ + L₂ (stretched) from the origin, and joint 1 turns all the way: a ring'), tex: '|L_1 - L_2| \\le \\sqrt{x^2+y^2} \\le L_1 + L_2' },
   { why: t('<b>(a) L₁ = L₂</b>: รัศมีในเป็นศูนย์ วงแหวนกลายเป็นแผ่นกลมรัศมี 2L₁', '<b>(a) L₁ = L₂</b>: the inner radius is zero, the ring becomes a disc of radius 2L₁'), onShow: () => document.querySelector('#ctl1 button').click() },
   { why: t('<b>คล่องแคล่ว</b>: แขนสองก้านมีทิศของปลายได้เพียงสองแบบที่แต่ละจุด ยกเว้นที่จุดกำเนิดเมื่อ L₁ = L₂ (พับก้าน 2 กลับมาทับก้าน 1 แล้วหมุนข้อ 1 ได้ทุกทิศ)', '<b>Dexterous</b>: at each point the two-link arm has only two end directions, except at the origin when L₁ = L₂ (link 2 folded back over link 1, joint 1 free to point anywhere)') },
@@ -137,24 +146,42 @@ LS.stepper(document.getElementById('st1'), { steps: [
 /* ---------- 2: choosing a solution ---------- */
 const S2 = {}, l1 = 0.4, l2 = 0.35, qA = [rad(-15), rad(95)], B = [-0.12, 0.6], sB = [1, -1].map(e => RB.ik2(l1, l2, B[0], B[1], e)).map(r => [r.t1, r.t2]), dB = sB.map(q => CH4.dist(q, qA)), near = dB[0] < dB[1] ? 0 : 1;
 document.getElementById('ro2').innerHTML = `<div class="term">A: θ = (${qA.map(dgs).join(', ')})</div>` + sB.map((q, i) => `<div class="term">${t('คำตอบ', 'solution')} ${i + 1}: θ = (${q.map(dgs).join(', ')}) · ${t('ระยะในปริภูมิข้อต่อ', 'joint-space distance')} ${dgs(dB[i])}${i === near ? t(' (ใกล้กว่า)', ' (closer)') : ''}</div>`).join('');
+/* the open step on the two ghost solutions: 1 name them, 2 how far each first joint turns from A and the joint-space distance, 3 the collision */
+const elbow2 = q => at(l1, q[0], 0.04);
+S2.ov = (s, st) => { const k = st.step; if (!k) return;
+  if (k === 1) sB.forEach((q, i) => OV.name(s, elbow2(q), 'ink', t('คำตอบ ', 'solution ') + (i + 1), { m: 0, s: 22, a: 'l', dx: 18, dy: -16 }));
+  if (k === 2) { const A1 = at(1, qA[0]); OV.ref(s, [0, 0, z0 + 0.04], [A1[0], A1[1], 0], 0.3); sB.forEach((q, i) => { const m = OV.ang(s, [0, 0, z0 + 0.04], [A1[0], A1[1], 0], at(1, q[0], -z0), 0.16 + 0.08 * i, i === near ? 'am' : 'p', 'Δθ', { sub: '1', s: 24, dx: 10 });
+    OV.name(s, elbow2(q), i === near ? 'am' : 'p', `d = ${dgs(dB[i])}`, { m: 0, s: 22, a: 'l', dx: 18, dy: -16 }); }); }
+  if (k === 3) OV.pt(s, elbow2(sB[near]), 'x', t('ชน!', 'collision!'), { r: 0.03, m: 0, s: 26, a: 'r', dx: -22, dy: 8 }); };
 CH2.sim('cv2', S2, 'obst', { aspect: 0.8, maxH: 480 });
 LS.choose(document.getElementById('ask2'), { options: [t('คำตอบที่ใกล้กว่า', 'the closer solution'), t('คำตอบที่ไกลกว่า', 'the farther solution')], answer: 1 });
 document.querySelector('#ask2 .asklab').textContent = t('แขนอยู่ที่ A ต้องไป B ควรใช้คำตอบไหน?', 'The arm is at A and must reach B. Which solution should it use?');
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; }, steps: [
   { why: t('<b>หาทุกคำตอบ</b>: B อยู่ในวงแหวน จึงมีสองท่า (ข้อศอกสองทาง)', '<b>Find every solution</b>: B is inside the ring, so there are two poses (the elbow either way)') },
   { why: t('<b>วัดระยะในปริภูมิข้อต่อ</b> จากท่าปัจจุบัน A (ผลต่างของมุม ห่อให้อยู่ใน ±180°)', '<b>Measure the joint-space distance</b> from the present pose A (angle differences wrapped into ±180°)'), tex: 'd = \\sqrt{\\Delta\\theta_1^2 + \\Delta\\theta_2^2}', body: () => `<div class="term">${dB.map((d, i) => `${t('คำตอบ', 'solution')} ${i + 1}: ${dgs(d)}`).join(' · ')}</div>` },
   { why: t('<b>ตรวจการชน</b>: ท่าที่ใกล้กว่าพาข้อศอกไปชนกล่องสีแดง ท่าที่ไกลกว่าไม่ชน', '<b>Check for collisions</b>: the closer pose puts the elbow into the red box; the farther one is clear') }],
   answer: t('ใช้คำตอบที่ไกลกว่า: ถ้าไม่มีสิ่งกีดขวางจะเลือกตัวที่ใกล้กว่า โปรแกรมผกผันจึงต้องคืนค่าทุกคำตอบ', 'Use the farther solution: without the obstacle the closer one would be chosen, so an IK routine must return every solution') });
 
 /* ---------- 3: one goal, eight poses ---------- */
-const SOL = X.irb.sols, S3s = { ex: 'irb', q: SOL[0].q, fit: true, xyz: true }, ro3 = document.getElementById('ro3');
+const SOL = X.irb.sols, S3s = { ex: 'irb', q: SOL[0].q, fit: true, xyz: true, goalAt: { dy: -100 } }, ro3 = document.getElementById('ro3');
 const name = s => `${s.shoulder === 'front' ? t('หน้า', 'front') : t('ข้ามหลัง', 'back')}, ${t('ข้อศอก', 'elbow')} ${s.elbow === 'up' ? t('ขึ้น', 'up') : t('ลง', 'down')}${s.wrist === 'flip' ? t(', ข้อมือกลับ', ', flip') : ''}`;
 const read3 = k => { ro3.innerHTML = `<div class="term"><b>${k + 1}. ${name(SOL[k])}</b> · θ = (${SOL[k].q.map(dgs).join(', ')}) · ${SOL[k].ok ? `<b class="ax-y">${t('อยู่ในช่วงข้อต่อ ✓', 'inside the joint ranges ✓')}</b>` : t('เกินช่วงข้อต่อ', 'outside the joint ranges')}</div>`; };
-ui.radio(document.getElementById('ctl3'), SOL.map((s, i) => ({ id: 's' + i, label: String(i + 1), on: !i })), id => { const k = +id.slice(1); S3s.q = SOL[k].q; read3(k); }); read3(0);
+let k3 = 0;
+/* steps 1 and 2 show, as a ghost, the solution that differs from the shown one only at the shoulder (step 1) or only at the elbow (step 2) */
+const twin = (c, key) => SOL.find(x => x !== c && ['shoulder', 'elbow', 'wrist'].every(a => a === key ? x[a] !== c[a] : x[a] === c[a]));
+const SH = x => x.shoulder === 'front' ? t('หันหน้าเข้าเป้าหมาย', 'facing the goal') : t('θ₁ + 180°: เอื้อมข้ามหลัง', 'θ₁ + 180°: over the back'), EL = x => x.elbow === 'up' ? t('ข้อศอกขึ้น', 'elbow up') : t('ข้อศอกลง', 'elbow down');
+const ghost3 = () => { const c = SOL[k3], key = [null, 'shoulder', 'elbow'][S3s.step], o = key && twin(c, key); S3s.ghost = o ? [o.q] : []; S3s.tags = o ? (key === 'shoulder' ? [SH(c), SH(o)] : [EL(c), EL(o)]) : null; };
+const rd3 = ui.radio(document.getElementById('ctl3'), SOL.map((s, i) => ({ id: 's' + i, label: String(i + 1), on: !i })), id => { k3 = +id.slice(1); S3s.q = SOL[k3].q; read3(k3); ghost3(); }); read3(0);
+/* steps 3 and 4 are written at the wrist and the elbow: 3 the flipped wrist turns axis 4 by 180° and leaves the flange where it was, 4 is the shown solution inside the joint ranges? */
+S3s.ov = (s, st) => { const k = st.step, F = s.F; if (!F || (k !== 3 && k !== 4)) return; const W = RB.Tp(F[6]), E = RB.Tp(F[3]), Z4 = RB.col(RB.TR(F[4]), 2);
+  if (k === 3) { OV.dist(s, OV.v(W, Z4, -0.2), OV.v(W, Z4, 0.12), 'b', null); CH2.H.turn(s, OV.v(W, Z4, -0.1), Z4, 0.05, SC3.C.b); OV.name(s, OV.v(W, Z4, -0.1), 'b', 'θ₄ + 180°, −θ₅, θ₆ + 180°', { m: 0, s: 20, a: 'r', dx: -30, dy: -20 });
+    OV.name(s, W, 'p', t('หน้าแปลนอยู่ที่เดิม', 'the flange stays put'), { m: 0, s: 20, a: 'l', dx: 26, dy: 40 }); }
+  if (k === 4) { const c = SOL[k3], bad = c.q.map((x, i) => [i, deg(x)]).filter(([i, d]) => d < CH4.IRB_LIM[i][0] - 1e-6 || d > CH4.IRB_LIM[i][1] + 1e-6).map(([i]) => 'θ' + '₁₂₃₄₅₆'[i]);
+    OV.name(s, E, bad.length ? 'x' : 'gr', bad.length ? t('เกินช่วง: ', 'out of range: ') + bad.join(', ') : t('✓ อยู่ในช่วงข้อต่อ', '✓ inside the joint ranges'), { m: 0, s: 22, a: 'l', dx: 20, dy: -20 }); } };
 CH2.sim('cv3', S3s, 'sol', { aspect: 0.8, maxH: 500 });
 LS.ask(document.getElementById('ask3'), { fields: [{ label: t('จำนวนคำตอบทั้งหมด =', 'solutions in all ='), ok: x => x === 8, w: 3 }, { label: t('อยู่ในช่วงข้อต่อ =', 'inside the ranges ='), ok: x => x === 2, w: 3 }],
   check: v => v[0] === 4 ? t('ไหล่ 2 × ข้อศอก 2 = 4 แล้วข้อมือยังกลับได้อีกแบบ', 'shoulder 2 × elbow 2 = 4, and the wrist can flip too') : '' });
-LS.stepper(document.getElementById('st3'), { steps: [
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; if (k) { k3 = 0; rd3.set('s0'); S3s.q = SOL[0].q; read3(0); } ghost3(); }, steps: [
   { why: t('<b>ไหล่</b>: หันหน้าเข้าเป้าหมาย หรือหมุน θ₁ + 180° แล้วเอื้อมข้ามหลัง', '<b>Shoulder</b>: face the goal, or turn θ₁ + 180° and reach over the back') },
   { why: t('<b>ข้อศอก</b>: ขึ้นหรือลง (สองเครื่องหมายของรากที่สอง)', '<b>Elbow</b>: up or down (the two signs of a square root)') },
   { why: t('<b>ข้อมือ</b>: θ₄ + 180°, −θ₅, θ₆ + 180° ให้หน้าแปลนเดิม', '<b>Wrist</b>: θ₄ + 180°, −θ₅, θ₆ + 180° gives the same flange pose'), tex: '2 \\times 2 \\times 2 = 8' },
@@ -164,11 +191,18 @@ LS.stepper(document.getElementById('st3'), { steps: [
 /* ---------- 4: redundancy ---------- */
 const S4 = { phi: rad(30) }, ro4 = document.getElementById('ro4');
 const read4 = () => { ro4.innerHTML = `<div class="term">φ = ${dgs(S4.phi)} · ${t('จุดปลายเครื่องมืออยู่ที่ (0.62, 0.38) m ตลอด', 'the tool point stays at (0.62, 0.38) m')}</div>`; };
-ui.slider(document.getElementById('ctl4'), { id: 'p4', label: t('ทิศของก้านสุดท้าย φ', 'direction of the last link φ'), min: -80, max: 110, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S4.phi = rad(v); read4(); } }); read4();
+const sl4 = ui.slider(document.getElementById('ctl4'), { id: 'p4', label: t('ทิศของก้านสุดท้าย φ', 'direction of the last link φ'), min: -80, max: 110, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S4.phi = rad(v); read4(); } }); read4();
+/* the open step on the solid arm (the redund scene: links 0.5, 0.4, 0.2 m, tool point (0.62, 0.38)): 1 three joint angles for two numbers, 2 φ and the circle the wrist may lie on */
+S4.ov = (s, st) => { const k = st.step; if (!k) return; const L = [0.5, 0.4, 0.2], p = [0.62, 0.38], ph = st.phi, w = [p[0] - L[2] * Math.cos(ph), p[1] - L[2] * Math.sin(ph)], r = RB.ik2(L[0], L[1], w[0], w[1], 1); if (!r.ok) return;
+  const J = [[0, 0, z0], [L[0] * Math.cos(r.t1), L[0] * Math.sin(r.t1), z0], [w[0], w[1], z0]], P4 = [p[0], p[1], z0];
+  if (k === 1) { J.forEach((j, i) => OV.name(s, j, 'am', 'θ', { sub: String(i + 1), s: 30, dx: i ? 18 : -22, dy: i ? 30 : -12 })); OV.name(s, P4, 'pk', t('(x, y): 2 ตัวเลข', '(x, y): 2 numbers'), { m: 0, s: 22, a: 'l', dx: 24, dy: 34 }); }
+  if (k === 2) { SC3.tube(s, RB.ring([p[0], p[1], z0 + 0.03], [0, 0, 1], L[2], 0, 2 * Math.PI, 60), SC3.C.am, 0.003); OV.ref(s, [w[0], w[1], z0 + 0.04], [1, 0, 0], 0.28);
+    OV.ang(s, [w[0], w[1], z0 + 0.04], [1, 0, 0], [Math.cos(ph), Math.sin(ph), 0], 0.11, 'pk', 'φ', { dx: 14, dy: -6 });
+    OV.name(s, [p[0], p[1] - L[2], z0], 'am', t('ข้อมือวางบนวงนี้ที่ใดก็ได้', 'the wrist may sit anywhere on this circle'), { m: 0, s: 22, a: 'c', dy: 40 }); } };
 CH2.sim('cv4', S4, 'redund', { aspect: 0.8, maxH: 460 });
 LS.choose(document.getElementById('ask4'), { options: ['1', '2', '4', t('ไม่จำกัด', 'infinitely many')], answer: 3 });
 document.querySelector('#ask4 .asklab').textContent = t('แขน 3 ข้อต่อในระนาบต้องวางเฉพาะจุดปลาย (x, y) มีกี่คำตอบ?', 'A planar three-joint arm must only put its tool point at (x, y). How many solutions?');
-LS.stepper(document.getElementById('st4'), { steps: [
+LS.stepper(document.getElementById('st4'), { onStep: k => { S4.step = k; if (k === 1) { S4.phi = rad(30); sl4.set(30); read4(); } }, steps: [
   { why: t('<b>นับ</b>: งานมีตัวเลข 2 ตัว (x, y) แขนมีข้อต่อ 3 ตัว เหลืออิสระหนึ่งตัว', '<b>Count</b>: the task has 2 numbers (x, y), the arm 3 joints: one is left free') },
   { why: t('<b>เลือก φ ได้อิสระ</b>: ทุก φ ที่ทำให้ข้อมืออยู่ในวงแหวนของสองก้านแรกใช้ได้ เลื่อนแถบดู: แขนขยับแต่ปลายไม่ขยับ (self-motion)', '<b>φ is free</b>: every φ that keeps the wrist inside the first two links\' ring works; move the slider: the arm moves, the tool point stays (self-motion)') }],
   answer: t('ไม่จำกัด: แขนที่มีข้อต่อเกินงาน (redundant) ต้องมีกฎเพิ่มเพื่อเลือกท่า', 'Infinitely many: a redundant arm needs an extra rule to pick a pose') });

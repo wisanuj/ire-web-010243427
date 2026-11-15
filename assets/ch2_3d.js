@@ -266,7 +266,8 @@ const paint = CH2.paint = (c, W, H, s, P, st) => { if (global.R3 && global.R3.ok
   items.forEach(it => { if (it.lead) S3.leader(c, it, P.muted); }); items.forEach(it => label(c, it.L, it.X, it.Y, it.size, P[KEY[it.L.c]] || P.ink, P.bg)); };
 /* scenes of any chapter: CH2.S3, then CH3.S3, CH4.S3 … */
 const sceneFn = name => SC[name] || ['CH3', 'CH4', 'CH5', 'CH6', 'CH7', 'CH8', 'CH9'].map(k => global[k] && global[k].S3 && global[k].S3[name]).find(Boolean);
-CH2.view = (name, c, W, H, st, P) => { const s = sceneFn(name)(st, { dark: P === RB.DARK }); st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st); return s; };
+CH2.view = (name, c, W, H, st, P) => { const s = sceneFn(name)(st, { dark: P === RB.DARK }); if (st.ov) st.ov(s, st);   // the open step of the page's solution (S3.OV)
+  st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st); return s; };
 /* the point of the horizontal plane z = z0 under the pointer */
 CH2.pick = (st, p, z0 = 0) => st._v ? S3.unproject(st._v.cam, st._v.W, st._v.H, p.x, p.y, z0) : null;
 /* drag in a canvas to turn the view (st.az, st.el); o.grab(p) may take the drag for something else (return true) */

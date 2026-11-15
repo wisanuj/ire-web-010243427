@@ -159,7 +159,13 @@ RB.stage = (canvas, aspect, frame, o = {}) => { const st = { ctx: null, W: 0, H:
   /* light pictures (as on the slides) for the light reading themes, dark ones for the dark theme */
   const tick = dt => { const pw = canvas.parentElement.clientWidth; if (pw !== st.pw) { st.pw = pw; size(); } if (!o.pal) st.P = (global.MC && global.MC.theme === 'dark') ? RB.DARK : RB.LIGHT; frame(st.ctx, st.W, st.H, dt, st.P); };
   if (global.LS && global.LS.anim) global.LS.anim(canvas, tick); else tick(0);
+  if (canvas.id) RB.stages[canvas.id] = { canvas, frame };
   return st; };
+/* checking a page without watching it (QA, a hidden browser): RB.snap(id, W, H) draws one frame of canvas id into a fresh light canvas
+   and returns it as a PNG data URL (no time passes: dt = 0) */
+RB.stages = {};
+RB.snap = (id, W = 640, H = 480, dark) => { const S = RB.stages[id]; if (!S) return null; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const P = dark ? RB.DARK : RB.LIGHT; x.fillStyle = P.bg; x.fillRect(0, 0, W, H); S.frame(x, W, H, 0, P); return c.toDataURL(); };
 /* world → screen for the planar scenes: origin at (cx, cy) px, s px per metre, y up */
 RB.fitWorld = (W, H, x0, x1, y0, y1, pad = 8, ox = 0, oy = 0) => { const s = min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (y1 - y0)); return RB.map(ox + (W - s * (x1 + x0)) / 2, oy + (H + s * (y1 + y0)) / 2, s); };
 RB.map = (cx, cy, s) => ({ cx, cy, s, x: wx => cx + s * wx, y: wy => cy - s * wy, p: (wx, wy) => [cx + s * wx, cy - s * wy], inv: (sx, sy) => [(sx - cx) / s, (cy - sy) / s] });

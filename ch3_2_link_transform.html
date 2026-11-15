@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -141,16 +141,30 @@ LS.stepper(document.getElementById('st1'), { steps: [
 /* ---------- 2: the planar three-link arm ---------- */
 const P3 = E.p3r, S2 = { ex: 'p3r', q: P3.q.slice(), show: 0, xyz: true, fit: true }, ro2 = document.getElementById('ro2'), ctl2 = document.getElementById('ctl2');
 const read2 = () => { const T = P3.T03(P3.L, S2.q); ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(T)}</div><div class="term">θ₁ + θ₂ + θ₃ = ${Math.round(deg(S2.q[0] + S2.q[1] + S2.q[2]))}° · ${t('ตำแหน่ง', 'position')} (${u(T[0][3], 3)}, ${u(T[1][3], 3)}) m</div>`; };
-['θ₁', 'θ₂', 'θ₃'].forEach((n, i) => ui.slider(ctl2, { id: 'b' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S2.q[i])), fmt: v => `${v}°`, oninput: v => { S2.q[i] = rad(v); read2(); } })); read2();
+const sl2 = ['θ₁', 'θ₂', 'θ₃'].map((n, i) => ui.slider(ctl2, { id: 'b' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S2.q[i])), fmt: v => `${v}°`, oninput: v => { S2.q[i] = rad(v); read2(); } })); read2();
 CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
 const T30 = P3.T03(P3.L, P3.q);
+/* the open step of the solution, drawn on the arm: the parts of each matrix (step 1), the position column of ¹₃T in {1} (2) and of ⁰₃T in {0} (3, 4) */
+const Pt = T => RB.Tp(T), dir = (T, j) => RB.col(RB.TR(T), j), dg = x => `${Math.round(deg(x))}°`;
+S2.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Y = i => dir(F[i], 1), q = st.q, L1 = P3.L.L1, L2 = P3.L.L2, lb = { m: 0, s: 24 };
+  const turn = (i, ref, w, r, key, name, o) => { OV.ref(s, O(i), ref, r + 0.1); OV.ang(s, O(i), ref, w, r, key, name, o); };
+  if (k === 1) { [1, 2, 3].forEach(i => turn(i, X(i - 1), X(i), i === 1 ? 0.2 : 0.12, 'pk', 'θ', { sub: String(i), dx: 14, dy: -10 }));   // ⁰₁T, ¹₂T, ²₃T: each turns θ_i about Z_i …
+    [[1, 'L₁'], [2, 'L₂']].forEach(([i, n]) => { const off = RB.sc(Y(i), -0.07); OV.dist(s, OV.v(O(i), off), OV.v(O(i + 1), off), 'am', n, { ...lb, s: 28, dy: 26 }); }); }   // … after moving a_{i−1} = L along X_{i−1}
+  if (k === 2) { const K = OV.v(O(1), X(1), L1 + L2 * Math.cos(q[1]));   // ¹₃T: in {1}, along X₁ then along Y₁
+    OV.vec(s, O(1), K, 'am', 'L₁ + L₂c₂', { ...lb, dy: 30 }); OV.vec(s, K, O(3), 'p', 'L₂s₂', { ...lb, a: 'l', dx: 14 });
+    turn(2, X(1), X(2), 0.1, 'pk', 'θ', { sub: '2', dx: 14, dy: -10 }); turn(3, X(1), X(3), 0.12, 'pk', 'θ₂ + θ₃', { ...lb, s: 26, a: 'l', dx: 16 }); }
+  if (k === 3) [[1, X(1), 'θ₁', 0.22], [2, X(2), 'θ₁ + θ₂', 0.13], [3, X(3), 'θ₁ + θ₂ + θ₃', 0.2]].forEach(([i, w, n, r]) => turn(i, X(0), w, r, i === 3 ? 'pk' : 'am', n, { ...lb, s: 26, a: 'l', dx: 16 }));   // ⁰₃T: every angle from X₀
+  if (k === 4) { const X0 = X(0), Y0 = Y(0), A = OV.v(O(1), X0, L1 * Math.cos(q[0])), B = OV.v(A, X0, L2 * Math.cos(q[0] + q[1])), C = OV.v(B, Y0, L1 * Math.sin(q[0]));   // x = L₁c₁ + L₂c₁₂ along X₀, then y = L₁s₁ + L₂s₁₂ along Y₀
+    OV.vec(s, O(1), A, 'am', `0.5 cos ${dg(q[0])}`, { ...lb, dy: 30 }); OV.vec(s, A, B, 'p', `0.4 cos ${dg(q[0] + q[1])}`, { ...lb, dy: 30 });
+    OV.vec(s, B, C, 'am', `0.5 sin ${dg(q[0])}`, { ...lb, a: 'l', dx: 14 }); OV.vec(s, C, O(3), 'p', `0.4 sin ${dg(q[0] + q[1])}`, { ...lb, a: 'l', dx: 14 });
+    turn(2, X0, X(2), 0.1, 'p', dg(q[0] + q[1]), { ...lb, a: 'l', dx: 14 }); } };
 LS.ask(document.getElementById('ask2'), { fields: [{ label: t('ที่ (30°, 45°, −60°): x =', 'at (30°, 45°, −60°): x ='), ok: x => Math.abs(x - T30[0][3]) < 0.006, w: 5 }, { label: 'y =', ok: x => Math.abs(x - T30[1][3]) < 0.006, w: 5 }, { label: t('มุมของเครื่องมือ (°) =', 'tool angle (°) ='), ok: x => Math.abs(x - 15) < 0.5, w: 4 }],
   check: v => Math.abs(v[0] - (T30[0][3] + 0)) > 0.006 && Math.abs(v[0] - (0.5 * Math.cos(rad(30)) + 0.4 * Math.cos(rad(45)))) < 0.01 ? t('ก้าน 2 ทำมุม θ₁ + θ₂ กับแกน X₀ ไม่ใช่ θ₂', 'Link 2 makes the angle θ₁ + θ₂ with X₀, not θ₂') : '' });
-LS.stepper(document.getElementById('st2'), { steps: [
-  { why: t('<b>เมทริกซ์ของแต่ละแถว</b> (α = 0, d = 0)', '<b>One matrix per row</b> (α = 0, d = 0)'), tex: '{}^{0}_{1}T = \\begin{bmatrix} c_1 & -s_1 & 0 & 0 \\\\ s_1 & c_1 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix},\\ {}^{1}_{2}T = \\begin{bmatrix} c_2 & -s_2 & 0 & L_1 \\\\ s_2 & c_2 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix},\\ {}^{2}_{3}T = \\begin{bmatrix} c_3 & -s_3 & 0 & L_2 \\\\ s_3 & c_3 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix}' },
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) { S2.q = P3.q.slice(); sl2.forEach((x, i) => x.set(Math.round(deg(S2.q[i])))); read2(); } }, steps: [
+  { why: t('<b>เมทริกซ์ของแต่ละแถว</b> (α = 0, d = 0)', '<b>One matrix per row</b> (α = 0, d = 0)'), tex: '\\begin{aligned} {}^{0}_{1}T &= \\begin{bmatrix} c_1 & -s_1 & 0 & 0 \\\\ s_1 & c_1 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix} \\\\ {}^{1}_{2}T &= \\begin{bmatrix} c_2 & -s_2 & 0 & L_1 \\\\ s_2 & c_2 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix} \\\\ {}^{2}_{3}T &= \\begin{bmatrix} c_3 & -s_3 & 0 & L_2 \\\\ s_3 & c_3 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix} \\end{aligned}' },
   { why: t('<b>คูณสองตัวหลังก่อน</b>', '<b>Multiply the last two first</b>'), tex: '{}^{1}_{3}T = \\begin{bmatrix} c_{23} & -s_{23} & 0 & L_1 + L_2c_2 \\\\ s_{23} & c_{23} & 0 & L_2s_2 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix}' },
   { why: t('<b>คูณด้วย ⁰₁T</b> ใช้ c₁c₂₃ − s₁s₂₃ = c₁₂₃', '<b>Multiply by ⁰₁T</b>, with c₁c₂₃ − s₁s₂₃ = c₁₂₃'), tex: '{}^{0}_{3}T = \\begin{bmatrix} c_{123} & -s_{123} & 0 & L_1c_1 + L_2c_{12} \\\\ s_{123} & c_{123} & 0 & L_1s_1 + L_2s_{12} \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix}' },
-  { why: t('<b>แทนตัวเลข</b> L₁ = 0.5, L₂ = 0.4, θ = (30°, 45°, −60°)', '<b>Put in numbers</b> L₁ = 0.5, L₂ = 0.4, θ = (30°, 45°, −60°)'), tex: `x = 0.5\\cos 30^\\circ + 0.4\\cos 75^\\circ = ${RB.d(T30[0][3], 3)},\\quad y = 0.5\\sin 30^\\circ + 0.4\\sin 75^\\circ = ${RB.d(T30[1][3], 3)}` }],
+  { why: t('<b>แทนตัวเลข</b> L₁ = 0.5, L₂ = 0.4, θ = (30°, 45°, −60°)', '<b>Put in numbers</b> L₁ = 0.5, L₂ = 0.4, θ = (30°, 45°, −60°)'), tex: `\\begin{aligned} x &= 0.5\\cos 30^\\circ + 0.4\\cos 75^\\circ = ${RB.d(T30[0][3], 3)} \\\\ y &= 0.5\\sin 30^\\circ + 0.4\\sin 75^\\circ = ${RB.d(T30[1][3], 3)} \\end{aligned}` }],
   answer: t('(x, y) = (0.537, 0.636) m และเครื่องมือชี้ไปทาง θ₁ + θ₂ + θ₃ = 15°', '(x, y) = (0.537, 0.636) m and the tool points at θ₁ + θ₂ + θ₃ = 15°') });
 
 /* ---------- B: your own DH table ---------- */

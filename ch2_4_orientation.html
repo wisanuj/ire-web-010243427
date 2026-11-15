@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -158,15 +158,26 @@ const Rt = E.inv.R, S1 = { kind: 'fixed', al: 0, be: 0, ga: 0, u: 3, target: Rt 
 const read1 = () => { const R = RB.Rzyx(S1.al, S1.be, S1.ga), d = Math.max(...R.flat().map((x, i) => Math.abs(x - Rt.flat()[i])));
   ro1.innerHTML = `<div class="live"><span class="eq">${t('เป้าหมาย', 'target')} R =</span>${M(Rt)}<span class="eq">${t('ของคุณ', 'yours')} =</span>${M(R)}</div><div class="term">${d < 0.02 ? `<b class="ax-y">${t('ทับกันแล้ว ✓', 'they match ✓')}</b>` : t(`ต่างกันมากสุด ${u(d, 3)} (ช่องใดช่องหนึ่ง)`, `largest difference ${u(d, 3)} (in one entry)`)}</div>`; };
 const ctl1 = document.getElementById('ctl1');
-[['ga', 'γ (X<sub>A</sub>)'], ['be', 'β (Y<sub>A</sub>)'], ['al', 'α (Z<sub>A</sub>)']].forEach(([k, n]) => ui.slider(ctl1, { id: '1' + k, label: n, min: k === 'be' ? -90 : -180, max: k === 'be' ? 90 : 180, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { S1[k] = rad(v); read1(); } }));
-read1(); CH2.sim('cv1', S1, 'seq', { aspect: 0.82, maxH: 480 });
+const sl1 = {}; [['ga', 'γ (X<sub>A</sub>)'], ['be', 'β (Y<sub>A</sub>)'], ['al', 'α (Z<sub>A</sub>)']].forEach(([k, n]) => { sl1[k] = ui.slider(ctl1, { id: '1' + k, label: n, min: k === 'be' ? -90 : -180, max: k === 'be' ? 90 : 180, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { S1[k] = rad(v); read1(); } }); });
 const a1 = RB.zyx(Rt);
+/* the open step of each solution, drawn on its picture (S3.OV) */
+const OV = window.S3.OV, O0 = [0, 0, 0], o0 = { m: 0, s: 24 }, K3 = ['x', 'y', 'z'], dg = x => `${u(deg(x), 1)}°`;
+/* 1, on the faint target frame (arrows 0.5 long): its X axis (column 1) tilts down by β and, seen from above, points at α; γ turns Z about that axis */
+S1.ov = (s, st) => { if (s.dark) s.items.forEach(it => { if (it.c === s.pal.floor) it.al = 0.35; });   // the target's X axis points below the floor: see through the dark floor disc
+  const k = st.step; if (!k || k > 3) return; const L = 0.5, X = RB.sc(RB.col(Rt, 0), L), H = [X[0], X[1], 0];
+  if (k === 1) { OV.vec(s, O0, X, 'x', t('คอลัมน์ 1', 'column 1'), { m: 0, s: 22, at: 1, dx: 18, dy: 18, a: 'l', r: 0.008 }); OV.dist(s, O0, H, 'ink', '√(r₁₁² + r₂₁²)', { ...o0, s: 22, dy: 30 });
+    OV.dist(s, H, X, 'z', 'r₃₁', { ...o0, dx: 16, a: 'l' }); OV.ang(s, O0, H, X, 0.32, 'am', `β = ${dg(a1.be)}`, { ...o0, dx: 26, dy: 4, a: 'l' }); }
+  if (k === 2) { OV.ref(s, O0, H, 1); OV.dist(s, H, [H[0], 0, 0], 'x', null); OV.pt(s, [H[0], 0, 0], 'x', 'r₁₁', { ...o0, dy: 30 }); OV.dist(s, H, [0, H[1], 0], 'y', null); OV.pt(s, [0, H[1], 0], 'y', 'r₂₁', { ...o0, dx: 16, dy: -10, a: 'l' });
+    OV.ang(s, O0, [1, 0, 0], H, 0.3, 'am', `α = ${dg(a1.al)}`, { ...o0, dx: 12, dy: 30, a: 'l' }); }
+  if (k === 3) { const Xu = RB.col(Rt, 0), Z1 = RB.col(RB.mm(RB.Rz(a1.al), RB.Ry(a1.be)), 2); OV.ref(s, OV.v(O0, Xu, -0.3), Xu, 0.95, 'x'); OV.ref(s, O0, Z1, 0.5);
+    OV.name(s, OV.v(O0, Z1, 0.55), 'ink', t('Z ก่อนหมุน γ', 'Z before γ'), { ...o0, s: 20, dx: 10, a: 'l' }); OV.ang(s, O0, Z1, RB.col(Rt, 2), 0.36, 'am', `γ = ${dg(a1.ga)}`, { ...o0, dx: 18, dy: -6, a: 'l' }); } };
+read1(); CH2.sim('cv1', S1, 'seq', { aspect: 0.82, maxH: 480 });
 LS.ask(document.getElementById('ask1'), { fields: [{ label: 'γ (°) =', ok: x => Math.abs(x + 45) < 0.5, w: 4 }, { label: 'β (°) =', ok: x => Math.abs(x - 30) < 0.5, w: 4 }, { label: 'α (°) =', ok: x => Math.abs(x - 60) < 0.5, w: 4 }],
   check: v => Math.abs(v[0] - 60) < 0.5 && Math.abs(v[2] + 45) < 0.5 ? t('สลับ α กับ γ: γ เป็นการหมุนรอบ X<sub>A</sub> (ขั้นแรก) α รอบ Z<sub>A</sub> (ขั้นสุดท้าย)', 'α and γ are swapped: γ is the turn about X<sub>A</sub> (first), α about Z<sub>A</sub> (last)') : '' });
-LS.stepper(document.getElementById('st1'), { steps: [
-  { why: t('<b>β</b> จาก r<sub>31</sub> และความยาวของ (r<sub>11</sub>, r<sub>21</sub>)', '<b>β</b> from r<sub>31</sub> and the length of (r<sub>11</sub>, r<sub>21</sub>)'), tex: `\\beta = \\operatorname{atan2}\\!\\left(${RB.d(-Rt[2][0], 3)},\\ \\sqrt{${RB.d(Rt[0][0], 3)}^2 + ${RB.d(Rt[1][0], 3)}^2}\\right) = \\operatorname{atan2}(0.5,\\ 0.866) = ${RB.d(deg(a1.be), 1)}^\\circ` },
-  { why: t('<b>α</b> จาก r<sub>21</sub> และ r<sub>11</sub> (cos β = 0.866)', '<b>α</b> from r<sub>21</sub> and r<sub>11</sub> (cos β = 0.866)'), tex: `\\alpha = \\operatorname{atan2}(${RB.d(Rt[1][0], 3)}/0.866,\\ ${RB.d(Rt[0][0], 3)}/0.866) = ${RB.d(deg(a1.al), 1)}^\\circ` },
-  { why: t('<b>γ</b> จาก r<sub>32</sub> และ r<sub>33</sub>', '<b>γ</b> from r<sub>32</sub> and r<sub>33</sub>'), tex: `\\gamma = \\operatorname{atan2}(${RB.d(Rt[2][1], 3)}/0.866,\\ ${RB.d(Rt[2][2], 3)}/0.866) = ${RB.d(deg(a1.ga), 1)}^\\circ` },
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k && k < 4) { ['ga', 'be', 'al'].forEach(a => { S1[a] = 0; sl1[a].set(0); }); read1(); } }, steps: [
+  { why: t('<b>β</b> จาก r<sub>31</sub> และความยาวของ (r<sub>11</sub>, r<sub>21</sub>)', '<b>β</b> from r<sub>31</sub> and the length of (r<sub>11</sub>, r<sub>21</sub>)'), tex: `\\begin{aligned} \\beta &= \\operatorname{atan2}\\!\\left(${RB.d(-Rt[2][0], 3)},\\ \\sqrt{${RB.d(Rt[0][0], 3)}^2 + ${RB.d(Rt[1][0], 3)}^2}\\right) \\\\ &= \\operatorname{atan2}(0.5,\\ 0.866) = ${RB.d(deg(a1.be), 1)}^\\circ \\end{aligned}` },
+  { why: t('<b>α</b> จาก r<sub>21</sub> และ r<sub>11</sub> (cos β = 0.866)', '<b>α</b> from r<sub>21</sub> and r<sub>11</sub> (cos β = 0.866)'), tex: `\\begin{aligned} \\alpha &= \\operatorname{atan2}(${RB.d(Rt[1][0], 3)}/0.866,\\ ${RB.d(Rt[0][0], 3)}/0.866) \\\\ &= ${RB.d(deg(a1.al), 1)}^\\circ \\end{aligned}` },
+  { why: t('<b>γ</b> จาก r<sub>32</sub> และ r<sub>33</sub>', '<b>γ</b> from r<sub>32</sub> and r<sub>33</sub>'), tex: `\\begin{aligned} \\gamma &= \\operatorname{atan2}(${RB.d(Rt[2][1], 3)}/0.866,\\ ${RB.d(Rt[2][2], 3)}/0.866) \\\\ &= ${RB.d(deg(a1.ga), 1)}^\\circ \\end{aligned}` },
   { why: t('<b>ตรวจ</b>: ตั้งแถบเลื่อนตามคำตอบ เฟรมสีต้องทับเฟรมจาง', '<b>Check</b>: set the sliders to the answer; the coloured frame must cover the faint one'), onShow: () => { S1.ga = rad(-45); S1.be = rad(30); S1.al = rad(60); [['1ga', -45], ['1be', 30], ['1al', 60]].forEach(([id, v]) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input')); }); } }],
   answer: t('(γ, β, α) = (−45°, 30°, 60°)', '(γ, β, α) = (−45°, 30°, 60°)') });
 
@@ -187,12 +198,19 @@ const fac = k => { let f = []; L2.slice(0, k).forEach(([a, d, kind]) => { const 
 const read2 = () => { const k = Math.round(goal2), R = CH2.seqR(L2.slice(0, k)); ro2.innerHTML = `<div class="live"><span class="eq">${t('หลังขั้นที่', 'after step')} ${k}: R = ${fac(k)} =</span>${M(R)}</div>`; line2.querySelectorAll('button').forEach((b, i) => b.classList.toggle('cur', i === k)); };
 line2.innerHTML = [t('เริ่ม', 'start'), ...L2.map(([a, d, kind], i) => `${i + 1}. ${d}° ${t('รอบ', 'about')} ${a} (${kind === 'fixed' ? t('ตรึง', 'fixed') : t('เคลื่อน', 'moving')})`)].map((x, i) => `<button type="button" class="btn" data-k="${i}">${x}</button>`).join('');
 line2.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; goal2 = +b.dataset.k; if (goal2 < S2.k) S2.k = Math.max(0, goal2 - 1); read2(); });
+/* 2: the turn being made (as in scene 'steps'): the tip of the axis of {B} that sweeps the widest circle about the turning axis, with the factor's name */
+S2.ov = (s, st) => { const k = st.step; if (!k || k > 3) return; const n = L2.length, kk = Math.min(Math.max(st.k, 0), n); if (kk < 0.02) return;
+  const i = Math.min(n, Math.ceil(kk)) - 1, f = kk - i, [a, d, kind] = L2[i], j = 'xyz'.indexOf(a), R0 = CH2.seqR(L2.slice(0, i)), ax = kind === 'fixed' ? RB.col(RB.I3(), j) : RB.col(R0, j), ang = rad(d) * f;
+  if (Math.abs(ang) < 0.03) return; let c = 0; [0, 1, 2].forEach(m => { if (Math.abs(RB.dot(RB.col(R0, m), ax)) < Math.abs(RB.dot(RB.col(R0, c), ax))) c = m; });
+  const t0 = RB.sc(RB.col(R0, c), 0.46), c0 = RB.sc(ax, RB.dot(t0, ax)), pts = Array.from({ length: 25 }, (_, q) => RB.mv(RB.Rk(ax, ang * q / 24), t0));
+  window.S3.tube(s, pts, window.S3.C.am, 0.005, true); OV.dist(s, c0, t0, 'am', null, { r: 0.0025 }); OV.dist(s, c0, pts[24], 'am', null, { r: 0.0025 });
+  OV.name(s, pts[12], 'am', 'R', { sub: a.toUpperCase(), post: `(${d}°)`, s: 30, dx: 22, dy: -10, a: 'l' }); };
 read2(); CH2.sim('cv2', S2, 'steps', { aspect: 0.82, maxH: 480, tick: dt => { if (S2.k < goal2) S2.k = Math.min(goal2, S2.k + dt * 0.8); else if (S2.k > goal2) S2.k = goal2; } });
 CH2.matAsk(document.getElementById('ask2'), { label: 'R =', ans: E.seq.R, tol: 0.006, check: M2 => { const W = [RB.Rz(rad(60)), RB.Ry(rad(45)), RB.Rx(rad(60)), RB.Ry(rad(45))].reduce(RB.mm); return Math.max(...M2.flat().map((x, i) => Math.abs(x - W.flat()[i]))) < 0.01 ? t('คุณเรียงลำดับกลับด้าน: ขั้นที่หมุนรอบแกนตรึงต้องคูณทางซ้าย', 'Your order is reversed: turns about fixed axes multiply on the left') : ''; } });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) { goal2 = [0, 1, 3, 5, 5][k]; read2(); } }, steps: [
   { why: t('<b>ขั้น 1</b> (แกนตรึง x 30°): R เริ่มจาก I', '<b>Step 1</b> (fixed x, 30°): R starts at I'), tex: 'R = R_X(30^\\circ)', onShow: () => { goal2 = 1; read2(); } },
   { why: t('<b>ขั้น 2–3</b> (แกนเคลื่อน): คูณทางขวา', '<b>Steps 2–3</b> (moving axes): multiply on the right'), tex: 'R = R_X(30^\\circ)\\,R_Y(45^\\circ)\\,R_Z(60^\\circ)', onShow: () => { goal2 = 3; read2(); } },
-  { why: t('<b>ขั้น 4–5</b> (แกนตรึง): คูณทางซ้าย ทีละตัว', '<b>Steps 4–5</b> (fixed axes): multiply on the left, one at a time'), tex: `R = ${CH2.seqTeX(L2)}`, onShow: () => { goal2 = 5; read2(); } },
+  { why: t('<b>ขั้น 4–5</b> (แกนตรึง): คูณทางซ้าย ทีละตัว', '<b>Steps 4–5</b> (fixed axes): multiply on the left, one at a time'), tex: `\\begin{aligned} R &= ${CH2.seqTeX(L2).split('\\,').slice(0, 2).join('\\,')} \\\\ &\\qquad ${CH2.seqTeX(L2).split('\\,').slice(2).join('\\,')} \\end{aligned}`, onShow: () => { goal2 = 5; read2(); } },
   { why: t('<b>คูณออกมาเป็นตัวเลข</b>', '<b>Multiply out</b>'), tex: `R = ${TM(E.seq.R)}` }],
   answer: t('\\(R = R_Y(45^\\circ)R_X(30^\\circ)R_X(30^\\circ)R_Y(45^\\circ)R_Z(60^\\circ)\\) ตรงกับลายมือในฉบับผู้สอนเดิม', '\\(R = R_Y(45^\\circ)R_X(30^\\circ)R_X(30^\\circ)R_Y(45^\\circ)R_Z(60^\\circ)\\), as in the old teacher slides') });
 
@@ -203,18 +221,28 @@ const read3 = () => { S3s.k = [Math.cos(rad(kel)) * Math.cos(rad(kaz)), Math.cos
   ro3.innerHTML = `<div class="live"><span class="eq">K̂ = (${S3s.k.map(x => u(x, 3)).join(', ')}) · R<sub>K</sub>(θ) =</span>${M(R)}${thp ? `<span class="eq">ᴬP<sub>BORG</sub> =</span>${CH2.htmlM(RB.Tp(T).map(x => [x]), 3, { cls: ['mp'] })}` : ''}</div>` +
     `<div class="term">${t('ย้อนจาก R', 'back from R')}: θ = ${back.k ? u(deg(back.th), 1) + '°, K̂ = (' + back.k.map(x => u(x, 3)).join(', ') + ')' : t('θ = 0: แกนไม่กำหนด', 'θ = 0: the axis is undefined')} · ${t('พารามิเตอร์ออยเลอร์', 'Euler parameters')} ε = (${ep.map(x => u(x, 3)).join(', ')}), Σε² = ${u(ep.reduce((a, x) => a + x * x, 0), 3)}</div>`; };
 const ctl3 = document.getElementById('ctl3');
-ui.slider(ctl3, { id: 'kaz', label: t('ทิศของ K̂ ในแนวนอน', 'K̂ azimuth'), min: -180, max: 180, step: 1, value: 45, fmt: v => `${v}°`, oninput: v => { kaz = v; read3(); } });
-ui.slider(ctl3, { id: 'kel', label: t('มุมเงยของ K̂', 'K̂ elevation'), min: -90, max: 90, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { kel = v; read3(); } });
-ui.slider(ctl3, { id: 'kth', label: 'θ', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S3s.th = rad(v); read3(); } });
-ui.radio(document.getElementById('opt3'), [{ id: 'o', label: t('ผ่านจุดกำเนิด (2.6)', 'through the origin (2.6)'), on: true }, { id: 'p', label: t('ผ่าน (1, 2, 3) (2.7)', 'through (1, 2, 3) (2.7)') }], id => { thp = id === 'p'; read3(); });
+const sl3 = [ui.slider(ctl3, { id: 'kaz', label: t('ทิศของ K̂ ในแนวนอน', 'K̂ azimuth'), min: -180, max: 180, step: 1, value: 45, fmt: v => `${v}°`, oninput: v => { kaz = v; read3(); } }),
+  ui.slider(ctl3, { id: 'kel', label: t('มุมเงยของ K̂', 'K̂ elevation'), min: -90, max: 90, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { kel = v; read3(); } }),
+  ui.slider(ctl3, { id: 'kth', label: 'θ', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S3s.th = rad(v); read3(); } })];
+const rd3 = ui.radio(document.getElementById('opt3'), [{ id: 'o', label: t('ผ่านจุดกำเนิด (2.6)', 'through the origin (2.6)'), on: true }, { id: 'p', label: t('ผ่าน (1, 2, 3) (2.7)', 'through (1, 2, 3) (2.7)') }], id => { thp = id === 'p'; read3(); });
+/* 3 (scene 'axis': 1 unit = 0.15 m, K̂ drawn 0.62 long, {B} 0.44): K̂ walked along X_A, Y_A; row 1 = how far each axis of {B} reaches along X_A;
+   each axis of {B} with its column; the origin of {B} turned about the axis through P; the vector part of the Euler parameters */
+S3s.ov = (s, st) => { const k = st.step; if (!k) return; const K = st.k, P = RB.sc(st.p, 0.15), R = RB.Rk(K, st.th), Ob = RB.add(P, RB.mv(R, RB.sc(P, -1))), tip = j => OV.v(Ob, RB.col(R, j), 0.44), f = x => u(x, 3);
+  if (k === 1) { let a = P; [0, 1, 2].forEach(j => { const b = OV.v(a, RB.col(RB.I3(), j), K[j] * 0.62); if (Math.abs(K[j]) > 0.01) OV.dist(s, a, b, K3[j], 'k', { sub: 'xyz'[j], post: ` = ${f(K[j])}`, s: 26, r: j ? 0.0035 : 0.009, ...[{ dy: 30 }, { dx: 16, a: 'l' }, { dx: 16, a: 'l' }][j] }); a = b; }); }
+  if (k === 2) [0, 1, 2].forEach(j => { const q = tip(j), F = [q[0], 0, 0]; OV.dist(s, q, F, K3[j], null); OV.pt(s, F, K3[j], `r₁${'₁₂₃'[j]} = ${f(R[0][j])}`, { ...o0, s: 22, dy: 30 + 26 * j }); });
+  if (k === 3) [0, 1, 2].forEach(j => OV.name(s, tip(j), K3[j], `(${RB.col(R, j).map(f).join(', ')})`, { ...o0, s: 22, dx: [20, 20, 18][j], dy: [26, -12, -14][j], a: 'l' }));
+  if (k === 4) { OV.vec(s, P, Ob, 'am', '−R P', { ...o0, at: 0.5, dx: 20, a: 'l' }); OV.vec(s, O0, Ob, 'b', 'P', { pre: 'A', sub: 'BORG', s: 28, at: 0.5, dx: -10, dy: 34, a: 'r' });
+    OV.name(s, Ob, 'b', `(${RB.sc(Ob, 1 / 0.15).map(x => u(x, 2)).join(', ')})`, { ...o0, dx: -20, dy: -26, a: 'r' }); }
+  if (k === 5) { const e = RB.eulerP(K, st.th); OV.vec(s, P, OV.v(P, RB.unit(K), 0.62 * Math.sin(st.th / 2)), 'am', `(ε₁, ε₂, ε₃) = K sin ${u(deg(st.th) / 2, 1)}°`, { ...o0, s: 22, at: 0.5, dx: 22, dy: 24, a: 'l', r: 0.011 });
+    OV.name(s, P, 'am', `ε₄ = cos ${u(deg(st.th) / 2, 1)}° = ${f(e[3])}`, { ...o0, s: 22, dx: -22, dy: 30, a: 'r' }); } };
 read3(); CH2.sim('cv3', S3s, 'axis', { aspect: 0.82, maxH: 500 });
 LS.ask(document.getElementById('ask3'), { fields: [{ label: t('Craig 2.6: r₁₁ =', 'Craig 2.6: r₁₁ ='), ok: x => Math.abs(x - 0.933) < 0.006, w: 5 }, { label: 'r₁₂ =', ok: x => Math.abs(x - 0.067) < 0.006, w: 5 }, { label: 'r₁₃ =', ok: x => Math.abs(x - 0.354) < 0.006, w: 5 }] });
-LS.stepper(document.getElementById('st3'), { steps: [
-  { why: t('<b>ค่าที่ใช้</b>: k<sub>x</sub> = k<sub>y</sub> = 0.707, k<sub>z</sub> = 0, θ = 30°', '<b>The values</b>: k<sub>x</sub> = k<sub>y</sub> = 0.707, k<sub>z</sub> = 0, θ = 30°'), tex: 'c\\theta = 0.866,\\quad s\\theta = 0.5,\\quad v\\theta = 1 - c\\theta = 0.134' },
-  { why: t('<b>แถวแรก</b> ของสูตร R<sub>K</sub>(θ)', '<b>Row 1</b> of the formula R<sub>K</sub>(θ)'), tex: '\\begin{aligned} r_{11} &= k_x^2 v\\theta + c\\theta = 0.5(0.134) + 0.866 = 0.933 \\\\ r_{12} &= k_xk_yv\\theta - k_zs\\theta = 0.067 \\\\ r_{13} &= k_xk_zv\\theta + k_ys\\theta = 0.354 \\end{aligned}' },
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; if (k) { kaz = 45; kel = 0; S3s.th = rad(30); [45, 0, 30].forEach((x, i) => sl3[i].set(x)); (k <= 3 ? rd3.btns.o : rd3.btns.p).click(); } }, steps: [
+  { why: t('<b>ค่าที่ใช้</b>: k<sub>x</sub> = k<sub>y</sub> = 0.707, k<sub>z</sub> = 0, θ = 30°', '<b>The values</b>: k<sub>x</sub> = k<sub>y</sub> = 0.707, k<sub>z</sub> = 0, θ = 30°'), tex: '\\begin{aligned} &c\\theta = 0.866,\\quad s\\theta = 0.5 \\\\ &v\\theta = 1 - c\\theta = 0.134 \\end{aligned}' },
+  { why: t('<b>แถวแรก</b> ของสูตร R<sub>K</sub>(θ)', '<b>Row 1</b> of the formula R<sub>K</sub>(θ)'), tex: '\\begin{aligned} r_{11} &= k_x^2 v\\theta + c\\theta \\\\ &= 0.5(0.134) + 0.866 = 0.933 \\\\ r_{12} &= k_xk_yv\\theta - k_zs\\theta = 0.067 \\\\ r_{13} &= k_xk_zv\\theta + k_ys\\theta = 0.354 \\end{aligned}' },
   { why: t('<b>ทั้งเมทริกซ์</b> (Craig 2.6)', '<b>The whole matrix</b> (Craig 2.6)'), tex: `{}^{A}_{B}R = ${TM(E.ex26.R)}`, onShow: () => { document.querySelector('#opt3 button').click(); } },
   { why: t('<b>Craig 2.7: แกนผ่าน (1, 2, 3)</b> ย้ายจุดไปที่จุดกำเนิด หมุน แล้วย้ายกลับ ส่วนหมุนเท่าเดิม ส่วนตำแหน่งคือ P − R P', '<b>Craig 2.7: the axis through (1, 2, 3)</b>: move the point to the origin, turn, move back. Same rotation part; the position part is P − R P'), tex: `{}^{A}P_{BORG} = \\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} - {}^{A}_{B}R\\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} = ${CH2.texV(RB.Tp(E.ex27.T), 3)}`, onShow: () => { document.querySelectorAll('#opt3 button')[1].click(); } },
-  { why: t('<b>พารามิเตอร์ออยเลอร์</b> ของการหมุนเดียวกัน', '<b>Euler parameters</b> of the same turn'), tex: `\\varepsilon = (k_x s_{15^\\circ},\\ k_y s_{15^\\circ},\\ k_z s_{15^\\circ},\\ c_{15^\\circ}) = (${RB.eulerP(E.ex26.k, rad(30)).map(x => RB.d(x, 3)).join(',\\ ')})` }],
+  { why: t('<b>พารามิเตอร์ออยเลอร์</b> ของการหมุนเดียวกัน', '<b>Euler parameters</b> of the same turn'), tex: `\\begin{aligned} \\varepsilon &= (k_x s_{15^\\circ},\\ k_y s_{15^\\circ},\\ k_z s_{15^\\circ},\\ c_{15^\\circ}) \\\\ &= (${RB.eulerP(E.ex26.k, rad(30)).map(x => RB.d(x, 3)).join(',\\ ')}) \\end{aligned}` }],
   answer: t('ตรงกับ Craig ตัวอย่าง 2.6 และ 2.7: ตำแหน่ง (−1.13, 1.13, 0.05)', 'As in Craig examples 2.6 and 2.7: position (−1.13, 1.13, 0.05)') });
 
 /* ---------- 4: homework 2.2 (answer check only) ---------- */

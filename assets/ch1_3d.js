@@ -146,7 +146,8 @@ const paint = (c, W, H, s, P, st, res) => { global.R3.draw(c, W, H, s); const k 
   items.forEach(({ L, X, Y, size }) => { const col = P[KEY[L.c]] || P.ink; if (L.m) G.sym(c, L.t, L.sub, X, Y, { color: col, size: size * 1.05, align: 'left', halo: P.bg }); else G.text(c, L.t, X, Y, { color: col, size, weight: L.b ? 700 : 500, align: 'left', halo: P.bg, haloW: 3.5 }); }); };
 /* reserve(W, H): boxes the after-drawing covers (S3.place keeps labels out of them) */
 const mk = (name, fb, after, reserve) => { V[name] = (c, W, H, st, P) => { if (!global.R3 || !global.R3.ok()) { st._v = null; if (fb) CH1.draw[fb](c, W, H, st, P); return; }
-    const s = SC[name](st, { dark: P === RB.DARK }); st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st, reserve ? reserve(W, H) : null); if (after) after(c, W, H, st, P, s); }; };
+    const s = SC[name](st, { dark: P === RB.DARK }); if (st.ov) st.ov(s, st);   // the open step of the page's solution (S3.OV)
+    st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st, reserve ? reserve(W, H) : null); if (after) after(c, W, H, st, P, s); }; };
 /* the point of the table (height z0) under a pointer position, for dragging a target */
 CH1.pick = (st, p, z0 = 0.11) => st._v ? S3.unproject(st._v.cam, st._v.W, st._v.H, p.x, p.y, z0) : null;
 const pillAt = (c, t, col, y = 18) => G.pill(c, t, 10, y, { fill: RB.rgba(col, 0.16), stroke: col, color: col, size: 12.5 });

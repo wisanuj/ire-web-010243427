@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -109,7 +109,15 @@
 document.addEventListener('mc:ready', () => {
 'use strict';
 const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, S = CH3.EX.scara, T4 = (T, d = 3) => CH2.htmlM(T, d, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true });
-const scSliders = (el, st, on) => [['θ₁', 'R', -130, 130], ['θ₂', 'R', -140, 140], ['d₃', 'P', 0, 0.3], ['θ₄', 'R', -180, 180]].forEach(([n, k, lo, hi], i) => ui.slider(el, { id: el.id + i, label: n, min: lo, max: hi, step: k === 'R' ? 1 : 0.01, value: k === 'R' ? Math.round(deg(st.q[i])) : st.q[i], fmt: v => k === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { st.q[i] = k === 'R' ? rad(v) : v; if (on) on(); } }));
+const scSliders = (el, st, on) => [['θ₁', 'R', -130, 130], ['θ₂', 'R', -140, 140], ['d₃', 'P', 0, 0.3], ['θ₄', 'R', -180, 180]].map(([n, k, lo, hi], i) => ui.slider(el, { id: el.id + i, label: n, min: lo, max: hi, step: k === 'R' ? 1 : 0.01, value: k === 'R' ? Math.round(deg(st.q[i])) : st.q[i], fmt: v => k === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { st.q[i] = k === 'R' ? rad(v) : v; if (on) on(); } }));
+/* a step of the solution opens: the SCARA goes back to its own joint values, so the picture matches the step */
+const put = (st, sl) => { st.q = S.q.slice(); sl.forEach((x, i) => x.set(i === 2 ? st.q[i] : Math.round(deg(st.q[i])))); };
+/* the step overlays (window.S3.OV): origins and axes of the frames F (world), a dimension set off from the link it measures, an angle with its dashed reference */
+const Pt = T => RB.Tp(T), dir = (T, j) => RB.col(RB.TR(T), j), mid = (a, b) => a.map((x, i) => (x + b[i]) / 2), UP = [0, 0, 1], lb = { m: 0, s: 26 };
+const dim = (s, a, b, off, key, txt, o) => { const OV = window.S3.OV; OV.dist(s, OV.v(a, off), OV.v(b, off), key, txt, o); };
+const turn = (s, O, ref, w, r, key, txt, o) => { const OV = window.S3.OV; OV.ref(s, O, ref, r + 0.1); OV.ang(s, O, ref, w, r, key, txt, o); };
+/* a twist of 180° about the axis X at O, from Z up to Z down: two quarter arcs (one arc cannot be drawn through a straight angle) */
+const half = (s, O, X, Zu, Zd, r, txt, o) => { const OV = window.S3.OV, m = RB.cross(X, Zu); window.S3.angArc(s, O, Zu, m, r, window.S3.C.am, 0.0045, false); OV.ang(s, O, m, Zd, r, 'am', txt, o); };
 
 /* ---------- A: both conventions ---------- */
 const SA = { q: S.q.slice() }, roA = document.getElementById('roA');
@@ -119,19 +127,35 @@ scSliders(document.getElementById('ctlA'), SA, readA); readA();
 CH2.sim('cvA', SA, 'convs', { aspect: 0.48, maxH: 460, orbit: false });
 
 /* ---------- 1: Craig's table ---------- */
-const S1 = { ex: 'scara', q: S.q.slice(), xyz: true, fit: true }; scSliders(document.getElementById('ctl1'), S1); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
+const S1 = { ex: 'scara', q: S.q.slice(), xyz: true, fit: true }, sl1 = scSliders(document.getElementById('ctl1'), S1); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
+/* the open step on the arm: rows 1–2 (θ₁, a₁ = L₁ between two parallel vertical axes, θ₂), row 3 (a₂ = L₂, the 180° twist, d₃), row 4 (d₄ and θ₄ on the line of axis 3) */
+S1.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Y = i => dir(F[i], 1), Z = i => dir(F[i], 2), L = S.L;
+  if (k === 1) { [1, 2].forEach(i => OV.ref(s, OV.v(O(i), UP, -0.12), UP, 0.42, 'z')); OV.name(s, OV.v(mid(O(1), O(2)), UP, 0.26), 'am', 'α₁ = 0', lb);   // axes 1, 2 vertical and parallel
+    turn(s, OV.v(O(1), UP, 0.06), X(0), X(1), 0.16, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 }); dim(s, O(1), O(2), RB.sc(Y(1), -0.08), 'am', 'a', { sub: '1', post: ' = L₁', dy: 30 });
+    turn(s, OV.v(O(2), UP, 0.06), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', dx: 16, dy: -10 }); OV.name(s, O(1), 'ink', '{0} = {1}', { ...lb, a: 'r', dx: -30, dy: 46 }); }
+  if (k === 2) { const Q = OV.v(O(2), X(2), L.L2); dim(s, O(2), Q, RB.sc(Y(2), -0.08), 'am', 'a', { sub: '2', post: ' = L₂', dy: 30 });   // along X₂ to axis 3
+    half(s, Q, X(2), Z(2), Z(3), 0.13, 'α', { sub: '2', post: ' = 180°', a: 'l', dx: 16 }); dim(s, Q, O(3), RB.sc(X(2), 0.08), 'p', 'd', { sub: '3', a: 'l', dx: 14 }); }   // Z₃ points down; d₃ slides along it
+  if (k === 3) { dim(s, O(3), O(4), RB.sc(X(2), 0.08), 'p', 'd', { sub: '4', a: 'l', dx: 14 }); turn(s, OV.v(O(4), Z(4), 0.05), X(3), X(4), 0.13, 'pk', 'θ', { sub: '4', dx: 16, dy: 10 });
+    OV.name(s, O(3), 'am', 'a₃ = α₃ = 0', { ...lb, a: 'r', dx: -30, dy: -20 }); } };   // joint 4 turns about the line of axis 3
 const OPT = ['0', '90°', '180°', 'L₁', 'L₂', 'd₃', 'd₄', 'θ₁', 'θ₂', 'θ₄'];
 CH3.dhAsk(document.getElementById('tab1'), { ans: S.sym, opts: OPT, check: v => v[5] === 'L₂' ? t('a<sub>i−1</sub> อยู่แถวเดียวกับข้อต่อ i: L₁ เป็น a₁ ในแถว 2 และ L₂ เป็น a₂ ในแถว 3', 'a<sub>i−1</sub> sits in the row of joint i: L₁ is a₁ in row 2 and L₂ is a₂ in row 3') : '' });
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) put(S1, sl1); }, steps: [
   { why: t('<b>แถว 1–2</b>: แกน 1, 2 ตั้งขนาน (α = 0) ห่างกัน L₁ ({0} ทับ {1} ที่ความสูงของแขน)', '<b>Rows 1–2</b>: axes 1 and 2 vertical and parallel (α = 0), L₁ apart ({0} = {1} at the height of the arm)'), body: CH3.dhTable(S.sym.slice(0, 2)) },
   { why: t('<b>แถว 3</b>: แกน 3 (เลื่อน) ห่างจากแกน 2 เป็น L₂ เลือก Z₃ ชี้ลงจึงบิด α₂ = 180° ตัวแปร d₃', '<b>Row 3</b>: axis 3 (sliding) is L₂ from axis 2; Z₃ is chosen pointing down, so α₂ = 180°; the variable is d₃'), body: CH3.dhTable(S.sym.slice(0, 3)) },
   { why: t('<b>แถว 4</b>: ข้อต่อ 4 หมุนรอบแกนเดียวกับแกน 3 ระยะ d₄ คือความยาวเครื่องมือ', '<b>Row 4</b>: joint 4 turns about the same line as axis 3; d₄ is the tool length'), body: CH3.dhTable(S.sym) }],
   answer: t('ตัวแปร θ₁, θ₂, d₃, θ₄ · สไลด์เดิมให้เติมเองในห้อง ตารางนี้ตรวจกับตารางแบบดั้งเดิมด้วยโปรแกรมแล้ว', 'Variables θ₁, θ₂, d₃, θ₄ · the old slide left this to fill in class; this table is checked against the classical one in tests.js') });
 
 /* ---------- 2: classical table ---------- */
-const S2 = { ex: 'scara', q: S.q.slice(), conv: 'c', xyz: true, fit: true }; scSliders(document.getElementById('ctl2'), S2); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
+const S2 = { ex: 'scara', q: S.q.slice(), conv: 'c', xyz: true, fit: true }, sl2 = scSliders(document.getElementById('ctl2'), S2); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
+/* the open step, in the classical frames (lower-case x, z; frame {i} at the far end of link i): row 1 (θ₁ about z₀, a₁ along x₁), row 2 (θ₂, a₂, the 180° twist about x₂), rows 3–4 (d₃, d₄, θ₄) */
+S2.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Y = i => dir(F[i], 1), Z = i => dir(F[i], 2);
+  if (k === 1) { turn(s, OV.v(O(0), UP, 0.06), X(0), X(1), 0.16, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 }); dim(s, O(0), O(1), RB.sc(Y(1), -0.08), 'am', 'a', { sub: '1', post: ' = L₁', dy: 30 }); }
+  if (k === 2) { turn(s, OV.v(O(1), UP, 0.06), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', dx: 16, dy: -10 }); dim(s, O(1), O(2), RB.sc(Y(1), -0.08), 'am', 'a', { sub: '2', post: ' = L₂', dy: 30 });
+    half(s, O(2), X(2), Z(1), Z(2), 0.13, 'α', { sub: '2', post: ' = 180°', a: 'l', dx: 16 }); }   // z₂ flipped down about x₂
+  if (k === 3) { dim(s, O(2), O(3), RB.sc(X(2), 0.08), 'p', 'd', { sub: '3', a: 'l', dx: 14 }); dim(s, O(3), O(4), RB.sc(X(2), 0.08), 'p', 'd', { sub: '4', a: 'l', dx: 14 });
+    turn(s, OV.v(O(4), Z(4), 0.05), X(3), X(4), 0.13, 'pk', 'θ', { sub: '4', dx: 16, dy: 10 }); } };
 CH3.dhAsk(document.getElementById('tab2'), { ans: S.symC, cols: CH3.COLS_C, opts: OPT, check: v => v[2] === '0' && v[6] === 'L₁' ? t('แบบดั้งเดิม เฟรม {1} อยู่ที่ข้อศอก: a₁ = L₁ อยู่แถว 1', 'In the classical form frame {1} sits at the elbow: a₁ = L₁ is in row 1') : '' });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) put(S2, sl2); }, steps: [
   { why: t('<b>แถว 1</b>: θ₁ หมุนรอบ z₀ แล้วเลื่อน a₁ = L₁ ตาม x₁ ถึงข้อศอก', '<b>Row 1</b>: θ₁ about z₀, then a₁ = L₁ along x₁ to the elbow'), body: CH3.dhTable(S.symC.slice(0, 1), { cols: CH3.COLS_C }) },
   { why: t('<b>แถว 2</b>: θ₂ รอบ z₁ เลื่อน a₂ = L₂ แล้วบิด α₂ = 180° ให้ z₂ ชี้ลงตามแกนเลื่อน', '<b>Row 2</b>: θ₂ about z₁, a₂ = L₂, then α₂ = 180° flips z₂ down along the quill'), body: CH3.dhTable(S.symC.slice(0, 2), { cols: CH3.COLS_C }) },
   { why: t('<b>แถว 3–4</b>: d₃ เลื่อนตาม z₂ แล้ว θ₄ หมุนรอบ z₃ และ d₄ คือความยาวเครื่องมือ', '<b>Rows 3–4</b>: d₃ slides along z₂; then θ₄ turns about z₃, and d₄ is the tool length'), body: CH3.dhTable(S.symC, { cols: CH3.COLS_C }) }],

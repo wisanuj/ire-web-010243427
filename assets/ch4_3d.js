@@ -11,6 +11,7 @@ const { bar, cyl, sph, box, arrow, dashed, floor, lab, scene, rj, pedestal, grip
 const { frame, angArc, view, cam, camFit } = CH2.H;
 const SC = CH4.S3 = {}, EXV = CH3.EXV, P = T4 => RB.Tp(T4), col = (T4, j) => RB.col(RB.TR(T4), j), sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const GOAL = () => T('เป้าหมาย', 'goal');
+CH4.OV = S3.OV;   // the step overlays live in scene3d.js (shared by every chapter)
 const ELBOW = { p3r: 2, arm4: 3, scara: 2, irb: 3, rrp: 2 };   // the frame at each arm's elbow: where a solution's number is written
 
 /* ---- an arm of chapter 3 (or the homework RRP arm) at joint values q: its frames and how it is seen ---- */
@@ -69,10 +70,12 @@ SC.geo = (st = {}, o = {}) => { const L1 = 0.5, L2 = 0.4, g = st.g || CH4.EX.p3r
   if (!sol.ok) { const t = atan2(y, x); harm(s, [L1, L2], [t, hypot(x, y) > L1 + L2 ? 0 : PI], { al: 0.45, grip: false }); sph(s, [x, y, z0], 0.026, C.rd); lab(s, [x, y, z0], T('ไปไม่ถึง', 'out of reach'), { c: 'ink', s: 28, dx: 24 }); s.fail = true; return s; }
   const q = sol.sols[st.k || 0];
   const A = harm(s, [L1, L2], [q[0], q[1]], { grip: false }), E = A.pts[1], W = A.pts[2], O = [0, 0, z0 + 0.03];
-  arrow(s, [0, 0, z0], [0.62, 0, z0], C.x, 0.005); lab(s, [0.62, 0, z0], 'X', { sub: '0', m: 1, c: 'x', s: 30, dx: 14, dy: 10 }); dashed(s, [0, 0, z0], W, s.pal.ink, 0.004, 21); lab(s, v([0, 0, z0], sub(W, [0, 0, z0]), 0.55), '√(x² + y²)', { s: 26, dx: -20, dy: -16, a: 'r' });
-  const mb = angArc(s, O, [1, 0, 0], sub(W, [0, 0, z0]), 0.2, C.am, 0.004); if (mb) lab(s, mb, 'β', { m: 1, c: 'am', s: 36, dx: 14, dy: 12 });
-  const mp = angArc(s, v(O, [0, 0, 0.005]), sub(E, [0, 0, z0]), sub(W, [0, 0, z0]), 0.3, C.pk, 0.004); if (mp) lab(s, mp, 'ψ', { m: 1, c: 'pk', s: 36, dx: 10, dy: -4 });
-  const me = angArc(s, v(E, [0, 0, 0.03]), sub([0, 0, z0], E), sub(W, E), 0.12, C.p, 0.004); if (me) lab(s, me, '180° − θ', { sub: '2', m: 1, c: 'p', s: 30, dx: 20, dy: 4 });
+  arrow(s, [0, 0, z0], [0.62, 0, z0], C.x, 0.005); lab(s, [0.62, 0, z0], 'X', { sub: '0', m: 1, c: 'x', s: 30, dx: 14, dy: 10 }); const on = n => !st.step || st.step === n || (n === 1 && st.step === 4);   // all of it without a stepper; with one, only what the open step uses
+  if (on(1)) { dashed(s, [0, 0, z0], W, s.pal.ink, 0.004, 21); lab(s, v([0, 0, z0], sub(W, [0, 0, z0]), 0.55), '√(x² + y²)', { s: 26, dx: -20, dy: -16, a: 'r' }); }
+  if (on(3) || on(4)) { const mb = angArc(s, O, [1, 0, 0], sub(W, [0, 0, z0]), 0.2, C.am, 0.004); if (mb) lab(s, mb, 'β', { m: 1, c: 'am', s: 36, dx: 14, dy: 12 }); }
+  if (on(3) || on(4)) { const mp = angArc(s, v(O, [0, 0, 0.005]), sub(E, [0, 0, z0]), sub(W, [0, 0, z0]), 0.3, C.pk, 0.004); if (mp) lab(s, mp, 'ψ', { m: 1, c: 'pk', s: 36, dx: 10, dy: -4 }); }
+  if (st.step === 4) { const mt = angArc(s, v(O, [0, 0, 0.01]), [1, 0, 0], sub(E, [0, 0, z0]), 0.42, C.gr, 0.0045); if (mt) lab(s, mt, 'θ', { sub: '1', m: 1, c: 'gr', s: 36, dx: 16, dy: 18 }); }
+  if (on(2)) { const me = angArc(s, v(E, [0, 0, 0.03]), sub([0, 0, z0], E), sub(W, E), 0.12, C.p, 0.004); if (me) lab(s, me, '180° − θ', { sub: '2', m: 1, c: 'p', s: 30, dx: 20, dy: 4 }); }
   lab(s, v([0, 0, z0], sub(E, [0, 0, z0]), 0.5), 'L', { sub: '1', m: 1, c: 'o', s: 32, dx: 22, dy: 26 }); lab(s, v(E, sub(W, E), 0.5), 'L', { sub: '2', m: 1, c: 'b', s: 32, dx: 22, dy: 10 });
   sph(s, W, 0.024, C.pk); lab(s, W, '(x, y)', { c: 'pk', s: 30, dx: 22, dy: -10 }); return s; };
 
@@ -100,5 +103,6 @@ SC.wc = (st = {}, o = {}) => { const X0 = CH4.EX.solve, LT = st.LT === undefined
   frame(s, RB.TR(G), P(G), { name: 'G', L: 0.16, r: 0.0045, ls: 28, lab: [{ dx: 14 }, {}, { dx: 16, dy: 30 }] }); sph(s, W, 0.03, C.pk, 0.55);
   lab(s, W, T('จุดศูนย์กลางข้อมือ', 'wrist centre'), { c: 'pk', s: 26, dx: -36, dy: -36, a: 'r' }); lab(s, v(W, Z6, X.LT / 2), 'L', { sub: 'T', m: 1, s: 28, dx: 22, dy: 6 });
   lab(s, P(F[3]), T('ข้อต่อ 1–3 วางจุดศูนย์กลางข้อมือ', 'joints 1–3 place the wrist centre'), { c: 'b', s: 24, dx: 20, dy: 70, a: 'l' }); lab(s, W, T('ข้อต่อ 4–6 หมุนเครื่องมือ', 'joints 4–6 turn the tool'), { c: 'p', s: 24, dx: 40, dy: -64 });
+  s.F = F; s.wc = { W, Z6, LT, G };
   s.q = q; return s; };
 })(typeof window !== 'undefined' ? window : globalThis);

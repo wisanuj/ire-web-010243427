@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/ch4.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script><script src="assets/ch4_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/ch4.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script><script src="assets/ch4_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -107,7 +107,7 @@ const table = (S, k) => `<table class="dhtab"><tr><th></th><th>θ₁</th><th>θ�
 const picker = (el, n, onpick) => { el.innerHTML = ''; return ui.radio(el, Array.from({ length: n }, (_, i) => ({ id: 'k' + i, label: String(i + 1), on: !i })), id => onpick(+id.slice(1))); };
 
 /* ---------- A: one goal, eight solutions ---------- */
-const qG = IR.q.slice(), SA = { ex: 'irb', q: qG.slice(), fit: true, xyz: true, frames: [0] }, roA = document.getElementById('roA'); let solA = [], kA = 0;
+const qG = IR.q.slice(), SA = { ex: 'irb', q: qG.slice(), fit: true, xyz: true, frames: [0], goalAt: { dy: -100 } }, roA = document.getElementById('roA'); let solA = [], kA = 0;
 const showA = () => { if (!solA.length) { roA.innerHTML = `<div class="term">${t('ไม่มีคำตอบ', 'no solution')}</div>`; return; } kA = Math.min(kA, solA.length - 1); SA.q = solA[kA].q;
   roA.innerHTML = `<div class="term"><b>${kA + 1}. ${name(solA[kA])}</b> · ${solA.length} ${t('คำตอบ', 'solutions')}</div>` + table(solA, kA); };
 const solveA = () => { solA = CH4.irbIK(CH4.irbFK(qG)); picker(document.getElementById('selA'), solA.length, k => { kA = k; showA(); }); kA = 0; showA(); };
@@ -117,41 +117,71 @@ CH2.sim('cvA', SA, 'sol', { aspect: 0.8, maxH: 520 });
 /* ---------- 1: the wrist centre ---------- */
 const S1 = { LT: X.solve.LT }, ro1 = document.getElementById('ro1');
 const read1 = () => { ro1.innerHTML = `<div class="term">L<sub>T</sub> = ${u(S1.LT, 3)} m · ${t('จุดศูนย์กลางข้อมือ', 'wrist centre')} p<sub>c</sub> = (0.450, 0.150, ${u(0.1 + S1.LT, 3)}) m</div>`; };
-ui.slider(document.getElementById('ctl1'), { id: 'lt', label: t('ความยาวเครื่องมือ L<sub>T</sub>', 'tool length L<sub>T</sub>'), min: 0, max: 0.25, step: 0.01, value: S1.LT, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S1.LT = v; read1(); } }); read1();
+const sl1 = ui.slider(document.getElementById('ctl1'), { id: 'lt', label: t('ความยาวเครื่องมือ L<sub>T</sub>', 'tool length L<sub>T</sub>'), min: 0, max: 0.25, step: 0.01, value: S1.LT, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S1.LT = v; read1(); } }); read1();
+/* the open step: 1 the goal's Z axis, 2 the move back by L_T from p_G to p_c, 3 axes 4, 5, 6 all passing through p_c */
+const Pp = T => RB.Tp(T), Dd = (T, j) => RB.col(RB.TR(T), j), f3 = p => `(${p.map(x => (x < -5e-4 ? '−' : '') + Math.abs(x).toFixed(2)).join(', ')})`;
+S1.ov = (s, st) => { const k = st.step, F = s.F, w = s.wc, OV = CH4.OV; if (!k || !F || !w) return; const PG = Pp(w.G), ZG = Dd(w.G, 2), O = Pp(F[0]), W = w.W, in0 = p => OV.sub(p, O);
+  if (k === 1) { OV.vec(s, PG, OV.v(PG, ZG, 0.24), 'z', '(r₁₃, r₂₃, r₃₃) = (0, 0, −1)', { m: 0, s: 22, at: 1, a: 'l', dx: 16, dy: 16 }); }
+  if (k === 2) { const side = OV.v([0, 0, 0], Dd(w.G, 1), 0.07); OV.vec(s, OV.v(PG, side), OV.v(W, side), 'am', null); OV.name(s, OV.v(OV.v(PG, side), ZG, -w.LT / 2), 'am', '−L', { sub: 'T', post: ' Ẑ', dx: 18 });
+    OV.pt(s, PG, 'ink', 'p', { sub: 'G', post: ' = ' + f3(in0(PG)), s: 24, a: 'l', dx: 24, dy: 8 }); OV.name(s, W, 'pk', 'p', { sub: 'c', post: ' = ' + f3(in0(W)), s: 24, a: 'r', dx: -26, dy: 34 }); }
+  if (k === 3) { [[4, 'b'], [5, 'p'], [6, 'o']].forEach(([i, c], n) => { const Z = Dd(F[i], 2); OV.dist(s, OV.v(W, Z, -0.2), OV.v(W, Z, 0.2), c, t('แกน ', 'axis ') + i, { m: 0, s: 22, at: n === 2 ? 0.02 : 0.98, dx: 14 }); }); OV.pt(s, W, 'pk', null, { r: 0.022 }); } };
 CH2.sim('cv1', S1, 'wc', { aspect: 0.8, maxH: 480 });
 LS.ask(document.getElementById('ask1'), { fields: [{ label: t('L<sub>T</sub> = 0.12 m: z ของจุดศูนย์กลางข้อมือ (m) =', 'L<sub>T</sub> = 0.12 m: z of the wrist centre (m) ='), ok: x => Math.abs(x - 0.22) < 0.002, w: 5 }],
   check: v => Math.abs(v[0] + 0.02) < 0.003 ? t('ถอยกลับตามแกน Z ของเครื่องมือ ซึ่งชี้ลง: ถอยกลับคือขึ้น', 'move back along the tool\'s Z, which points down: back is up') : '' });
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) { S1.LT = X.solve.LT; sl1.set(S1.LT); read1(); } }, steps: [
   { why: t('<b>แกน Z ของเป้าหมาย</b> คือคอลัมน์ 3 ของ ⁰_GR: ชี้ลง', '<b>The goal\'s Z axis</b> is column 3 of ⁰_GR: it points down'), tex: '{}^0\\hat Z_G = (r_{13}, r_{23}, r_{33}) = (0, 0, -1)' },
-  { why: t('<b>ถอยกลับ</b> ไปตามแกนนั้นเป็นระยะ L_T', '<b>Move back</b> along it by L_T'), tex: 'p_c = p_G - L_T\\,{}^0\\hat Z_G = (0.45,\\ 0.15,\\ 0.10) - 0.12\\,(0, 0, -1) = (0.45,\\ 0.15,\\ 0.22)\\ \\text{m}' },
+  { why: t('<b>ถอยกลับ</b> ไปตามแกนนั้นเป็นระยะ L_T', '<b>Move back</b> along it by L_T'), tex: '\\begin{aligned} p_c &= p_G - L_T\\,{}^0\\hat Z_G \\\\ &= (0.45,\\ 0.15,\\ 0.10) - 0.12\\,(0, 0, -1) \\\\ &= (0.45,\\ 0.15,\\ 0.22)\\ \\text{m} \\end{aligned}' },
   { why: t('<b>ทำไมจุดนี้</b>: แกน 4, 5, 6 ผ่านจุดศูนย์กลางข้อมือ หมุน θ₄–θ₆ แล้วจุดนี้ไม่ขยับ ตำแหน่งจึงขึ้นกับ θ₁–θ₃ เท่านั้น', '<b>Why this point</b>: axes 4, 5, 6 pass through it, so turning θ₄–θ₆ does not move it: its position depends on θ₁–θ₃ only') }],
   answer: t('p_c = (0.45, 0.15, 0.22) m เลื่อนแถบดู: เครื่องมือยาวขึ้น จุดศูนย์กลางข้อมือก็ถอยขึ้นตาม แขนต้องหาท่าใหม่', 'p_c = (0.45, 0.15, 0.22) m; move the slider: a longer tool moves the wrist centre further up and the arm needs a new pose') });
 
 /* ---------- 2: solving the IRB 140 ---------- */
-const S = X.irb.sols, Tg = X.irb.T, S2 = { ex: 'irb', q: S[0].q, fit: true, xyz: true, frames: [0] }, ro2 = document.getElementById('ro2');
+const S = X.irb.sols, Tg = X.irb.T, S2 = { ex: 'irb', q: S[0].q, fit: true, xyz: true, frames: [0], goalAt: { dy: -100 } }, ro2 = document.getElementById('ro2');
 const read2 = k => { ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(Tg)}</div><div class="term"><b>${k + 1}. ${name(S[k])}</b>: θ = (${S[k].q.map(x => dgs(x)).join(', ')}) · ${S[k].ok ? `<b class="ax-y">${t('ในช่วง ✓', 'in range ✓')}</b>` : t('เกินช่วง', 'out of range')}</div>`; };
-picker(document.getElementById('ctl2'), S.length, k => { S2.q = S[k].q; read2(k); }); read2(0);
+let k2 = 0; const elb = x => x.elbow === 'up' ? t('ข้อศอกขึ้น', 'elbow up') : t('ข้อศอกลง', 'elbow down');
+/* step 3 shows the other elbow of the same shoulder and wrist as a ghost, so both θ₃ (and their θ₂) can be seen */
+const ghost2 = () => { const c = S[k2], o = S.find(x => x.shoulder === c.shoulder && x.wrist === c.wrist && x.elbow !== c.elbow), on = S2.step === 3 && o; S2.ghost = on ? [o.q] : []; S2.tags = on ? [elb(c), elb(o)] : null; };
+const pk2 = picker(document.getElementById('ctl2'), S.length, k => { k2 = k; S2.q = S[k].q; read2(k); ghost2(); }); read2(0);
+/* the open step on the solid arm: 1 θ₁ from above, 2 the triangle shoulder–elbow–wrist centre (a₁, u, p_z, a₂, d₄), 3 the θ₂ and θ₃ arcs, 4 the wrist axes and θ₄, θ₅, θ₆ */
+S2.ov = (s, st) => { const k = st.step, F = s.F, OV = CH4.OV, C = window.S3.C; if (!k || !F) return; const O = Pp(F[0]), Sh = Pp(F[2]), E = Pp(F[3]), W = Pp(F[4]), up = (p, h) => [p[0], p[1], p[2] + h], Wp = [W[0], W[1], O[2]], Sp = [W[0], W[1], Sh[2]], X0 = Dd(F[0], 0), X1 = Dd(F[1], 0), X2 = Dd(F[2], 0), Y2 = Dd(F[2], 1);
+  if (k === 1) { const d = OV.sub(Wp, O); OV.ang(s, up(O, 0.04), X0, d, 0.22, 'pk', 'θ', { sub: '1', dx: 16, dy: 18 }); OV.ref(s, up(O, 0.04), OV.v([0, 0, 0], d, -1 / Math.hypot(...d)), 0.3);
+    OV.name(s, OV.v(up(O, 0.04), d, -0.32 / Math.hypot(...d)), 'mut', t('หรือ θ₁ − 180° (ข้ามหลัง)', 'or θ₁ − 180° (reach over)'), { m: 0, s: 20, a: 'r', dx: -6 }); }
+  if (k === 2) { OV.dist(s, up(O, 0.03), up(Sh, 0.03), 'o', 'a', { sub: '1', dy: -20 }); OV.dist(s, Sh, Sp, 'ink', 'u = r − a₁', { m: 0, s: 22, at: 0.6, dy: 30 }); OV.dist(s, Sp, W, 'am', 'p', { sub: 'z', dx: 18 }); OV.dist(s, Sh, W, 'gr', null);
+    OV.name(s, OV.v(Sh, OV.sub(E, Sh), 0.5), 'b', 'a', { sub: '2', a: 'r', dx: -16 }); OV.name(s, OV.v(E, OV.sub(W, E), 0.5), 'o', 'd', { sub: '4', dy: -18 }); }
+  if (k === 3) { OV.ref(s, Sh, X1, 0.3); OV.ang(s, Sh, X1, X2, 0.13, 'pk', 'θ', { sub: '2', dx: 18, dy: 8 }); OV.ref(s, E, Y2, 0.24); OV.ang(s, E, Y2, Dd(F[4], 2), 0.12, 'am', 'θ', { sub: '3', dx: 16, dy: -8 });
+    OV.name(s, OV.v(E, Y2, 0.26), 'mut', 'θ₃ = 0', { m: 0, s: 18, a: 'l', dx: 6 }); }
+  if (k === 4) { const Z4 = Dd(F[4], 2), Z5 = Dd(F[5], 2), Z6 = Dd(F[6], 2); OV.dist(s, OV.v(W, Z4, -0.12), OV.v(W, Z4, 0.2), 'b', t('แกน 4', 'axis 4'), { m: 0, s: 20, at: 1, dx: 12, a: 'l' });
+    OV.dist(s, OV.v(W, Z5, -0.13), OV.v(W, Z5, 0.13), 'p', t('แกน 5', 'axis 5'), { m: 0, s: 20, at: 0, a: 'l', dx: 12 }); OV.dist(s, W, OV.v(W, Z6, 0.2), 'o', t('แกน 6', 'axis 6'), { m: 0, s: 20, at: 1, a: 'l', dx: 12 });
+    OV.ang(s, W, Z4, Z6, 0.1, 'pk', 'θ', { sub: '5', dx: 16, dy: -6 }); CH2.H.turn(s, OV.v(W, Z4, -0.08), Z4, 0.045, C.b); OV.name(s, OV.v(W, Z4, -0.08), 'b', 'θ', { sub: '4', a: 'r', dx: -26, dy: 8 });
+    CH2.H.turn(s, OV.v(W, Z6, 0.15), Z6, 0.045, C.o); OV.name(s, OV.v(W, Z6, 0.15), 'o', 'θ', { sub: '6', a: 'r', dx: -26, dy: 8 }); } };
 CH2.sim('cv2', S2, 'sol', { aspect: 0.8, maxH: 500 });
 const [px, py, pz] = [Tg[0][3], Tg[1][3], Tg[2][3]], th1 = Math.atan2(py, px), rr = Math.hypot(px, py), uu = rr - IR.a1, s3 = (IR.a2 ** 2 + IR.d4 ** 2 - uu * uu - pz * pz) / (2 * IR.a2 * IR.d4), fd = S.find(s => s.shoulder === 'front' && s.elbow === 'down' && s.wrist === 'no flip');
 LS.ask(document.getElementById('ask2'), { fields: [{ label: t('θ₁ ของคำตอบข้ามหลัง (°) =', 'θ₁ of the reach-over solutions (°) ='), ok: x => Math.abs(RB.wrap(rad(x) - (th1 + Math.PI))) < rad(0.2), w: 5 }, { label: t('s₃ (ด้านหน้า) =', 's₃ (front) ='), ok: x => Math.abs(x - s3) < 0.003, w: 5 }, { label: t('ใช้ได้กี่คำตอบ =', 'usable solutions ='), ok: x => x === 2, w: 3 }] });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; S2.el = k === 1 ? 60 : k === 4 ? 24 : undefined; if (k) { k2 = 0; pk2.set('k0'); S2.q = S[0].q; read2(0); } ghost2();
+    /* step 4 is about the wrist alone: look closely at the wrist centre (without the x, y, z readout, which would cover it) */
+    const z4 = k === 4; S2.fit = !z4; S2.xyz = !z4; S2.tgt = z4 ? Pp(CH3.exFrames('irb', S2.q).F[6]) : undefined; S2.dist = z4 ? 1.5 : undefined; }, steps: [
   { why: t('<b>θ₁</b> จากตำแหน่งของจุดศูนย์กลางข้อมือ (คอลัมน์ 4)', '<b>θ₁</b> from the wrist-centre position (column 4)'), tex: `\\theta_1 = \\mathrm{atan2}(${u(py, 4)},\\ ${u(px, 4)}) = ${u(deg(th1), 2)}^\\circ \\ \\text{or}\\ ${u(deg(th1) - 180, 2)}^\\circ` },
-  { why: t('<b>s₃</b> (ด้านหน้า: r = +√(p_x² + p_y²))', '<b>s₃</b> (front: r = +√(p_x² + p_y²))'), tex: `u = r - a_1 = ${u(rr, 4)} - 0.07 = ${u(uu, 4)},\\quad s_3 = \\frac{a_2^2 + d_4^2 - u^2 - p_z^2}{2a_2d_4} = ${u(s3, 4)}` },
-  { why: t('<b>θ₃</b> สองแบบ (ข้อศอก) และ <b>θ₂</b> ของแต่ละแบบ', '<b>θ₃</b> two ways (the elbow) and <b>θ₂</b> for each'), tex: `\\theta_3 = \\mathrm{atan2}(${u(s3, 4)}, \\pm${u(Math.sqrt(1 - s3 * s3), 4)}) = ${u(deg(S[0].q[2]), 2)}^\\circ \\text{ or } ${u(deg(fd.q[2]), 2)}^\\circ,\\quad \\theta_2 = ${u(deg(S[0].q[1]), 2)}^\\circ \\text{ or } ${u(deg(fd.q[1]), 2)}^\\circ` },
-  { why: t('<b>ข้อมือ</b>: ³₆R = (⁰₃R)ᵀ ⁰₆R แล้วอ่าน θ₅, θ₄, θ₆ (ข้อมือกลับเป็นอีกคำตอบ)', '<b>Wrist</b>: ³₆R = (⁰₃R)ᵀ ⁰₆R, then read θ₅, θ₄, θ₆ (the flipped wrist is another solution)'), tex: `\\theta_5 = \\mathrm{atan2}(\\pm\\sqrt{r_{13}^2 + r_{33}^2},\\ r_{23}) = \\pm 50^\\circ,\\quad (\\theta_4, \\theta_6) = (40^\\circ, -30^\\circ) \\text{ or } (-140^\\circ, 150^\\circ)` },
+  { why: t('<b>s₃</b> (ด้านหน้า: r = +√(p_x² + p_y²))', '<b>s₃</b> (front: r = +√(p_x² + p_y²))'), tex: `\\begin{aligned} u &= r - a_1 = ${u(rr, 4)} - 0.07 = ${u(uu, 4)} \\\\ s_3 &= \\frac{a_2^2 + d_4^2 - u^2 - p_z^2}{2a_2d_4} = ${u(s3, 4)} \\end{aligned}` },
+  { why: t('<b>θ₃</b> สองแบบ (ข้อศอก) และ <b>θ₂</b> ของแต่ละแบบ', '<b>θ₃</b> two ways (the elbow) and <b>θ₂</b> for each'), tex: `\\begin{aligned} \\theta_3 &= \\mathrm{atan2}(${u(s3, 4)}, \\pm${u(Math.sqrt(1 - s3 * s3), 4)}) = ${u(deg(S[0].q[2]), 2)}^\\circ \\text{ or } ${u(deg(fd.q[2]), 2)}^\\circ \\\\ \\theta_2 &= ${u(deg(S[0].q[1]), 2)}^\\circ \\text{ or } ${u(deg(fd.q[1]), 2)}^\\circ \\end{aligned}` },
+  { why: t('<b>ข้อมือ</b>: ³₆R = (⁰₃R)ᵀ ⁰₆R แล้วอ่าน θ₅, θ₄, θ₆ (ข้อมือกลับเป็นอีกคำตอบ)', '<b>Wrist</b>: ³₆R = (⁰₃R)ᵀ ⁰₆R, then read θ₅, θ₄, θ₆ (the flipped wrist is another solution)'), tex: `\\begin{aligned} \\theta_5 &= \\mathrm{atan2}(\\pm\\sqrt{r_{13}^2 + r_{33}^2},\\ r_{23}) = \\pm 50^\\circ \\\\ (\\theta_4, \\theta_6) &= (40^\\circ, -30^\\circ) \\text{ or } (-140^\\circ, 150^\\circ) \\end{aligned}` },
   { why: t('<b>ทั้งแปด</b> และช่วงข้อต่อ (θ₂ −180°…0°, θ₃ ±90°, θ₅ ±120°)', '<b>All eight</b> and the joint ranges (θ₂ −180°…0°, θ₃ ±90°, θ₅ ±120°)'), body: () => table(S, -1) }],
   answer: t('8 คำตอบ ใช้ได้ 2: ท่าเดิม (30°, −60°, 20°, 40°, 50°, −30°) และข้อมือกลับ (30°, −60°, 20°, −140°, −50°, 150°)', '8 solutions, 2 usable: the original pose (30°, −60°, 20°, 40°, 50°, −30°) and its flipped wrist (30°, −60°, 20°, −140°, −50°, 150°)') });
 
 /* ---------- 3: SOLVE ---------- */
-const V = X.solve.sols, best = X.solve.best.s, S3 = { ex: 'irb', q: best.q, fit: true, xyz: true, frames: [0] }, ro3 = document.getElementById('ro3'), kb = V.findIndex(v => v.q.every((x, i) => Math.abs(x - best.q[i]) < 1e-9));
+const V = X.solve.sols, best = X.solve.best.s, S3 = { ex: 'irb', q: best.q, fit: true, xyz: true, frames: [0], goalAt: { dy: -100 } }, ro3 = document.getElementById('ro3'), kb = V.findIndex(v => v.q.every((x, i) => Math.abs(x - best.q[i]) < 1e-9));
 const read3 = k => { ro3.innerHTML = `<div class="term"><b>${k + 1}. ${name(V[k])}</b>${k === kb ? t(' · ใกล้ท่าศูนย์ที่สุดในช่วง', ' · closest to the zero pose in range') : ''}</div>` + table(V, k); };
 const pk3 = picker(document.getElementById('ctl3'), V.length, k => { S3.q = V[k].q; read3(k); }); pk3.set('k' + kb); read3(kb);
+/* the open step: 1 the goal {G} at the tool tip and the move back by L_T to {6}, 2 the wrist centre every solution must reach, 3 the zero pose (a ghost, set in onStep) beside the chosen one */
+S3.ov = (s, st) => { const k = st.step, F = s.F, OV = CH4.OV; if (!k || !F) return; const W = Pp(F[6]);
+  if (k === 1) { const G = RB.Tm(F[0], X.solve.G), PG = Pp(G); CH2.H.frame(s, RB.TR(G), PG, { name: 'G', L: 0.13, r: 0.004, ls: 24, lab: [{ dx: 10 }, { dy: 30 }, { dx: 16, dy: 26 }] });
+    const side = OV.v([0, 0, 0], Dd(G, 1), -0.07); OV.vec(s, OV.v(PG, side), OV.v(W, side), 'am', null); OV.name(s, OV.v(OV.v(PG, side), OV.sub(W, PG), 0.5), 'am', 'L', { sub: 'T', post: ' = 0.12 m', a: 'r', dx: -14 }); OV.name(s, W, 'pk', '{6}', { m: 0, s: 24, a: 'r', dx: -20, dy: -10 }); }
+  if (k === 2) OV.pt(s, W, 'pk', t('จุดศูนย์กลางข้อมือ: ทั้ง 8 คำตอบไปที่จุดนี้', 'wrist centre: all 8 solutions reach it'), { m: 0, s: 20, r: 0.024, a: 'r', dx: -24, dy: -14 });
+  if (k === 3) { const Z0 = CH3.exFrames('irb', IR.zero).F; OV.name(s, Pp(F[3]), 'ink', t('ที่เลือก', 'chosen'), { m: 0, s: 22, a: 'r', dx: -20, dy: 24 }); OV.name(s, Pp(Z0[6]), 'mut', t('ท่าศูนย์ (ท่าปัจจุบัน)', 'zero pose (the present one)'), { m: 0, s: 22, a: 'l', dx: 16, dy: -22 }); } };
 CH2.sim('cv3', S3, 'sol', { aspect: 0.8, maxH: 500 });
 LS.ask(document.getElementById('ask3'), { fields: [{ label: t('คำตอบที่เลือก: θ₁ (°) =', 'the chosen solution: θ₁ (°) ='), ok: x => Math.abs(x - deg(best.q[0])) < 0.1, w: 5 }, { label: 'θ₂ (°) =', ok: x => Math.abs(x - deg(best.q[1])) < 0.1, w: 5 }, { label: 'θ₃ (°) =', ok: x => Math.abs(x - deg(best.q[2])) < 0.1, w: 5 }] });
-LS.stepper(document.getElementById('st3'), { steps: [
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3.step = k; S3.ghost = k === 3 ? [IR.zero] : []; if (k) { pk3.set('k' + kb); S3.q = best.q; read3(kb); } }, steps: [
   { why: t('<b>ถอดเครื่องมือ</b>: ⁰₆T = ⁰_GT (⁶_TT)⁻¹ = ⁰_GT D_Z(−0.12)', '<b>Take the tool off</b>: ⁰₆T = ⁰_GT (⁶_TT)⁻¹ = ⁰_GT D_Z(−0.12)'), tex: `{}^0_6T = ${CH2.texM(X.solve.W, 3)}` },
   { why: t('<b>แก้แบบหน้าที่แล้ว</b>: ได้ 8 คำตอบ', '<b>Solve as before</b>: 8 solutions'), body: () => table(V, -1) },
-  { why: t('<b>เลือก</b>: อยู่ในช่วงข้อต่อ และใกล้ท่าปัจจุบัน (ท่าศูนย์ (0, −90°, 0, 0, 90°, 0)) ที่สุด', '<b>Choose</b>: inside the ranges and closest to the present pose (the zero pose (0, −90°, 0, 0, 90°, 0))'), tex: `\\theta = (${best.q.map(x => u(deg(x), 2)).join('^\\circ,\\ ')}^\\circ)` }],
+  { why: t('<b>เลือก</b>: อยู่ในช่วงข้อต่อ และใกล้ท่าปัจจุบัน (ท่าศูนย์ (0, −90°, 0, 0, 90°, 0)) ที่สุด', '<b>Choose</b>: inside the ranges and closest to the present pose (the zero pose (0, −90°, 0, 0, 90°, 0))'), tex: `\\begin{aligned} (\\theta_1, \\theta_2, \\theta_3) &= (${best.q.slice(0, 3).map(x => u(deg(x), 2)).join('^\\circ,\\ ')}^\\circ) \\\\ (\\theta_4, \\theta_5, \\theta_6) &= (${best.q.slice(3).map(x => u(deg(x), 2)).join('^\\circ,\\ ')}^\\circ) \\end{aligned}` }],
   answer: t(`θ = (${best.q.map(x => u(deg(x), 2)).join('°, ')}°) ตรวจ: ⁰₆T(θ) D_Z(0.12) = ⁰_GT (ภาพปกของบทคือท่านี้บนแขนจริง)`, `θ = (${best.q.map(x => u(deg(x), 2)).join('°, ')}°); check: ⁰₆T(θ) D_Z(0.12) = ⁰_GT (the chapter's cover shows this pose on the real arm)`) });
 });
 </script>

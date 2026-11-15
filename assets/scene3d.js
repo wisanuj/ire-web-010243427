@@ -70,6 +70,29 @@ S3.cells = (s, has, R, z, c, al, n = 150) => { const h = 2 * R / n, q = []; for 
 const CACHE = new Map();
 S3.cached = (s, key, build) => { const k = key + (s.dark ? '|d' : '|l'); let it = CACHE.get(k); if (!it) { const t = { ...s, items: [], labels: [] }; build(t); it = t.items; CACHE.set(k, it); if (CACHE.size > 60) CACHE.delete(CACHE.keys().next().value); } it.forEach(o => s.items.push(o)); };
 
+/* the angle at O from direction u to direction w, drawn as an arc of radius r with an arrow head; returns its middle (for a label) */
+S3.angArc = (s, O, u, w, r, c, tr = 0.0045, head = true) => { u = un(u); w = un(w); const th = Math.acos(Math.max(-1, Math.min(1, u[0] * w[0] + u[1] * w[1] + u[2] * w[2]))); if (th < 0.03) return null;
+  const n = un(cr(u, w)), b = cr(n, u), N = max(8, Math.ceil(th * 22)), at = a => [O[0] + r * (u[0] * cos(a) + b[0] * sin(a)), O[1] + r * (u[1] * cos(a) + b[1] * sin(a)), O[2] + r * (u[2] * cos(a) + b[2] * sin(a))];
+  tube(s, Array.from({ length: N + 1 }, (_, k) => at(th * k / N)), c, tr, head); return at(th / 2); };
+/* ---- what one step of a worked solution talks about, drawn into the live view. A page gives its state st.ov(s, st): CH1.view and CH2.view call it
+   after the scene is built (so its labels are placed with the others) and the page's stepper sets st.step (LS.stepper onStep). key: colour key ---- */
+const ovl = (o, key) => ({ m: o.m === undefined ? 1 : o.m, c: o.key || key, s: o.s || 30, sub: o.sub, post: o.post, pre: o.pre, dx: o.dx || 0, dy: o.dy || 0, a: o.a || 'c', b: o.b });
+const ovc = (s, key) => ({ am: C.am, pk: C.pk, p: C.p, gr: C.gr, b: C.b, o: C.o, x: C.x, y: C.y, z: s.pal.z, rd: C.rd })[key] || s.pal.ink;
+const vsub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+S3.OV = {
+  /* a dashed distance a → b, named at the point `at` along it */
+  dist: (s, a, b, key, t, o = {}) => { S3.dashed(s, a, b, ovc(s, key), o.r || 0.0035, o.n || 17); if (t) S3.lab(s, v(a, vsub(b, a), o.at === undefined ? 0.5 : o.at), t, ovl(o, key)); },
+  /* an arrow a → b, named */
+  vec: (s, a, b, key, t, o = {}) => { S3.arrow(s, a, b, ovc(s, key), o.r || 0.006); if (t) S3.lab(s, v(a, vsub(b, a), o.at === undefined ? 0.5 : o.at), t, ovl(o, key)); },
+  /* the angle at O from u to w, radius r, named */
+  ang: (s, O, u, w, r, key, t, o = {}) => { const m = S3.angArc(s, O, u, w, r, ovc(s, key), o.tr || 0.0045); if (m && t) S3.lab(s, m, t, ovl(o, key)); return m; },
+  /* a dashed reference direction from O */
+  ref: (s, O, d, len, key) => S3.dashed(s, O, v(O, d, len), key ? ovc(s, key) : s.pal.dash, 0.003, 9),
+  /* a point, marked and named */
+  pt: (s, p, key, t, o = {}) => { sph(s, p, o.r || 0.018, ovc(s, key)); if (t) S3.lab(s, p, t, ovl(o, key)); },
+  /* a name at a point, nothing drawn */
+  name: (s, p, key, t, o = {}) => S3.lab(s, p, t, ovl(o, key)),
+  sub: vsub, v };
 /* a revolute arm lying in a horizontal plane at height z0 (the two- and three-link arm of the chapter) */
 S3.harm = (s, L, q, o = {}) => { const z0 = o.z0 || 0.11, al = o.al, cols = o.cols || s.L.slice(1), pts = [[0, 0, z0]]; let th = 0; L.forEach((l, i) => { th += q[i]; const p = pts[i]; pts.push([p[0] + l * cos(th), p[1] + l * sin(th), z0]); });
   if (!al) pedestal(s, [0, 0], z0 - 0.02);

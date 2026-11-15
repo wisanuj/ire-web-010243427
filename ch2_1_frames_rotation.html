@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -144,11 +144,21 @@ readA(); CH2.sim('cvA', SA, 'orient', { aspect: 0.82, maxH: 540 });
 
 /* ---------- 1: read R from a picture ---------- */
 const S1 = { R: E.ex1.R }; CH2.sim('cv1', S1, 'orient', { aspect: 0.82, maxH: 460 });
+/* the open step of each solution, drawn on its picture (S3.OV): the axes and numbers that step reads. Frame {B} of scene 'orient' has arrows 0.5 long */
+const OV = window.S3.OV, O0 = [0, 0, 0], LB = 0.5, tip = (R, j) => RB.sc(RB.col(R, j), LB), AM = window.S3.C.am;
+const rightAngles = (s, R, r = 0.22) => [[0, 1], [1, 2], [2, 0]].forEach(([a, b]) => OV.ang(s, O0, RB.col(R, a), RB.col(R, b), r, 'am', '90°', { m: 0, s: 22 }));
+S1.ov = (s, st) => { const k = st.step, R = st.R; if (!k) return;
+  if (k === 1) OV.pt(s, tip(R, 0), 'x', '(1, 0, 0)', { m: 0, s: 26, dy: 36 });
+  if (k === 2) { OV.ref(s, O0, [0, -1, 0], 0.74); OV.name(s, [0, -0.78, 0], 'ink', '−Y', { sub: 'A', s: 28, dy: -12 });
+    OV.pt(s, tip(R, 1), 'y', '(0, 0, 1)', { m: 0, s: 26, dx: 30, a: 'l' }); OV.pt(s, tip(R, 2), 'z', '(0, −1, 0)', { m: 0, s: 26, dy: 36 }); }
+  if (k === 3) { OV.ang(s, O0, [0, 1, 0], RB.col(R, 1), 0.26, 'am', '90°', { m: 0, s: 24, dx: 14, dy: -8 }); OV.ang(s, O0, [0, 0, 1], RB.col(R, 2), 0.18, 'am', '90°', { m: 0, s: 24, dx: -14, dy: -8 });
+    CH2.H.turn(s, [0.58, 0, 0], [1, 0, 0], 0.07, AM); OV.name(s, [0.58, 0, 0], 'am', 'R', { sub: 'X', post: '(90°)', s: 30, dx: 40, dy: 46, a: 'l' }); }
+  if (k === 4) rightAngles(s, R); };
 document.getElementById('note1').innerHTML = t('เฟรมเทาคือ {A} เฟรมสีคือ {B} มีจุดกำเนิดเดียวกัน', 'Grey: {A}; coloured: {B}; same origin');
 CH2.matAsk(document.getElementById('ask1'), { label: '\\({}^{A}_{B}R =\\)', ans: E.ex1.R, check: M2 => { const T = RB.tr(E.ex1.R); return M2.every((r, i) => r.every((x, j) => Math.abs(x - T[i][j]) < 0.006)) ? t('คุณเขียนแกนของ {B} เป็น<b>แถว</b> ต้องเขียนเป็น<b>คอลัมน์</b>', 'You wrote the axes of {B} as <b>rows</b>; they go in as <b>columns</b>') : ''; } });
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; }, steps: [
   { why: t('<b>อ่านแกน X<sub>B</sub></b>: ทับแกน X<sub>A</sub> พอดี', '<b>Read X<sub>B</sub></b>: it lies on X<sub>A</sub>'), tex: '{}^{A}\\hat X_B = (1,\\ 0,\\ 0)^T' },
-  { why: t('<b>อ่านแกน Y<sub>B</sub> และ Z<sub>B</sub></b>: Y<sub>B</sub> ชี้ตาม Z<sub>A</sub>, Z<sub>B</sub> ชี้ตาม −Y<sub>A</sub>', '<b>Read Y<sub>B</sub> and Z<sub>B</sub></b>: Y<sub>B</sub> points along Z<sub>A</sub>, Z<sub>B</sub> along −Y<sub>A</sub>'), tex: '{}^{A}\\hat Y_B = (0,\\ 0,\\ 1)^T, \\quad {}^{A}\\hat Z_B = (0,\\ -1,\\ 0)^T' },
+  { why: t('<b>อ่านแกน Y<sub>B</sub> และ Z<sub>B</sub></b>: Y<sub>B</sub> ชี้ตาม Z<sub>A</sub>, Z<sub>B</sub> ชี้ตาม −Y<sub>A</sub>', '<b>Read Y<sub>B</sub> and Z<sub>B</sub></b>: Y<sub>B</sub> points along Z<sub>A</sub>, Z<sub>B</sub> along −Y<sub>A</sub>'), tex: '\\begin{aligned} {}^{A}\\hat Y_B &= (0,\\ 0,\\ 1)^T \\\\ {}^{A}\\hat Z_B &= (0,\\ -1,\\ 0)^T \\end{aligned}' },
   { why: t('<b>วางเป็นคอลัมน์</b> (สีตามแกน)', '<b>Stack them as columns</b> (coloured by axis)'), tex: `{}^{A}_{B}R = ${TM(E.ex1.R)} = R_X(90^\\circ)` },
   { why: t('<b>ตรวจ</b>: คอลัมน์ยาว 1 ตั้งฉากกัน และ det = 1·(0·0 − (−1)·1) = +1', '<b>Check</b>: unit, orthogonal columns and det = 1·(0·0 − (−1)·1) = +1') }],
   answer: t('\\({}^{A}_{B}R = R_X(90^\\circ)\\): {B} คือ {A} ที่หมุนรอบแกน X ไป 90°', '\\({}^{A}_{B}R = R_X(90^\\circ)\\): {B} is {A} turned 90° about X') });
@@ -156,13 +166,19 @@ LS.stepper(document.getElementById('st1'), { steps: [
 /* ---------- 2: a turn about Z ---------- */
 const S2 = { R: RB.Rz(rad(30)), arcZ: true, el: 38 }, ro2 = document.getElementById('ro2'); let th2 = 30;
 const read2 = () => { S2.R = RB.Rz(rad(th2)); ro2.innerHTML = `<div class="live"><span class="eq">R<sub>Z</sub>(${th2}°) =</span>${M(S2.R)}</div>`; };
-ui.slider(document.getElementById('ctl2'), { id: 'th2', label: 'θ', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { th2 = v; read2(); } }); read2();
+const sl2 = ui.slider(document.getElementById('ctl2'), { id: 'th2', label: 'θ', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { th2 = v; read2(); } }); read2();
+/* steps 1, 2: the right triangle of X_B, then of Y_B (cos θ along the axis, sin θ across); 3: each axis with its column; 4: the same with θ = 30° */
+S2.ov = (s, st) => { const k = st.step, R = st.R; if (!k) return; const X = tip(R, 0), Y = tip(R, 1), Z = tip(R, 2), c = R[0][0], sn = R[1][0], n = k === 4, f = x => u(x, 3), o = { m: 0, s: 24 };
+  if (k === 1 || n) { const F = [X[0], 0, 0]; OV.dist(s, O0, F, 'x', n ? f(c) : 'cos θ', { ...o, r: 0.0065, dy: 34 }); OV.dist(s, F, X, 'x', n ? f(sn) : 'sin θ', { ...o, dx: 14, a: 'l' }); }
+  if (k === 2 || n) { const F = [0, Y[1], 0]; OV.dist(s, O0, F, 'y', n ? f(c) : 'cos θ', { ...o, r: 0.0065, dx: 12, dy: 30, a: 'l' }); OV.dist(s, F, Y, 'y', n ? f(-sn) : '−sin θ', { ...o, dy: -16 }); }
+  if (k === 2) OV.name(s, Z, 'z', '(0, 0, 1)', { ...o, dx: 30, a: 'l' });
+  if (k === 3) { OV.name(s, X, 'x', '(cos θ, sin θ, 0)', { ...o, dx: -24, dy: 8, a: 'r' }); OV.name(s, Y, 'y', '(−sin θ, cos θ, 0)', { ...o, dx: 24, dy: -10, a: 'l' }); OV.name(s, Z, 'z', '(0, 0, 1)', { ...o, dx: 30, a: 'l' }); } };
 CH2.sim('cv2', S2, 'orient', { aspect: 0.82, maxH: 480 });
 LS.ask(document.getElementById('ask2'), { fields: [{ label: t('θ = 30°: r₁₁ =', 'θ = 30°: r₁₁ ='), ok: x => Math.abs(x - 0.866) < 0.006, w: 5 }, { label: 'r₂₁ =', ok: x => Math.abs(x - 0.5) < 0.006, w: 5 }, { label: 'r₁₂ =', ok: x => Math.abs(x + 0.5) < 0.006, w: 5 }],
   check: v => Math.abs(v[2] - 0.5) < 0.006 ? t('r₁₂ คือส่วน X<sub>A</sub> ของ Y<sub>B</sub> ซึ่งชี้ไปทาง −X<sub>A</sub> เครื่องหมายต้องเป็นลบ', 'r₁₂ is the X<sub>A</sub> part of Y<sub>B</sub>, which leans towards −X<sub>A</sub>: it must be negative') : '' });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) { th2 = 30; sl2.set(30); read2(); } }, steps: [
   { why: t('<b>X<sub>B</sub> อยู่ในระนาบ X–Y</b> ทำมุม θ กับ X<sub>A</sub>', '<b>X<sub>B</sub> stays in the X–Y plane</b>, at θ from X<sub>A</sub>'), tex: '{}^{A}\\hat X_B = (\\cos\\theta,\\ \\sin\\theta,\\ 0)^T' },
-  { why: t('<b>Y<sub>B</sub> คือ X<sub>B</sub> ที่หมุนต่ออีก 90°</b> และ Z<sub>B</sub> ไม่ขยับ', '<b>Y<sub>B</sub> is X<sub>B</sub> turned another 90°</b>, and Z<sub>B</sub> does not move'), tex: '{}^{A}\\hat Y_B = (-\\sin\\theta,\\ \\cos\\theta,\\ 0)^T, \\quad {}^{A}\\hat Z_B = (0,\\ 0,\\ 1)^T' },
+  { why: t('<b>Y<sub>B</sub> คือ X<sub>B</sub> ที่หมุนต่ออีก 90°</b> และ Z<sub>B</sub> ไม่ขยับ', '<b>Y<sub>B</sub> is X<sub>B</sub> turned another 90°</b>, and Z<sub>B</sub> does not move'), tex: '\\begin{aligned} {}^{A}\\hat Y_B &= (-\\sin\\theta,\\ \\cos\\theta,\\ 0)^T \\\\ {}^{A}\\hat Z_B &= (0,\\ 0,\\ 1)^T \\end{aligned}' },
   { why: t('<b>วางเป็นคอลัมน์</b>', '<b>Columns side by side</b>'), tex: `R_Z(\\theta) = \\begin{bmatrix} \\textcolor{${CH2.COL.x}}{\\cos\\theta} & \\textcolor{${CH2.COL.y}}{-\\sin\\theta} & \\textcolor{${CH2.COL.z}}{0} \\\\ \\textcolor{${CH2.COL.x}}{\\sin\\theta} & \\textcolor{${CH2.COL.y}}{\\cos\\theta} & \\textcolor{${CH2.COL.z}}{0} \\\\ \\textcolor{${CH2.COL.x}}{0} & \\textcolor{${CH2.COL.y}}{0} & \\textcolor{${CH2.COL.z}}{1} \\end{bmatrix}` },
   { why: t('<b>แทน θ = 30°</b>', '<b>Put in θ = 30°</b>'), tex: `R_Z(30^\\circ) = ${TM(RB.Rz(rad(30)))}` }],
   answer: t('ทำแบบเดียวกันรอบ X และ Y ได้ R<sub>X</sub>(θ) และ R<sub>Y</sub>(θ) ในสไลด์หน้า 15', 'The same reasoning about X and Y gives R<sub>X</sub>(θ) and R<sub>Y</sub>(θ) on slide p. 15') });
@@ -173,15 +189,23 @@ const MS = [{ k: 'a', M: [[0, -1, 0], [1, 0, 0], [0, 0, 1]], rot: true, why: t('
   { k: 'c', M: [[0, 1, 0], [1, 0, 0], [0, 0, 1]], rot: false, why: t('(c) ผ่านสองข้อแรก แต่ det = −1: <b>ไม่ใช่</b> เป็นภาพสะท้อน (สลับ X กับ Y)', '(c) passes the first two checks but det = −1: <b>not</b> a rotation, a mirror image (it swaps X and Y)') },
   { k: 'd', M: [[0.6, 0.8, 0], [0.8, 0.6, 0], [0, 0, 1]], rot: false, why: t('(d) คอลัมน์ยาว 1 แต่ X·Y = 0.96 ≠ 0: <b>ไม่ใช่</b> (แกนไม่ตั้งฉาก)', '(d) unit columns but X·Y = 0.96 ≠ 0: <b>not</b> a rotation (the axes are not at right angles)') }];
 const S3s = { R: MS[0].M, nb: '' }, ro3 = document.getElementById('ro3');
-const show3 = i => { S3s.R = MS[i].M; ro3.innerHTML = `<div class="live"><span class="eq">(${MS[i].k}) =</span>${M(MS[i].M)}</div>` + checkLine(MS[i].M); };
-ui.radio(document.getElementById('opt3'), MS.map((m, i) => ({ id: String(i), label: t('วาด ', 'draw ') + `(${m.k})`, on: !i })), id => show3(+id)); show3(0);
+const show3 = i => { S3s.R = MS[i].M; S3s.i = i; S3s.tgt = i === 1 ? [0, 0, 0.4] : undefined; S3s.dist = i === 1 ? 4.2 : undefined;   // (b): step back so its column of length 2 fits
+  ro3.innerHTML = `<div class="live"><span class="eq">(${MS[i].k}) =</span>${M(MS[i].M)}</div>` + checkLine(MS[i].M); };
+const rd3 = ui.radio(document.getElementById('opt3'), MS.map((m, i) => ({ id: String(i), label: t('วาด ', 'draw ') + `(${m.k})`, on: !i })), id => show3(+id)); show3(0);
+/* the reason of the matrix on the picture, once its step is open: (a) three right angles in the order X → Y → Z; (b) the column of length 2;
+   (c) the right-hand rule on X and Y points against Z; (d) the angle between X and Y is not 90° */
+S3s.ov = (s, st) => { const k = st.step, i = st.i, R = st.R; if (!k || i >= k) return;
+  if (i === 0) rightAngles(s, R);
+  if (i === 1) { OV.pt(s, [0, 0, LB], 'am', t('ยาว 1', 'length 1'), { m: 0, s: 22, dx: -20, a: 'r' }); OV.name(s, RB.sc(tip(R, 2), 0.9), 'z', t('ยาว 2', 'length 2'), { m: 0, s: 24, dx: 26, a: 'l' }); }
+  if (i === 2) { OV.ang(s, O0, RB.col(R, 0), RB.col(R, 1), 0.2, 'am', null); OV.vec(s, O0, RB.sc(RB.cross(RB.col(R, 0), RB.col(R, 1)), LB), 'am', 'X × Y', { at: 0.85, dx: 22, a: 'l' }); }
+  if (i === 3) { const c = RB.col(R, 0), d = RB.col(R, 1), a = deg(Math.acos(RB.dot(c, d) / Math.hypot(...c) / Math.hypot(...d))); OV.ang(s, O0, c, d, 0.32, 'am', `${u(a, 1)}° ≠ 90°`, { m: 0, s: 24, dx: 30, a: 'l' }); } };
 CH2.sim('cv3', S3s, 'orient', { aspect: 0.8, maxH: 460 });
 const pk = document.getElementById('pick3');
 pk.innerHTML = `<tr><th>${t('เมทริกซ์', 'matrix')}</th><th>${t('เป็นการหมุน?', 'a rotation?')}</th></tr>` + MS.map((m, i) => `<tr data-i="${i}"><td>(${m.k}) ${M(m.M, { cls: null })}</td><td><select aria-label="rotation"><option value="">—</option><option value="1">${t('ใช่', 'yes')}</option><option value="0">${t('ไม่ใช่', 'no')}</option></select></td></tr>`).join('');
 const chk3 = document.getElementById('chk3'); chk3.textContent = t('ตรวจ', 'Check');
 chk3.addEventListener('click', () => { let ok = 0; pk.querySelectorAll('tr[data-i]').forEach(tr => { const m = MS[+tr.dataset.i], s = tr.querySelector('select'), g = s.value !== '' && (s.value === '1') === m.rot; if (g) ok++; s.classList.toggle('ok', g); s.classList.toggle('no', !g); });
   document.getElementById('res3').innerHTML = ok === 4 ? `<span class="pill good">✓</span> ${t('ถูกทุกข้อ!', 'All correct!')}` : `<span class="pill bad">${ok} / 4</span> ${t('ใช้สามข้อตรวจใต้ภาพ หรือเปิดเฉลยทีละข้อ', 'use the three checks under the picture, or open the reasons one by one')}`; });
-LS.stepper(document.getElementById('st3'), { steps: MS.map((m, i) => ({ why: m.why, onShow: () => { show3(i); } })), answer: t('มีเพียง (a) ที่เป็นเมทริกซ์การหมุน', 'Only (a) is a rotation matrix') });
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; if (k) { show3(k - 1); rd3.set(String(k - 1)); } }, steps: MS.map((m, i) => ({ why: m.why, onShow: () => { show3(i); } })), answer: t('มีเพียง (a) ที่เป็นเมทริกซ์การหมุน', 'Only (a) is a rotation matrix') });
 
 /* ---------- B: description of a frame ---------- */
 const SB = { p: [-0.05, 0.85, 0.32], yaw: 35, tilt: 18, pts3: false }, roB = document.getElementById('roB');

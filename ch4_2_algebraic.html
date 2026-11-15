@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/ch4.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script><script src="assets/ch4_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/ch4.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script><script src="assets/ch4_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -119,17 +119,27 @@ const solve1 = () => { const R = CH4.p3r(L1, L2, goal[0], goal[1], goal[2]);
   if (R.ok) { S1.q = R.sols[0]; S1.ghost = [R.sols[1]]; S1.goal = true;
     ro1.innerHTML = `<div class="term">c₂ = ${u(R.c2, 4)} · s₂ = ±${u(Math.sqrt(Math.max(0, 1 - R.c2 * R.c2)), 4)}</div>` + R.sols.map((s, i) => `<div class="term">${t('คำตอบ', 'solution')} ${i + 1}: θ = (${s.map(x => dgs(x)).join(', ')})</div>`).join(''); }
   else { const a = Math.atan2(goal[1], goal[0]); S1.q = [a, 0, goal[2] - a]; S1.ghost = []; S1.goal = false; ro1.innerHTML = `<div class="term"><b class="ax-x">c₂ = ${u(R.c2, 3)}: |c₂| > 1 ${t('ไม่มีคำตอบ (นอกปริภูมิทำงาน)', 'no solution (outside the workspace)')}</b></div>`; } };
-[['x', 0, -0.95, 0.95, 'm'], ['y', 1, -0.95, 0.95, 'm'], ['φ', 2, -180, 180, '°']].forEach(([n, i, lo, hi, un]) => ui.slider(document.getElementById('ctl1'), { id: 'g' + i, label: n, min: lo, max: hi, step: un === '°' ? 1 : 0.005,
+const sl1 = [['x', 0, -0.95, 0.95, 'm'], ['y', 1, -0.95, 0.95, 'm'], ['φ', 2, -180, 180, '°']].map(([n, i, lo, hi, un]) => ui.slider(document.getElementById('ctl1'), { id: 'g' + i, label: n, min: lo, max: hi, step: un === '°' ? 1 : 0.005,
   value: un === '°' ? Math.round(deg(goal[i])) : +goal[i].toFixed(3), fmt: v => un === '°' ? `${v}°` : `${v.toFixed(3)} m`, oninput: v => { goal[i] = un === '°' ? rad(v) : v; solve1(); } })); solve1();
+/* the open step of the solution, drawn on solution 1 (the solid arm): what that step measures or computes */
+const pz = p => [p[0], p[1], p[2] + 0.05], mid = (a, b) => a.map((x, i) => (x + b[i]) / 2), Pt = T => pz(RB.Tp(T)), dir = (T, j) => RB.col(RB.TR(T), j);
+S1.ov = (s, st) => { const k = st.step, F = s.F, OV = CH4.OV; if (!k || !F) return; const O = Pt(F[1]), E = Pt(F[2]), W = Pt(F[3]), u1 = dir(F[1], 0), u2 = dir(F[2], 0), X0 = dir(F[0], 0), X3 = dir(F[3], 0);
+  if (k === 1) { OV.dist(s, O, W, 'pk', '√(x² + y²)', { m: 0, s: 26, dx: -16, dy: -14, a: 'r' }); OV.name(s, mid(O, E), 'o', 'L', { sub: '1', dy: 30 }); OV.name(s, mid(E, W), 'b', 'L', { sub: '2', dx: 22 });
+    OV.ref(s, E, u1, 0.2); OV.ang(s, E, u1, u2, 0.12, 'am', 'θ', { sub: '2', dx: 18, dy: 6 }); }
+  if (k === 2) { const c2 = Math.cos(st.q[1]), s2 = Math.sin(st.q[1]), K = OV.v(O, u1, L1 + L2 * c2); OV.vec(s, O, K, 'am', 'k', { sub: '1', dy: 32 }); OV.vec(s, K, W, 'p', 'k', { sub: '2', dx: 22 });
+    OV.name(s, K, 'ink', t('ตั้งฉาก', 'right angle'), { m: 0, s: 20, dx: 30, dy: 26 }); }
+  if (k === 3) { OV.ref(s, O, X0, 0.42); OV.dist(s, O, W, 'mut', null); OV.ang(s, O, X0, u1, 0.16, 'pk', 'θ', { sub: '1', dx: 16, dy: 18 });
+    OV.ang(s, O, X0, OV.sub(W, O), 0.27, 'am', 'atan2(y, x)', { m: 0, s: 22, dx: 52, dy: 4 }); OV.ang(s, O, u1, OV.sub(W, O), 0.38, 'p', 'atan2(k₂, k₁)', { m: 0, s: 22, dx: 44, dy: -6 }); }
+  if (k === 4) { OV.ref(s, W, X0, 0.24); OV.ref(s, W, u2, 0.24); OV.ang(s, W, X0, X3, 0.13, 'am', 'φ', { dx: 16, dy: 10 }); OV.ang(s, W, u2, X3, 0.2, 'pk', 'θ', { sub: '3', dx: 18, dy: -4 }); } };
 CH2.sim('cv1', S1, 'sol', { aspect: 0.8, maxH: 480 });
 const s2b = P.sol.sols[1], beta = Math.atan2(P.goal[1], P.goal[0]), gm = P.sol.k.map(k => Math.atan2(k[1], k[0]));
 LS.ask(document.getElementById('ask1'), { fields: [{ label: t('คำตอบที่ θ₂ &lt; 0: θ₁ (°) =', 'the solution with θ₂ &lt; 0: θ₁ (°) ='), ok: x => Math.abs(x - deg(s2b[0])) < 0.1, w: 5 }, { label: 'θ₃ (°) =', ok: x => Math.abs(x - deg(s2b[2])) < 0.1, w: 5 }],
   check: v => Math.abs(v[0] - 30) < 0.1 ? t('30° คือคำตอบที่ θ₂ = +45° (ท่าของบทที่ 3) อีกคำตอบใช้ k₂ ติดลบ', '30° is the solution with θ₂ = +45° (chapter 3\'s pose); the other one has a negative k₂') : '' });
-LS.stepper(document.getElementById('st1'), { steps: [
-  { why: t('<b>θ₂</b>: ยกกำลังสองสมการของ x, y แล้วบวก', '<b>θ₂</b>: square the x and y equations and add'), tex: `c_2 = \\frac{${u(P.goal[0], 4)}^2 + ${u(P.goal[1], 4)}^2 - 0.5^2 - 0.4^2}{2(0.5)(0.4)} = ${u(P.sol.c2, 4)},\\quad \\theta_2 = \\mathrm{atan2}(\\pm 0.7071,\\ 0.7071) = \\pm 45^\\circ` },
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) { P.goal.forEach((g, i) => { goal[i] = g; sl1[i].set(i === 2 ? Math.round(deg(g)) : +g.toFixed(3)); }); solve1(); } }, steps: [
+  { why: t('<b>θ₂</b>: ยกกำลังสองสมการของ x, y แล้วบวก', '<b>θ₂</b>: square the x and y equations and add'), tex: `\\begin{aligned} c_2 &= \\frac{${u(P.goal[0], 4)}^2 + ${u(P.goal[1], 4)}^2 - 0.5^2 - 0.4^2}{2(0.5)(0.4)} = ${u(P.sol.c2, 4)} \\\\ \\theta_2 &= \\mathrm{atan2}(\\pm 0.7071,\\ 0.7071) = \\pm 45^\\circ \\end{aligned}` },
   { why: t('<b>k₁, k₂</b> ของแต่ละคำตอบ', '<b>k₁, k₂</b> for each solution'), tex: `k_1 = 0.5 + 0.4c_2 = ${u(P.sol.k[0][0], 4)},\\quad k_2 = 0.4s_2 = \\pm ${u(P.sol.k[0][1], 4)}` },
-  { why: t('<b>θ₁</b> = atan2(y, x) − atan2(k₂, k₁)', '<b>θ₁</b> = atan2(y, x) − atan2(k₂, k₁)'), tex: `\\mathrm{atan2}(y, x) = ${u(deg(beta), 2)}^\\circ,\\quad \\mathrm{atan2}(k_2, k_1) = \\pm ${u(deg(gm[0]), 2)}^\\circ \\;\\Rightarrow\\; \\theta_1 = 30^\\circ \\text{ or } ${u(deg(s2b[0]), 2)}^\\circ` },
-  { why: t('<b>θ₃</b> = φ − θ₁ − θ₂', '<b>θ₃</b> = φ − θ₁ − θ₂'), tex: `\\theta_3 = 15^\\circ - 30^\\circ - 45^\\circ = -60^\\circ \\quad\\text{or}\\quad 15^\\circ - ${u(deg(s2b[0]), 2)}^\\circ + 45^\\circ = ${u(deg(s2b[2]), 2)}^\\circ` }],
+  { why: t('<b>θ₁</b> = atan2(y, x) − atan2(k₂, k₁)', '<b>θ₁</b> = atan2(y, x) − atan2(k₂, k₁)'), tex: `\\begin{aligned} &\\mathrm{atan2}(y, x) = ${u(deg(beta), 2)}^\\circ,\\quad \\mathrm{atan2}(k_2, k_1) = \\pm ${u(deg(gm[0]), 2)}^\\circ \\\\ &\\theta_1 = ${u(deg(beta), 2)}^\\circ \\mp ${u(deg(gm[0]), 2)}^\\circ = 30^\\circ \\text{ or } ${u(deg(s2b[0]), 2)}^\\circ \\end{aligned}` },
+  { why: t('<b>θ₃</b> = φ − θ₁ − θ₂', '<b>θ₃</b> = φ − θ₁ − θ₂'), tex: `\\begin{aligned} \\theta_3 &= 15^\\circ - 30^\\circ - 45^\\circ = -60^\\circ \\\\ \\text{or}\\quad \\theta_3 &= 15^\\circ - ${u(deg(s2b[0]), 2)}^\\circ + 45^\\circ = ${u(deg(s2b[2]), 2)}^\\circ \\end{aligned}` }],
   answer: t(`(30°, 45°, −60°) คือท่าของบทที่ 3 และ (${s2b.map(x => u(deg(x), 2)).join('°, ')}°)`, `(30°, 45°, −60°), chapter 3's pose, and (${s2b.map(x => u(deg(x), 2)).join('°, ')}°)`) });
 
 /* ---------- A: atan2 versus atan ---------- */
@@ -146,11 +156,20 @@ RB.drag(cvA, null, p => { if (!p) return; SA.a = Math.atan2(-(p.y - geoA.H / 2),
 /* ---------- 2: RPR ---------- */
 const R3 = CH3.EX.rpr, S2 = { ex: 'rpr', q: R3.q.slice(), xyz: true, fit: true }, ro2 = document.getElementById('ro2'), T2 = R3.T03(R3.L, R3.q);
 const read2 = () => { const T = R3.T03(R3.L, S2.q), b = CH4.rprIK(R3.L.L2, T).sols[0]; ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(T)}</div><div class="term">${t('สูตรผกผันให้', 'the inverse gives')} θ₁ = ${dgs(b[0], 1)}, d₂ = ${u(b[1], 3)} m, θ₃ = ${dgs(b[2], 1)}</div>`; };
-[['θ₁', 0, -150, 150, 'R'], ['d₂', 1, 0.1, 0.6, 'P'], ['θ₃', 2, -150, 150, 'R']].forEach(([n, i, lo, hi, k]) => ui.slider(document.getElementById('ctl2'), { id: 'r' + i, label: n, min: lo, max: hi, step: k === 'R' ? 1 : 0.01, value: k === 'R' ? Math.round(deg(S2.q[i])) : S2.q[i], fmt: v => k === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { S2.q[i] = k === 'R' ? rad(v) : v; read2(); } })); read2();
+const sl2 = [['θ₁', 0, -150, 150, 'R'], ['d₂', 1, 0.1, 0.6, 'P'], ['θ₃', 2, -150, 150, 'R']].map(([n, i, lo, hi, k]) => ui.slider(document.getElementById('ctl2'), { id: 'r' + i, label: n, min: lo, max: hi, step: k === 'R' ? 1 : 0.01, value: k === 'R' ? Math.round(deg(S2.q[i])) : S2.q[i], fmt: v => k === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { S2.q[i] = k === 'R' ? rad(v) : v; read2(); } })); read2();
+/* the open step on the RPR arm: 1 the components p_x, p_y and θ₁ measured from −Y₀ to the arm, 2 the length d₂ + L₂, 3 θ₃ about the arm's own axis */
+S2.ov = (s, st) => { const k = st.step, F = s.F, OV = CH4.OV; if (!k || !F) return; const up = (p, h) => [p[0], p[1], p[2] + h], O = RB.Tp(F[0]), O2 = RB.Tp(F[2]), O3 = RB.Tp(F[3]), X0 = dir(F[0], 0), Y0 = dir(F[0], 1), Za = dir(F[2], 2), X2 = dir(F[2], 0), X3 = dir(F[3], 0);
+  if (k === 1) { const px = RB.dot(OV.sub(O3, O), X0), py = RB.dot(OV.sub(O3, O), Y0), A = OV.v(O, X0, px);
+    OV.name(s, OV.v(O, X0, px / 2), 'x', 'p', { sub: 'x', dy: 34 }); OV.name(s, OV.v(A, Y0, py / 2), 'y', 'p', { sub: 'y', dx: 26, dy: 26 });
+    OV.ref(s, up(O, 0.04), OV.v([0, 0, 0], Y0, -1), 0.3); OV.name(s, OV.v(up(O, 0.04), Y0, -0.33), 'y', '−Y', { sub: '0', dx: -6, dy: 4 });
+    OV.ang(s, up(O, 0.04), OV.v([0, 0, 0], Y0, -1), Za, 0.2, 'pk', 'θ', { sub: '1', dx: 18, dy: -10 }); }
+  if (k === 2) { OV.dist(s, up(O, 0.08), up(O3, 0.08), 'pk', '√(x² + y²) = d₂ + L₂', { m: 0, s: 24, dy: -30 }); OV.dist(s, up(O, -0.07), up(O2, -0.07), 'p', 'd', { sub: '2', dy: 34 }); OV.dist(s, up(O2, -0.07), up(O3, -0.07), 'o', 'L', { sub: '2', dy: 34 }); }
+  if (k === 3) { OV.ref(s, O3, X2, 0.26); OV.ang(s, O3, X2, X3, 0.14, 'pk', 'θ', { sub: '3', dx: 22, dy: -8 }); const E = OV.v(O3, X3, 0.16);
+    OV.dist(s, E, [E[0], E[1], O3[2]], 'am', 'r₃₁ = s₃', { m: 0, s: 22, dx: 40 }); } };
 CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 460 });
 LS.ask(document.getElementById('ask2'), { fields: [{ label: `${t('เป้าหมายในสไลด์', 'the goal on the slide')}: θ₁ (°) =`, ok: x => Math.abs(x - 30) < 0.2, w: 4 }, { label: 'd₂ (m) =', ok: x => Math.abs(x - 0.35) < 0.003, w: 4 }, { label: 'θ₃ (°) =', ok: x => Math.abs(x - 45) < 0.2, w: 4 }],
   check: v => Math.abs(v[1] - 0.5) < 0.003 ? t('0.5 m คือ d₂ + L₂ ต้องลบ L₂ = 0.15 m', '0.5 m is d₂ + L₂: subtract L₂ = 0.15 m') : '' });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; S2.az = k === 1 ? -90 : k === 3 ? -115 : undefined; S2.el = k === 1 ? 64 : k === 3 ? 22 : undefined; if (k) { R3.q.forEach((x, i) => { S2.q[i] = x; sl2[i].set(i === 1 ? x : Math.round(deg(x))); }); read2(); } }, steps: [
   { why: t('<b>คอลัมน์ 4</b>: (p_x, p_y) = (d₂ + L₂)(s₁, −c₁)', '<b>Column 4</b>: (p_x, p_y) = (d₂ + L₂)(s₁, −c₁)'), tex: `\\theta_1 = \\mathrm{atan2}(p_x, -p_y) = \\mathrm{atan2}(${u(T2[0][3], 3)},\\ ${u(-T2[1][3], 3)}) = 30^\\circ` },
   { why: t('<b>ความยาว</b> ของ (p_x, p_y) คือ d₂ + L₂', '<b>The length</b> of (p_x, p_y) is d₂ + L₂'), tex: `d_2 = \\sqrt{p_x^2 + p_y^2} - L_2 = 0.5 - 0.15 = 0.35\\ \\text{m}` },
   { why: t('<b>แถว 3</b>: (r₃₁, r₃₂) = (s₃, c₃)', '<b>Row 3</b>: (r₃₁, r₃₂) = (s₃, c₃)'), tex: `\\theta_3 = \\mathrm{atan2}(r_{31}, r_{32}) = \\mathrm{atan2}(${u(T2[2][0], 3)},\\ ${u(T2[2][1], 3)}) = 45^\\circ` }],
@@ -159,19 +178,33 @@ LS.stepper(document.getElementById('st2'), { steps: [
 /* ---------- 3: tangent half-angle ---------- */
 const S3 = { a: 3, b: 4, c: 2 }, ro3 = document.getElementById('ro3'), cv3 = document.getElementById('cv3');
 const read3 = () => { const R = CH4.half(S3.a, S3.b, S3.c); ro3.innerHTML = R.ok ? `<div class="term">b² + a² − c² = ${u(R.D, 3)} · u = ${R.u.map(x => u(x, 4)).join(', ') || '—'}</div><div class="term"><b class="ax-y">θ = ${R.sols.map(x => dgs(x)).join(t(' และ ', ' and '))}</b></div>` : `<div class="term"><b class="ax-x">c² > a² + b²: ${t('ไม่มีรากจริง', 'no real root')}</b></div>`; };
-[['a', -5, 5], ['b', -5, 5], ['c', -6, 6]].forEach(([k, lo, hi]) => ui.slider(document.getElementById('ctl3'), { id: 'h' + k, label: k, min: lo, max: hi, step: 0.1, value: S3[k], fmt: v => v.toFixed(1), oninput: v => { S3[k] = v; read3(); } })); read3();
+const sl3 = [['a', -5, 5], ['b', -5, 5], ['c', -6, 6]].map(([k, lo, hi]) => ui.slider(document.getElementById('ctl3'), { id: 'h' + k, label: k, min: lo, max: hi, step: 0.1, value: S3[k], fmt: v => v.toFixed(1), oninput: v => { S3[k] = v; read3(); } })); read3();
 RB.stage(cv3, 0.6, (c, W, H, dt, P) => { const m = 34, sx = th => m + (th + Math.PI) / (2 * Math.PI) * (W - 2 * m), A = Math.max(6, Math.hypot(S3.a, S3.b) + 0.5, Math.abs(S3.c) + 0.5), sy = v => H / 2 - v / A * (H / 2 - 20);
   c.save(); c.strokeStyle = P.faint; c.lineWidth = 1; c.beginPath(); c.moveTo(m, sy(0)); c.lineTo(W - m, sy(0)); [-180, -90, 0, 90, 180].forEach(d => { const x = sx(rad(d)); c.moveTo(x, sy(0) - 4); c.lineTo(x, sy(0) + 4); }); c.stroke(); c.restore();
   [-180, -90, 0, 90, 180].forEach(d => G.text(c, `${d}°`, sx(rad(d)), sy(0) + 16, { color: P.muted, size: 11, align: 'center' }));
   c.save(); c.beginPath(); for (let i = 0; i <= 200; i++) { const th = -Math.PI + 2 * Math.PI * i / 200, v = S3.a * Math.cos(th) + S3.b * Math.sin(th); i ? c.lineTo(sx(th), sy(v)) : c.moveTo(sx(th), sy(v)); } c.strokeStyle = P.l2; c.lineWidth = 2.5; c.stroke(); c.restore();
   c.save(); c.setLineDash([6, 5]); G.line(c, m, sy(S3.c), W - m, sy(S3.c), P.l1, 2); c.restore(); G.text(c, `c = ${S3.c.toFixed(1)}`, W - m, sy(S3.c) - 6, { color: P.l1, size: 12, align: 'right' }); G.text(c, 'a cos θ + b sin θ', m + 4, 16, { color: P.l2, size: 12 });
-  CH4.half(S3.a, S3.b, S3.c).sols.forEach(th => { const w = RB.wrap(th); c.beginPath(); c.arc(sx(w), sy(S3.c), 6, 0, 2 * Math.PI); c.fillStyle = P.sel; c.fill(); G.text(c, dgs(w, 1), sx(w), sy(S3.c) - 12, { color: P.sel, size: 12, align: 'center', weight: 700 }); }); }, { maxH: 400 });
+  CH4.half(S3.a, S3.b, S3.c).sols.forEach(th => { const w = RB.wrap(th); c.beginPath(); c.arc(sx(w), sy(S3.c), 6, 0, 2 * Math.PI); c.fillStyle = P.sel; c.fill(); G.text(c, dgs(w, 1), sx(w), sy(S3.c) - 12, { color: P.sel, size: 12, align: 'center', weight: 700 }); });
+  /* the open step of the solution: 1 the u = tan(θ/2) scale and the quadratic, 2 its roots on that scale, 3 each root carried up to its angle, 4 the atan2 check */
+  const k = S3.step || 0; if (!k) return; const R = CH4.half(S3.a, S3.b, S3.c), yU = H - 12, ux = w => sx(2 * Math.atan(w)), sg = x => x < 0 ? '−' : '+', ab = x => u(Math.abs(x), 2);
+  const box = lines => lines.forEach((l, i) => G.text(c, l, W - m, 20 + 18 * i, { color: P.ink, size: 13, align: 'right', weight: i ? 700 : 500 }));
+  if (k <= 3) { c.save(); c.strokeStyle = P.muted; c.lineWidth = 1; c.beginPath(); c.moveTo(m, yU); c.lineTo(W - m, yU); [-3, -2, -1, -0.5, 0, 0.5, 1, 2, 3].forEach(w => { c.moveTo(ux(w), yU - 4); c.lineTo(ux(w), yU + 4); }); c.stroke(); c.restore();
+    [-2, -1, 0, 1, 2].forEach(w => G.text(c, u(w, 0), ux(w), yU - 7, { color: P.muted, size: 10, align: 'center' })); G.text(c, 'u = tan(θ/2)', m, yU - 22, { color: P.muted, size: 12, weight: 600 }); }
+  if (k === 1) box(['(a + c)u² − 2bu + (c − a) = 0', `${u(S3.a + S3.c, 2)}u² ${sg(-2 * S3.b)} ${ab(2 * S3.b)}u ${sg(S3.c - S3.a)} ${ab(S3.c - S3.a)} = 0`]);
+  if (k === 2 || k === 3) { if (k === 2) box(['u = (b ± √(a² + b² − c²)) / (a + c)', R.u.map(w => u(w, 4)).join(',  ')]);
+    R.u.forEach((w, i) => { const x = ux(w); if (k === 3) { c.save(); c.setLineDash([4, 4]); G.line(c, x, yU, x, sy(S3.c), P.sel, 1.5); c.restore(); c.beginPath(); c.arc(x, sy(S3.c), 9, 0, 2 * Math.PI); c.strokeStyle = P.sel; c.lineWidth = 2; c.stroke(); }
+      c.beginPath(); c.arc(x, yU, 5, 0, 2 * Math.PI); c.fillStyle = P.sel; c.fill(); G.text(c, `u${'₁₂'[i]} = ${u(w, 3)}`, x + 8, yU - 22, { color: P.sel, size: 12, weight: 700 }); });
+    if (k === 3 && R.u.length) G.text(c, 'θ = 2 tan⁻¹u', ux(R.u[0]) - 8, (yU + sy(S3.c)) / 2, { color: P.sel, size: 13, align: 'right', weight: 700 }); }
+  if (k === 4) { const A = Math.hypot(S3.a, S3.b), t0 = Math.atan2(S3.b, S3.a), x0 = sx(t0); c.save(); c.setLineDash([5, 4]); G.line(c, x0, sy(0), x0, sy(A), P.good, 1.8); G.line(c, m, sy(A), x0, sy(A), P.good, 1.5); c.restore();
+    G.text(c, `atan2(b, a) = ${u(deg(t0), 2)}°`, x0, sy(A) - 8, { color: P.good, size: 12, align: 'center', weight: 700 }); G.text(c, `√(a² + b²) = ${u(A, 2)}`, m + 4, sy(A) + 16, { color: P.good, size: 12, weight: 600 });
+    if (Math.abs(S3.c) <= A) { const dl = Math.acos(S3.c / A), y = sy(S3.c) + 16; [1, -1].forEach(e => { const t1 = t0 + e * dl; if (Math.abs(t1) > Math.PI) return; const x1 = sx(t1); G.line(c, x0, y, x1, y, P.l3, 2); c.beginPath(); c.moveTo(x1, y); c.lineTo(x1 - e * 8, y - 4); c.lineTo(x1 - e * 8, y + 4); c.closePath(); c.fillStyle = P.l3; c.fill();
+      G.text(c, `${e > 0 ? '+' : '−'}${u(deg(dl), 2)}°`, (x0 + x1) / 2, y + 16, { color: P.l3, size: 12, align: 'center', weight: 700 }); }); } } }, { maxH: 400 });
 const H3 = X.half.sol, r3 = H3.sols.map(x => deg(x)).sort((a, b) => b - a);
 LS.ask(document.getElementById('ask3'), { fields: [{ label: t('a, b, c = 3, 4, 2: รากที่มากกว่า θ (°) =', 'a, b, c = 3, 4, 2: the larger root θ (°) ='), ok: x => Math.abs(x - r3[0]) < 0.1, w: 5 }, { label: t('รากที่น้อยกว่า θ (°) =', 'the smaller root θ (°) ='), ok: x => Math.abs(x - r3[1]) < 0.1, w: 5 }] });
-LS.stepper(document.getElementById('st3'), { steps: [
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3.step = k; if (k) { [['a', 3], ['b', 4], ['c', 2]].forEach(([n, x], i) => { S3[n] = x; sl3[i].set(x); }); read3(); } }, steps: [
   { why: t('<b>แทน</b> u = tan(θ/2) ได้พหุนามกำลังสอง', '<b>Substitute</b> u = tan(θ/2): a quadratic'), tex: '(a + c)u^2 - 2bu + (c - a) = 0 \\;\\Rightarrow\\; 5u^2 - 8u - 1 = 0' },
   { why: t('<b>สูตรกำลังสอง</b>', '<b>The quadratic formula</b>'), tex: `u = \\frac{4 \\pm \\sqrt{21}}{5} = ${u(H3.u[0], 4)},\\ ${u(H3.u[1], 4)}` },
-  { why: t('<b>กลับเป็นมุม</b> θ = 2 tan⁻¹u', '<b>Back to angles</b> θ = 2 tan⁻¹u'), tex: `\\theta = ${u(deg(H3.sols[0]), 2)}^\\circ,\\quad ${u(deg(H3.sols[1]), 2)}^\\circ`, onShow: () => { S3.a = 3; S3.b = 4; S3.c = 2; ['a', 'b', 'c'].forEach(k => document.getElementById('h' + k).value = S3[k]); read3(); } },
+  { why: t('<b>กลับเป็นมุม</b> θ = 2 tan⁻¹u', '<b>Back to angles</b> θ = 2 tan⁻¹u'), tex: `\\theta = ${u(deg(H3.sols[0]), 2)}^\\circ,\\quad ${u(deg(H3.sols[1]), 2)}^\\circ` },
   { why: t('<b>ตรวจด้วย atan2</b>', '<b>Check with atan2</b>'), tex: '\\mathrm{atan2}(4, 3) \\pm \\mathrm{atan2}(\\sqrt{21}, 2) = 53.13^\\circ \\pm 66.42^\\circ' }],
   answer: t(`θ = ${u(r3[0], 2)}° และ ${u(r3[1], 2)}°`, `θ = ${u(r3[0], 2)}° and ${u(r3[1], 2)}°`) });
 

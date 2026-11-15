@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch1.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch1_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch1.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch1_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -170,18 +170,26 @@ LS.stepper(document.getElementById('st1'), {
 /* ---------- 2: reprogrammable — one arm, three programs ---------- */
 const JOBS = [{ th: 'งาน 1: หยิบวาง', en: 'Job 1: pick and place', pts: [[0.55, 0.15], [0.3, 0.62], [-0.35, 0.55], [0.3, 0.62]] }, { th: 'งาน 2: เชื่อมตามแนว', en: 'Job 2: seam welding', pts: [[0.25, 0.7], [0.4, 0.6], [0.55, 0.5], [0.7, 0.4], [0.55, 0.5], [0.4, 0.6]] },
   { th: 'งาน 3: จัดเรียงกล่อง', en: 'Job 3: palletising', pts: [[0.7, 0.1], [-0.2, 0.75], [0.7, 0.1], [-0.45, 0.6], [0.7, 0.1], [-0.65, 0.35]] }];
-const B2 = { job: 0, u: 0, q: [0.3, 1.2] };
+const B2 = { job: 0, u: 0, q: [0.3, 1.2] }, OVt = (s, p, key, txt, o = {}) => window.S3.OV.name(s, p, key, txt, { m: 0, s: 30, ...o });
+/* the open step, on the arm: (a) its two motors, (c) what it is made of, (b) the program: the list of taught points and the one it is heading for.
+   Step 3 (an automatic machine also runs by itself) has nothing to point at in this picture */
+B2.v = { step: 0, ov: (s, st) => { const k = st.step; if (!k || k === 3) return; const OV = window.S3.OV, z = 0.17, f = RB.fk2(l1, l2, st.q[0], st.q[1]), O = [0, 0, z], E = [f.x1, f.y1, z], T = [f.x, f.y, z];
+  if (k === 1) { OV.pt(s, O, 'o'); OV.pt(s, E, 'o'); OVt(s, O, 'o', t('มอเตอร์ 1', 'motor 1'), { dy: 46 }); OVt(s, E, 'o', t('มอเตอร์ 2', 'motor 2'), { dy: -40 }); }
+  if (k === 2) { OVt(s, OV.v(O, OV.sub(E, O), 0.5), 'ink', t('ก้าน 1', 'link 1'), { dy: 40 }); OVt(s, OV.v(E, OV.sub(T, E), 0.5), 'ink', t('ก้าน 2', 'link 2'), { dy: 40 }); OVt(s, T, 'ink', t('มือจับ', 'gripper'), { dy: -40 }); }
+  if (k === 4) { const P = st.pts, i = st.next, g = [P[i][0], P[i][1], 0.06], d = OV.sub(g, T), L = Math.hypot(...d);
+    if (L > 0.08) OV.vec(s, T, OV.v(T, d, (L - 0.04) / L), 'am', t(`ไป P${i + 1}`, `to P${i + 1}`), { m: 0, s: 30, dx: 10, dy: -24 });
+    OVt(s, [0.02, -0.3, 0], 'am', t('โปรแกรม: ', 'program: ') + P.map((_, j) => 'P' + (j + 1)).join(' → '), { a: 'c' }); } } };
 ui.radio(document.getElementById('ctl2'), JOBS.map((j, i) => ({ id: 'j' + i, label: t(j.th, j.en), on: i === 0 })), id => { B2.job = +id.slice(1); B2.u = 0; });
 RB.stage(document.getElementById('cv2'), 0.73, (c, W, H, dt, P) => { const J = JOBS[B2.job], n = J.pts.length;
   B2.u = (B2.u + dt * 0.55) % n; const i = Math.floor(B2.u), f = B2.u - i, a = J.pts[i], b = J.pts[(i + 1) % n], s = f < 0.35 ? 0 : Math.min(1, (f - 0.35) / 0.65), p = [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s], q = RB.ik2(l1, l2, p[0], p[1], 1);
-  if (window.R3 && R3.ok()) { CH1.view.jobs(c, W, H, Object.assign(B2.v || (B2.v = {}), { pts: J.pts, q: [q.t1, q.t2], open: f < 0.35 ? 0.2 : 1, xyz: true }), P); return; }
+  if (window.R3 && R3.ok()) { CH1.view.jobs(c, W, H, Object.assign(B2.v || (B2.v = {}), { pts: J.pts, q: [q.t1, q.t2], open: f < 0.35 ? 0.2 : 1, xyz: true, next: (i + 1) % n }), P); return; }
   G.clear(c, W, H, P); const M = RB.fitWorld(W, H, -0.95, 0.95, -0.2, 0.95, 6);   // flat drawing when WebGL is not available
   G.grid(c, M, -0.9, 0.9, -0.2, 0.9, 0.1, P.grid); G.poly(c, J.pts.concat([J.pts[0]]).map(v => M.p(v[0], v[1])), { stroke: RB.rgba(P.sel, 0.6), lw: 1.5, dash: [5, 4] });
   J.pts.forEach((v, k) => { const m = M.p(v[0], v[1]); G.circle(c, m[0], m[1], 6, { fill: P.warn, stroke: P.bg, lw: 1.5 }); G.text(c, 'P' + (k + 1), m[0] + 8, m[1] - 8, { color: P.warn, size: 12, weight: 700, halo: P.bg }); });
   if (q.ok) CH1.arm2(c, M, l1, l2, q.t1, q.t2, P, { w: 10, open: f < 0.35 ? 0.3 : 1 });
   G.text(c, t('โปรแกรม = รายการจุดที่สอน', 'program = list of taught points'), 10, 20, { color: P.muted, size: 12.5, weight: 600 }); }, { maxH: 420 });
 LS.choose(document.getElementById('ask2'), { options: [t('มีมอเตอร์ไฟฟ้า', 'it has electric motors'), t('โปรแกรมใหม่ให้ทำงานชุดใหม่ได้', 'it can be reprogrammed for a new series of actions'), t('มีรูปร่างเหมือนคน', 'it looks like a human'), t('ทำงานได้โดยไม่ต้องมีคนกดปุ่ม', 'it runs without anyone pressing a button')], answer: 1 });
-LS.stepper(document.getElementById('st2'), {
+LS.stepper(document.getElementById('st2'), { onStep: k => { B2.v.step = k; },
   steps: [{ why: t('<b>ตัดตัวเลือก (a)</b>: เครื่องซักผ้าและพัดลมก็มีมอเตอร์ มอเตอร์เป็นเพียงส่วน "กระทำ"', '<b>Rule out (a)</b>: washing machines and fans have motors too; a motor is only the "act" part') },
     { why: t('<b>ตัดตัวเลือก (c)</b>: แขนกลอุตสาหกรรมส่วนใหญ่ไม่เหมือนคนเลย ส่วนตุ๊กตาที่เหมือนคนอาจไม่ใช่หุ่นยนต์', '<b>Rule out (c)</b>: most industrial arms look nothing like a person, and a lifelike doll need not be a robot') },
     { why: t('<b>ตัดตัวเลือก (d)</b>: เครื่องจักรอัตโนมัติก็ทำงานเองได้ แต่ทำได้งานเดียว', '<b>Rule out (d)</b>: an automatic machine also runs by itself, but only its one job') },

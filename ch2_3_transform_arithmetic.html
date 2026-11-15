@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -138,13 +138,24 @@ CH2.sim('cvA', SA, 'mapVsOp', { aspect: 0.46, maxH: 420, orbit: false });
 
 /* ---------- 1: Craig 2.4 ---------- */
 const S1 = { kind: 'gen', th: rad(30), q: [10, 5, 0], p1: [3, 7, 0], k: 0.06, xy: true, grid: [0, 14, 0, 14, 2], num: true, az: -90, el: 58, tgt0: [0.4, 0.4, 0.05], dist0: 2.6, u: 0 }, ro1 = document.getElementById('ro1'); let play1 = false;
+Object.defineProperty(S1, 'num', { get: () => S1.u > 1.98 });   // the numbers of ᴬP₂ only once the point has got there (before, the scene would write ᴬP₁ + Q)
 const read1 = () => { const ur = Math.min(1, S1.u), us = Math.max(0, S1.u - 1), p = RB.add(RB.mv(RB.Rz(S1.th * ur), S1.p1), RB.sc(S1.q, us));
   ro1.innerHTML = `${S1.u < 1 ? t('ขั้น 1: หมุนรอบ Z<sub>A</sub> ', 'step 1: turning about Z<sub>A</sub> ') + Math.round(30 * ur) + '°' : t('ขั้น 2: เลื่อนตาม ᴬQ = (10, 5, 0) ', 'step 2: moving by ᴬQ = (10, 5, 0) ') + Math.round(100 * us) + '%'} · ${t('จุดอยู่ที่', 'the point is at')} (${u(p[0], 3)}, ${u(p[1], 3)}, 0)`; };
 const sl1 = ui.slider(document.getElementById('ctl1'), { id: 'u1', label: t('ความคืบหน้า', 'progress'), min: 0, max: 2, step: 0.01, value: 0, fmt: v => v < 1 ? t('หมุน', 'turn') : t('เลื่อน', 'move'), oninput: v => { S1.u = v; play1 = false; read1(); } });
 ui.buttons(document.getElementById('ctl1'), [{ label: t('▶ เล่น', '▶ play'), onclick: () => { if (S1.u >= 1.999) S1.u = 0; play1 = true; } }]); read1();
+/* the open step of each solution, drawn on its picture (S3.OV) */
+const OV = window.S3.OV, O0 = [0, 0, 0], o0 = { m: 0, s: 24 }, mid = (a, b) => a.map((x, i) => (x + b[i]) / 2), K3 = ['x', 'y', 'z'];
+/* a dashed walk from `from` along the unit directions A[0], A[1], A[2] by c[0], c[1], c[2] metres, each leg named by its number txt[j] (legs too short to see are left out) */
+const walk = (s, from, A, c, txt, lo = []) => { let a = from; A.forEach((d, j) => { const b = OV.v(a, d, c[j]); if (Math.abs(c[j]) > 0.004) OV.dist(s, a, b, K3[j], txt[j], { ...o0, ...(lo[j] || {}) }); a = b; }); return a; };
+/* 1: the operator's two parts; the turned point R ᴬP₁; the shift by Q, 10 along X_A and 5 along Y_A */
+S1.ov = (s, st) => { const k = st.step; if (!k) return; const sc = x => RB.sc(x, st.k), R = RB.Rz(st.th), pr = RB.mv(R, st.p1), Pr = sc(pr);
+  if (k === 1) { OV.ref(s, O0, RB.col(R, 0), 0.32); OV.ang(s, O0, [1, 0, 0], RB.col(R, 0), 0.22, 'am', `${Math.round(RB.deg(st.th))}°`, { ...o0, dx: 18, dy: 10, a: 'l' });
+    OV.vec(s, O0, sc(st.q), 'o', 'Q', { post: ` = (${st.q.join(', ')})`, s: 28, at: 0.6, dx: 10, dy: 34, a: 'l' }); }
+  if (k === 2) OV.pt(s, Pr, 'ink', `R ᴬP₁ = (${u(pr[0], 3)}, ${u(pr[1], 3)})`, { ...o0, dx: 24, dy: -22, a: 'l' });
+  if (k === 3) walk(s, Pr, [[1, 0, 0], [0, 1, 0]], sc(st.q), ['+' + st.q[0], '+' + st.q[1]], [{ dy: 30 }, { dx: 16, a: 'l' }]); };
 CH2.sim('cv1', S1, 'oper', { aspect: 0.8, maxH: 480, tick: dt => { if (play1) { S1.u = Math.min(2, S1.u + dt * 0.6); sl1.set(S1.u); read1(); if (S1.u >= 2) play1 = false; } } });
 LS.ask(document.getElementById('ask1'), { fields: [{ label: 'ᴬP<sub>2,x</sub> =', ok: x => Math.abs(x - 9.098) < 0.006, w: 5 }, { label: 'ᴬP<sub>2,y</sub> =', ok: x => Math.abs(x - 12.562) < 0.006, w: 5 }] });
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) { S1.u = Math.min(2, k - 1); play1 = false; sl1.set(S1.u); read1(); } }, steps: [
   { why: t('<b>ตัวดำเนินการ T</b>: ส่วนหมุน R<sub>Z</sub>(30°) ส่วนเลื่อน Q = (10, 5, 0) (ไม่มีเฟรมที่สอง จึงไม่มีตัวห้อยตัวยก)', '<b>The operator T</b>: rotation part R<sub>Z</sub>(30°), translation Q = (10, 5, 0) (no second frame, so no sub- or superscripts)'), tex: `T = ${TT(E.ex24.T)}`, onShow: () => { S1.u = 0; sl1.set(0); read1(); } },
   { why: t('<b>หมุนก่อน</b> (ลูกศรประในภาพ)', '<b>Turn first</b> (the dashed arrow in the picture)'), tex: `R_Z(30^\\circ)\\,{}^{A}P_1 = ${TV(RB.mv(RB.Rz(rad(30)), [3, 7, 0]))}`, onShow: () => { S1.u = 1; sl1.set(1); read1(); } },
   { why: t('<b>แล้วเลื่อน</b> ด้วย Q', '<b>Then move</b> by Q'), tex: `{}^{A}P_2 = ${TV(RB.mv(RB.Rz(rad(30)), [3, 7, 0]))} + ${TV([10, 5, 0])} = ${TV(E.ex24.p2)}`, onShow: () => { S1.u = 2; sl1.set(2); read1(); } }],
@@ -164,14 +175,21 @@ readB(); CH2.sim('cvB', SB, 'chain3', { aspect: 0.78, maxH: 520 });
 
 /* ---------- 2: Craig 2.5 inverse ---------- */
 const S2 = { TAB: RB.T(RB.Rz(rad(30)), [0.4, 0.3, 0]), inv: true, xy: true, az: -90, el: 55, tgt: [0.22, 0.2, 0.05], dist: 2.3, LA: 0.3, LB: 0.25 };
+/* 2 (1 unit = 0.1 m): the turn and the shift of ᴬ_BT; the axes of {A} seen from {B} (−30°); ᴮP_AORG walked along X_B and Y_B; the 3–4–5 triangle */
+S2.ov = (s, st) => { const k = st.step; if (!k) return; const R = RB.TR(st.TAB), B = RB.Tp(st.TAB), X = RB.col(R, 0), Y = RB.col(R, 1), a = Math.round(RB.deg(Math.atan2(R[1][0], R[0][0]))), bo = RB.sc(RB.Tp(RB.Ti(st.TAB)), 10);
+  if (k === 1) { OV.ref(s, B, [1, 0, 0], 0.24); OV.ang(s, B, [1, 0, 0], X, 0.15, 'am', `${a}°`, { ...o0, dx: 20, dy: 8, a: 'l' }); OV.name(s, B, 'am', `(${u(B[0] * 10, 3)}, ${u(B[1] * 10, 3)}, 0)`, { ...o0, dx: 20, dy: 40, a: 'l' }); }
+  if (k === 2) { OV.ref(s, B, [1, 0, 0], 0.26); OV.ref(s, B, [0, 1, 0], 0.26); OV.name(s, OV.v(B, [1, 0, 0], 0.28), 'ink', 'X', { sub: 'A', s: 26, dx: 12, a: 'l' }); OV.name(s, OV.v(B, [0, 1, 0], 0.28), 'ink', 'Y', { sub: 'A', s: 26, dy: -10 });
+    OV.ang(s, B, X, [1, 0, 0], 0.17, 'b', `${-a}°`, { ...o0, dx: 22, dy: 10, a: 'l' }); }
+  if (k === 3) walk(s, B, [X, Y], RB.sc(bo, 0.1), [u(bo[0], 3), u(bo[1], 3)], [{ dy: -16 }, { dx: -14, a: 'r' }]);
+  if (k === 4) { walk(s, O0, [[1, 0, 0], [0, 1, 0]], B, [u(B[0] * 10, 3), u(B[1] * 10, 3)], [{ dy: 30, r: 0.009 }, { dx: 16, a: 'l' }]); OV.name(s, mid(O0, B), 'b', t('ยาว ', 'length ') + u(Math.hypot(...bo), 3), { ...o0, dx: -30, dy: -30, a: 'r' }); } };
 CH2.sim('cv2', S2, 'chain3', { aspect: 0.8, maxH: 460 });
 document.getElementById('ro2').innerHTML = t('ภาพย่อ 1 หน่วย = 0.1 m · สีส้ม: ᴬP<sub>BORG</sub> = (4, 3, 0) · สีน้ำเงิน: ᴮP<sub>AORG</sub> ลูกศรย้อนกลับ ซึ่งต้องอ่านตามแกนของ {B}', 'Scale 1 unit = 0.1 m · orange: ᴬP<sub>BORG</sub> = (4, 3, 0) · blue: ᴮP<sub>AORG</sub>, the arrow back, read along the axes of {B}');
 LS.ask(document.getElementById('ask2'), { fields: [{ label: 'ᴮP<sub>AORG,x</sub> =', ok: x => Math.abs(x + 4.964) < 0.006, w: 5 }, { label: 'ᴮP<sub>AORG,y</sub> =', ok: x => Math.abs(x + 0.598) < 0.006, w: 5 }],
   check: v => Math.abs(v[0] + 4) < 0.01 && Math.abs(v[1] + 3) < 0.01 ? t('(−4, −3) ยังเขียนตามแกนของ {A}: ต้องคูณด้วย Rᵀ ด้วย', '(−4, −3) is still written along the axes of {A}: multiply by Rᵀ as well') : (Math.abs(v[0] - 4.964) < 0.01 ? t('ลืมเครื่องหมายลบ', 'You forgot the minus sign') : '') });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; }, steps: [
   { why: t('<b>เขียน ᴬ<sub>B</sub>T</b>', '<b>Write ᴬ<sub>B</sub>T</b>'), tex: `{}^{A}_{B}T = ${TT(E.ex25.T)}` },
   { why: t('<b>ส่วนหมุน</b>: ทรานสโพส', '<b>Rotation part</b>: transpose'), tex: `{}^{B}_{A}R = {}^{A}_{B}R^T = ${CH2.texM(RB.tr(RB.TR(E.ex25.T)), 3)}` },
-  { why: t('<b>ส่วนตำแหน่ง</b>: −Rᵀ ᴬP<sub>BORG</sub>', '<b>Position part</b>: −Rᵀ ᴬP<sub>BORG</sub>'), tex: '-\\begin{bmatrix} 0.866 & 0.5 & 0 \\\\ -0.5 & 0.866 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix}\\begin{bmatrix} 4 \\\\ 3 \\\\ 0 \\end{bmatrix} = -\\begin{bmatrix} 4.964 \\\\ 0.598 \\\\ 0 \\end{bmatrix}' },
+  { why: t('<b>ส่วนตำแหน่ง</b>: −Rᵀ ᴬP<sub>BORG</sub>', '<b>Position part</b>: −Rᵀ ᴬP<sub>BORG</sub>'), tex: '\\begin{aligned} &-\\begin{bmatrix} 0.866 & 0.5 & 0 \\\\ -0.5 & 0.866 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix}\\begin{bmatrix} 4 \\\\ 3 \\\\ 0 \\end{bmatrix} \\\\ &= -\\begin{bmatrix} 4.964 \\\\ 0.598 \\\\ 0 \\end{bmatrix} \\end{aligned}' },
   { why: t('<b>รวมเป็น ᴮ<sub>A</sub>T</b> และตรวจ: ความยาว 5 เท่ากับ |(4, 3)|', '<b>Assemble ᴮ<sub>A</sub>T</b> and check: its length is 5, like |(4, 3)|'), tex: `{}^{B}_{A}T = ${TT(E.ex25.Ti)}` }],
   answer: t('\\({}^{B}P_{AORG} = (-4.964,\\ -0.598,\\ 0)^T\\) · ตรวจได้อีกทางด้วย \\({}^{A}_{B}T\\,{}^{B}_{A}T = I\\)', '\\({}^{B}P_{AORG} = (-4.964,\\ -0.598,\\ 0)^T\\) · another check: \\({}^{A}_{B}T\\,{}^{B}_{A}T = I\\)') });
 
@@ -182,12 +200,20 @@ const read3 = () => { const BT = RB.T(RB.mm(RB.Rz(S3s.yaw), RB.Rx(Math.PI)), S3s
 const ctl3 = document.getElementById('ctl3'), sl3 = [];
 [['x', 0, 0.2, 0.9], ['y', 1, -0.5, 0.5], ['z', 2, 0.3, 0.8]].forEach(([n, i, lo, hi]) => sl3.push(ui.slider(ctl3, { id: 'tp' + n, label: `ᴮP<sub>TORG</sub> ${n}`, min: lo, max: hi, step: 0.01, value: S3s.p[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { S3s.p[i] = v; read3(); } })));
 const slY = ui.slider(ctl3, { id: 'tyaw', label: t('หมุนเครื่องมือรอบแกนตั้ง', 'turn the tool about the vertical'), min: -180, max: 180, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { S3s.yaw = rad(v); read3(); } });
-ui.buttons(document.getElementById('opt3'), [{ label: t('↺ ตำแหน่งของโจทย์', '↺ problem position'), onclick: () => { S3s.p = RB.Tp(B.BT).slice(); S3s.yaw = 0; sl3.forEach((s, i) => s.set(S3s.p[i])); slY.set(0); read3(); } },
+ui.buttons(document.getElementById('opt3'), [{ label: t('↺ ตำแหน่งของโจทย์', '↺ problem position'), onclick: () => resetT() },
   { label: t('ไปที่สลักเกลียว', 'go to the bolt'), onclick: () => { S3s.p = RB.Tp(B.BG).slice(); sl3.forEach((s, i) => s.set(S3s.p[i])); read3(); } }]); read3();
+/* 3: the walk from {T} back to {B} (against the arrow), then on along B → S → G; the bolt in the base frame; the arrow back to {B} and then to the bolt, each walked along the axes of {T} */
+const resetT = () => { S3s.p = RB.Tp(B.BT).slice(); S3s.yaw = 0; sl3.forEach((sl, i) => sl.set(S3s.p[i])); slY.set(0); read3(); };
+S3s.ov = (s, st) => { const k = st.step; if (!k) return; const p = st.p, RT = RB.mm(RB.Rz(st.yaw || 0), RB.Rx(Math.PI)), Ti = RB.Ti(RB.T(RT, p)), G = RB.Tp(B.BG), AT = [0, 1, 2].map(j => RB.col(RT, j));
+  const axT = () => AT.forEach((d, j) => OV.name(s, OV.v(p, d, 0.27), K3[j], 'XYZ'[j], { sub: 'T', s: 26 })), f = x => u(x, 3);
+  if (k === 1) { const n = RB.sc(RB.unit(RB.cross(p, [0, 0, 1])), 0.045); OV.vec(s, OV.v(p, n), n, 'p', 'T', { pre: 'B', sub: 'T', post: '⁻¹', s: 30, at: 0.45, dx: 20, dy: 34, a: 'l' }); }
+  if (k === 2) { OV.vec(s, [0, 0, 0.004], G, 'b', 'T', { pre: 'B', sub: 'G', s: 30, at: 0.6, dx: -16, dy: -16, a: 'r' }); OV.name(s, G, 'b', `(${G.map(f).join(', ')})`, { ...o0, dx: 26, dy: 34, a: 'l' }); }
+  if (k === 3) { const c = RB.Tp(Ti); axT(); walk(s, p, AT, c, c.map(f), [{ dy: -14 }, { dx: 14, a: 'l' }, { dx: -14, a: 'r' }]); }
+  if (k === 4) { const c = RB.Tv(Ti, G); axT(); walk(s, p, AT, c, c.map(f), [{ dy: -14 }, { dx: 14, a: 'l' }, { dx: 14, a: 'l' }]); } };
 CH2.sim('cv3', S3s, 'bolt', { aspect: 0.75, maxH: 540 });
 LS.ask(document.getElementById('ask3'), { fields: [{ label: t('ที่ตำแหน่งของโจทย์: ᵀP<sub>GORG</sub> = (', 'at the problem position: ᵀP<sub>GORG</sub> = ('), ok: x => Math.abs(x - 0.1) < 0.006, w: 4 }, { label: ',', ok: x => Math.abs(x - 0.5) < 0.006, w: 4 }, { label: ',', ok: x => Math.abs(x - 0.3) < 0.006, w: 4 }],
   check: v => Math.abs(v[1] + 0.5) < 0.01 || Math.abs(v[2] + 0.3) < 0.01 ? t('นั่นคือ ᴮP<sub>GORG</sub> − ᴮP<sub>TORG</sub> ซึ่งยังเขียนตามแกนของ {B}: Z<sub>T</sub> ชี้ลง Y<sub>T</sub> ชี้ไปทาง −Y<sub>B</sub>', 'That is ᴮP<sub>GORG</sub> − ᴮP<sub>TORG</sub>, still along the axes of {B}: Z<sub>T</sub> points down and Y<sub>T</sub> along −Y<sub>B</sub>') : '' });
-LS.stepper(document.getElementById('st3'), { steps: [
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; if (k) resetT(); }, steps: [
   { why: t('<b>เดินจาก {T} ไป {G}</b>: สวนลูกศร B→T แล้วตาม B→S และ S→G', '<b>Walk from {T} to {G}</b>: against B→T, then along B→S and S→G'), tex: '{}^{T}_{G}T = {}^{B}_{T}T^{-1}\\;{}^{B}_{S}T\\;{}^{S}_{G}T' },
   { why: t('<b>สลักเกลียวในเฟรมฐาน</b> (สองตัวหลัง)', '<b>The bolt in the base frame</b> (the last two factors)'), tex: `{}^{B}_{G}T = {}^{B}_{S}T\\,{}^{S}_{G}T = ${TT(B.BG)}` },
   { why: t('<b>หาผกผันของ ᴮ<sub>T</sub>T</b> ด้วยกฎ [Rᵀ, −RᵀP]', '<b>Invert ᴮ<sub>T</sub>T</b> with the rule [Rᵀ, −RᵀP]'), tex: `{}^{B}_{T}T^{-1} = ${TT(RB.Ti(B.BT))}` },

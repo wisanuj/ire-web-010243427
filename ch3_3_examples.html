@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -128,59 +128,110 @@ document.addEventListener('mc:ready', () => {
 const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, E = CH3.EX, T4 = (T, d = 3) => CH2.htmlM(T, d, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true }), TT = T => CH2.texM(T, 3);
 const Tx = rows => `\\begin{bmatrix} ${rows.map(r => r.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
 /* joint sliders for an example: names, kinds (R in degrees, P in metres) */
-const jsl = (el, S, names, kinds, onch, ranges) => names.forEach((n, i) => ui.slider(el, { id: el.id + i, label: n, min: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][0] : -150) : 0.1, max: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][1] : 150) : 0.6, step: kinds[i] === 'R' ? 1 : 0.01, value: kinds[i] === 'R' ? Math.round(deg(S.q[i])) : S.q[i], fmt: v => kinds[i] === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { S.q[i] = kinds[i] === 'R' ? rad(v) : v; onch(); } }));
+const jsl = (el, S, names, kinds, onch, ranges) => names.map((n, i) => ui.slider(el, { id: el.id + i, label: n, min: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][0] : -150) : 0.1, max: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][1] : 150) : 0.6, step: kinds[i] === 'R' ? 1 : 0.01, value: kinds[i] === 'R' ? Math.round(deg(S.q[i])) : S.q[i], fmt: v => kinds[i] === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { S.q[i] = kinds[i] === 'R' ? rad(v) : v; onch(); } }));
+/* put an example back to its own joint values q and move its sliders (a step of the solution opens: its numbers must match the picture) */
+const put = (S, sl, kinds, q, onch, el) => { S.q = q.slice(); sl.forEach((x, i) => x.set(kinds[i] === 'R' ? Math.round(deg(S.q[i])) : S.q[i])); onch(); if (el && S.el === undefined) S.el = el; };   // el: look down a little more (angles about the vertical axis 1), unless the view was already turned by hand
+/* the step overlays (window.S3.OV): frame origins and axes, a dimension set off from the link it measures, an angle with its dashed reference */
+const Pt = T => RB.Tp(T), dir = (T, j) => RB.col(RB.TR(T), j), dg = x => `${RB.u(deg(x), 0)}°`, lb = { m: 0, s: 24 }, UP = [0, 0, 1];
+const upish = d => d[2] >= 0 ? d : RB.sc(d, -1), leftOf = (s, k) => RB.sc(window.S3.axes(s.cam).x, k);   // leftOf: k metres to the left on the screen (a dimension beside a vertical column)
+const dim = (s, a, b, off, key, txt, o) => { const OV = window.S3.OV; OV.dist(s, OV.v(a, off), OV.v(b, off), key, txt, o); };
+const turn = (s, O, ref, w, r, key, txt, o) => { const OV = window.S3.OV; OV.ref(s, O, ref, r + 0.1); OV.ang(s, O, ref, w, r, key, txt, o); };
 
 /* ---------- 1: RPR ---------- */
 const R3 = E.rpr, S1 = { ex: 'rpr', q: R3.q.slice(), xyz: true, fit: true }, ro1 = document.getElementById('ro1');
 const read1 = () => { ro1.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(R3.T03(R3.L, S1.q))}</div>`; };
-jsl(document.getElementById('ctl1'), S1, ['θ₁', 'd₂', 'θ₃'], ['R', 'P', 'R'], read1); read1(); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 460 });
+const sl1 = jsl(document.getElementById('ctl1'), S1, ['θ₁', 'd₂', 'θ₃'], ['R', 'P', 'R'], read1); read1(); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 460 });
+/* the open step on the arm: the table's entries (1), what each link transform does (2), the position column of ⁰₃T (3) and its numbers (4) */
+S1.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Y = i => dir(F[i], 1), Z = i => dir(F[i], 2), q = st.q, r = q[1] + R3.L.L2, up = RB.sc(UP, 0.07);
+  const top1 = OV.v(O(1), UP, 0.13), top3 = OV.v(O(3), Z(3), 0.11);   // θ₁ and θ₃ are drawn a little up their joint axes, clear of the joints
+  if (k === 1) { OV.ang(s, O(1), Z(1), Z(2), 0.13, 'am', 'α', { sub: '1', post: ' = 90°', dx: 34, dy: -14 }); OV.name(s, O(1), 'am', 'a', { sub: '1', post: ' = 0', a: 'r', dx: -26, dy: 44 });
+    dim(s, O(2), O(3), up, 'p', 'd', { sub: '3', post: ' = L₂', dy: -18 }); OV.name(s, O(2), 'am', 'α₂ = a₂ = 0', { ...lb, s: 26, dy: 46 }); }   // axes 1, 2 cross at 90°; axis 3 lies on axis 2
+  if (k === 2) { turn(s, top1, X(0), X(1), 0.16, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 });   // ⁰₁T
+    dim(s, O(1), O(2), up, 'p', 'd', { sub: '2', dy: -18 });   // ¹₂T: d₂ along Z₂ = −Y₁
+    dim(s, O(2), O(3), up, 'p', 'L', { sub: '2', dy: -18 }); turn(s, top3, X(2), X(3), 0.13, 'pk', 'θ', { sub: '3', dx: 16, dy: -10 }); }   // ²₃T
+  if (k === 3) { OV.vec(s, OV.v(O(1), up), OV.v(O(3), up), 'pk', 'd₂ + L₂', { ...lb, s: 26, dy: -18 }); OV.name(s, OV.v(O(3), up), 'pk', t('ทิศ (s₁, −c₁, 0) = Z₃', 'direction (s₁, −c₁, 0) = Z₃'), { ...lb, s: 22, dy: -40 }); }   // the end is d₂ + L₂ out from axis 1, along Z₃ = (s₁, −c₁, 0)
+  if (k === 4) { const A = OV.v(O(1), X(0), r * Math.sin(q[0])); OV.vec(s, O(1), A, 'am', `${RB.u(r, 2)} sin ${dg(q[0])}`, { ...lb, dy: 30 }); OV.vec(s, A, O(3), 'p', `−${RB.u(r, 2)} cos ${dg(q[0])}`, { ...lb, a: 'l', dx: 14 });
+    dim(s, O(1), O(3), up, 'pk', `${RB.u(r, 2)} m`, { ...lb, s: 26, dy: -18 }); } };
 CH3.dhAsk(document.getElementById('tab1'), { ans: R3.sym, opts: ['0', '90°', 'L₂', 'd₂', 'θ₁', 'θ₂', 'θ₃'], check: v => v[7] === 'θ₂' ? t('ข้อต่อ 2 เป็นข้อต่อเลื่อน: ตัวแปรคือ d₂ ส่วน θ₂ คงที่ (= 0)', 'Joint 2 slides: its variable is d₂; θ₂ is fixed (= 0)') : '' });
 const p1 = R3.T03(R3.L, R3.q);
 LS.ask(document.getElementById('ask1'), { fields: [{ label: t('ที่ค่าตั้งต้น (30°, 0.35 m, 45°): p<sub>x</sub> =', 'at the start values (30°, 0.35 m, 45°): p<sub>x</sub> ='), ok: x => Math.abs(x - p1[0][3]) < 0.006, w: 5 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x - p1[1][3]) < 0.006, w: 5 }] });
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) put(S1, sl1, ['R', 'P', 'R'], R3.q, read1, 38); }, steps: [
   { why: t('<b>ตาราง</b>: แกน 1 กับ 2 ตัดกันตั้งฉาก (a₁ = 0, α₁ = 90°) แกน 3 อยู่แนวเดียวกับแกน 2 (α₂ = a₂ = 0, d₃ = L₂)', '<b>The table</b>: axes 1 and 2 cross at right angles (a₁ = 0, α₁ = 90°); axis 3 lies on axis 2 (α₂ = a₂ = 0, d₃ = L₂)'), body: CH3.dhTable(R3.sym) },
-  { why: t('<b>เมทริกซ์ของแต่ละแถว</b>', '<b>One matrix per row</b>'), tex: `{}^{0}_{1}T = ${Tx([['c_1', '-s_1', 0, 0], ['s_1', 'c_1', 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])},\\ {}^{1}_{2}T = ${Tx([[1, 0, 0, 0], [0, 0, -1, '-d_2'], [0, 1, 0, 0], [0, 0, 0, 1]])},\\ {}^{2}_{3}T = ${Tx([['c_3', '-s_3', 0, 0], ['s_3', 'c_3', 0, 0], [0, 0, 1, 'L_2'], [0, 0, 0, 1]])}` },
-  { why: t('<b>คูณ</b> (Craig ตัวอย่าง 3.4)', '<b>Multiply</b> (Craig example 3.4)'), tex: `{}^{0}_{3}T = ${Tx([['c_1c_3', '-c_1s_3', 's_1', 's_1(d_2 + L_2)'], ['s_1c_3', '-s_1s_3', '-c_1', '-c_1(d_2 + L_2)'], ['s_3', 'c_3', 0, 0], [0, 0, 0, 1]])}` },
-  { why: t('<b>แทนค่า</b> θ₁ = 30°, d₂ = 0.35, L₂ = 0.15', '<b>Put in</b> θ₁ = 30°, d₂ = 0.35, L₂ = 0.15'), tex: `p_x = \\sin 30^\\circ (0.5) = ${RB.d(p1[0][3], 3)},\\quad p_y = -\\cos 30^\\circ (0.5) = ${RB.d(p1[1][3], 3)}` }],
+  { why: t('<b>เมทริกซ์ของแต่ละแถว</b>', '<b>One matrix per row</b>'), tex: `\\begin{aligned} {}^{0}_{1}T &= ${Tx([['c_1', '-s_1', 0, 0], ['s_1', 'c_1', 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])} \\\\ {}^{1}_{2}T &= ${Tx([[1, 0, 0, 0], [0, 0, -1, '-d_2'], [0, 1, 0, 0], [0, 0, 0, 1]])} \\\\ {}^{2}_{3}T &= ${Tx([['c_3', '-s_3', 0, 0], ['s_3', 'c_3', 0, 0], [0, 0, 1, 'L_2'], [0, 0, 0, 1]])} \\end{aligned}` },
+  { why: t('<b>คูณ</b> (Craig ตัวอย่าง 3.4)', '<b>Multiply</b> (Craig example 3.4)'), tex: `\\small {}^{0}_{3}T = ${Tx([['c_1c_3', '-c_1s_3', 's_1', 's_1(d_2 + L_2)'], ['s_1c_3', '-s_1s_3', '-c_1', '-c_1(d_2 + L_2)'], ['s_3', 'c_3', 0, 0], [0, 0, 0, 1]])}` },
+  { why: t('<b>แทนค่า</b> θ₁ = 30°, d₂ = 0.35, L₂ = 0.15', '<b>Put in</b> θ₁ = 30°, d₂ = 0.35, L₂ = 0.15'), tex: `\\begin{aligned} p_x &= \\sin 30^\\circ (0.5) = ${RB.d(p1[0][3], 3)} \\\\ p_y &= -\\cos 30^\\circ (0.5) = ${RB.d(p1[1][3], 3)} \\end{aligned}` }],
   answer: t('ปลายแขนอยู่ห่างแกน 1 เป็นระยะ d₂ + L₂ ในทิศ (s₁, −c₁, 0)', 'The end of the arm is d₂ + L₂ from axis 1, in the direction (s₁, −c₁, 0)') });
 
 /* ---------- 2: 90° twist ---------- */
 const TW = E.twist, S2 = { ex: 'twist', q: TW.q.slice(), xyz: true, fit: true }, ro2 = document.getElementById('ro2');
 const read2 = () => { ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(TW.T03(TW.L, S2.q))}</div>`; };
-jsl(document.getElementById('ctl2'), S2, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read2); read2(); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 460 });
+const sl2 = jsl(document.getElementById('ctl2'), S2, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read2); read2(); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 460 });
+/* the open step: the table's lengths and twist (1), the position of {3} in {1} (2) and in {0} (3) */
+S2.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Y = i => dir(F[i], 1), Z = i => dir(F[i], 2), q = st.q, L = TW.L, r = L.L1 + L.L2 * Math.cos(q[1]);
+  if (k === 1) { dim(s, O(1), O(2), RB.sc(UP, 0.07), 'am', 'a', { sub: '1', post: ' = L₁', dy: -18 }); OV.ref(s, O(2), Z(1), 0.22); OV.ang(s, O(2), Z(1), Z(2), 0.13, 'am', 'α', { sub: '1', post: ' = 90°', dx: 30, dy: -12 });
+    dim(s, O(2), O(3), RB.sc(upish(Y(2)), 0.07), 'am', 'a', { sub: '2', post: ' = L₂', a: 'r', dx: -12, dy: -12 }); OV.name(s, O(3), 'ink', '{W} = {3}', { ...lb, s: 26, dy: 52 }); }
+  if (k === 2) { const n = RB.sc(Z(2), -0.07), K = OV.v(O(1), X(1), r);   // ¹₃T: along X₁ by L₁ + L₂c₂, then up Z₁ by L₂s₂ (set off beside the arm)
+    OV.vec(s, OV.v(O(1), n), OV.v(K, n), 'am', 'L₁ + L₂c₂', { ...lb, dy: 30 }); OV.vec(s, OV.v(K, n), OV.v(O(3), n), 'p', 'L₂s₂', { ...lb, a: 'l', dx: 14 });
+    turn(s, O(2), X(1), X(2), 0.13, 'pk', 'θ', { sub: '2', dx: 16, dy: 8 }); turn(s, O(3), X(1), X(3), 0.13, 'pk', 'θ₂ + θ₃', { ...lb, s: 26, a: 'l', dx: 16 }); }
+  if (k === 3) { const A = OV.v(O(1), X(0), r * Math.cos(q[0])), B = OV.v(A, Y(0), r * Math.sin(q[0]));   // ⁰₃T: c₁r along X₀, s₁r along Y₀, L₂s₂ up
+    turn(s, OV.v(O(1), UP, 0.07), X(0), X(1), 0.16, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 });
+    OV.vec(s, O(1), A, 'am', 'c₁(L₁ + L₂c₂)', { ...lb, dy: 30 }); OV.vec(s, A, B, 'am', 's₁(L₁ + L₂c₂)', { ...lb, a: 'l', dx: 14 }); OV.vec(s, B, O(3), 'p', 'L₂s₂', { ...lb, a: 'l', dx: 14 }); } };
 CH3.dhAsk(document.getElementById('tab2'), { ans: TW.sym, opts: ['0', '90°', 'L₁', 'L₂', 'θ₁', 'θ₂', 'θ₃'], check: v => v[5] === '0' ? t('แกน 1 กับแกน 2 อยู่ห่างกัน L₁ ตามเส้นตั้งฉากร่วม: a₁ = L₁', 'Axes 1 and 2 are L₁ apart along their common perpendicular: a₁ = L₁') : '' });
-LS.stepper(document.getElementById('st2'), { steps: [
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) put(S2, sl2, ['R', 'R', 'R'], TW.q, read2, 34); }, steps: [
   { why: t('<b>ตาราง</b>: แกน 1 ตั้ง แกน 2 นอน ห่างกัน L₁ และบิด 90° แกน 2 กับ 3 ขนาน ห่างกัน L₂ เฟรม {W} = {3} จึงไม่มี L₃', '<b>The table</b>: axis 1 vertical, axis 2 horizontal, L₁ apart and twisted 90°; axes 2 and 3 parallel, L₂ apart; {W} = {3}, so no L₃'), body: CH3.dhTable(TW.sym) },
-  { why: t('<b>สองตัวหลัง</b>', '<b>The last two</b>'), tex: `{}^{1}_{3}T = {}^{1}_{2}T\\,{}^{2}_{3}T = ${Tx([['c_{23}', '-s_{23}', 0, 'L_1 + L_2c_2'], [0, 0, -1, 0], ['s_{23}', 'c_{23}', 0, 'L_2s_2'], [0, 0, 0, 1]])}` },
-  { why: t('<b>คูณด้วย ⁰₁T</b>', '<b>Multiply by ⁰₁T</b>'), tex: `{}^{0}_{3}T = ${Tx([['c_1c_{23}', '-c_1s_{23}', 's_1', 'c_1(L_1 + L_2c_2)'], ['s_1c_{23}', '-s_1s_{23}', '-c_1', 's_1(L_1 + L_2c_2)'], ['s_{23}', 'c_{23}', 0, 'L_2s_2'], [0, 0, 0, 1]])}` }],
+  { why: t('<b>สองตัวหลัง</b>', '<b>The last two</b>'), tex: `\\begin{aligned} {}^{1}_{3}T &= {}^{1}_{2}T\\,{}^{2}_{3}T \\\\ &= ${Tx([['c_{23}', '-s_{23}', 0, 'L_1 + L_2c_2'], [0, 0, -1, 0], ['s_{23}', 'c_{23}', 0, 'L_2s_2'], [0, 0, 0, 1]])} \\end{aligned}` },
+  { why: t('<b>คูณด้วย ⁰₁T</b>', '<b>Multiply by ⁰₁T</b>'), tex: `\\small {}^{0}_{3}T = ${Tx([['c_1c_{23}', '-c_1s_{23}', 's_1', 'c_1(L_1 + L_2c_2)'], ['s_1c_{23}', '-s_1s_{23}', '-c_1', 's_1(L_1 + L_2c_2)'], ['s_{23}', 'c_{23}', 0, 'L_2s_2'], [0, 0, 0, 1]])}` }],
   answer: t('ตารางตรงกับลายมือในฉบับผู้สอนเดิม ตรวจสูตรกับภาพจำลองได้: เลื่อนแถบแล้วเทียบตัวเลข', 'The table matches the old teacher slides; check the formula against the simulation by moving the sliders') });
 
 /* ---------- 3: four-frame arm ---------- */
 const A4 = E.arm4, S3s = { ex: 'arm4', q: A4.q.slice(), xyz: true, fit: true }, ro3 = document.getElementById('ro3');
 const read3 = () => { ro3.innerHTML = `<div class="live"><span class="eq">⁰<sub>4</sub>T =</span>${T4(A4.T04(A4.L, S3s.q))}</div>`; };
-jsl(document.getElementById('ctl3'), S3s, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read3); read3(); CH2.sim('cv3', S3s, 'dh', { aspect: 0.8, maxH: 460 });
+const sl3 = jsl(document.getElementById('ctl3'), S3s, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read3); read3(); CH2.sim('cv3', S3s, 'dh', { aspect: 0.8, maxH: 460 });
+/* the open step: the table (1), the angles and the reach in the position column of ⁰₄T (2), the three heights that add up to p_z (3) */
+S3s.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Y = i => dir(F[i], 1), Z = i => dir(F[i], 2), q = st.q, L = A4.L, side = leftOf(s, 0.1);
+  if (k === 1) { dim(s, O(0), O(1), side, 'p', 'd', { sub: '1', post: ' = L₁ + L₂', a: 'l', dx: 14 }); OV.ref(s, O(2), Z(1), 0.22); OV.ang(s, O(2), Z(1), Z(2), 0.13, 'am', 'α', { sub: '1', post: ' = 90°', dx: 30, dy: -12 });
+    dim(s, O(2), O(3), RB.sc(upish(Y(2)), 0.07), 'am', 'a', { sub: '2', post: ' = L₃', a: 'r', dx: -12, dy: -12 }); dim(s, O(3), O(4), RB.sc(upish(Y(3)), 0.07), 'am', 'a', { sub: '3', post: ' = L₄', dy: -18 }); }
+  if (k === 2) { const R = L.L3 * Math.cos(q[1]) + L.L4 * Math.cos(q[1] + q[2]), K = OV.v(O(1), X(1), R);   // c₂, c₂₃, s₂₃ are angles from the horizontal X₁; the reach R sits in p_x = c₁R, p_y = s₁R
+    turn(s, OV.v(O(1), UP, 0.08), X(0), X(1), 0.16, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 }); turn(s, O(2), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', dx: 16, dy: 8 }); turn(s, O(3), X(1), X(3), 0.13, 'am', 'θ₂ + θ₃', { ...lb, s: 26, a: 'l', dx: 16 });
+    OV.dist(s, O(1), K, 'p', 'L₃c₂ + L₄c₂₃', { ...lb, dy: 30 }); OV.ref(s, K, UP, O(4)[2] - K[2]); }
+  if (k === 3) { const K1 = OV.v(O(2), X(1), L.L3 * Math.cos(q[1])), K2 = OV.v(O(3), X(1), L.L4 * Math.cos(q[1] + q[2]));   // p_z = (L₁ + L₂) + L₃s₂ + L₄s₂₃, each one a vertical step
+    OV.vec(s, OV.v(O(0), side), OV.v(O(1), side), 'p', RB.u(L.L1 + L.L2, 2), { ...lb, s: 26, a: 'l', dx: 14 }); OV.ref(s, O(2), X(1), L.L3 * Math.cos(q[1])); OV.ref(s, O(3), X(1), L.L4 * Math.cos(q[1] + q[2]));
+    OV.vec(s, K1, O(3), 'am', `0.5 sin ${dg(q[1])}`, { ...lb, a: 'l', dx: 14 }); OV.vec(s, K2, O(4), 'pk', `0.4 sin(${dg(q[1] + q[2])})`, { ...lb, a: 'l', dx: 14 }); } };
 CH3.dhAsk(document.getElementById('tab3'), { ans: A4.sym, opts: ['0', '90°', 'L₁ + L₂', 'L₃', 'L₄', 'θ₁', 'θ₂', 'θ₃'], check: v => v[15] !== '0' ? t('เฟรม {4} ไม่มีข้อต่อ: θ₄ = 0 คงที่', 'Frame {4} has no joint: θ₄ = 0, fixed') : '' });
 const p3 = A4.T04(A4.L, A4.q);
 LS.ask(document.getElementById('ask3'), { fields: [{ label: t('ที่ (30°, 35°, −60°): ความสูงของเครื่องมือ p<sub>z</sub> =', 'at (30°, 35°, −60°): tool height p<sub>z</sub> ='), ok: x => Math.abs(x - p3[2][3]) < 0.006, w: 5 }] });
-LS.stepper(document.getElementById('st3'), { steps: [
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; if (k) put(S3s, sl3, ['R', 'R', 'R'], A4.q, read3, 32); }, steps: [
   { why: t('<b>ตาราง</b>: เสาสูง L₁ + L₂ (d₁) แกน 2 นอนตัดแกน 1 (α₁ = 90°) แขน L₃ และ L₄ ตาม X', '<b>The table</b>: a column L₁ + L₂ high (d₁), axis 2 horizontal through axis 1 (α₁ = 90°), arms L₃ and L₄ along X'), body: CH3.dhTable(A4.sym) },
-  { why: t('<b>ผลคูณ</b> (คูณจากปลายเข้ามา: ²₄T, ¹₄T, ⁰₄T)', '<b>The product</b> (from the tip inward: ²₄T, ¹₄T, ⁰₄T)'), tex: `{}^{0}_{4}T = ${Tx([['c_1c_{23}', '-c_1s_{23}', 's_1', 'c_1(L_3c_2 + L_4c_{23})'], ['s_1c_{23}', '-s_1s_{23}', '-c_1', 's_1(L_3c_2 + L_4c_{23})'], ['s_{23}', 'c_{23}', 0, 'L_1 + L_2 + L_3s_2 + L_4s_{23}'], [0, 0, 0, 1]])}` },
-  { why: t('<b>แทนค่า</b>', '<b>Put in numbers</b>'), tex: `p_z = 0.5 + 0.5\\sin 35^\\circ + 0.4\\sin(-25^\\circ) = ${RB.d(p3[2][3], 3)}` }],
+  { why: t('<b>ผลคูณ</b> (คูณจากปลายเข้ามา: ²₄T, ¹₄T, ⁰₄T)', '<b>The product</b> (from the tip inward: ²₄T, ¹₄T, ⁰₄T)'), tex: `\\begin{aligned} {}^{0}_{4}T &= ${Tx([['c_1c_{23}', '-c_1s_{23}', 's_1', 'p_x'], ['s_1c_{23}', '-s_1s_{23}', '-c_1', 'p_y'], ['s_{23}', 'c_{23}', 0, 'p_z'], [0, 0, 0, 1]])} \\\\ p_x &= c_1(L_3c_2 + L_4c_{23}) \\\\ p_y &= s_1(L_3c_2 + L_4c_{23}) \\\\ p_z &= L_1 + L_2 + L_3s_2 + L_4s_{23} \\end{aligned}` },
+  { why: t('<b>แทนค่า</b>', '<b>Put in numbers</b>'), tex: `\\begin{aligned} p_z &= 0.5 + 0.5\\sin 35^\\circ + 0.4\\sin(-25^\\circ) \\\\ &= ${RB.d(p3[2][3], 3)} \\end{aligned}` }],
   answer: t(`ความสูงของเครื่องมือ ${RB.u(p3[2][3], 3)} m`, `Tool height ${RB.u(p3[2][3], 3)} m`) });
 
 /* ---------- 4: six-axis arm ---------- */
 const IR = E.irb, S4 = { ex: 'irb', q: IR.zero.slice(), xyz: true, fit: true }, ro4 = document.getElementById('ro4');
 const read4 = () => { const T = IR.T06(S4.q, IR.a1, IR.a2, IR.d4); ro4.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(T)}</div><div class="term">${t('ตำแหน่ง (คอลัมน์ 4) คือจุดศูนย์กลางข้อมือ เทียบเฟรม {0} ที่ความสูงไหล่ 0.352 m', 'the position (column 4) is the wrist centre, relative to {0} at the shoulder height 0.352 m')}</div>`; };
-jsl(document.getElementById('ctl4'), S4, ['θ₁', 'θ₂', 'θ₃', 'θ₄', 'θ₅', 'θ₆'], ['R', 'R', 'R', 'R', 'R', 'R'], read4, [[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]]); read4();
+const K6 = ['R', 'R', 'R', 'R', 'R', 'R'], sl4 = jsl(document.getElementById('ctl4'), S4, ['θ₁', 'θ₂', 'θ₃', 'θ₄', 'θ₅', 'θ₆'], K6, read4, [[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]]); read4();
 CH2.sim('cv4', S4, 'dh', { aspect: 0.8, maxH: 500 });
+/* the open step: the wrist centre d₄ along Y₃ (1), the arm part ¹₃T in {1} (2), the reach and height of the wrist centre (3), the numbers at the example's pose (4).
+   Dimensions are set off along Z₂ (the shoulder axis, normal to the plane of the arm) so they do not hide in the links */
+const Q4 = [rad(90), -Math.PI / 2, 0, 0, Math.PI / 2, 0];   // the pose of the "try first" question and of step 4
+S4.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Z = i => dir(F[i], 2), q = st.q, n = RB.sc(Z(2), -0.08);
+  const reach = IR.a1 + IR.a2 * Math.cos(q[1]) - IR.d4 * Math.sin(q[1] + q[2]), K = OV.v(O(1), X(1), reach), top1 = OV.v(O(1), UP, 0.08);
+  if (k === 1) { dim(s, O(3), O(4), RB.sc(upish(X(3)), 0.07), 'p', t('d₄ ตาม Y₃', 'd₄ along Y₃'), { ...lb, s: 26, dy: -18 }); OV.pt(s, O(4), 'pk', t('จุดศูนย์กลางข้อมือ', 'wrist centre'), { ...lb, s: 22, r: 0.022, dy: 46 }); }
+  if (k === 2) { const K2 = OV.v(O(1), X(1), IR.a1 + IR.a2 * Math.cos(q[1]));   // ¹₃T column 4: a₁ + a₂c₂ along X₁, −a₂s₂ along Z₁
+    OV.vec(s, OV.v(O(1), n), OV.v(K2, n), 'am', 'a₁ + a₂c₂', { ...lb, dy: 30 }); OV.vec(s, OV.v(K2, n), OV.v(O(3), n), 'p', '−a₂s₂', { ...lb, a: 'l', dx: 14 });
+    turn(s, O(2), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', dx: 16, dy: 8 }); }
+  if (k === 3) { turn(s, top1, X(0), X(1), 0.18, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 });   // p_x, p_y = c₁, s₁ times the reach; p_z the height of the wrist centre over {0}
+    OV.vec(s, O(1), K, 'am', 'a₁ + a₂c₂ − d₄s₂₃', { ...lb, s: 22, dy: 30 }); OV.vec(s, K, O(4), 'p', '−a₂s₂ − d₄c₂₃', { ...lb, s: 22, a: 'l', dx: 14 }); }
+  if (k === 4) { turn(s, top1, X(0), X(1), 0.18, 'pk', 'θ', { sub: '1', post: ` = ${dg(q[0])}`, dx: 16, dy: -10 }); turn(s, O(2), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', post: ` = ${dg(q[1])}`, dx: 16, dy: 8 });
+    dim(s, O(1), O(2), n, 'am', 'a₁ = 0.07', { ...lb, s: 26, dy: 30 }); dim(s, O(2), O(3), n, 'am', 'a₂ = 0.36', { ...lb, s: 26, a: 'r', dx: -14 }); dim(s, O(3), O(4), n, 'p', 'd₄ = 0.38', { ...lb, s: 26, dy: -18 }); } };
 document.getElementById('tab4').innerHTML = CH3.dhTable(IR.symL) + `<div class="term">a₁ = 0.07 m, a₂ = 0.36 m, d₄ = 0.38 m</div>`;
 LS.ask(document.getElementById('ask4'), { fields: [{ label: t('ที่ θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> =', 'at θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> ='), ok: x => Math.abs(x) < 0.006, w: 4 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x - 0.45) < 0.006, w: 4 }, { label: 'p<sub>z</sub> =', ok: x => Math.abs(x - 0.36) < 0.006, w: 4 }],
   check: v => Math.abs(v[2] - 0.712) < 0.01 ? t('0.712 m คือความสูงจากพื้น แต่ ⁰₆T วัดจากเฟรม {0} ที่ความสูงไหล่ 0.352 m', '0.712 m is the height above the floor; ⁰₆T is measured from {0} at the shoulder height 0.352 m') : '' });
-LS.stepper(document.getElementById('st4'), { steps: [
-  { why: t('<b>ข้อมือก่อน</b>: ⁴₆T = ⁴₅T ⁵₆T แล้ว ³₆T = ³₄T ⁴₆T (เมทริกซ์ของข้อมือมีศูนย์มาก คูณง่าย)', '<b>The wrist first</b>: ⁴₆T = ⁴₅T ⁵₆T, then ³₆T = ³₄T ⁴₆T (the wrist matrices are full of zeros)'), tex: `{}^{3}_{6}T = ${Tx([['c_4c_5c_6 - s_4s_6', '-c_4c_5s_6 - s_4c_6', '-c_4s_5', 0], ['s_5c_6', '-s_5s_6', 'c_5', 'd_4'], ['-s_4c_5c_6 - c_4s_6', 's_4c_5s_6 - c_4c_6', 's_4s_5', 0], [0, 0, 0, 1]])}` },
+LS.stepper(document.getElementById('st4'), { onStep: k => { S4.step = k; if (k) put(S4, sl4, K6, Q4, read4, 30); }, steps: [
+  { why: t('<b>ข้อมือก่อน</b>: ⁴₆T = ⁴₅T ⁵₆T แล้ว ³₆T = ³₄T ⁴₆T (เมทริกซ์ของข้อมือมีศูนย์มาก คูณง่าย)', '<b>The wrist first</b>: ⁴₆T = ⁴₅T ⁵₆T, then ³₆T = ³₄T ⁴₆T (the wrist matrices are full of zeros)'), tex: `\\begin{aligned} {}^{3}_{6}T &= ${Tx([['r_{11}', 'r_{12}', '-c_4s_5', 0], ['s_5c_6', '-s_5s_6', 'c_5', 'd_4'], ['r_{31}', 'r_{32}', 's_4s_5', 0], [0, 0, 0, 1]])} \\\\ r_{11} &= c_4c_5c_6 - s_4s_6 \\\\ r_{12} &= -c_4c_5s_6 - s_4c_6 \\\\ r_{31} &= -s_4c_5c_6 - c_4s_6 \\\\ r_{32} &= s_4c_5s_6 - c_4c_6 \\end{aligned}` },
   { why: t('<b>ส่วนแขน</b>: ¹₃T = ¹₂T ²₃T', '<b>The arm part</b>: ¹₃T = ¹₂T ²₃T'), tex: `{}^{1}_{3}T = ${Tx([['c_{23}', '-s_{23}', 0, 'a_1 + a_2c_2'], [0, 0, 1, 0], ['-s_{23}', '-c_{23}', 0, '-a_2s_2'], [0, 0, 0, 1]])}` },
-  { why: t('<b>ตำแหน่ง</b> จาก ¹₆T = ¹₃T ³₆T แล้วหมุนด้วย θ₁ (คอลัมน์ 4 ของ ³₆T คือ (0, d₄, 0))', '<b>The position</b> from ¹₆T = ¹₃T ³₆T, then turned by θ₁ (column 4 of ³₆T is (0, d₄, 0))'), tex: 'p_x = c_1(a_1 + a_2c_2 - d_4s_{23}),\\quad p_y = s_1(a_1 + a_2c_2 - d_4s_{23}),\\quad p_z = -a_2s_2 - d_4c_{23}' },
-  { why: t('<b>แทนค่า</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0', '<b>Put in</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0'), tex: 'p_x = 0,\\quad p_y = 0.07 + 0 + 0.38 = 0.45,\\quad p_z = 0.36 - 0 = 0.36' }],
+  { why: t('<b>ตำแหน่ง</b> จาก ¹₆T = ¹₃T ³₆T แล้วหมุนด้วย θ₁ (คอลัมน์ 4 ของ ³₆T คือ (0, d₄, 0))', '<b>The position</b> from ¹₆T = ¹₃T ³₆T, then turned by θ₁ (column 4 of ³₆T is (0, d₄, 0))'), tex: '\\begin{aligned} p_x &= c_1(a_1 + a_2c_2 - d_4s_{23}) \\\\ p_y &= s_1(a_1 + a_2c_2 - d_4s_{23}) \\\\ p_z &= -a_2s_2 - d_4c_{23} \\end{aligned}' },
+  { why: t('<b>แทนค่า</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0', '<b>Put in</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0'), tex: '\\begin{aligned} p_x &= 0 \\\\ p_y &= 0.07 + 0 + 0.38 = 0.45 \\\\ p_z &= 0.36 - 0 = 0.36 \\end{aligned}' }],
   answer: t('(0, 0.45, 0.36) m: แขนหันไปทาง Y แต่ความสูงเท่าเดิม ทิศของเครื่องมือขึ้นกับ θ₄–θ₆ ด้วย ดูเมทริกซ์ใต้ภาพ', '(0, 0.45, 0.36) m: the arm faces Y at the same height. The tool orientation also depends on θ₄–θ₆: see the matrix under the picture') });
 
 /* ---------- A: standard frames ---------- */

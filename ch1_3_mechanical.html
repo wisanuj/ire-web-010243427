@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch1.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch1_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch1.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch1_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -149,16 +149,32 @@ const al = rows => `\\begin{aligned} ${rows.join(' \\\\ ')} \\end{aligned}`;
 const S1 = { A: [0.2, 0.62], B: [0.8, 0.22], n: 2, mode: 'ptp', u: 0, xyz: true }, SV = {};
 const ctl1 = document.getElementById('ctl1'), ro1 = document.getElementById('ro1');
 const read1 = () => { const dv = CH1.pathDev(S1); ro1.innerHTML = `${t('จุดต่อจุด', 'point-to-point')}, ${S1.n} ${t('จุดสอน', 'taught points')}: ${t('ออกนอกแนวมากสุด', 'max. distance from the seam')} <code>${u(dv * 1000, 1)} mm</code>`; };
-ui.slider(ctl1, { id: 'n1', label: t('จำนวนจุดสอน', 'taught points'), min: 2, max: 12, step: 1, value: 2, fmt: v => String(v), oninput: v => { S1.n = v; read1(); } });
-ui.radio(ctl1, [{ id: 'ptp', label: t('เดินแบบจุดต่อจุด', 'run point-to-point'), on: true }, { id: 'cp', label: t('เดินแบบเส้นทางต่อเนื่อง', 'run continuous path') }], id => { S1.mode = id; });
+const sl1 = ui.slider(ctl1, { id: 'n1', label: t('จำนวนจุดสอน', 'taught points'), min: 2, max: 12, step: 1, value: 2, fmt: v => String(v), oninput: v => { S1.n = v; read1(); } });
+const md1 = ui.radio(ctl1, [{ id: 'ptp', label: t('เดินแบบจุดต่อจุด', 'run point-to-point'), on: true }, { id: 'cp', label: t('เดินแบบเส้นทางต่อเนื่อง', 'run continuous path') }], id => { S1.mode = id; });
 read1();
+/* the open step, drawn on the welding scene (the arm's plane is z = 0.11; these lie a little above it):
+   1 the joint angles at A (amber) and at B (purple), the only ones the controller knows · 2 the arm at this moment: its links and angles, which give the tool point
+   · 3 the farthest the point-to-point path strays from the seam · 4 continuous path: many points along A–B, each turned into joint angles */
+const mid = (a, b) => a.map((x, i) => (x + b[i]) / 2);
+S1.ov = (s, st) => { const k = st.step; if (!k) return; const OV = window.S3.OV, { l1, l2, e } = CH1.PATH, z = 0.15, O = [0, 0, z], X0 = [1, 0, 0], A = st.A, B = st.B;
+  const arm = q => { const f = RB.fk2(l1, l2, q[0], q[1]); return { E: [f.x1, f.y1, z], T: [f.x, f.y, z], u1: [Math.cos(q[0]), Math.sin(q[0]), 0], u2: [Math.cos(q[0] + q[1]), Math.sin(q[0] + q[1]), 0] }; };
+  if (k === 1) { OV.ref(s, O, X0, 0.36); [[A, 'am', 'ᴬ', 0.16, 0.1], [B, 'p', 'ᴮ', 0.26, 0.12]].forEach(([p, key, sup, r1, r2]) => { const q = RB.ik2(l1, l2, p[0], p[1], e); if (!q.ok) return; const a = arm([q.t1, q.t2]);
+      OV.dist(s, O, a.E, key, null); OV.dist(s, a.E, a.T, key, null); OV.ang(s, O, X0, a.u1, r1, key, 'θ₁' + sup, { m: 0, s: 34, dx: 16 }); OV.ref(s, a.E, a.u1, 0.2); OV.ang(s, a.E, a.u1, a.u2, r2, key, 'θ₂' + sup, { m: 0, s: 34, dx: 18 }); }); }
+  if (k === 2) { const r = CH1.pathAt(st, st.u, st.mode); if (!r.ok) return; const a = arm(r.q); OV.name(s, mid(O, a.E), 'o', 'l', { sub: '1', s: 40, dx: -22, dy: 6, a: 'r' }); OV.name(s, mid(a.E, a.T), 'b', 'l', { sub: '2', s: 40, dx: 22, a: 'l' });
+    OV.ref(s, O, X0, 0.3); OV.ang(s, O, X0, a.u1, 0.15, 'am', 'θ', { sub: '1', s: 40, dx: 16 }); OV.ref(s, a.E, a.u1, 0.2); OV.ang(s, a.E, a.u1, a.u2, 0.11, 'p', 'θ', { sub: '2', s: 40, dx: 18 }); }
+  if (k === 3) { const L = Math.hypot(B[0] - A[0], B[1] - A[1]); let best = null;
+    for (let i = 0; i <= 240; i++) { const r = CH1.pathAt(st, i / 240, 'ptp'); if (!r.ok) return; const w = ((r.p[0] - A[0]) * (B[0] - A[0]) + (r.p[1] - A[1]) * (B[1] - A[1])) / (L * L), f = [A[0] + w * (B[0] - A[0]), A[1] + w * (B[1] - A[1])], dv = Math.hypot(r.p[0] - f[0], r.p[1] - f[1]);
+      if (!best || dv > best.dv) best = { dv, p: r.p, f }; }
+    OV.dist(s, [best.f[0], best.f[1], 0.13], [best.p[0], best.p[1], 0.13], 'pk', `${u(best.dv * 1000, 1)} mm`, { m: 0, s: 34, dx: 30, a: 'l' }); OV.pt(s, [best.p[0], best.p[1], 0.13], 'pk'); }
+  if (k === 4) { for (let i = 0; i <= 12; i++) OV.pt(s, [A[0] + (B[0] - A[0]) * i / 12, A[1] + (B[1] - A[1]) * i / 12, 0.13], 'gr', null, { r: 0.012 });
+    OV.name(s, [0.62, 0.04, 0.13], 'gr', t('จุดถี่ ๆ บน A–B: หามุมข้อต่อทุกจุด', 'many points on A–B, joint angles for each'), { m: 0, s: 28, a: 'c' }); } };
 RB.stage(document.getElementById('cv1'), 0.714, (c, W, H, dt, P) => { S1.u = (S1.u + dt * 0.25) % 1.25; const sv = Object.assign(SV, S1, { u: Math.min(1, S1.u) }); CH1.view.path(c, W, H, sv, P); }, { maxH: 480 });
 LS.choose(document.getElementById('ask1'), { options: [t('ตามแนวเชื่อมพอดี', 'follows the seam exactly'), t('โค้งออกนอกแนว', 'bows off the seam')], answer: 1 });
-LS.stepper(document.getElementById('st1'), {
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) { S1.n = 2; sl1.set(2); read1(); S1.mode = k >= 4 ? 'cp' : 'ptp'; md1.set(S1.mode); } },
   steps: [{ why: t('<b>จุดต่อจุด</b>: ตัวควบคุมรู้เพียงมุมข้อต่อที่ A และที่ B แล้วเปลี่ยนแต่ละมุมจากค่าเริ่มไปค่าสุดท้าย <b>เป็นเส้นตรงในปริภูมิข้อต่อ</b>', '<b>Point-to-point</b>: the controller only knows the joint angles at A and at B, and changes each angle from start to end <b>along a straight line in joint space</b>'),
       tex: '\\theta_i(s) = \\theta_i^A + s\\,(\\theta_i^B - \\theta_i^A),\\quad 0 \\le s \\le 1' },
     { why: t('<b>แต่ตำแหน่งปลายแขนเป็นฟังก์ชันไม่เชิงเส้นของมุม</b> (มี sin และ cos) เส้นตรงในปริภูมิข้อต่อจึงกลายเป็น <b>เส้นโค้ง</b> ในปริภูมิทำงาน (เส้นสีชมพู)', '<b>But the tool position is a non-linear function of the angles</b> (sines and cosines), so a straight line in joint space becomes <b>a curve</b> in the workspace (pink)'),
-      tex: 'x = l_1\\cos\\theta_1 + l_2\\cos(\\theta_1 + \\theta_2),\\quad y = l_1\\sin\\theta_1 + l_2\\sin(\\theta_1 + \\theta_2)' },
+      tex: al(['x &= l_1\\cos\\theta_1 + l_2\\cos(\\theta_1 + \\theta_2)', 'y &= l_1\\sin\\theta_1 + l_2\\sin(\\theta_1 + \\theta_2)']) },
     { why: t('<b>ผลลัพธ์</b>: สอนสองจุด ปลายแขนออกนอกแนวเชื่อมได้เป็นร้อยมิลลิเมตร เพิ่มจุดสอนช่วยได้ แต่ไม่มีวันตรงพอดี', '<b>Result</b>: with two taught points the tool strays about a hundred millimetres from the seam. More taught points help, but it is never exactly on it'),
       body: () => `<div class="sub2">${t('ค่าจากภาพจำลอง', 'from the simulation')}: n = 2 → <code>${u(CH1.pathDev({ ...S1, n: 2 }) * 1000, 1)} mm</code>, n = 5 → <code>${u(CH1.pathDev({ ...S1, n: 5 }) * 1000, 1)} mm</code></div>` },
     { why: t('<b>เส้นทางต่อเนื่อง</b>: ตัวควบคุมคำนวณจุดบนเส้นตรง A–B ถี่ ๆ และหามุมข้อต่อของทุกจุด ปลายแขนจึงอยู่บนแนวตลอด (กด "เดินแบบเส้นทางต่อเนื่อง")', '<b>Continuous path</b>: the controller computes many points along the line A–B and the joint angles at every one, so the tool stays on the seam (press "run continuous path")') }],
@@ -187,16 +203,31 @@ ui.slider(ctl2, { id: 't2', label: 'θ', min: 10, max: 180, step: 1, value: 90, 
 ui.slider(ctl2, { id: 'u2', label: t('ตำแหน่งที่สั่ง', 'commanded position'), min: 0, max: 1, step: 0.001, value: 0.75, fmt: v => `${Math.round(v * 100)}%`, oninput: v => { S2.u = v; } });
 read2();
 RB.stage(document.getElementById('cv2'), 0.68, (c, W, H, dt, P) => CH1.view.resol(c, W, H, S2, P), { maxH: 460 });
+/* the open step, on the swing of the link (the scene draws it 0.82 m long in the vertical x–z plane, pivot at z = 0.22; these lie a little in front of it):
+   1 the travel between the two ends, split into 2ⁿ steps · 2 the triangle l, l, θ and its chord d · 3 the chord split into 2ⁿ steps
+   · 4 the arc lθ the tip travels, split the same way · 5 both, with the angular step. The numbers use the problem's l, θ and n */
+const SUP = n => String(n).split('').map(ch => '⁰¹²³⁴⁵⁶⁷⁸⁹'[ch]).join('');
+S2.ov = (s, st) => { const k = st.step; if (!k) return; const OV = window.S3.OV, R = 0.82, zO = 0.22, yv = -0.07, a0 = Math.PI / 2 + st.th / 2, a1 = Math.PI / 2 - st.th / 2, P = (a, r = R) => [r * Math.cos(a), yv, zO + r * Math.sin(a)];
+  const O = [0, yv, zO], S = P(a0), E = P(a1), N = 2 ** st.bits, d = RB.chord(st.l, st.th), arc = st.l * st.th, mm = x => u(x * 1000, 3), top = P(Math.PI / 2), cm = [(S[0] + E[0]) / 2, yv, S[2]];
+  const chord = txt => OV.dist(s, S, E, 'pk', txt, { m: 0, s: 32, dy: -30, r: 0.006 });
+  /* the arc a little outside the scene's own (one turn from S to E, or two halves when θ is close to 180°) */
+  const arcAll = txt => { const Ra = R + 0.05; if (st.th < 3.05) OV.ang(s, O, OV.sub(S, O), OV.sub(E, O), Ra, 'am', null, { tr: 0.006 }); else { OV.ang(s, O, OV.sub(S, O), OV.sub(top, O), Ra, 'am', null, { tr: 0.006 }); OV.ang(s, O, OV.sub(top, O), OV.sub(E, O), Ra, 'am', null, { tr: 0.006 }); }
+    if (txt) OV.name(s, P(Math.PI / 2 + st.th * 0.3, Ra), 'am', txt, { m: 0, s: 32, a: 'r', dx: -12, dy: -14 }); };
+  if (k === 1) { OV.pt(s, S, 'am'); OV.pt(s, E, 'am'); OV.name(s, S, 'am', `2${SUP(st.bits)} = ${N} ${t('ขั้น', 'steps')}`, { m: 0, s: 32, a: 'l', dx: 20, dy: 120 }); }
+  if (k === 2) { OV.dist(s, O, S, 'ink', `l = ${u(st.l, 3)} m`, { m: 0, s: 30, dx: -40, a: 'r' }); OV.dist(s, O, E, 'ink', null); chord(`d = ${u(d, 4)} m`); }
+  if (k === 3) { chord(null); OV.name(s, cm, 'pk', `d / ${N} = ${mm(d / N)} mm`, { m: 0, s: 32, dx: -60, dy: 92, a: 'r' }); }
+  if (k === 4) { arcAll(`lθ = ${u(arc, 4)} m`); OV.name(s, P(Math.PI / 2 - st.th * 0.3, R + 0.05), 'am', `lθ / ${N} = ${mm(arc / N)} mm`, { m: 0, s: 30, a: 'l', dx: 12, dy: -14 }); }
+  if (k === 5) { chord(`d = ${u(d, 3)} m`); arcAll(`lθ = ${u(arc, 3)} m`); OV.name(s, O, 'p', `Δθ = θ / ${N} = ${u(RB.deg(st.th) / N, 3)}°`, { m: 0, s: 30, dy: 60 }); } };
 LS.ask(document.getElementById('ask2'), { fields: [{ label: t('(a) เชิงเส้น (mm) =', '(a) linear (mm) ='), ok: x => Math.abs(x - 1.381) < 0.006, w: 5 }, { label: t('(b) หมุน (mm) =', '(b) rotating (mm) ='), ok: x => Math.abs(x - 1.534) < 0.006, w: 5 }],
   check: v => Math.abs(v[0] - 1.534) < 0.006 ? t('(a) ต้องใช้ระยะคอร์ด d = √2 m ไม่ใช่ส่วนโค้ง', '(a) uses the chord d = √2 m, not the arc') : (Math.abs(v[1] - 0.088) < 0.002 ? t('0.088° คือขั้นของมุม ต้องคูณด้วยความยาวก้าน (เป็นเรเดียน) จึงได้ระยะที่ปลาย', '0.088° is the angular step; multiply by the link length (in radians) to get the distance at the tip') : '') });
 LS.stepper(document.getElementById('st2'), {
   steps: [{ why: t('<b>จำนวนขั้นของเอนโค้ดเดอร์ 10 บิต</b> (ภาพจำลองตั้งค่าตามโจทย์ให้แล้ว)', '<b>Number of steps of a 10-bit encoder</b> (the simulation is now set to the problem)'), tex: '2^{10} = 1024\\ \\text{steps}' },
-    { why: t('<b>(a) ระยะคอร์ด</b> ระหว่างสองจุด ด้วยกฎของโคไซน์', '<b>(a) The chord</b> between the two points, by the law of cosines'), tex: 'd = l\\sqrt{2(1 - \\cos\\theta)} = 1\\cdot\\sqrt{2(1 - \\cos 90^\\circ)} = \\sqrt2 = 1.4142\\ \\text{m}' },
+    { why: t('<b>(a) ระยะคอร์ด</b> ระหว่างสองจุด ด้วยกฎของโคไซน์', '<b>(a) The chord</b> between the two points, by the law of cosines'), tex: al(['d &= l\\sqrt{2(1 - \\cos\\theta)}', '&= 1\\cdot\\sqrt{2(1 - \\cos 90^\\circ)} = \\sqrt2 = 1.4142\\ \\text{m}']) },
     { why: t('<b>แบ่งเป็น 1024 ขั้น</b>', '<b>Split it into 1024 steps</b>'), tex: '\\frac{1.4142}{1024} = 1.381\\times10^{-3}\\ \\text{m} \\approx \\boxed{1.38\\ \\text{mm}}' },
-    { why: t('<b>(b) ส่วนโค้งที่ปลายก้านเดินทาง</b>: ใช้ θ เป็นเรเดียน', '<b>(b) The arc travelled by the tip</b>: θ in radians'), tex: 'l\\theta = 1 \\times \\frac{\\pi}{2} = 1.5708\\ \\text{m} \\;\\Rightarrow\\; \\frac{1.5708}{1024} = 1.534\\times10^{-3}\\ \\text{m} \\approx \\boxed{1.53\\ \\text{mm}}' },
+    { why: t('<b>(b) ส่วนโค้งที่ปลายก้านเดินทาง</b>: ใช้ θ เป็นเรเดียน', '<b>(b) The arc travelled by the tip</b>: θ in radians'), tex: al(['l\\theta &= 1 \\times \\frac{\\pi}{2} = 1.5708\\ \\text{m}', '\\frac{1.5708}{1024} &= 1.534\\times10^{-3}\\ \\text{m} \\approx \\boxed{1.53\\ \\text{mm}}']) },
     { why: t('<b>ตรวจ</b>: ขั้นของมุม และเหตุที่แกนหมุนหยาบกว่า', '<b>Check</b>: the angular step, and why the rotating link is coarser'), tex: al(['\\Delta\\theta &= 90^\\circ / 1024 = 0.088^\\circ', 'l\\theta &= 1.571\\ \\text{m} > d = 1.414\\ \\text{m}']) }],
   answer: t('(a) เชิงเส้น <b>1.381 × 10⁻³ m</b> · (b) หมุน <b>1.534 × 10⁻³ m</b> · ตรงกับคำตอบในสไลด์เดิม', '(a) linear <b>1.381 × 10⁻³ m</b> · (b) rotating <b>1.534 × 10⁻³ m</b> · the same as the answers on the old slides'),
-  onStep: k => { if (k >= 1) { S2.bits = 10; S2.th = rad(90); S2.l = 1; document.getElementById('b2').value = 10; document.getElementById('t2').value = 90; document.getElementById('b2').dispatchEvent(new Event('input')); document.getElementById('t2').dispatchEvent(new Event('input')); } } });
+  onStep: k => { S2.step = k; if (k >= 1) { S2.bits = 10; S2.th = rad(90); S2.l = 1; document.getElementById('b2').value = 10; document.getElementById('t2').value = 90; document.getElementById('b2').dispatchEvent(new Event('input')); document.getElementById('t2').dispatchEvent(new Event('input')); } } });
 
 /* ---------- 3: homework 1.2 (check only) ---------- */
 const SH = { l: 0.5, th: Math.PI, bits: 3, u: 0.3, show: 'rot' }; const ctl3 = document.getElementById('ctl3');

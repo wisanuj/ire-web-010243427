@@ -112,7 +112,7 @@ SC.first = (st = {}, o = {}) => { const kind = st.kind || 'R', qv = st.q === und
   frame(s, I, O, { name: '0', ref: true, L: 0.36, r: 0.005, ls: 30 }); frame(s, RB.TR(T1), P(T1), { name: '1', L: 0.28, ls: 30, lab: [{ dy: 34 }, {}, { dx: 22 }] });
   if (kind === 'R') { const m = angArc(s, O, [1, 0, 0], RB.col(RB.TR(T1), 0), 0.14, C.pk, 0.0045); if (m) lab(s, m, 'θ', { sub: '1', m: 1, c: 'pk', s: 36, a: 'c', dy: 40 }); }
   else { const m = v(O, [0, 0, 1], qv / 2); arrow(s, v(O, [-1, 0, 0], 0.12), v(P(T1), [-1, 0, 0], 0.12), C.p, 0.004); lab(s, v(m, [-1, 0, 0], 0.12), 'd', { sub: '1', m: 1, c: 'p', s: 36, a: 'r', dx: -12 }); }
-  return s; };
+  s.F = [RB.T(I, O), T1]; return s; };   // the frames {0}, {1} in world coordinates, for the page's step overlays
 
 /* ---- the same SCARA with Craig's frames (left) and the classical frames (right); the arms reach to the right, so the pair sits left of centre ---- */
 SC.convs = (st = {}, o = {}) => { const E = CH3.EX.scara, L = E.L, q = st.q || E.q, c3 = view([0.09, 0.05, 0.36], 5.6, -62, 20), s = scene(st.name || 'convs', 1800, 860, c3, o), A = S3.axes(c3), right = [-A.x[0], -A.x[1], 0];

@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=13">
-<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
-<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script>
+<link rel="stylesheet" href="assets/ire.css?v=14">
+<script src="assets/stops.js?v=14"></script><script src="assets/shell.js?v=14"></script>
+<script src="assets/robot.js?v=14"></script><script src="assets/lesson.js?v=14"></script><script src="assets/ch2.js?v=14"></script><script src="assets/ch3.js?v=14"></script><script src="assets/scene3d.js?v=14"></script><script src="assets/gl3d.js?v=14"></script><script src="assets/ch2_3d.js?v=14"></script><script src="assets/ch3_3d.js?v=14"></script>
 </head>
 <body>
 <div class="wrap">
@@ -116,13 +116,20 @@ CH2.sim('cvA', SA, 'link', { aspect: 0.8, maxH: 540 });
 /* ---------- 1: the joint variable (RPR arm) ---------- */
 const S1 = { ex: 'rpr', q: E.rpr.q.slice(), show: 2, xyz: true, fit: true }, ro1 = document.getElementById('ro1'), ctl1 = document.getElementById('ctl1');
 const read1 = () => { ro1.innerHTML = CH3.dhTable([['0', '0', '0', `θ₁ = ${Math.round(deg(S1.q[0]))}°`], ['90°', '0', `d₂ = ${S1.q[1].toFixed(2)} m`, '0'], ['0', '0', 'L₂ = 0.15 m', `θ₃ = ${Math.round(deg(S1.q[2]))}°`]], { hl: 1 }); };
-ui.slider(ctl1, { id: 'q1', label: 'θ₁', min: -120, max: 120, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S1.q[0] = rad(v); read1(); } });
-ui.slider(ctl1, { id: 'q2', label: t('d₂ (ข้อต่อเลื่อน)', 'd₂ (sliding joint)'), min: 0.1, max: 0.6, step: 0.01, value: 0.35, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S1.q[1] = v; read1(); } });
-ui.slider(ctl1, { id: 'q3', label: 'θ₃', min: -180, max: 180, step: 1, value: 45, fmt: v => `${v}°`, oninput: v => { S1.q[2] = rad(v); read1(); } }); read1();
+const sl1 = [ui.slider(ctl1, { id: 'q1', label: 'θ₁', min: -120, max: 120, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S1.q[0] = rad(v); read1(); } }),
+  ui.slider(ctl1, { id: 'q2', label: t('d₂ (ข้อต่อเลื่อน)', 'd₂ (sliding joint)'), min: 0.1, max: 0.6, step: 0.01, value: 0.35, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S1.q[1] = v; read1(); } }),
+  ui.slider(ctl1, { id: 'q3', label: 'θ₃', min: -180, max: 180, step: 1, value: 45, fmt: v => `${v}°`, oninput: v => { S1.q[2] = rad(v); read1(); } })]; read1();
 CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
+/* the open step of the solution, drawn on the arm (no step open: the scene marks row 2 itself, show: 2) */
+const Pt = T => RB.Tp(T), dir = (T, j) => RB.col(RB.TR(T), j), mid = (a, b) => a.map((x, i) => (x + b[i]) / 2);
+S1.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O1 = Pt(F[1]), O2 = Pt(F[2]);
+  if (k === 1) [[1, 0.07], [3, 0.11]].forEach(([i, lift]) => { const O = OV.v(Pt(F[i]), dir(F[i], 2), lift), Xp = dir(F[i - 1], 0); OV.ref(s, O, Xp, 0.24); OV.ang(s, O, Xp, dir(F[i], 0), 0.16, 'pk', 'θ', { sub: String(i), dx: 16, dy: -10 }); });   // revolute joints 1 and 3: θ from X_{i−1} to X_i, drawn a little up the joint axis Z_i (clear of the joint)
+  if (k === 2) { const off = RB.sc(dir(F[1], 0), -0.08); OV.dist(s, OV.v(O1, off), OV.v(O2, off), 'p', 'd', { sub: '2', a: 'r', dx: -14 }); OV.ref(s, O2, dir(F[1], 0), 0.24, 'pk'); OV.name(s, O2, 'pk', 'θ', { sub: '2', post: ' = 0', dx: 24, dy: 46 }); }   // the slide d₂ along Z₂; X₂ stays parallel to X₁
+  if (k === 3) { const Z1 = dir(F[1], 2), Z2 = dir(F[2], 2); OV.ref(s, OV.v(O1, Z1, -0.12), Z1, 0.42, 'z'); OV.ref(s, O1, Z2, -0.2, 'z');   // the two joint axes cross at {1}
+    OV.ang(s, O1, Z1, Z2, 0.13, 'am', 'α', { sub: '1', post: ' = 90°', dx: 34, dy: -14 }); OV.name(s, O1, 'am', 'a', { sub: '1', post: ' = 0', a: 'r', dx: -26, dy: 44 }); } };
 LS.choose(document.getElementById('ask1'), { options: ['α₁', 'a₁', 'd₂', 'θ₂'], answer: 2, labels: ['', '', '', ''] });
 document.querySelector('#ask1 .asklab').textContent = t('ข้อต่อ 2 เป็นข้อต่อเลื่อน ช่องไหนของแถวที่ 2 เปลี่ยนเมื่อมันเลื่อน?', 'Joint 2 slides. Which entry of row 2 changes when it moves?');
-LS.stepper(document.getElementById('st1'), { steps: [
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; S1.show = k ? 0 : 2; if (k) { S1.q = E.rpr.q.slice(); sl1[0].set(Math.round(deg(S1.q[0]))); sl1[1].set(S1.q[1]); sl1[2].set(Math.round(deg(S1.q[2]))); read1(); } }, steps: [
   { why: t('<b>ข้อต่อหมุน</b> หมุนรอบแกนของตัวเอง (Z<sub>i</sub>): มุมระหว่าง X<sub>i−1</sub> กับ X<sub>i</sub> คือ θ<sub>i</sub> จึงเปลี่ยน', '<b>A revolute joint</b> turns about its own axis Z<sub>i</sub>: the angle from X<sub>i−1</sub> to X<sub>i</sub>, θ<sub>i</sub>, changes') },
   { why: t('<b>ข้อต่อเลื่อน</b> เลื่อนตามแกนของตัวเอง: ระยะจาก X<sub>i−1</sub> ถึง X<sub>i</sub> ตาม Z<sub>i</sub> คือ d<sub>i</sub> จึงเปลี่ยน θ<sub>i</sub> คงที่', '<b>A prismatic joint</b> slides along its axis: the distance from X<sub>i−1</sub> to X<sub>i</sub> along Z<sub>i</sub>, d<sub>i</sub>, changes; θ<sub>i</sub> stays') },
   { why: t('<b>a และ α ไม่เปลี่ยนเลย</b>: เป็นรูปร่างของก้าน (ระยะและมุมระหว่างแกนข้อต่อสองแกน) ลองเลื่อนแถบใดก็ได้ แถวสีเหลืองมีเพียง d₂ ที่ขยับ', '<b>a and α never change</b>: they are the shape of the link (distance and angle between two joint axes). Move any slider: in the yellow row only d₂ moves') }],
@@ -137,23 +144,36 @@ ui.radio(document.getElementById('opt2'), [{ id: 'R', label: t('ข้อต่�
 CH2.sim('cv2', S2, 'first', { aspect: 0.9, maxH: 460 });
 LS.choose(document.getElementById('ask2'), { options: [t('d₁ เป็นตัวแปร และ θ₁ = 0', 'd₁ varies and θ₁ = 0'), t('θ₁ เป็นตัวแปร และ d₁ = 0', 'θ₁ varies and d₁ = 0'), t('ทั้ง d₁ และ θ₁ เป็นตัวแปร', 'both d₁ and θ₁ vary')], answer: 0 });
 document.querySelector('#ask2 .asklab').textContent = t('ถ้าข้อต่อแรกเป็นข้อต่อเลื่อน และ {0} ทับ {1} เมื่อ d₁ = 0 ข้อใดถูก?', 'The first joint slides and {0} coincides with {1} when d₁ = 0. Which is right?');
-LS.stepper(document.getElementById('st2'), { steps: [
+/* the open step: Z₀ and Z₁ on one line (a₀ = α₀ = 0); the fixed parameter of each kind of joint is zero */
+S2.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = Pt(F[0]), O1 = Pt(F[1]), Z = [0, 0, 1];
+  if (k === 1) { OV.ref(s, OV.v(O, Z, -0.1), Z, 0.66, 'z'); OV.name(s, OV.v(O, Z, 0.56), 'z', t('Z₀ กับ Z₁ อยู่บนเส้นเดียวกัน', 'Z₀ and Z₁ on one line'), { m: 0, s: 22, a: 'l', dx: 16 });
+    OV.name(s, O, 'am', 'a', { sub: '0', post: ' = 0', a: 'r', dx: -56, dy: 54 }); OV.name(s, O, 'am', 'α', { sub: '0', post: ' = 0', a: 'r', dx: -56, dy: 90 }); }
+  if (k === 2 && st.kind === 'R') { OV.ref(s, OV.v(O, Z, -0.1), Z, 0.66, 'z'); OV.name(s, O, 'p', 'd', { sub: '1', post: ' = 0', a: 'r', dx: -56, dy: 54 }); }   // turns about Z₀, does not slide
+  if (k === 3 && st.kind === 'P') { OV.ref(s, O, [1, 0, 0], 0.4, 'pk'); OV.name(s, OV.v(O1, [1, 0, 0], 0.16), 'pk', 'θ', { sub: '1', post: ' = 0', dy: 44 }); } };   // slides along Z₀: X₁ stays parallel to X₀
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) document.querySelectorAll('#opt2 button')[k === 3 ? 1 : 0].click(); }, steps: [   // each step puts the example's own joint back (the radio button resets it)
   { why: t('<b>ก้านแรกมีแกนข้อต่อข้างเดียว</b> จึงเลือก {0} ได้อิสระ Craig ให้ {0} ทับ {1} เมื่อตัวแปรข้อต่อ 1 เป็นศูนย์ เพื่อให้ค่าในตารางเป็นศูนย์มากที่สุด', '<b>The first link has a joint axis on one side only</b>, so {0} is free to choose. Craig makes {0} coincide with {1} when joint variable 1 is zero, so that most table entries are zero'), tex: 'a_0 = 0, \\quad \\alpha_0 = 0' },
-  { why: t('<b>ข้อต่อหมุน</b>: {1} หมุนรอบ Z₀ ไม่เลื่อน', '<b>Revolute</b>: {1} turns about Z₀ and does not slide'), tex: 'd_1 = 0,\\quad \\theta_1 \\text{ varies}', onShow: () => { document.querySelector('#opt2 button').click(); } },
-  { why: t('<b>ข้อต่อเลื่อน</b>: {1} เลื่อนตาม Z₀ ไม่หมุน', '<b>Prismatic</b>: {1} slides along Z₀ and does not turn'), tex: '\\theta_1 = 0,\\quad d_1 \\text{ varies}', onShow: () => { document.querySelectorAll('#opt2 button')[1].click(); } }],
+  { why: t('<b>ข้อต่อหมุน</b>: {1} หมุนรอบ Z₀ ไม่เลื่อน', '<b>Revolute</b>: {1} turns about Z₀ and does not slide'), tex: 'd_1 = 0,\\quad \\theta_1 \\text{ varies}' },
+  { why: t('<b>ข้อต่อเลื่อน</b>: {1} เลื่อนตาม Z₀ ไม่หมุน', '<b>Prismatic</b>: {1} slides along Z₀ and does not turn'), tex: '\\theta_1 = 0,\\quad d_1 \\text{ varies}' }],
   answer: t('ข้อต่อแรกเลื่อน: <b>d₁ เป็นตัวแปร θ₁ = 0</b> ก้านสุดท้ายใช้กติกาเดียวกัน', 'Prismatic first joint: <b>d₁ varies, θ₁ = 0</b>. The last link follows the same rule') });
 
 /* ---------- 3: the planar three-link arm ---------- */
 const S3s = { ex: 'p3r', q: E.p3r.q.slice(), show: 0, xyz: true, fit: true }, ctl3 = document.getElementById('ctl3');
-ui.radio(document.getElementById('opt3'), [{ id: '0', label: t('ไม่แสดงพารามิเตอร์', 'no parameters'), on: true }, { id: '1', label: t('แถว 1', 'row 1') }, { id: '2', label: t('แถว 2', 'row 2') }, { id: '3', label: t('แถว 3', 'row 3') }], id => { S3s.show = +id; });
-['θ₁', 'θ₂', 'θ₃'].forEach((n, i) => ui.slider(ctl3, { id: 'p' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S3s.q[i])), fmt: v => `${v}°`, oninput: v => { S3s.q[i] = rad(v); } }));
+const rad3 = ui.radio(document.getElementById('opt3'), [{ id: '0', label: t('ไม่แสดงพารามิเตอร์', 'no parameters'), on: true }, { id: '1', label: t('แถว 1', 'row 1') }, { id: '2', label: t('แถว 2', 'row 2') }, { id: '3', label: t('แถว 3', 'row 3') }], id => { S3s.show = +id; });
+const sl3 = ['θ₁', 'θ₂', 'θ₃'].map((n, i) => ui.slider(ctl3, { id: 'p' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S3s.q[i])), fmt: v => `${v}°`, oninput: v => { S3s.q[i] = rad(v); } }));
 CH2.sim('cv3', S3s, 'dh', { aspect: 0.8, maxH: 500 });
+/* the open step (row k): the scene marks a_{k−1} and θ_k (show: k); the overlay adds the zeros of the row and, from row 2 on, the two parallel joint axes */
+const SUB = ['₀', '₁', '₂', '₃'];
+S3s.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), up = [0, 0, 1];
+  if (k === 1) { OV.name(s, O(1), 'am', 'α₀ = a₀ = d₁ = 0', { m: 0, s: 27, a: 'r', dx: -34, dy: 50 }); return; }
+  [k - 1, k].forEach(i => OV.ref(s, OV.v(O(i), up, -0.1), up, 0.34, 'z'));   // joint axes k−1 and k, both vertical: α_{k−1} = 0
+  OV.name(s, OV.v(mid(O(k - 1), O(k)), up, 0.2), 'am', `α${SUB[k - 1]} = 0`, { m: 0, s: 27 }); OV.name(s, O(k), 'p', `d${SUB[k]} = 0`, { m: 0, s: 27, a: 'l', dx: 26, dy: 44 }); };
 CH3.dhAsk(document.getElementById('ask3'), { ans: E.p3r.sym, opts: ['0', '90°', 'L₁', 'L₂', 'L₃', 'θ₁', 'θ₂', 'θ₃'],
   check: v => v[5] === 'L₂' || v[9] === 'L₁' ? t('a<sub>i−1</sub> คือความยาวของก้าน i−1: แถวที่ 2 ใช้ a₁ = L₁ แถวที่ 3 ใช้ a₂ = L₂', 'a<sub>i−1</sub> is the length of link i−1: row 2 has a₁ = L₁, row 3 has a₂ = L₂') : '' });
 const rowsWhy = [t('<b>แถว 1</b>: {0} ทับ {1} เมื่อ θ₁ = 0 จึง α₀ = a₀ = d₁ = 0 ตัวแปรคือ θ₁', '<b>Row 1</b>: {0} coincides with {1} when θ₁ = 0, so α₀ = a₀ = d₁ = 0; the variable is θ₁'),
   t('<b>แถว 2</b>: แกน 1 กับ 2 ขนานกัน (α₁ = 0) ห่างกัน L₁ ตาม X₁ X ทุกแกนอยู่ในระนาบเดียวกัน (d₂ = 0)', '<b>Row 2</b>: axes 1 and 2 are parallel (α₁ = 0), L₁ apart along X₁; all X axes lie in one plane (d₂ = 0)'),
   t('<b>แถว 3</b>: เหมือนแถว 2 ห่างกัน L₂', '<b>Row 3</b>: like row 2, L₂ apart')];
-LS.stepper(document.getElementById('st3'), { steps: [0, 1, 2].map(i => ({ why: rowsWhy[i], body: CH3.dhTable(E.p3r.sym.slice(0, i + 1)), onShow: () => { S3s.show = i + 1; document.querySelectorAll('#opt3 button')[i + 1].click(); } })),
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; S3s.show = k; rad3.set(String(k)); if (k) { S3s.q = E.p3r.q.slice(); sl3.forEach((x, i) => x.set(Math.round(deg(S3s.q[i])))); } },   // row k of the table is marked in the picture (also after Back)
+  steps: [0, 1, 2].map(i => ({ why: rowsWhy[i], body: CH3.dhTable(E.p3r.sym.slice(0, i + 1)) })),
   answer: t('ตัวแปร θ₁, θ₂, θ₃ · ค่าคงที่ L₁, L₂ · เฟรมปลาย {4} ที่ระยะ L₃ เป็นการบ้านข้อ 3(b) (หน้า 3.3)', 'Variables θ₁, θ₂, θ₃ · constants L₁, L₂ · a tip frame {4} at L₃ is homework 3(b) (page 3.3)') });
 });
 </script>

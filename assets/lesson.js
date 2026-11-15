@@ -16,6 +16,11 @@ const t = (th, en) => MC.t(th, en);
         answer: html | () => html  (boxed under the last step once every step is open),
         onStep(k, n): called after every change (k = number of open steps),
         hint: html shown while no step is open, scroll: false to stop the page following the new step } */
+/* a displayed equation wider than its card is shrunk to fit (down to 60 %), instead of running off the edge: the solution column is
+   narrow on laptops and phones. Done when a step opens and again when the window changes size */
+LS.fitMath = root => (root || document).querySelectorAll('.steps .katex-display, .final .katex-display').forEach(d => { d.style.fontSize = ''; const w = d.clientWidth, sw = d.scrollWidth;
+  if (w > 0 && sw > w + 1) d.style.fontSize = Math.max(0.6, (w / sw) * 0.98).toFixed(3) + 'em'; });
+let fitT = null; if (typeof window !== 'undefined') window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(() => LS.fitMath(), 150); });
 LS.stepper = (el, o = {}) => {
   el.classList.add('stepper');
   el.innerHTML = `<ol class="steps"></ol><div class="final"></div><div class="shint"></div>
@@ -29,11 +34,11 @@ LS.stepper = (el, o = {}) => {
   const body = s => (s.tex ? MC.tex(s.tex, true) : '') + (typeof s.body === 'function' ? s.body() : (s.body || ''));
   const make = (s, anim) => { const li = document.createElement('li'); if (!anim) li.classList.add('noanim');
     li.innerHTML = `<div class="sb">${s.why ? `<div class="why">${s.why}</div>` : ''}${body(s)}</div>`; MC.renderMath(li); return li; };
-  const add = anim => { const s = steps[k], li = make(s, anim); ol.appendChild(li); k++; if (s.onShow) s.onShow(li, anim); return li; };
+  const add = anim => { const s = steps[k], li = make(s, anim); ol.appendChild(li); LS.fitMath(li); k++; if (s.onShow) s.onShow(li, anim); return li; };
   function sync() {
     const n = steps.length; [...ol.children].forEach((li, i) => { li.classList.toggle('cur', i === k - 1 && k < n); li.classList.toggle('done', i < k - 1 || k === n); });
     const ans = k === n && n > 0 && o.answer ? (typeof o.answer === 'function' ? o.answer() : o.answer) : '';
-    fin.innerHTML = ans ? `<div class="answer">${ans}</div>` : ''; if (ans) MC.renderMath(fin);
+    fin.innerHTML = ans ? `<div class="answer">${ans}</div>` : ''; if (ans) { MC.renderMath(fin); LS.fitMath(fin); }
     hint.innerHTML = k === 0 ? (o.hint || t('<b>ลองคิดเองก่อน</b> แล้วกด <b>▶ ขั้นถัดไป</b> เพื่อเปิดเฉลยทีละขั้น', '<b>Try it yourself first</b>, then press <b>▶ Next step</b> to open the solution one step at a time')) : '';
     if (k === 0 && o.hint) MC.renderMath(hint);   // a page's own hint may hold math
     const nx = B('next'); nx.disabled = k >= n; nx.textContent = k >= n ? t('✓ ครบทุกขั้นแล้ว', '✓ All steps shown') : (k === 0 ? t('▶ เริ่มเฉลย', '▶ Start') : t('▶ ขั้นถัดไป', '▶ Next step'));
