@@ -11,9 +11,11 @@ const { bar, cyl, sph, box, arrow, tube, dashed, floor, lab, camAt, scene, shado
 const SC = CH2.S3 = {}, I = RB.I3(), O0 = [0, 0, 0], AX = ['X', 'Y', 'Z'], AK = ['x', 'y', 'z'];
 const view = (tgt, dist, az, el, fov = 28) => camAt(tgt, dist, az, el, fov);
 /* the camera of an orbitable scene: st.az / st.el when the page has turned the view, else the scene's own; the angles used are kept in st._az, st._el */
-const cam = (st, tgt, dist, az, el) => { const a = st.az === undefined ? az : st.az, e = st.el === undefined ? el : st.el; st._az = a; st._el = e; return view(st.tgt || tgt, st.dist || dist, a, e); };
+/* the reader's own turning and zooming (S3.look: st.vaz, st.vel, st.vzoom) is added here, so that a fitted camera fits the view actually shown */
+const lookAt = (st, az, el) => { const u = S3.look(st); return { a: (st.az === undefined ? az : st.az) + u.az, e: max(-20, min(89, (st.el === undefined ? el : st.el) + u.el)), z: u.zoom }; };
+const cam = (st, tgt, dist, az, el) => { const { a, e, z } = lookAt(st, az, el); st._az = a; st._el = e; const c = view(st.tgt || tgt, (st.dist || dist) / z, a, e); c.user = true; return c; };
 /* the same, but framed on the points pts (S3.fitCam): for arms the reader moves anywhere with sliders */
-const camFit = (st, pts, az, el, w, h, o) => { const a = st.az === undefined ? az : st.az, e = st.el === undefined ? el : st.el; st._az = a; st._el = e; return S3.fitCam(st, pts, a, e, 28, w, h, o); };
+const camFit = (st, pts, az, el, w, h, o) => { const { a, e, z } = lookAt(st, az, el); st._az = a; st._el = e; const f = S3.fitCam(st, pts, a, e, 28, w, h, o), c = z === 1 ? f : S3.camAt(f.tgt, f.dist / z, a, e, 28); c.user = true; return c; };
 const grey = s => s.dark ? [0.66, 0.7, 0.8] : [0.4, 0.45, 0.54];
 const axc = (s, j) => [C.x, C.y, s.pal.z][j];
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -271,18 +273,17 @@ const sceneFn = name => SC[name] || ['CH3', 'CH4', 'CH5', 'CH6', 'CH7', 'CH8', '
 const gridOn = (name, s) => { if (SC[name] && name !== 'bolt') return false; if (s.F && s.gridZ === undefined) { const z = s.F.map(T => T[2][3]); if (z.every(x => Math.abs(x - z[0]) < 1e-6) && s.F.every(T => Math.abs(T[2][2]) > 0.999)) s.gridZ = z[0]; } return true; };
 CH2.gridNote = (c, W, P) => G.text(c, T('ตาราง 0.1 m', 'grid 0.1 m'), W - 10, 17, { color: P.muted, size: 11.5, align: 'right', halo: P.bg });
 CH2.view = (name, c, W, H, st, P) => { const s = sceneFn(name)(st, { dark: P === RB.DARK }); if (st.ov) st.ov(s, st);   // the open step of the page's solution (S3.OV)
+  s.cam = S3.userCam(s.cam, st);   // scenes with a fixed camera: the reader's turning and zooming go on top
   const g = gridOn(name, s); if (g) S3.floorGrid(s);
   st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st, g ? [[W - 120, 0, W, 26]] : null); if (g) CH2.gridNote(c, W, P); return s; };
 /* the point of the horizontal plane z = z0 under the pointer */
 CH2.pick = (st, p, z0 = 0) => st._v ? S3.unproject(st._v.cam, st._v.W, st._v.H, p.x, p.y, z0) : null;
 /* drag in a canvas to turn the view (st.az, st.el); o.grab(p) may take the drag for something else (return true) */
-CH2.orbit = (cv, st, o = {}) => { let last = null, mine = false; RB.drag(cv, null, (p, ph) => { if (!p) { last = null; mine = false; if (o.end) o.end(); return; }
-  if (ph === 'down') { mine = !!(o.grab && o.grab(p)); last = p; return; } if (mine) { o.move(p); return; }
-  if (last) { st.az = (st.az === undefined ? (st._az === undefined ? 28 : st._az) : st.az) - (p.x - last.x) * 0.4; st.el = NUM.clamp((st.el === undefined ? (st._el === undefined ? 22 : st._el) : st.el) + (p.y - last.y) * 0.3, -15, 85); } last = p; }); };
+CH2.orbit = (cv, st, o) => S3.orbit(cv, st, o || {});   // drag turns, pinch / Ctrl+wheel / buttons zoom (scene3d.js); o.grab(p) may take the drag
 /* one simulation on a page: a canvas drawn every frame with scene `name` of state st; o: aspect, maxH, orbit (default on), drag (see CH2.orbit), tick(dt), after(c, W, H, P, scene) */
 CH2.sim = (cv, st, name, o = {}) => { if (typeof cv === 'string') cv = document.getElementById(cv); const out = { s: null, cv };
   RB.stage(cv, o.aspect || 0.8, (c, W, H, dt, P) => { if (o.tick) o.tick(dt); out.s = CH2.view(typeof name === 'function' ? name() : name, c, W, H, st, P); if (o.after) o.after(c, W, H, P, out.s); }, { maxH: o.maxH || 520 });
-  if (o.orbit !== false) { cv.classList.add('grab'); CH2.orbit(cv, st, o.drag || {}); } return out; };
+  CH2.orbit(cv, st, o.drag || {}); return out; };   // every view can be turned and zoomed
 CH2.pillAt = (c, t, col, y = 18) => G.pill(c, t, 10, y, { fill: RB.rgba(col, 0.16), stroke: col, color: col, size: 12.5 });
 
 /* "try it first" for a whole matrix: o = { rows, cols, label (html), ans: matrix, tol, check: M → hint for a known mistake, onOk } */

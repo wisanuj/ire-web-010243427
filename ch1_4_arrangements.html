@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=15">
-<script src="assets/stops.js?v=15"></script><script src="assets/shell.js?v=15"></script>
-<script src="assets/robot.js?v=15"></script><script src="assets/lesson.js?v=15"></script><script src="assets/ch1.js?v=15"></script><script src="assets/scene3d.js?v=15"></script><script src="assets/gl3d.js?v=15"></script><script src="assets/ch1_3d.js?v=15"></script>
+<link rel="stylesheet" href="assets/ire.css?v=16">
+<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
+<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch1.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch1_3d.js?v=16"></script>
 </head>
 <body>
 <div class="wrap">
@@ -127,7 +127,7 @@ ui.radio(document.getElementById('typA'), TYPES.map(([k, lab], i) => ({ id: k, l
 ui.buttons(document.getElementById('typA'), [{ id: 'wsA', label: t('ปริภูมิทำงาน ✓', 'workspace ✓'), on: true, onclick: el => { SA.ws = SA.ws === false; el.classList.toggle('on', SA.ws !== false); el.textContent = t('ปริภูมิทำงาน ', 'workspace ') + (SA.ws !== false ? '✓' : '✗'); } }]);
 buildA();
 const cvA = document.getElementById('cvA'); RB.stage(cvA, 0.786, (c, W, H, dt, P) => CH1.view.arr(c, W, H, SA, P), { maxH: 540 });
-let lastA = null; RB.drag(cvA, null, (p, ph) => { if (!p) { lastA = null; return; } if (lastA) { SA.az -= (p.x - lastA.x) * 0.4; SA.el = NUM.clamp(SA.el + (p.y - lastA.y) * 0.3, 3, 80); } lastA = p; });
+/* turning and zooming: the shared control of every 3-D view (S3.orbit, attached by CH1.view) */
 
 /* ---------- 1: pick a structure ---------- */
 const JOBS = [{ th: 'ใส่ชิ้นส่วนลงแผงวงจรด้วยความเร็วสูง', en: 'Insert components into circuit boards, fast', key: ['SCARA'], ok: ['SCARA', 'PAR'], show: 'SCARA', why: t('<b>SCARA</b>: แกนตั้งสามแกนทำให้ยอมตัวด้านข้างเล็กน้อย (ช่วยให้ขาชิ้นส่วนลงรูได้) แต่แข็งในแนวตั้งขณะกด และเคลื่อนที่บนโต๊ะได้เร็ว', '<b>SCARA</b>: its vertical axes let it give a little sideways (helping pins find their holes) while staying stiff vertically as it presses, and it moves fast over a table') },
@@ -192,7 +192,9 @@ const read3 = () => { const q = RB.ik2(SK.l1, SK.l2, SK.x, SK.y, SK.elbow); ro3.
 ui.buttons(document.getElementById('ctl3'), [{ label: t('สลับ ± (ศอก)', 'flip ± (elbow)'), onclick: () => { SK.elbow = -SK.elbow; read3(); } }, { label: t('↺ จุดของการบ้าน', '↺ homework point'), onclick: () => { SK.x = 0.55; SK.y = 0.5; read3(); } }]);
 read3();
 RB.stage(cv3, 0.81, (c, W, H, dt, P) => { geo3 = { W, H }; CH1.view.ik2(c, W, H, SK, P); }, { maxH: 540 });
-RB.drag(cv3, null, (p) => { if (!p) return; const w = CH1.pick(SK, p) || RB.fitWorld(geo3.W, geo3.H, ...SK.win, 4).inv(p.x, p.y); SK.x = NUM.clamp(w[0], -0.95, 0.95); SK.y = NUM.clamp(w[1], -0.95, 0.95); read3(); });
+/* a drag that starts on the goal moves it; anywhere else it turns the view (without WebGL every drag moves the goal, as before) */
+window.S3.orbit(cv3, SK, { grab: p => { const w = CH1.pick(SK, p); return !w || Math.hypot(w[0] - SK.x, w[1] - SK.y) < 0.16; },
+  move: p => { const w = CH1.pick(SK, p) || RB.fitWorld(geo3.W, geo3.H, ...SK.win, 4).inv(p.x, p.y); SK.x = NUM.clamp(w[0], -0.95, 0.95); SK.y = NUM.clamp(w[1], -0.95, 0.95); read3(); } });
 const sol = [1, -1].map(e => RB.ik2(0.5, 0.4, 0.55, 0.5, e)).map(q => [deg(q.t1), deg(q.t2)]);
 LS.ask(document.getElementById('ask3'), { fields: [{ label: 'θ₁ (°) =', ok: (x, v) => sol.some(s => Math.abs(x - s[0]) < 0.5 && Math.abs(v[1] - s[1]) < 0.5), w: 5 }, { label: 'θ₂ (°) =', ok: (x, v) => sol.some(s => Math.abs(v[0] - s[0]) < 0.5 && Math.abs(x - s[1]) < 0.5), w: 5 }],
   check: v => sol.some(s => Math.abs(v[1] - s[1]) < 0.5) ? t('θ₂ ถูกแล้ว แต่ θ₁ ต้องคู่กับเครื่องหมายของ θ₂ ชุดเดียวกัน', 'θ₂ is right, but θ₁ must go with the same sign of θ₂') : (sol.some(s => Math.abs(v[0] - RB.deg(Math.atan(0.5 / 0.55))) < 0.5) ? t('42.3° คือ atan2(y, x) เพียงพจน์แรก ต้องลบพจน์ที่สอง', '42.3° is only atan2(y, x); subtract the second term') : '') });

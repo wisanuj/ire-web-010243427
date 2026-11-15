@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=15">
-<script src="assets/stops.js?v=15"></script><script src="assets/shell.js?v=15"></script>
-<script src="assets/robot.js?v=15"></script><script src="assets/lesson.js?v=15"></script><script src="assets/ch1.js?v=15"></script><script src="assets/scene3d.js?v=15"></script><script src="assets/gl3d.js?v=15"></script><script src="assets/ch1_3d.js?v=15"></script>
+<link rel="stylesheet" href="assets/ire.css?v=16">
+<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
+<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch1.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch1_3d.js?v=16"></script>
 </head>
 <body>
 <div class="wrap">
@@ -192,7 +192,7 @@ RB.stage(document.getElementById('cvA'), 0.62, (c, W, H, dt, P) => CH1.draw.shot
 const SB = { yaw: rad(25), pitch: rad(30), roll: rad(35), az: -64, el: 18 }; const ctlB = document.getElementById('ctlB');
 [['yaw', t('หันซ้ายขวา (yaw)', 'yaw')], ['pitch', t('ก้มเงย (pitch)', 'pitch')], ['roll', t('หมุนรอบแกนเครื่องมือ (roll)', 'roll')]].forEach(([k, lab]) => ui.slider(ctlB, { id: 'w' + k, label: lab, min: -90, max: 90, step: 1, value: Math.round(deg(SB[k])), fmt: v => `${v}°`, oninput: v => { SB[k] = rad(v); } }));
 { const cvB = document.getElementById('cvB'); cvB.classList.add('grab'); RB.stage(cvB, 0.77, (c, W, H, dt, P) => CH1.view.wristS(c, W, H, SB, P), { maxH: 470 });
-  let last = null; RB.drag(cvB, null, p => { if (!p) { last = null; return; } if (last) { SB.az -= (p.x - last.x) * 0.4; SB.el = NUM.clamp(SB.el + (p.y - last.y) * 0.3, 3, 80); } last = p; }); }
+  /* turning and zooming: the shared control of every 3-D view (S3.orbit, attached by CH1.view) */ }
 
 /* ---------- 2: worked example 3 ---------- */
 const S2 = { l: 1, th: rad(90), bits: 4, u: 0.75, quant: true }; const ctl2 = document.getElementById('ctl2'), ro2 = document.getElementById('ro2');

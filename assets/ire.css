@@ -482,3 +482,12 @@ table.dhtab select.ok{border-color:var(--good);background:color-mix(in srgb,var(
 table.dhtab select.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--panel))}
 .dhask{margin:8px 0;overflow-x:auto}
 .dhask .asklab{font-weight:600;color:var(--accent2);margin-bottom:2px}
+
+/* the look-around buttons on a 3-D view (S3.orbit): zoom in, zoom out, reset */
+.viewhost{position:relative}
+.viewctl{position:absolute;transform:translateY(-50%);display:flex;flex-direction:column;gap:5px;opacity:.5;transition:opacity .15s;z-index:2}
+.viewhost:hover .viewctl,.viewctl:focus-within{opacity:1}
+.viewctl button{width:30px;height:30px;padding:0;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:600 17px/1 inherit;cursor:pointer;box-shadow:var(--shadow)}
+.viewctl button:hover{background:var(--chip)}
+@media (hover:none){.viewctl{opacity:.8}}
+@media print{.viewctl{display:none}}

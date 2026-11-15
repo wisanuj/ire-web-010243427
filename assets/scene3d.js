@@ -152,5 +152,32 @@ S3.place = (ctx, W, H, items, bg, memo, reserved) => { if (typeof document === '
   return items; };
 /* a leader line from a label back to the point it names */
 S3.leader = (ctx, it, col) => { const b = it.box, cx = Math.min(Math.max(it.ax, b[0]), b[2]), cy = Math.min(Math.max(it.ay, b[1]), b[3]); ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = 0.7; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(it.ax, it.ay); ctx.lineTo(cx, cy); ctx.stroke(); ctx.restore(); };
+/* ---- looking around: one control for every live 3-D view. Drag turns the view, the + and − buttons (or a two-finger pinch, or Ctrl/⌘ + wheel)
+   zoom, ⟲ puts it back. What the reader did is kept apart from what the page set: st.vaz, st.vel (degrees added to the scene's own view) and
+   st.vzoom (1 = as drawn). S3.look(st) returns them, cleared whenever the page itself changes the view (st.az, st.el, st.dist, st.tgt: a step
+   of a solution turning the camera). S3.userCam(cam, st) applies them to a camera that a scene made without them (CH2.H.cam / camFit apply
+   them themselves, before fitting). S3.orbit(canvas, state, o) does the pointer work; o.grab(p) → true lets the page take a drag (o.move, o.end) ---- */
+S3.look = st => { const key = [st.az, st.el, st.dist, st.tgt && st.tgt.join()].join('|'); if (st._ck !== undefined && st._ck !== key) { st.vaz = 0; st.vel = 0; st.vzoom = 1; } st._ck = key;
+  return { az: st.vaz || 0, el: st.vel || 0, zoom: st.vzoom || 1 }; };
+S3.userCam = (cam, st) => { if (cam.user) return cam; const u = S3.look(st); if (!u.az && !u.el && u.zoom === 1) return cam;
+  const c = S3.camAt(cam.tgt, cam.dist / u.zoom, cam.az + u.az, Math.max(-20, Math.min(89, cam.el + u.el)), cam.fov); c.user = true; return c; };
+S3.orbit = (cv, state, o) => { if (typeof document === 'undefined' || !cv || !cv.parentElement) return; if (cv._look) { cv._look.state = state; if (o) cv._look.o = o; return; }
+  const L = cv._look = { state, o: o || {} }, S = () => typeof L.state === 'function' ? L.state() : L.state; let last = null, mine = false, pinch = 0;
+  const zoom = k => { const st = S(); S3.look(st); st.vzoom = Math.max(0.35, Math.min(5, (st.vzoom || 1) * k)); };
+  RB.drag(cv, null, (p, ph) => { const st = S(), oo = L.o; if (!p) { last = null; mine = false; if (oo.end) oo.end(); return; }
+    if (ph === 'down') { mine = !!(oo.grab && oo.grab(p)); last = p; return; } if (mine) { if (oo.move) oo.move(p); return; }
+    if (last && !pinch) { S3.look(st); st.vaz = (st.vaz || 0) - (p.x - last.x) * 0.4; st.vel = Math.max(-100, Math.min(100, (st.vel || 0) + (p.y - last.y) * 0.3)); } last = p; });
+  cv.addEventListener('wheel', e => { if (!e.ctrlKey && !e.metaKey) return; e.preventDefault(); zoom(Math.exp(-e.deltaY * 0.012)); }, { passive: false });
+  const gap = e => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  cv.addEventListener('touchstart', e => { if (e.touches.length === 2) pinch = gap(e); }, { passive: true });
+  cv.addEventListener('touchmove', e => { if (e.touches.length === 2 && pinch) { const d = gap(e); if (d > 0) zoom(d / pinch); pinch = d; e.preventDefault(); } }, { passive: false });
+  cv.addEventListener('touchend', e => { if (e.touches.length < 2) pinch = 0; }, { passive: true });
+  let g0 = 1; cv.addEventListener('gesturestart', e => { g0 = 1; e.preventDefault(); }); cv.addEventListener('gesturechange', e => { e.preventDefault(); if (e.scale > 0) { zoom(e.scale / g0); g0 = e.scale; } });   // Safari's trackpad pinch
+  /* the buttons, at the middle of the picture's right edge */
+  const host = cv.parentElement, bar = document.createElement('div'), th = (global.MC && global.MC.t) || ((a, b) => b); host.classList.add('viewhost'); bar.className = 'viewctl';
+  [['+', th('ซูมเข้า', 'zoom in'), () => zoom(1.25)], ['−', th('ซูมออก', 'zoom out'), () => zoom(0.8)], ['⟲', th('กลับมุมมองเดิม', 'reset the view'), () => { const st = S(); st.vaz = 0; st.vel = 0; st.vzoom = 1; }]].forEach(([t, tip, fn]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.title = tip; b.setAttribute('aria-label', tip); b.addEventListener('click', fn); bar.appendChild(b); });
+  host.appendChild(bar); const put = () => { bar.style.top = (cv.offsetTop + cv.offsetHeight / 2) + 'px'; bar.style.left = (cv.offsetLeft + cv.offsetWidth - 36) + 'px'; }; put();
+  if (global.ResizeObserver) new ResizeObserver(put).observe(cv); global.addEventListener('resize', put); cv.classList.add('grab'); };
 global.S3 = S3;
 })(typeof window !== 'undefined' ? window : globalThis);

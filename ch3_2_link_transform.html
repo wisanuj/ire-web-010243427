@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=15">
-<script src="assets/stops.js?v=15"></script><script src="assets/shell.js?v=15"></script>
-<script src="assets/robot.js?v=15"></script><script src="assets/lesson.js?v=15"></script><script src="assets/ch2.js?v=15"></script><script src="assets/ch3.js?v=15"></script><script src="assets/scene3d.js?v=15"></script><script src="assets/gl3d.js?v=15"></script><script src="assets/ch2_3d.js?v=15"></script><script src="assets/ch3_3d.js?v=15"></script>
+<link rel="stylesheet" href="assets/ire.css?v=16">
+<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
+<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch2.js?v=16"></script><script src="assets/ch3.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch2_3d.js?v=16"></script><script src="assets/ch3_3d.js?v=16"></script>
 </head>
 <body>
 <div class="wrap">
@@ -181,7 +181,7 @@ const table = () => { tabB.innerHTML = `<table class="dhtab"><tr><th>i</th><th>Î
   tabB.querySelectorAll('select').forEach(x => x.addEventListener('change', () => { rowsB[+x.dataset.i][4] = x.value; sliders(); sync(); }));
   document.getElementById('addB').addEventListener('click', () => { if (rowsB.length < 6) { rowsB.push([0, 0.3, 0, 0, 'R']); table(); sliders(); sync(); } });
   document.getElementById('delB').addEventListener('click', () => { if (rowsB.length > 1) { rowsB.pop(); table(); sliders(); sync(); } }); };
-const load = k => { const p = PRE[k]; rowsB = p.rows.map(r => r.slice()); SB.h0 = p.h0; SB.toolDir = p.tool; SB.az = undefined; SB.el = undefined; table(); sliders(); sync(); };
+const load = k => { const p = PRE[k]; rowsB = p.rows.map(r => r.slice()); SB.h0 = p.h0; SB.toolDir = p.tool; SB.az = undefined; SB.el = undefined; SB.vaz = 0; SB.vel = 0; SB.vzoom = 1; table(); sliders(); sync(); };
 ui.radio(document.getElementById('optB'), Object.entries(PRE).map(([k, p], i) => ({ id: k, label: p.lab, on: !i })), id => load(id)); load('p3r');
 CH2.sim('cvB', SB, 'free', { aspect: 0.82, maxH: 540 });
 });

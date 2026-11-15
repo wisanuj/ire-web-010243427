@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=15">
-<script src="assets/stops.js?v=15"></script><script src="assets/shell.js?v=15"></script>
-<script src="assets/robot.js?v=15"></script><script src="assets/lesson.js?v=15"></script><script src="assets/ch1.js?v=15"></script><script src="assets/scene3d.js?v=15"></script><script src="assets/gl3d.js?v=15"></script><script src="assets/ch1_3d.js?v=15"></script>
+<link rel="stylesheet" href="assets/ire.css?v=16">
+<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
+<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch1.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch1_3d.js?v=16"></script>
 </head>
 <body>
 <div class="wrap">
@@ -156,7 +156,7 @@ document.addEventListener('mc:ready', () => {
 'use strict';
 const t = MC.t, ui = MC.ui, G = RB.G, tx = (s, d) => MC.tex(s, d), u = RB.u, deg = RB.deg, rad = RB.rad;
 /* drag on a 3-D picture to turn the camera (az, el in degrees) */
-const orbit = (cv, st) => { let last = null; RB.drag(cv, null, p => { if (!p) { last = null; return; } if (last) { st.az -= (p.x - last.x) * 0.4; st.el = NUM.clamp(st.el + (p.y - last.y) * 0.3, 3, 80); } last = p; }); };
+/* turning and zooming: the shared control of every 3-D view (S3.orbit, attached by CH1.view) */
 const al = rows => `\\begin{aligned} ${rows.join(' \\\\ ')} \\end{aligned}`;
 
 /* ---------- A: build an arm ---------- */
@@ -200,7 +200,7 @@ LS.stepper(document.getElementById('st1'), { onStep: k => { B.v.step = k; if (k)
 
 /* ---------- 2: state space ---------- */
 const D2 = { mode: 'both', az: -68, el: 20 }, cvD = document.getElementById('cv2'); cvD.classList.add('grab'); ui.html(document.getElementById('ctl2'), t('ลากในภาพเพื่อหมุนมุมมอง', 'Drag in the picture to turn the view'), 'simnote');
-RB.stage(cvD, 0.475, (c, W, H, dt, P) => CH1.view.dof(c, W, H, D2, P), { maxH: 400 }); orbit(cvD, D2);
+RB.stage(cvD, 0.475, (c, W, H, dt, P) => CH1.view.dof(c, W, H, D2, P), { maxH: 400 });
 LS.ask(document.getElementById('ask2'), { fields: [{ label: t('SCARA: โครงแบบ', 'SCARA: configuration'), ok: x => x === 4, w: 3.5 }, { label: t('สถานะ', 'state'), ok: x => x === 8, w: 3.5 }, { label: t('แขน 6 แกน: สถานะ', '6-axis arm: state'), ok: x => x === 12, w: 3.5 }],
   check: v => v[1] === 4 ? t('ปริภูมิสถานะต้องนับความเร็วของข้อต่อด้วย', 'the state space also counts the joint velocities') : '' });
 /* the open step, on the two bodies of the picture: the numbers that fix each one (q), then their rates (q̇), then the arms that move like them */
@@ -255,7 +255,9 @@ const dexScene = (cvId, ctlId, st0) => { const S = { ...st0, R: 0.86, elbow: 1, 
   ui.buttons(ctl, [{ label: t('สลับศอก', 'flip elbow'), onclick: () => { S.elbow = -S.elbow; } }]);
   S.R = Math.max(0.5, (S.l1 + S.l2 + S.l3) * 1.08);
   RB.stage(cv, 0.875, (c, W, H, dt, P) => { geo = { W, H }; CH1.view.dex(c, W, H, S, P); const r = Math.hypot(S.x, S.y); G.text(c, `r = ${u(r, 3)} m`, W - 10, H - 12, { color: P.ink, size: 13, weight: 700, align: 'right', mono: true, halo: P.bg }); }, { maxH: 520 });
-  RB.drag(cv, null, (p, ph) => { if (!p) return; const w = CH1.pick(S, p) || RB.fitWorld(geo.W, geo.H, -S.R * 1.06, S.R * 1.06, -S.R * 1.06, S.R * 1.06, 4).inv(p.x, p.y); S.x = w[0]; S.y = w[1]; });
+  /* a drag that starts on the tool point moves it; anywhere else it turns the view (without WebGL every drag moves the point, as before) */
+  window.S3.orbit(cv, S, { grab: p => { const w = CH1.pick(S, p); return !w || Math.hypot(w[0] - S.x, w[1] - S.y) < 0.14; },
+    move: p => { const w = CH1.pick(S, p) || RB.fitWorld(geo.W, geo.H, -S.R * 1.06, S.R * 1.06, -S.R * 1.06, S.R * 1.06, 4).inv(p.x, p.y); S.x = w[0]; S.y = w[1]; } });
   /* back to the problem's own arm, tool point and direction (a solution step opened), sliders included */
   S.reset = () => { Object.assign(S, st0, { elbow: 1 }); ['l1', 'l2', 'l3'].forEach(k => sl[k].set(S[k])); sl.phi.set(Math.round(deg(S.phi))); S.R = Math.max(0.5, (S.l1 + S.l2 + S.l3) * 1.08); };
   return S; };
