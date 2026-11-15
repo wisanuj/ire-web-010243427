@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="4.3 — Geometric solution">4.3 — วิธีเรขาคณิต</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=13">
+<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
+<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/ch4.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script><script src="assets/ch4_3d.js?v=13"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">วิธีเรขาคณิต <span class="en">Geometric solution — triangles in a top view and a side view</span></h1>
+<h1 data-l="en">Geometric solution <span class="en">Triangles in a top view and a side view</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch4/s25.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 25: the two-link part as a triangle with the law of cosines">
+    <figcaption data-l="th">สไลด์บทที่ 4 หน้า 25 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 4 slides, p. 25 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">วิธีเรขาคณิตแยกแขนเป็นรูปสามเหลี่ยมในระนาบ แล้วใช้กฎของโคไซน์กับ atan2 ได้สูตรเดียวกับวิธีพีชคณิต แต่เห็นที่มาของทุกมุม หน้านี้ทำแขนสองก้าน แขน RRR ในปริภูมิสามมิติ (สไลด์เดิม Part 2 แก้สูตรที่วงเล็บผิดและเพิ่มคำตอบเอื้อมข้ามหลัง) และ SCARA ครอบคลุมสไลด์หน้า 25–29 มี <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">The geometric method cuts the arm into plane triangles and uses the law of cosines with atan2: the same formulas as the algebra, but every angle can be seen. This page solves the two-link arm, the spatial RRR arm (the old part 2 slides, with their bracket error fixed and the reach-over solutions added) and the SCARA. It covers slides pp. 25–29, with <b>3 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>สามเหลี่ยม ฐาน–ข้อศอก–ข้อมือ: \(x^2 + y^2 = L_1^2 + L_2^2 - 2L_1L_2\cos(180^\circ - \theta_2)\) · \(\theta_1 = \beta \mp \psi\)</li><li>แขน RRR: มองจากบน \(\theta_1 = \mathrm{atan2}(y_d, x_d)\) หรือ +180° · มองจากข้าง \(\hat z = z_d - (L_1 + L_2)\), กฎของโคไซน์ให้ c₃</li><li>\(\theta_2 = \mathrm{atan2}(\hat z, r_1) - \mathrm{atan2}(L_4s_3, L_3 + L_4c_3)\) ใช้ได้กับทุกเครื่องหมายของ s₃ (4 คำตอบ)</li><li>SCARA: θ₁, θ₂ จากแขนสองก้าน · d₃ = −z − d₄ · θ₄ = θ₁ + θ₂ − φ</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>Triangle base–elbow–wrist: \(x^2 + y^2 = L_1^2 + L_2^2 - 2L_1L_2\cos(180^\circ - \theta_2)\) · \(\theta_1 = \beta \mp \psi\).</li><li>RRR arm: top view \(\theta_1 = \mathrm{atan2}(y_d, x_d)\) or +180° · side view \(\hat z = z_d - (L_1 + L_2)\), the law of cosines gives c₃.</li><li>\(\theta_2 = \mathrm{atan2}(\hat z, r_1) - \mathrm{atan2}(L_4s_3, L_3 + L_4c_3)\) works for either sign of s₃ (4 solutions).</li><li>SCARA: θ₁, θ₂ from the two-link arm · d₃ = −z − d₄ · θ₄ = θ₁ + θ₂ − φ.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>สามเหลี่ยมสองก้าน</a><a href="#ex2"><b>2</b>แขน RRR</a><a href="#ex3"><b>3</b>SCARA</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>Two-link triangle</a><a href="#ex2"><b>2</b>RRR arm</a><a href="#ex3"><b>3</b>SCARA</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">แขนสองก้านเป็นรูปสามเหลี่ยม</h2><h2 data-l="en">The two-link arm as a triangle</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 25 (Craig 4.4 รูป 4.8) · L₁ = 0.5 m, L₂ = 0.4 m · เป้าหมายเดียวกับหน้า 4.2</div><div class="src" data-l="en">Chapter 4 slides, p. 25 (Craig 4.4, figure 4.8) · L₁ = 0.5 m, L₂ = 0.4 m · the same goal as page 4.2</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">แขน RRR ในปริภูมิสามมิติ: มองจากบนแล้วมองจากข้าง</h2><h2 data-l="en">A spatial RRR arm: top view, then side view</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 26–28 (สไลด์เดิม Part 2 หน้า 3–16, Craig แบบฝึกหัด 3.4) · L₁ + L₂ = 0.5, L₃ = 0.5, L₄ = 0.4 m · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 4 slides, pp. 26–28 (old part 2 slides pp. 3–16, Craig exercise 3.4) · L₁ + L₂ = 0.5, L₃ = 0.5, L₄ = 0.4 m · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch4/s28.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 28: the RRR arm of chapter 3 run backwards; find all four solutions">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 28 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 28 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">SCARA: แขนสองก้าน การเลื่อน และการหมุน</h2><h2 data-l="en">The SCARA: a two-link arm, a slide and a turn</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 29 · ตาราง SCARA ของบทที่ 3 (L₁ = 0.45, L₂ = 0.35, d₄ = 0.05 m) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 4 slides, p. 29 · chapter 3's SCARA table (L₁ = 0.45, L₂ = 0.35, d₄ = 0.05 m) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch4/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: the SCARA inverse kinematics; find both solutions">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 29 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 29 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — คำตอบที่ทับกัน</h3>
+    <ol><li>ในข้อ 2 กดคำตอบ 1 แล้ว 3: ก้านทุกก้านอยู่ที่เดิม แต่มุมข้อต่อต่างกัน (θ₁ ต่าง 180°) เพราะแขนนี้ไม่มีระยะเยื้องที่ไหล่ แขน IRB 140 มีระยะเยื้อง a₁ จึงไม่เป็นแบบนี้ (หน้า 4.4)</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ข้อผิดพลาดของสูตรเดิม</h3>
+    <ol><li>สไลด์เดิมเขียน θ₂ = α + β แล้วเลือก ± ของ β กับของ θ₃ แยกกัน ถ้าจับคู่ผิด ใส่กลับแล้วไม่ถึงเป้าหมาย รูป atan2(L₄s₃, L₃ + L₄c₃) ในหน้านี้จับคู่ให้เอง</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 4 หน้า 25–29 (ภาพอยู่ในหน้านี้แล้ว) · Craig 4.4 · Spong 3.3 · สไลด์เดิม Part 2 หน้า 2–16</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — solutions on top of each other</h3>
+    <ol><li>In problem 2 press solution 1, then 3: every link stays put but the joint angles differ (θ₁ by 180°), because this arm has no shoulder offset. The IRB 140 has an offset a₁, so it does not do this (page 4.4).</li></ol></div>
+  <div class="card"><h3>Try this 2 — the old formula's pitfall</h3>
+    <ol><li>The old slides wrote θ₂ = α + β and chose the ± of β and of θ₃ separately; a wrong pairing misses the goal. The form atan2(L₄s₃, L₃ + L₄c₃) used here pairs them by itself.</li></ol>
+    <div class="book">Source: chapter 4 slides, pp. 25–29 (the pictures are on this page) · Craig 4.4 · Spong 3.3 · old part 2 slides pp. 2–16</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, X = CH4.EX;
+const dgs = (x, n = 2) => `${u(deg(x), n)}°`;
+
+/* ---------- 1: the triangle ---------- */
+const S1 = { g: X.p3r.goal.slice(), k: 0 }, ro1 = document.getElementById('ro1');
+const read1 = () => { const G = CH4.p3rGeo(0.5, 0.4, S1.g[0], S1.g[1], 0);
+  ro1.innerHTML = G.ok ? `<div class="term">β = ${dgs(G.beta)} · ψ = ${dgs(G.psi)} · ${t('มุมที่ข้อศอก', 'angle at the elbow')} = ${dgs(G.elbow)}</div>` + G.sols.map((s, i) => `<div class="term">${t('คำตอบ', 'solution')} ${i + 1}: θ₁ = β ${i ? '+' : '−'} ψ = ${dgs(s[0])}, θ₂ = ${dgs(s[1])}</div>`).join('') : `<div class="term"><b class="ax-x">${t('ไปไม่ถึง: สามเหลี่ยมประกอบไม่ได้', 'out of reach: no triangle can be made')}</b></div>`; };
+[['x', 0], ['y', 1]].forEach(([n, i]) => ui.slider(document.getElementById('ctl1'), { id: 'g' + i, label: `${n} (m)`, min: -0.9, max: 0.9, step: 0.005, value: +S1.g[i].toFixed(3), fmt: v => `${v.toFixed(3)} m`, oninput: v => { S1.g[i] = v; read1(); } }));
+ui.radio(document.getElementById('ctl1'), [{ id: '0', label: t('คำตอบ 1 (θ₂ > 0)', 'solution 1 (θ₂ > 0)'), on: true }, { id: '1', label: t('คำตอบ 2 (θ₂ < 0)', 'solution 2 (θ₂ < 0)') }], id => { S1.k = +id; }); read1();
+CH2.sim('cv1', S1, 'geo', { aspect: 0.8, maxH: 480 });
+const G0 = CH4.p3rGeo(0.5, 0.4, X.p3r.goal[0], X.p3r.goal[1], 0), r0 = Math.hypot(X.p3r.goal[0], X.p3r.goal[1]);
+LS.ask(document.getElementById('ask1'), { fields: [{ label: t('เป้าหมายของหน้า 4.2: ψ (°) =', 'the goal of page 4.2: ψ (°) ='), ok: x => Math.abs(x - deg(G0.psi)) < 0.1, w: 5 }, { label: t('คำตอบ 1: θ₁ (°) =', 'solution 1: θ₁ (°) ='), ok: x => Math.abs(x - 30) < 0.1, w: 5 }] });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>ด้านที่สามของสามเหลี่ยม</b>', '<b>The third side of the triangle</b>'), tex: `\\sqrt{x^2 + y^2} = \\sqrt{${u(X.p3r.goal[0], 4)}^2 + ${u(X.p3r.goal[1], 4)}^2} = ${u(r0, 4)}\\ \\text{m}` },
+  { why: t('<b>มุมที่ข้อศอก</b> ด้วยกฎของโคไซน์', '<b>The angle at the elbow</b> by the law of cosines'), tex: `\\cos(180^\\circ - \\theta_2) = \\frac{L_1^2 + L_2^2 - (x^2 + y^2)}{2L_1L_2} = ${u(Math.cos(G0.elbow), 4)} \\;\\Rightarrow\\; \\theta_2 = \\pm 45^\\circ` },
+  { why: t('<b>มุมที่ฐาน</b>: β ไปหาเป้าหมาย ψ ระหว่างเส้นนั้นกับก้าน 1', '<b>The angles at the base</b>: β to the goal, ψ between that line and link 1'), tex: `\\beta = \\mathrm{atan2}(y, x) = ${u(deg(G0.beta), 2)}^\\circ,\\quad \\cos\\psi = \\frac{x^2 + y^2 + L_1^2 - L_2^2}{2L_1\\sqrt{x^2 + y^2}} \\Rightarrow \\psi = ${u(deg(G0.psi), 2)}^\\circ` },
+  { why: t('<b>θ₁</b>: ข้อศอกพับทางหนึ่ง ก้าน 1 อยู่ใต้เส้น (β − ψ) อีกทางอยู่เหนือ (β + ψ)', '<b>θ₁</b>: with the elbow one way link 1 is below the line (β − ψ), the other way above it (β + ψ)'), tex: `\\theta_1 = ${u(deg(G0.beta), 2)}^\\circ - ${u(deg(G0.psi), 2)}^\\circ = 30^\\circ \\quad\\text{or}\\quad ${u(deg(G0.beta + G0.psi), 2)}^\\circ` }],
+  answer: t('เท่ากับวิธีพีชคณิตทุกตัว: (30°, 45°) และ (69.73°, −45°) แล้ว θ₃ = φ − θ₁ − θ₂', 'The same as the algebra: (30°, 45°) and (69.73°, −45°), then θ₃ = φ − θ₁ − θ₂') });
+
+/* ---------- 2: the spatial RRR arm ---------- */
+const L4 = X.arm4.L, S2 = { ex: 'arm4', q: X.arm4.q.slice(), fit: true, xyz: true, frames: [0] }, p2 = X.arm4.p.slice(), ro2 = document.getElementById('ro2'); let k2 = 1;
+const order = sols => ['front|up', 'front|down', 'back|up', 'back|down'].map(key => sols.find(s => s.shoulder + '|' + s.elbow === key)).filter(Boolean);
+const read2 = () => { const S = order(CH4.arm4IK(L4, p2)); if (!S.length) { ro2.innerHTML = `<div class="term"><b class="ax-x">${t('ไปไม่ถึง: |c₃| > 1', 'out of reach: |c₃| > 1')}</b></div>`; S2.goal = false; return; }
+  const k = Math.min(k2, S.length) - 1; S2.q = S[k].q; S2.goal = true;
+  ro2.innerHTML = `<div class="term">r₁ = ${u(Math.hypot(p2[0], p2[1]), 3)} · ẑ = ${u(p2[2] - 0.5, 3)} · c₃ = ${u(S[0].c3, 4)}</div>` + S.map((s, i) => `<div class="term">${i === k ? '<b>' : ''}${i + 1}. ${s.shoulder === 'front' ? t('หน้า', 'front') : t('ข้ามหลัง', 'back')}, ${t('ข้อศอก', 'elbow')} ${s.elbow === 'up' ? t('ขึ้น', 'up') : t('ลง', 'down')}: (${s.q.map(x => dgs(x)).join(', ')})${i === k ? '</b>' : ''}</div>`).join(''); };
+[['x_d', 0, -0.9, 0.9], ['y_d', 1, -0.9, 0.9], ['z_d', 2, -0.3, 1.3]].forEach(([n, i, lo, hi]) => ui.slider(document.getElementById('ctl2'), { id: 'p' + i, label: n.replace('_d', '<sub>d</sub>') + ' (m)', min: lo, max: hi, step: 0.005, value: +p2[i].toFixed(3), fmt: v => `${v.toFixed(3)} m`, oninput: v => { p2[i] = v; read2(); } }));
+ui.radio(document.getElementById('ctl2'), [1, 2, 3, 4].map(n => ({ id: 'k' + n, label: t('คำตอบ ', 'solution ') + n, on: n === 1 })), id => { k2 = +id.slice(1); read2(); }); read2();
+CH2.sim('cv2', S2, 'sol', { aspect: 0.8, maxH: 500 });
+const A2 = order(X.arm4.sols);
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('คำตอบ 2 (หน้า ข้อศอกลง): θ₂ (°) =', 'solution 2 (front, elbow down): θ₂ (°) ='), ok: x => Math.abs(x - deg(A2[1].q[1])) < 0.1, w: 5 }, { label: 'θ₃ (°) =', ok: x => Math.abs(x - deg(A2[1].q[2])) < 0.1, w: 5 }],
+  check: v => Math.abs(v[0] - 35) < 0.2 ? t('35° คือข้อศอกขึ้น (ท่าของบทที่ 3) ข้อศอกลงใช้ s₃ อีกเครื่องหมาย', '35° is elbow up (chapter 3\'s pose); elbow down takes the other sign of s₃') : '' });
+const r1 = Math.hypot(X.arm4.p[0], X.arm4.p[1]), zh = X.arm4.p[2] - 0.5;
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>มองจากบน</b>', '<b>Top view</b>'), tex: `\\theta_1 = \\mathrm{atan2}(${u(X.arm4.p[1], 3)},\\ ${u(X.arm4.p[0], 3)}) = 30^\\circ \\text{ or } -150^\\circ,\\quad r_1 = \\pm ${u(r1, 4)}` },
+  { why: t('<b>มองจากข้าง</b>: ความสูงเหนือไหล่ แล้วกฎของโคไซน์', '<b>Side view</b>: height above the shoulder, then the law of cosines'), tex: `\\hat z = ${u(X.arm4.p[2], 4)} - 0.5 = ${u(zh, 4)},\\quad c_3 = \\frac{r_1^2 + \\hat z^2 - 0.25 - 0.16}{2(0.5)(0.4)} = ${u(A2[0].c3, 4)} \\Rightarrow \\theta_3 = \\pm 60^\\circ` },
+  { why: t('<b>θ₂</b> สำหรับแต่ละ s₃ (และ r₁ ตาม θ₁ ที่ใช้)', '<b>θ₂</b> for each s₃ (and r₁ with the θ₁ used)'), tex: `\\theta_2 = \\mathrm{atan2}(\\hat z, r_1) - \\mathrm{atan2}(0.4s_3,\\ 0.5 + 0.4c_3) = ${u(deg(Math.atan2(zh, r1)), 2)}^\\circ \\mp ${u(deg(Math.atan2(0.4 * Math.sin(rad(60)), 0.5 + 0.4 * 0.5)), 2)}^\\circ` },
+  { why: t('<b>ทั้งสี่คำตอบ</b>', '<b>All four</b>'), body: () => `<div class="term">${A2.map((s, i) => `${i + 1}: (${s.q.map(x => dgs(x)).join(', ')})`).join('<br>')}</div>` }],
+  answer: t('ข้อศอกลง: θ₂ = −17.66°, θ₃ = 60° · คำตอบ 3, 4 (θ₁ = −150°) วางก้านที่เดียวกับ 1, 2', 'Elbow down: θ₂ = −17.66°, θ₃ = 60° · solutions 3, 4 (θ₁ = −150°) put the links where 1, 2 do') });
+
+/* ---------- 3: SCARA ---------- */
+const SL = X.scara.L, S3 = { ex: 'scara', q: X.scara.q.slice(), ghost: [], tags: ['1', '2'], frames: [0], fit: true, xyz: true }, g3 = [...X.scara.p, X.scara.phi], ro3 = document.getElementById('ro3'); let k3 = 1;
+const read3 = () => { const S = CH4.scaraIK(SL, g3[0], g3[1], g3[2], g3[3]); if (!S.length || S[0][2] < 0 || S[0][2] > 0.3) { ro3.innerHTML = `<div class="term"><b class="ax-x">${t('ไปไม่ถึง (นอกวงแหวน หรือ d₃ เกิน 0–0.3 m)', 'out of reach (outside the ring, or d₃ beyond 0–0.3 m)')}</b></div>`; S3.goal = false; return; }
+  const sol = [S[1], S[0]], k = k3 - 1; S3.q = sol[k]; S3.ghost = [sol[1 - k]]; S3.tags = k ? ['2', '1'] : ['1', '2']; S3.goal = true;
+  ro3.innerHTML = sol.map((s, i) => `<div class="term">${i === k ? '<b>' : ''}${t('คำตอบ', 'solution')} ${i + 1}: θ₁ = ${dgs(s[0])}, θ₂ = ${dgs(s[1])}, d₃ = ${u(s[2], 3)} m, θ₄ = ${dgs(s[3])}${i === k ? '</b>' : ''}</div>`).join(''); };
+[['x', 0, -0.8, 0.8, 'm'], ['y', 1, -0.8, 0.8, 'm'], ['z', 2, -0.35, -0.05, 'm'], ['φ', 3, -180, 180, '°']].forEach(([n, i, lo, hi, un]) => ui.slider(document.getElementById('ctl3'), { id: 's' + i, label: n, min: lo, max: hi, step: un === '°' ? 1 : 0.005, value: un === '°' ? Math.round(deg(g3[i])) : +g3[i].toFixed(3), fmt: v => un === '°' ? `${v}°` : `${v.toFixed(3)} m`, oninput: v => { g3[i] = un === '°' ? rad(v) : v; read3(); } }));
+ui.radio(document.getElementById('ctl3'), [1, 2].map(n => ({ id: 'c' + n, label: t('คำตอบ ', 'solution ') + n, on: n === 1 })), id => { k3 = +id.slice(1); read3(); }); read3();
+CH2.sim('cv3', S3, 'sol', { aspect: 0.8, maxH: 480 });
+const Z = X.scara.sols;
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('คำตอบที่ θ₂ = +60°: θ₁ (°) =', 'the solution with θ₂ = +60°: θ₁ (°) ='), ok: x => Math.abs(x - deg(Z[0][0])) < 0.1, w: 5 }, { label: 'θ₄ (°) =', ok: x => Math.abs(x - deg(Z[0][3])) < 0.1, w: 5 }],
+  check: v => Math.abs(v[1] - 30) < 0.2 ? t('θ₄ ต้องชดเชยให้ θ₁ + θ₂ − θ₄ = φ = −55° คงเดิม', 'θ₄ must make up for it so that θ₁ + θ₂ − θ₄ = φ = −55° still') : '' });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>θ₂</b> ของแขนสองก้าน', '<b>θ₂</b> of the two-link arm'), tex: `c_2 = \\frac{x^2 + y^2 - 0.45^2 - 0.35^2}{2(0.45)(0.35)} = 0.5 \\Rightarrow \\theta_2 = \\pm 60^\\circ` },
+  { why: t('<b>θ₁</b> = atan2(y, x) − atan2(L₂s₂, L₁ + L₂c₂)', '<b>θ₁</b> = atan2(y, x) − atan2(L₂s₂, L₁ + L₂c₂)'), tex: `\\theta_1 = ${u(deg(Math.atan2(X.scara.p[1], X.scara.p[0])), 2)}^\\circ \\pm ${u(deg(Math.atan2(0.35 * Math.sin(rad(60)), 0.45 + 0.35 * 0.5)), 2)}^\\circ = 35^\\circ \\text{ or } ${u(deg(Z[0][0]), 2)}^\\circ` },
+  { why: t('<b>d₃</b> จากความสูง (Z₃ ชี้ลง)', '<b>d₃</b> from the height (Z₃ points down)'), tex: `d_3 = -z - d_4 = 0.2 - 0.05 = 0.15\\ \\text{m}` },
+  { why: t('<b>θ₄</b> จากทิศของเครื่องมือ', '<b>θ₄</b> from the tool direction'), tex: `\\theta_4 = \\theta_1 + \\theta_2 - \\varphi = 35 - 60 + 55 = 30^\\circ \\quad\\text{or}\\quad ${u(deg(Z[0][0]), 2)} + 60 + 55 = ${u(deg(Z[0][3]), 2)}^\\circ` }],
+  answer: t(`(35°, −60°, 0.15 m, 30°) ท่าของบทที่ 3 และ (${u(deg(Z[0][0]), 2)}°, 60°, 0.15 m, ${u(deg(Z[0][3]), 2)}°)`, `(35°, −60°, 0.15 m, 30°), chapter 3's pose, and (${u(deg(Z[0][0]), 2)}°, 60°, 0.15 m, ${u(deg(Z[0][3]), 2)}°)`) });
+});
+</script>
+</body>
+</html>

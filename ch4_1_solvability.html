@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="4.1 — Solvability of inverse kinematics">4.1 — การมีคำตอบของจลนศาสตร์ผกผัน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=13">
+<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
+<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/ch4.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script><script src="assets/ch4_3d.js?v=13"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">การมีคำตอบของจลนศาสตร์ผกผัน <span class="en">Solvability — does a solution exist, how many, which one?</span></h1>
+<h1 data-l="en">Solvability of inverse kinematics <span class="en">Does a solution exist, how many, which one?</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch4/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: forward kinematics gives one answer; inverse kinematics may give none, one, several or infinitely many">
+    <figcaption data-l="th">สไลด์บทที่ 4 หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 4 slides, p. 5 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">จลนศาสตร์ไปข้างหน้า (บทที่ 3) มีคำตอบเดียวเสมอ แต่ย้อนกลับจากเฟรมของเครื่องมือไปหามุมข้อต่ออาจ <b>ไม่มีคำตอบ</b> (เป้าหมายอยู่นอกปริภูมิทำงาน) <b>มีหลายคำตอบ</b> (ต้องเลือก) หรือ <b>มีไม่จำกัด</b> (แขนมีข้อต่อเกินงาน) หน้านี้ตอบสามคำถามก่อนลงมือแก้สมการ ครอบคลุมสไลด์หน้า 5–13 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>4 โจทย์</b></p>
+    <p class="sub" data-l="en">Forward kinematics (chapter 3) always has one answer, but going back from the tool frame to the joint angles may have <b>no solution</b> (the goal is outside the workspace), <b>several</b> (one must be chosen) or <b>infinitely many</b> (more joints than the task needs). This page answers those three questions before any equation is solved. It covers slides pp. 5–13, with <b>one tool (A)</b> and <b>4 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>มีคำตอบเมื่อเป้าหมายอยู่ใน <b>ปริภูมิทำงาน</b>: ไปถึงได้ (reachable) = อย่างน้อยหนึ่งทิศ · คล่องแคล่ว (dexterous) = ทุกทิศ</li><li>แขนสองก้าน: ภายในวงแหวนมี 2 คำตอบ บนขอบ 1 นอกวงแหวน 0</li><li>เลือกคำตอบที่ <b>ใกล้ท่าปัจจุบัน</b> ที่สุด เว้นแต่ชนสิ่งกีดขวางหรือเกินช่วงข้อต่อ จึงต้องหาทุกคำตอบก่อน</li><li>แขน 6 แกนแบบ IRB 140 มีได้ถึง 8 คำตอบ · ข้อต่อเกินงานมีคำตอบไม่จำกัด (self-motion)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>A solution exists when the goal is in the <b>workspace</b>: reachable = in at least one orientation · dexterous = in every orientation.</li><li>Two-link arm: 2 solutions inside the ring, 1 on its edge, 0 outside.</li><li>Choose the solution <b>closest to the present pose</b>, unless it collides or breaks a joint range: so find all the solutions first.</li><li>A six-axis arm like the IRB 140 has up to 8 solutions · more joints than the task gives infinitely many (self-motion).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>ปริภูมิทำงาน</a><a href="#ex1"><b>1</b>ร่างปริภูมิทำงาน</a><a href="#ex2"><b>2</b>เลือกคำตอบ</a><a href="#ex3"><b>3</b>แปดคำตอบ</a><a href="#ex4"><b>4</b>ข้อต่อเกินงาน</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Workspace</a><a href="#ex1"><b>1</b>Sketch a workspace</a><a href="#ex2"><b>2</b>Choosing</a><a href="#ex3"><b>3</b>Eight solutions</a><a href="#ex4"><b>4</b>Redundancy</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: มีกี่คำตอบที่จุดนี้</h2><h2 data-l="en">Tool: how many solutions here?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 6 · Craig 4.2 · ลากจุดสีชมพู (เป้าหมาย) บนพื้น หรือเลื่อนแถบ</div><div class="src" data-l="en">Chapter 4 slides, p. 6 · Craig 4.2 · drag the pink goal on the floor, or use the sliders</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch4/s06.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 6: reachable and dexterous workspace">
+      <figcaption data-l="th">สไลด์หน้า 6 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 6 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">พื้นสีฟ้าคือที่ที่ปลายแขนไปถึงได้: วงแหวนระหว่าง |L₁ − L₂| กับ L₁ + L₂ ลากเป้าหมายไปมา ภายในวงแหวนมีสองท่า (ทึบและโปร่ง) บนขอบเหลือท่าเดียว นอกวงแหวนไม่มีเลย ลองตั้ง L₁ = L₂ แล้วลากเป้าหมายเข้าใกล้จุดกำเนิด</p>
+      <p class="lead" data-l="en">The blue floor is where the end of the arm can go: the ring between |L₁ − L₂| and L₁ + L₂. Drag the goal around: inside the ring there are two poses (solid and see-through), on its edge only one, outside none. Set L₁ = L₂ and bring the goal near the origin.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">กิจกรรม: ร่างปริภูมิทำงานของแขนสองก้าน</h2><h2 data-l="en">Activity: sketch the workspace of a two-link arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 7 (สไลด์เดิม Part 1 หน้า 6–7) · ข้อต่อหมุนได้รอบ</div><div class="src" data-l="en">Chapter 4 slides, p. 7 (old part 1 slides pp. 6–7) · the joints turn all the way round</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch4/s07.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 7: sketch the reachable and dexterous workspace for equal and unequal links">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 7 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 7 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">หลายคำตอบ: เลือกตัวไหน</h2><h2 data-l="en">Several solutions: which one?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 8–9 (Craig รูป 4.2–4.3) · L₁ = 0.4 m, L₂ = 0.35 m · แขนอยู่ที่ A ต้องไป B</div><div class="src" data-l="en">Chapter 4 slides, pp. 8–9 (Craig figures 4.2–4.3) · L₁ = 0.4 m, L₂ = 0.35 m · the arm is at A and must go to B</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch4/s09.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 9: choosing a solution when there is an obstacle">
+      <figcaption data-l="th">สไลด์หน้า 9 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 9 · tap to enlarge</figcaption></figure><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">แขน 6 แกน: เป้าหมายเดียว แปดท่า</h2><h2 data-l="en">A six-axis arm: one goal, eight poses</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 10 · เป้าหมายคือ ⁰₆T ของท่า (30°, −60°, 20°, 40°, 50°, −30°) ในบทที่ 3 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 4 slides, p. 10 · the goal is ⁰₆T of chapter 3's pose (30°, −60°, 20°, 40°, 50°, −30°) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch4/s10.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 10: four arm configurations of the IRB 140 reaching the same goal, and the number of solutions">
+    <figcaption data-l="th">สไลด์หน้า 10 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 10 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">ข้อต่อเกินงาน: คำตอบไม่จำกัด</h2><h2 data-l="en">More joints than the task: infinitely many solutions</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 11 (สไลด์เดิม Part 1 หน้า 11) · แขน 3 ก้าน 0.5, 0.4, 0.2 m จุดปลายเครื่องมืออยู่กับที่</div><div class="src" data-l="en">Chapter 4 slides, p. 11 (old part 1 slide p. 11) · a three-link arm, 0.5, 0.4, 0.2 m, its tool point held still</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch4/s11.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 11: a redundant three-link arm and self-motion">
+      <figcaption data-l="th">สไลด์หน้า 11 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 11 · tap to enlarge</figcaption></figure><div id="ask4"></div><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ขอบของวงแหวน</h3>
+    <ol><li>ในเครื่องมือ A ลากเป้าหมายไปที่ขอบนอกพอดี ท่าทึบกับท่าโปร่งรวมเป็นท่าเดียว (แขนเหยียดตรง) นี่คือเหตุที่ s₂ = 0 ให้คำตอบเดียวในหน้า 4.2</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ไม่ใช่ 6 แกนทุกตัวจะมี 8 คำตอบ</h3>
+    <ol><li>ในข้อ 3 ลองนับว่าคำตอบไหนอยู่ในช่วงข้อต่อ เหลือเพียงสองท่า (ข้อมือสองแบบ) โปรแกรมจริงจึงต้องตรวจช่วงข้อต่อก่อนเลือก</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 4 หน้า 5–13 (ภาพอยู่ในหน้านี้แล้ว) · Craig 4.1–4.3 · สไลด์เดิม Part 1 หน้า 3–13</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the edge of the ring</h3>
+    <ol><li>In tool A drag the goal exactly onto the outer edge: the solid and the see-through pose become one (the arm straight). That is why s₂ = 0 gives one solution on page 4.2.</li></ol></div>
+  <div class="card"><h3>Try this 2 — not every six-axis goal has 8 usable solutions</h3>
+    <ol><li>In problem 3 count the solutions inside the joint ranges: only two remain (the two wrists). A real controller checks the ranges before it chooses.</li></ol>
+    <div class="book">Source: chapter 4 slides, pp. 5–13 (the pictures are on this page) · Craig 4.1–4.3 · old part 1 slides pp. 3–13</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, X = CH4.EX;
+const dgs = x => `${u(deg(x), 1)}°`;
+
+/* ---------- A: how many solutions here? ---------- */
+const SA = { l1: 0.4, l2: 0.3, goal: [0.45, 0.35] }, roA = document.getElementById('roA'), ctlA = document.getElementById('ctlA');
+const readA = () => { const r = Math.hypot(...SA.goal), lo = Math.abs(SA.l1 - SA.l2), hi = SA.l1 + SA.l2, n = r > hi + 1e-9 || r < lo - 1e-9 ? 0 : (Math.abs(r - hi) < 0.005 || Math.abs(r - lo) < 0.005) ? 1 : 2;
+  roA.innerHTML = `<div class="term">${t('ระยะเป้าหมาย', 'goal distance')} √(x² + y²) = ${u(r, 3)} m · ${t('วงแหวน', 'ring')} ${u(lo, 2)}–${u(hi, 2)} m</div><div class="term"><b class="${n ? 'ax-y' : 'ax-x'}">${[t('ไม่มีคำตอบ: นอกปริภูมิทำงาน', 'no solution: outside the workspace'), t('1 คำตอบ: บนขอบ', '1 solution: on the edge'), t('2 คำตอบ: ข้อศอกสองทาง', '2 solutions: the elbow either way')][n]}</b>${SA.l1 === SA.l2 && r < 0.02 ? t(' · ที่จุดกำเนิดหมุนข้อ 1 ได้รอบ: ไม่จำกัด', ' · at the origin joint 1 can turn freely: infinitely many') : ''}</div>`; };
+[['l1', 'L₁'], ['l2', 'L₂']].forEach(([k, n]) => ui.slider(ctlA, { id: 'sa' + k, label: `${n} (m)`, min: 0.1, max: 0.6, step: 0.01, value: SA[k], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA[k] = v; readA(); } }));
+const gx = ui.slider(ctlA, { id: 'sax', label: 'x', min: -1.1, max: 1.1, step: 0.01, value: SA.goal[0], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.goal[0] = v; readA(); } });
+const gy = ui.slider(ctlA, { id: 'say', label: 'y', min: -1.1, max: 1.1, step: 0.01, value: SA.goal[1], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.goal[1] = v; readA(); } }); readA();
+CH2.sim('cvA', SA, () => 'reach', { aspect: 0.86, maxH: 540, drag: { grab: p => { const w = CH2.pick(SA, p, 0.11); return !!w && Math.hypot(w[0] - SA.goal[0], w[1] - SA.goal[1]) < 0.15; },
+  move: p => { const w = CH2.pick(SA, p, 0.11); if (!w) return; SA.goal = [Math.max(-1.1, Math.min(1.1, w[0])), Math.max(-1.1, Math.min(1.1, w[1]))]; gx.set(SA.goal[0]); gy.set(SA.goal[1]); readA(); } } });
+
+/* ---------- 1: sketch the workspace ---------- */
+const S1 = { l1: 0.4, l2: 0.4 };
+ui.radio(document.getElementById('ctl1'), [{ id: 'eq', label: '(a) L₁ = L₂', on: true }, { id: 'ne', label: '(b) L₁ ≠ L₂' }], id => { S1.l2 = id === 'eq' ? 0.4 : 0.2; S1.q = id === 'eq' ? undefined : [rad(40), rad(80)]; });
+CH2.sim('cv1', S1, 'reach', { aspect: 0.86, maxH: 480 });
+LS.choose(document.getElementById('ask1'), { options: [t('ทั้งแผ่นกลม', 'the whole disc'), t('วงแหวน', 'a ring'), t('จุดกำเนิดจุดเดียว', 'the origin only'), t('ไม่มีเลย', 'nothing')], answer: 2 });
+document.querySelector('#ask1 .asklab').textContent = t('เมื่อ L₁ = L₂ ปริภูมิทำงานแบบคล่องแคล่ว (ทุกทิศ) คืออะไร?', 'When L₁ = L₂, what is the dexterous workspace (every orientation)?');
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>ไปถึงได้</b>: ปลายแขนอยู่ห่างจุดกำเนิดได้ตั้งแต่ |L₁ − L₂| (พับ) ถึง L₁ + L₂ (เหยียด) และหมุนข้อ 1 ได้รอบ จึงเป็นวงแหวน', '<b>Reachable</b>: the end can be from |L₁ − L₂| (folded) to L₁ + L₂ (stretched) from the origin, and joint 1 turns all the way: a ring'), tex: '|L_1 - L_2| \\le \\sqrt{x^2+y^2} \\le L_1 + L_2' },
+  { why: t('<b>(a) L₁ = L₂</b>: รัศมีในเป็นศูนย์ วงแหวนกลายเป็นแผ่นกลมรัศมี 2L₁', '<b>(a) L₁ = L₂</b>: the inner radius is zero, the ring becomes a disc of radius 2L₁'), onShow: () => document.querySelector('#ctl1 button').click() },
+  { why: t('<b>คล่องแคล่ว</b>: แขนสองก้านมีทิศของปลายได้เพียงสองแบบที่แต่ละจุด ยกเว้นที่จุดกำเนิดเมื่อ L₁ = L₂ (พับก้าน 2 กลับมาทับก้าน 1 แล้วหมุนข้อ 1 ได้ทุกทิศ)', '<b>Dexterous</b>: at each point the two-link arm has only two end directions, except at the origin when L₁ = L₂ (link 2 folded back over link 1, joint 1 free to point anywhere)') },
+  { why: t('<b>(b) L₁ ≠ L₂</b>: มีรูตรงกลางรัศมี |L₁ − L₂| ที่ไปไม่ถึง และไม่มีจุดที่ไปได้ทุกทิศ', '<b>(b) L₁ ≠ L₂</b>: a hole of radius |L₁ − L₂| that cannot be reached, and no point with every direction'), onShow: () => document.querySelectorAll('#ctl1 button')[1].click() }],
+  answer: t('(a) แผ่นกลมรัศมี 2L₁ คล่องแคล่วเฉพาะจุดกำเนิด · (b) วงแหวน |L₁ − L₂| ถึง L₁ + L₂ ไม่มีส่วนคล่องแคล่ว', '(a) a disc of radius 2L₁, dexterous at the origin only · (b) a ring from |L₁ − L₂| to L₁ + L₂, no dexterous part') });
+
+/* ---------- 2: choosing a solution ---------- */
+const S2 = {}, l1 = 0.4, l2 = 0.35, qA = [rad(-15), rad(95)], B = [-0.12, 0.6], sB = [1, -1].map(e => RB.ik2(l1, l2, B[0], B[1], e)).map(r => [r.t1, r.t2]), dB = sB.map(q => CH4.dist(q, qA)), near = dB[0] < dB[1] ? 0 : 1;
+document.getElementById('ro2').innerHTML = `<div class="term">A: θ = (${qA.map(dgs).join(', ')})</div>` + sB.map((q, i) => `<div class="term">${t('คำตอบ', 'solution')} ${i + 1}: θ = (${q.map(dgs).join(', ')}) · ${t('ระยะในปริภูมิข้อต่อ', 'joint-space distance')} ${dgs(dB[i])}${i === near ? t(' (ใกล้กว่า)', ' (closer)') : ''}</div>`).join('');
+CH2.sim('cv2', S2, 'obst', { aspect: 0.8, maxH: 480 });
+LS.choose(document.getElementById('ask2'), { options: [t('คำตอบที่ใกล้กว่า', 'the closer solution'), t('คำตอบที่ไกลกว่า', 'the farther solution')], answer: 1 });
+document.querySelector('#ask2 .asklab').textContent = t('แขนอยู่ที่ A ต้องไป B ควรใช้คำตอบไหน?', 'The arm is at A and must reach B. Which solution should it use?');
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>หาทุกคำตอบ</b>: B อยู่ในวงแหวน จึงมีสองท่า (ข้อศอกสองทาง)', '<b>Find every solution</b>: B is inside the ring, so there are two poses (the elbow either way)') },
+  { why: t('<b>วัดระยะในปริภูมิข้อต่อ</b> จากท่าปัจจุบัน A (ผลต่างของมุม ห่อให้อยู่ใน ±180°)', '<b>Measure the joint-space distance</b> from the present pose A (angle differences wrapped into ±180°)'), tex: 'd = \\sqrt{\\Delta\\theta_1^2 + \\Delta\\theta_2^2}', body: () => `<div class="term">${dB.map((d, i) => `${t('คำตอบ', 'solution')} ${i + 1}: ${dgs(d)}`).join(' · ')}</div>` },
+  { why: t('<b>ตรวจการชน</b>: ท่าที่ใกล้กว่าพาข้อศอกไปชนกล่องสีแดง ท่าที่ไกลกว่าไม่ชน', '<b>Check for collisions</b>: the closer pose puts the elbow into the red box; the farther one is clear') }],
+  answer: t('ใช้คำตอบที่ไกลกว่า: ถ้าไม่มีสิ่งกีดขวางจะเลือกตัวที่ใกล้กว่า โปรแกรมผกผันจึงต้องคืนค่าทุกคำตอบ', 'Use the farther solution: without the obstacle the closer one would be chosen, so an IK routine must return every solution') });
+
+/* ---------- 3: one goal, eight poses ---------- */
+const SOL = X.irb.sols, S3s = { ex: 'irb', q: SOL[0].q, fit: true, xyz: true }, ro3 = document.getElementById('ro3');
+const name = s => `${s.shoulder === 'front' ? t('หน้า', 'front') : t('ข้ามหลัง', 'back')}, ${t('ข้อศอก', 'elbow')} ${s.elbow === 'up' ? t('ขึ้น', 'up') : t('ลง', 'down')}${s.wrist === 'flip' ? t(', ข้อมือกลับ', ', flip') : ''}`;
+const read3 = k => { ro3.innerHTML = `<div class="term"><b>${k + 1}. ${name(SOL[k])}</b> · θ = (${SOL[k].q.map(dgs).join(', ')}) · ${SOL[k].ok ? `<b class="ax-y">${t('อยู่ในช่วงข้อต่อ ✓', 'inside the joint ranges ✓')}</b>` : t('เกินช่วงข้อต่อ', 'outside the joint ranges')}</div>`; };
+ui.radio(document.getElementById('ctl3'), SOL.map((s, i) => ({ id: 's' + i, label: String(i + 1), on: !i })), id => { const k = +id.slice(1); S3s.q = SOL[k].q; read3(k); }); read3(0);
+CH2.sim('cv3', S3s, 'sol', { aspect: 0.8, maxH: 500 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('จำนวนคำตอบทั้งหมด =', 'solutions in all ='), ok: x => x === 8, w: 3 }, { label: t('อยู่ในช่วงข้อต่อ =', 'inside the ranges ='), ok: x => x === 2, w: 3 }],
+  check: v => v[0] === 4 ? t('ไหล่ 2 × ข้อศอก 2 = 4 แล้วข้อมือยังกลับได้อีกแบบ', 'shoulder 2 × elbow 2 = 4, and the wrist can flip too') : '' });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>ไหล่</b>: หันหน้าเข้าเป้าหมาย หรือหมุน θ₁ + 180° แล้วเอื้อมข้ามหลัง', '<b>Shoulder</b>: face the goal, or turn θ₁ + 180° and reach over the back') },
+  { why: t('<b>ข้อศอก</b>: ขึ้นหรือลง (สองเครื่องหมายของรากที่สอง)', '<b>Elbow</b>: up or down (the two signs of a square root)') },
+  { why: t('<b>ข้อมือ</b>: θ₄ + 180°, −θ₅, θ₆ + 180° ให้หน้าแปลนเดิม', '<b>Wrist</b>: θ₄ + 180°, −θ₅, θ₆ + 180° gives the same flange pose'), tex: '2 \\times 2 \\times 2 = 8' },
+  { why: t('<b>ช่วงข้อต่อ</b> (ที่ใช้ในวิชานี้: θ₂ −180°…0°, θ₃ ±90°, θ₅ ±120°) ตัดเหลือ 2 คำตอบ ลองกดปุ่ม 1–8 ดูทีละท่า', '<b>Joint ranges</b> (used in this course: θ₂ −180°…0°, θ₃ ±90°, θ₅ ±120°) leave 2 solutions; press 1–8 to see each pose') }],
+  answer: t('8 คำตอบ ใช้ได้ 2 (ท่าเดิมกับข้อมือที่กลับ)', '8 solutions, 2 usable (the original pose and its flipped wrist)') });
+
+/* ---------- 4: redundancy ---------- */
+const S4 = { phi: rad(30) }, ro4 = document.getElementById('ro4');
+const read4 = () => { ro4.innerHTML = `<div class="term">φ = ${dgs(S4.phi)} · ${t('จุดปลายเครื่องมืออยู่ที่ (0.62, 0.38) m ตลอด', 'the tool point stays at (0.62, 0.38) m')}</div>`; };
+ui.slider(document.getElementById('ctl4'), { id: 'p4', label: t('ทิศของก้านสุดท้าย φ', 'direction of the last link φ'), min: -80, max: 110, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S4.phi = rad(v); read4(); } }); read4();
+CH2.sim('cv4', S4, 'redund', { aspect: 0.8, maxH: 460 });
+LS.choose(document.getElementById('ask4'), { options: ['1', '2', '4', t('ไม่จำกัด', 'infinitely many')], answer: 3 });
+document.querySelector('#ask4 .asklab').textContent = t('แขน 3 ข้อต่อในระนาบต้องวางเฉพาะจุดปลาย (x, y) มีกี่คำตอบ?', 'A planar three-joint arm must only put its tool point at (x, y). How many solutions?');
+LS.stepper(document.getElementById('st4'), { steps: [
+  { why: t('<b>นับ</b>: งานมีตัวเลข 2 ตัว (x, y) แขนมีข้อต่อ 3 ตัว เหลืออิสระหนึ่งตัว', '<b>Count</b>: the task has 2 numbers (x, y), the arm 3 joints: one is left free') },
+  { why: t('<b>เลือก φ ได้อิสระ</b>: ทุก φ ที่ทำให้ข้อมืออยู่ในวงแหวนของสองก้านแรกใช้ได้ เลื่อนแถบดู: แขนขยับแต่ปลายไม่ขยับ (self-motion)', '<b>φ is free</b>: every φ that keeps the wrist inside the first two links\' ring works; move the slider: the arm moves, the tool point stays (self-motion)') }],
+  answer: t('ไม่จำกัด: แขนที่มีข้อต่อเกินงาน (redundant) ต้องมีกฎเพิ่มเพื่อเลือกท่า', 'Infinitely many: a redundant arm needs an extra rule to pick a pose') });
+});
+</script>
+</body>
+</html>

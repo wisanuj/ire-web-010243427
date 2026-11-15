@@ -50,6 +50,7 @@ global.RBTESTS = T => {
     const kc = RB.chain(CH1.chainSpec(['R', 'P', 'R']), [0.5, 0.1, -0.4]), ec = kc.pts[kc.pts.length - 1]; T('tip readout: vertical chain = (x, 0, z)', dd(CH1.S3.chain({ types: ['R', 'P', 'R'], q: [0.5, 0.1, -0.4], xyz: true }).tip, [ec[0], 0, ec[1]]), 0, 1e-12); }
   if (global.CH2) ch2(T);
   if (global.CH3) ch3(T);
+  if (global.CH4) ch4(T);
 };
 /* ---------------- chapter 3: forward kinematics (Craig ch. 3) ---------------- */
 function ch3(T) {
@@ -141,5 +142,45 @@ function ch2(T) {
   /* homework 2.2 */
   const W = E.hw22; T('HW 2.2: ¹_2R = R_X(60°)', near(W.R12, RB.Rx(d2r(60))), 0, 1e-12); T('HW 2.2: ¹_3R = R_Y(−90°)', near(W.R13, RB.Ry(d2r(-90))), 0, 1e-12); T('HW 2.2: ¹_2R ²_3R = ¹_3R', near(RB.mm(W.R12, W.R23), W.R13), 0, 1e-12);
   T('HW 2.2: r21 of ²_3R = √3/2', W.R23[1][0], s3, 1e-12);
+}
+/* ---------------- chapter 4: inverse kinematics (Craig ch. 4) ---------------- */
+function ch4(T) {
+  const RB = global.RB, CH3 = global.CH3, CH4 = global.CH4, d2r = RB.rad, w = RB.wrap;
+  const near = (A, B) => { let e = 0; A.forEach((r, i) => r.forEach((x, j) => { e = Math.max(e, Math.abs(x - B[i][j])); })); return e; };
+  let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  /* planar 3R (Craig 4.4): both solutions, algebraic and geometric, put back through the forward kinematics */
+  let e3 = 0, same = 0; for (let k = 0; k < 300; k++) { const q = [d2r(-180 + 360 * rnd()), d2r(-170 + 340 * rnd()), d2r(-180 + 360 * rnd())], [x, y, f] = CH4.p3rFK(0.5, 0.4, q), A = CH4.p3r(0.5, 0.4, x, y, f), G = CH4.p3rGeo(0.5, 0.4, x, y, f);
+    [...A.sols, ...G.sols].forEach(s => { const g = CH4.p3rFK(0.5, 0.4, s); e3 = Math.max(e3, Math.abs(g[0] - x), Math.abs(g[1] - y), Math.abs(w(g[2] - f))); });
+    if (A.sols.every(a => G.sols.some(g => a.every((v, i) => Math.abs(w(v - g[i])) < 1e-9)))) same++; }
+  T('planar 3R: every algebraic and geometric solution reaches the goal', e3, 0, 1e-9); T('planar 3R: algebra and geometry give the same two solutions (300 goals)', same, 300, 0);
+  T('planar 3R: out of reach (x = 1, y = 0) has no solution', CH4.p3r(0.5, 0.4, 1, 0, 0).sols.length, 0, 0);
+  T('planar 3R: on the boundary (x = 0.9) the two solutions coincide', Math.abs(CH4.p3r(0.5, 0.4, 0.9, 0, 0).sols[0][1] - CH4.p3r(0.5, 0.4, 0.9, 0, 0).sols[1][1]), 0, 1e-6);
+  /* tangent half-angle (Craig 4.5, example 4.3) */
+  let eh = 0; for (let k = 0; k < 300; k++) { const a = 4 * rnd() - 2, b = 4 * rnd() - 2, c = 4 * rnd() - 2; CH4.half(a, b, c).sols.forEach(t => { eh = Math.max(eh, Math.abs(a * Math.cos(t) + b * Math.sin(t) - c)); }); }
+  T('a cos θ + b sin θ = c: every root satisfies the equation', eh, 0, 1e-9); T('c² > a² + b²: no real root', CH4.half(1, 1, 2).sols.length, 0, 0);
+  /* IRB 140: eight solutions, each one reaches the goal frame, the original among them */
+  let ei = 0, found = 0, n8 = 0; for (let k = 0; k < 200; k++) { const q = [d2r(-170 + 340 * rnd()), d2r(-170 * rnd()), d2r(-85 + 170 * rnd()), d2r(-170 + 340 * rnd()), d2r(-110 + 220 * rnd()), d2r(-170 + 340 * rnd())], Tq = CH4.irbFK(q), S = CH4.irbIK(Tq);
+    S.forEach(s => { ei = Math.max(ei, near(CH4.irbFK(s.q), Tq)); }); if (S.some(s => s.q.every((v, i) => Math.abs(w(v - q[i])) < 1e-7))) found++; if (S.length === 8) n8++; }
+  T('IRB 140: every inverse solution gives the goal ^0_6T (200 goals)', ei, 0, 1e-9); T('IRB 140: the joint angles we started from are always among the solutions', found, 200, 0); T('IRB 140: most goals have 8 solutions', n8 > 100 ? 'yes' : 'no', 'yes');
+  const Z = CH4.irbIK(CH4.irbFK(CH3.EX.irb.zero)); T('IRB 140 zero pose: 8 solutions', Z.length, 8, 0);
+  T('IRB 140 zero pose: front, elbow up, no flip = the zero pose', Z.find(s => s.shoulder === 'front' && s.elbow === 'up' && s.wrist === 'no flip').q.every((v, i) => Math.abs(v - CH3.EX.irb.zero[i]) < 1e-9) ? 'yes' : 'no', 'yes');
+  T('IRB 140: a wrist flip is θ4 + 180°, −θ5, θ6 + 180°', (() => { const a = Z[0].q, b = Z[1].q; return Math.abs(w(b[3] - a[3] - Math.PI)) + Math.abs(b[4] + a[4]) + Math.abs(w(b[5] - a[5] - Math.PI)); })(), 0, 1e-9);
+  /* closest solution and the RPR arm */
+  T('closest solution: from the zero pose it is the zero pose', CH4.nearest(Z, CH3.EX.irb.zero).d, 0, 1e-9);
+  const R = CH3.EX.rpr, qr = [d2r(30), 0.35, d2r(45)], sr = CH4.rprIK(R.L.L2, R.T03(R.L, qr)).sols[0]; T('RPR inverse: θ1, d2, θ3 back', Math.abs(sr[0] - qr[0]) + Math.abs(sr[1] - qr[1]) + Math.abs(sr[2] - qr[2]), 0, 1e-12);
+  /* the worked examples on the slides */
+  const X = CH4.EX, dg = RB.deg, dd = (p, q) => Math.hypot(...p.map((x, i) => x - q[i]));
+  T('ex 3R: goal x = 0.537', X.p3r.goal[0], 0.5365, 5e-5); T('ex 3R: goal y = 0.636', X.p3r.goal[1], 0.6364, 5e-5); T('ex 3R: goal φ = 15°', dg(X.p3r.goal[2]), 15, 1e-9);
+  T('ex 3R: c2 = 0.7071 (θ2 = ±45°)', X.p3r.sol.c2, Math.SQRT1_2, 1e-9); T('ex 3R: second solution θ1 = 69.73°', dg(X.p3r.sol.sols[1][0]), 69.73, 0.005); T('ex 3R: second solution θ3 = −9.73°', dg(X.p3r.sol.sols[1][2]), -9.73, 0.005);
+  T('ex half-angle: 3 cos θ + 4 sin θ = 2 roots 119.55°, −13.29°', Math.abs(dg(X.half.sol.sols[0]) - 119.55) + Math.abs(dg(X.half.sol.sols[1]) + 13.29), 0, 0.01);
+  T('ex RRR: four solutions', X.arm4.sols.length, 4, 0); T('ex RRR: every solution reaches the goal', Math.max(...X.arm4.sols.map(s => dd(CH4.arm4P(X.arm4.L, s.q), X.arm4.p))), 0, 1e-9);
+  T('ex RRR: elbow-down twin θ2 = −17.66°, θ3 = 60°', Math.abs(dg(X.arm4.sols[0].q[1]) + 17.66) + Math.abs(dg(X.arm4.sols[0].q[2]) - 60), 0, 0.01);
+  T('ex SCARA: two solutions reach the goal', Math.max(...X.scara.sols.map(q => { const P = CH4.scaraPose(X.scara.L, q); return dd(P.p, X.scara.p) + Math.abs(RB.wrap(P.phi - X.scara.phi)); })), 0, 1e-9);
+  T('ex SCARA: θ4 = θ1 + θ2 − φ', dg(X.scara.sols[1][3]), 30, 1e-9);
+  T('ex IRB 140: 8 solutions, 2 inside the joint ranges', X.irb.sols.length * 10 + X.irb.sols.filter(s => s.ok).length, 82, 0);
+  T('ex SOLVE: wrist frame at (0.45, 0.15, 0.22)', dd(RB.Tp(X.solve.W), [0.45, 0.15, 0.22]), 0, 1e-12); T('ex SOLVE: closest solution θ1 = 18.43°', dg(X.solve.best.s.q[0]), 18.43, 0.005);
+  T('ex SOLVE: tool frame of the chosen solution = {G}', near(RB.Tm(CH4.irbFK(X.solve.best.s.q), RB.trans(0, 0, X.solve.LT)), X.solve.G), 0, 1e-9);
+  T('HW 4: (x, y, z) = (0.5427, 0.3800, 0.6690)', dd(X.hw.p, [0.5427, 0.3800, 0.6690]), 0, 1e-4); T('HW 4: second solution (−145°, 170.04°, 0.9773)', Math.abs(dg(X.hw.sols[1][0]) + 145) + Math.abs(dg(X.hw.sols[1][1]) - 170.04) + Math.abs(X.hw.sols[1][2] - 0.9773), 0, 0.01);
+  T('HW 4: both solutions reach the goal', Math.max(...X.hw.sols.map(q => dd(CH4.rrp.P(X.hw.L, q), X.hw.p))), 0, 1e-12); T('HW 4: closed form = product of the link transforms', dd(RB.Tp(CH4.rrp.T03(X.hw.L, X.hw.q)), X.hw.p), 0, 1e-12);
 }
 })(typeof window !== 'undefined' ? window : globalThis);

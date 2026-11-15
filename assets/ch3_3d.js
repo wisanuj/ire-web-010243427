@@ -17,20 +17,20 @@ const linkCol = (s, k) => k ? s.L[1 + (k - 1) % 3] : s.L[0];
 const dim = (s, a, b, c, off = [0, 0, 0], r = 0.004) => { const A = v(a, off), B = v(b, off); if (len(sub(B, A)) < 0.02) return null; arrow(s, A, B, c, r); arrow(s, B, A, c, r); dashed(s, a, A, c, 0.0022, 5); dashed(s, b, B, c, 0.0022, 5); return v(A, sub(B, A), 0.5); };
 
 /* ---- the DH skeleton of a table. F = frames in world coordinates (F[0] = {0}); op: frames (indices to draw), fl (axis length), lab (write X_i, Z_i),
-   tags ({i} at the origins), axes (long joint-axis lines), show (row k: mark a_{k−1}, α_{k−1}, d_k, θ_k), grip ('x' | 'z': the tool direction), y (draw Y too) ---- */
+   tags ({i} at the origins), axes (long joint-axis lines), show (row k: mark a_{k−1}, α_{k−1}, d_k, θ_k), grip ('x' | 'z': the tool direction), y (draw Y too), al (see-through: a second solution drawn as a ghost) ---- */
 const drawDH = CH3.drawDH = (s, rows, F, op = {}) => { const n = rows.length, fl = op.fl || 0.16;
   for (let i = 1; i <= n; i++) { const r = rows[i - 1], Op = P(F[i - 1]), Xp = col(F[i - 1], 0), Oi = P(F[i]), Zi = col(F[i], 2), Q = v(Op, Xp, op.conv === 'c' ? 0 : r.a), fixed = !r.j;
-    if (op.conv === 'c') { /* classical: d along Z_{i−1}, then a along X_i */ const Zp = col(F[i - 1], 2), M = v(Op, Zp, r.d + (r.j === 'P' ? (op.q[i - 1] || 0) : 0)); if (len(sub(M, Op)) > 1e-6) bar(s, Op, M, 0.016, linkCol(s, i)); if (len(sub(Oi, M)) > 1e-6) bar(s, M, Oi, 0.02, linkCol(s, i)); continue; }
-    if (len(sub(Q, Op)) > 1e-6) bar(s, Op, Q, i === 1 ? 0.03 : 0.022, linkCol(s, i - 1));
-    if (len(sub(Oi, Q)) > 1e-6) bar(s, Q, Oi, r.j === 'P' ? 0.014 : 0.02, fixed ? linkCol(s, i - 1) : linkCol(s, i));
-    if (r.j === 'R') rj(s, i === 1 ? Oi : Q, Zi, { r: op.jr || 0.04, h: op.jh || 0.04 });
-    else if (r.j === 'P') box(s, v(Q, Zi, -0.05), v(Q, Zi, 0.05), 0.06, 0.06, s.pal.sleeve, 1, col(F[i - 1], 0)); }
+    if (op.conv === 'c') { /* classical: d along Z_{i−1}, then a along X_i */ const Zp = col(F[i - 1], 2), M = v(Op, Zp, r.d + (r.j === 'P' ? (op.q[i - 1] || 0) : 0)); if (len(sub(M, Op)) > 1e-6) bar(s, Op, M, 0.016, linkCol(s, i), op.al); if (len(sub(Oi, M)) > 1e-6) bar(s, M, Oi, 0.02, linkCol(s, i), op.al); continue; }
+    if (len(sub(Q, Op)) > 1e-6) bar(s, Op, Q, i === 1 ? 0.03 : 0.022, linkCol(s, i - 1), op.al);
+    if (len(sub(Oi, Q)) > 1e-6) bar(s, Q, Oi, r.j === 'P' ? 0.014 : 0.02, fixed ? linkCol(s, i - 1) : linkCol(s, i), op.al);
+    if (r.j === 'R') rj(s, i === 1 ? Oi : Q, Zi, { r: op.jr || 0.04, h: op.jh || 0.04, al: op.al });
+    else if (r.j === 'P') box(s, v(Q, Zi, -0.05), v(Q, Zi, 0.05), 0.06, 0.06, s.pal.sleeve, op.al || 1, col(F[i - 1], 0)); }
   if (op.axes) for (let i = 1; i <= n; i++) { if (!rows[i - 1].j) continue; const Oi = P(F[i]), Zi = col(F[i], 2); cyl(s, v(Oi, Zi, -op.axes), v(Oi, Zi, op.axes), 0.003, s.pal.z, 0.45); }
   const fr = op.frames || F.map((_, i) => i);
   fr.forEach(i => { const O = P(F[i]); [0, 2].concat(op.y ? [1] : []).forEach(j => { arrow(s, O, v(O, col(F[i], j), fl), axc(s, j), 0.0045);
       if (op.lab !== false) lab(s, v(O, col(F[i], j), fl + 0.04), 'XYZ'[j], { sub: String(i), m: 1, c: 'xyz'[j], s: op.ls || 28, a: 'c', dy: 10, ...((op.labAt && op.labAt[i] && op.labAt[i][j]) || {}) }); });
     sph(s, O, 0.011, s.pal.ink); if (op.tags) lab(s, O, `{${i}}`, { s: 26, a: 'r', dx: -12, dy: 30, ...((op.tagAt && op.tagAt[i]) || {}) }); });
-  if (op.grip) { const E = F[n], d = col(E, op.grip === 'z' ? 2 : 0), sd = col(E, 1); grip(s, P(E), d, sd, { w: 0.03, L: 0.06 }); }
+  if (op.grip) { const E = F[n], d = col(E, op.grip === 'z' ? 2 : 0), sd = col(E, 1); grip(s, P(E), d, sd, { w: 0.03, L: 0.06, al: op.al }); }
   if (op.show) { const k = op.show, r = rows[k - 1], Op = P(F[k - 1]), Xp = col(F[k - 1], 0), Zp = col(F[k - 1], 2), Ok = P(F[k]), Zk = col(F[k], 2), Xk = col(F[k], 0), Q = v(Op, Xp, r.a);
     const m1 = dim(s, Op, Q, C.am, RB.sc(Zp, -0.06)); if (m1) lab(s, m1, 'a', { sub: (k - 1) + '', m: 1, c: 'am', s: 34, a: 'c', dy: 36 });
     const m2 = dim(s, Q, Ok, C.p, RB.sc(Xp, -0.07)); if (m2) lab(s, m2, 'd', { sub: k + '', m: 1, c: 'p', s: 34, a: 'r', dx: -14 });
@@ -50,6 +50,7 @@ const EXV = { p3r: { T0: [0, 0, 0.11], cam: [[0.35, 0.3, 0.05], 3.0, -90, 58], g
   arm4: { T0: [0, 0, 0], cam: [[0.35, 0.1, 0.45], 3.6, -62, 18], grip: 'x', base: false },
   scara: { T0: [0, 0, 0.6], cam: [[0.3, 0.15, 0.35], 3.4, -60, 22], grip: 'z', base: true },
   irb: { T0: [0, 0, 0.352], cam: [[0.22, 0, 0.5], 4.0, -60, 16], grip: 'z', base: true } };
+CH3.EXV = EXV;   // chapter 4 shows the same arms
 /* the frames of example `ex` (CH3.EX) at joint values q, in world coordinates */
 CH3.exFrames = (ex, q, conv) => { const E = CH3.EX[ex === 'rprHW' ? 'rpr' : ex], L = E.L, rows = ex === 'rprHW' ? E.hwRows(L) : conv === 'c' ? E.rowsC(L) : E.rows(L), V = EXV[ex];
   const full = ex === 'p3r' && q.length > 3 ? [...rows, E.tool(L)] : rows; return { rows: full, F: CH3.frames(full, q, conv, RB.trans(...V.T0)) }; };

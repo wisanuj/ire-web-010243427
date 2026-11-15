@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="4.4 — Six-axis arms: the wrist centre">4.4 — แขน 6 แกน: จุดศูนย์กลางข้อมือ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=13">
+<script src="assets/stops.js?v=13"></script><script src="assets/shell.js?v=13"></script>
+<script src="assets/robot.js?v=13"></script><script src="assets/lesson.js?v=13"></script><script src="assets/ch2.js?v=13"></script><script src="assets/ch3.js?v=13"></script><script src="assets/ch4.js?v=13"></script><script src="assets/scene3d.js?v=13"></script><script src="assets/gl3d.js?v=13"></script><script src="assets/ch2_3d.js?v=13"></script><script src="assets/ch3_3d.js?v=13"></script><script src="assets/ch4_3d.js?v=13"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">แขน 6 แกน: จุดศูนย์กลางข้อมือ <span class="en">Six-axis arms — position first, then orientation</span></h1>
+<h1 data-l="en">Six-axis arms: the wrist centre <span class="en">Position first, then orientation</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch4/s31.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 31: split the six-joint problem at the wrist centre">
+    <figcaption data-l="th">สไลด์บทที่ 4 หน้า 31 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 4 slides, p. 31 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">แขนอุตสาหกรรมเกือบทุกตัวมีข้อมือทรงกลม: แกน 4, 5, 6 ตัดกันที่จุดศูนย์กลางข้อมือ ปัญหา 6 ตัวแปรจึงแยกเป็นสองปัญหา 3 ตัวแปร (Pieper, Craig 4.6): θ₁–θ₃ วางจุดศูนย์กลางข้อมือ แล้ว θ₄–θ₆ หมุนเครื่องมือ หน้านี้ทำครบทั้งสองขั้นกับ ABB IRB 140 ของบทที่ 3 ได้ 8 คำตอบ เลือกตามช่วงข้อต่อ และจบด้วย SOLVE: จากเป้าหมายกับเครื่องมือไปถึงมุมข้อต่อ (Craig 4.8–4.9) ครอบคลุมสไลด์หน้า 31–40 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">Almost every industrial arm has a spherical wrist: axes 4, 5, 6 meet at the wrist centre. The six-unknown problem then splits into two three-unknown ones (Pieper, Craig 4.6): θ₁–θ₃ place the wrist centre, θ₄–θ₆ turn the tool. This page works both steps on chapter 3's ABB IRB 140, finds 8 solutions, chooses by the joint ranges, and ends with SOLVE: from a goal and a tool to joint angles (Craig 4.8–4.9). It covers slides pp. 31–40, with <b>one tool (A)</b> and <b>3 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>จุดศูนย์กลางข้อมือ = ปลายเครื่องมือถอยกลับตามแกน Z ของเครื่องมือ: \(p_c = p_T - L_T\,{}^0\hat Z_T\)</li><li>IRB 140: \(\theta_1 = \mathrm{atan2}(p_y, p_x)\) หรือ +180° · \(s_3 = (a_2^2 + d_4^2 - u^2 - p_z^2)/(2a_2d_4)\) · \(\theta_2 = \mathrm{atan2}(-p_z, u) - \mathrm{atan2}(d_4c_3, a_2 - d_4s_3)\)</li><li>\({}^3_6R = ({}^0_3R)^T\,{}^0_6R\): \(\theta_5 = \mathrm{atan2}(\pm\sqrt{r_{13}^2 + r_{33}^2}, r_{23})\) ข้อมือกลับ = θ₄ + 180°, −θ₅, θ₆ + 180°</li><li>8 คำตอบ แต่ใช้ได้เฉพาะที่อยู่ในช่วงข้อต่อ · s₅ = 0 คือภาวะเอกฐานของข้อมือ</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>The wrist centre is the tool tip moved back along the tool's own Z: \(p_c = p_T - L_T\,{}^0\hat Z_T\).</li><li>IRB 140: \(\theta_1 = \mathrm{atan2}(p_y, p_x)\) or +180° · \(s_3 = (a_2^2 + d_4^2 - u^2 - p_z^2)/(2a_2d_4)\) · \(\theta_2 = \mathrm{atan2}(-p_z, u) - \mathrm{atan2}(d_4c_3, a_2 - d_4s_3)\).</li><li>\({}^3_6R = ({}^0_3R)^T\,{}^0_6R\): \(\theta_5 = \mathrm{atan2}(\pm\sqrt{r_{13}^2 + r_{33}^2}, r_{23})\); the flipped wrist is θ₄ + 180°, −θ₅, θ₆ + 180°.</li><li>8 solutions, but only those inside the joint ranges can be used · s₅ = 0 is the wrist singularity.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>แปดคำตอบ</a><a href="#ex1"><b>1</b>จุดศูนย์กลางข้อมือ</a><a href="#ex2"><b>2</b>แก้ IRB 140</a><a href="#ex3"><b>3</b>SOLVE</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Eight solutions</a><a href="#ex1"><b>1</b>Wrist centre</a><a href="#ex2"><b>2</b>Solving the IRB 140</a><a href="#ex3"><b>3</b>SOLVE</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: เป้าหมายเดียว แปดคำตอบ</h2><h2 data-l="en">Tool: one goal, eight solutions</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 35–36 · ตั้งท่าด้วยแถบเลื่อน (เป้าหมายคือ ⁰₆T ของท่านั้น) แล้วกด 1–8 ดูทุกคำตอบ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 4 slides, pp. 35–36 · set a pose with the sliders (the goal is that pose's ⁰₆T), then press 1–8 to see every solution · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="ctl" id="selA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch4/s36.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 36: the wrist flip on the real IRB 140">
+      <figcaption data-l="th">สไลด์หน้า 36 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 36 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">ลูกบอลสีชมพูคือเป้าหมาย (จุดศูนย์กลางข้อมือของ ⁰₆T) ทุกคำตอบพาจุดศูนย์กลางข้อมือไปที่เดียวกันและหันหน้าแปลนเหมือนกัน ตัวเลข x, y, z ข้างลูกบอลจึงไม่เปลี่ยนเมื่อกดคำตอบอื่น คำตอบคู่ 1–2, 3–4, … ต่างกันเพียงข้อมือกลับ ตารางบอกว่าคำตอบไหนอยู่ในช่วงข้อต่อที่ใช้ในวิชานี้</p>
+      <p class="lead" data-l="en">The pink ball is the goal (the wrist centre of ⁰₆T). Every solution takes the wrist centre to the same place with the flange turned the same way, so the x, y, z beside the ball do not change when you press another solution. Pairs 1–2, 3–4, … differ only by the flipped wrist. The table says which solutions lie inside the joint ranges used in this course.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">จุดศูนย์กลางข้อมืออยู่ที่ไหน</h2><h2 data-l="en">Where is the wrist centre?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 31–32 · เป้าหมาย {G} ที่ (0.45, 0.15, 0.10) m จาก {0} ชี้ลง · เลื่อนแถบความยาวเครื่องมือ</div><div class="src" data-l="en">Chapter 4 slides, pp. 31–32 · goal {G} at (0.45, 0.15, 0.10) m from {0}, pointing down · move the tool-length slider</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch4/s32.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 32: the wrist centre is the tool tip moved back along the tool's Z axis">
+      <figcaption data-l="th">สไลด์หน้า 32 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 32 · tap to enlarge</figcaption></figure><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">แก้ IRB 140 ครบทุกขั้น</h2><h2 data-l="en">Solving the IRB 140 step by step</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 33–35 · a₁ = 0.07, a₂ = 0.36, d₄ = 0.38 m · เป้าหมาย ⁰₆T ของท่า (30°, −60°, 20°, 40°, 50°, −30°) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 4 slides, pp. 33–35 · a₁ = 0.07, a₂ = 0.36, d₄ = 0.38 m · goal ⁰₆T of the pose (30°, −60°, 20°, 40°, 50°, −30°) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch4/s35.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 35: a goal transform of the IRB 140; find all eight solutions">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 35 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 35 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">SOLVE: จากเป้าหมายและเครื่องมือถึงมุมข้อต่อ</h2><h2 data-l="en">SOLVE: from a goal and a tool to joint angles</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 4 หน้า 37–38 (Craig 4.8–4.9) · เครื่องมือยาว 0.12 m ตาม Z₆ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 4 slides, pp. 37–38 (Craig 4.8–4.9) · a tool 0.12 m long along Z₆ · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch4/s38.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 38: SOLVE with a tool; find the closest solution inside the ranges">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 38 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 38 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ความแม่นยำซ้ำกับความแม่นยำ (Craig 4.10)</h3>
+    <ol><li>จุดที่สอนด้วยการพาแขนไป (teach) แขนกลับไปด้วยค่าข้อต่อเดิม ไม่ผ่านจลนศาสตร์: ใช้ <b>ความแม่นยำซ้ำ</b> (repeatability) ซึ่งดีมาก</li><li>จุดที่คำนวณจากกล้องหรือ CAD ผ่านจลนศาสตร์ผกผันด้วยพารามิเตอร์ DH: ใช้ <b>ความแม่นยำ</b> (accuracy) ซึ่งแย่กว่า ถ้า a, α, d หรือมุมศูนย์ของแขนจริงต่างจากตาราง ปลายเครื่องมือก็ไปผิดที่ การปรับเทียบ (calibration) วัดค่าจริงของแขนแต่ละตัว</li></ol></div>
+  <div class="card"><h3>คำนวณให้เร็ว (Craig 4.11)</h3>
+    <ol><li>ตัวควบคุมแก้จลนศาสตร์ผกผันหลายร้อยครั้งต่อวินาทีขณะเคลื่อนที่ตามเส้นทาง (บทที่ 7): คำนวณ sin, cos ครั้งเดียว ใช้ซ้ำ นับจำนวน atan2 และรากที่สอง</li><li>แขนที่ไม่มีคำตอบแบบปิดใช้วิธีวนซ้ำ (นิวตันกับจาโคเบียน บทที่ 5) เริ่มจากท่าปัจจุบัน</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 4 หน้า 31–40 (ภาพอยู่ในหน้านี้แล้ว) · Craig 4.6–4.11 · Spong 3.3 · สไลด์เดิม Part 2 หน้า 17–33</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Repeatability and accuracy (Craig 4.10)</h3>
+    <ol><li>A taught point (the arm jogged there) is reached again by the same joint values, without any kinematics: that uses <b>repeatability</b>, which is very good.</li><li>A point computed from a camera or CAD goes through inverse kinematics with the DH parameters: that uses <b>accuracy</b>, which is worse. If the real a, α, d or zero angles differ from the table, the tool lands elsewhere; calibration measures each arm's real values.</li></ol></div>
+  <div class="card"><h3>Computing it fast (Craig 4.11)</h3>
+    <ol><li>A controller solves IK hundreds of times a second while it follows a path (chapter 7): take each sine and cosine once, reuse them, count the atan2s and square roots.</li><li>An arm without a closed form is solved by iteration (Newton's method with the Jacobian, chapter 5) starting from the present pose.</li></ol>
+    <div class="book">Source: chapter 4 slides, pp. 31–40 (the pictures are on this page) · Craig 4.6–4.11 · Spong 3.3 · old part 2 slides pp. 17–33</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, X = CH4.EX, IR = CH3.EX.irb;
+const dgs = (x, n = 1) => `${u(deg(x), n)}°`, T4 = T => CH2.htmlM(T, 3, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true });
+const name = s => `${s.shoulder === 'front' ? t('หน้า', 'front') : t('ข้ามหลัง', 'back')}, ${t('ข้อศอก', 'elbow')} ${s.elbow === 'up' ? t('ขึ้น', 'up') : t('ลง', 'down')}${s.wrist === 'flip' ? t(', ข้อมือกลับ', ', flip') : ''}`;
+const table = (S, k) => `<table class="dhtab"><tr><th></th><th>θ₁</th><th>θ₂</th><th>θ₃</th><th>θ₄</th><th>θ₅</th><th>θ₆</th><th>${t('ช่วง', 'range')}</th></tr>` +
+  S.map((s, i) => `<tr${i === k ? ' style="font-weight:700"' : ''}><td>${i + 1}</td>${s.q.map(x => `<td>${dgs(x)}</td>`).join('')}<td>${CH4.inLim(s.q) ? '✓' : '—'}</td></tr>`).join('') + '</table>';
+/* a selector of up to 8 solutions under a sim; onpick(k) */
+const picker = (el, n, onpick) => { el.innerHTML = ''; return ui.radio(el, Array.from({ length: n }, (_, i) => ({ id: 'k' + i, label: String(i + 1), on: !i })), id => onpick(+id.slice(1))); };
+
+/* ---------- A: one goal, eight solutions ---------- */
+const qG = IR.q.slice(), SA = { ex: 'irb', q: qG.slice(), fit: true, xyz: true, frames: [0] }, roA = document.getElementById('roA'); let solA = [], kA = 0;
+const showA = () => { if (!solA.length) { roA.innerHTML = `<div class="term">${t('ไม่มีคำตอบ', 'no solution')}</div>`; return; } kA = Math.min(kA, solA.length - 1); SA.q = solA[kA].q;
+  roA.innerHTML = `<div class="term"><b>${kA + 1}. ${name(solA[kA])}</b> · ${solA.length} ${t('คำตอบ', 'solutions')}</div>` + table(solA, kA); };
+const solveA = () => { solA = CH4.irbIK(CH4.irbFK(qG)); picker(document.getElementById('selA'), solA.length, k => { kA = k; showA(); }); kA = 0; showA(); };
+[[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]].forEach(([lo, hi], i) => ui.slider(document.getElementById('ctlA'), { id: 'qa' + i, label: `θ${'₁₂₃₄₅₆'[i]} ${t('ของเป้าหมาย', 'of the goal')}`, min: lo, max: hi, step: 1, value: Math.round(deg(qG[i])), fmt: v => `${v}°`, oninput: v => { qG[i] = rad(v); solveA(); } })); solveA();
+CH2.sim('cvA', SA, 'sol', { aspect: 0.8, maxH: 520 });
+
+/* ---------- 1: the wrist centre ---------- */
+const S1 = { LT: X.solve.LT }, ro1 = document.getElementById('ro1');
+const read1 = () => { ro1.innerHTML = `<div class="term">L<sub>T</sub> = ${u(S1.LT, 3)} m · ${t('จุดศูนย์กลางข้อมือ', 'wrist centre')} p<sub>c</sub> = (0.450, 0.150, ${u(0.1 + S1.LT, 3)}) m</div>`; };
+ui.slider(document.getElementById('ctl1'), { id: 'lt', label: t('ความยาวเครื่องมือ L<sub>T</sub>', 'tool length L<sub>T</sub>'), min: 0, max: 0.25, step: 0.01, value: S1.LT, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S1.LT = v; read1(); } }); read1();
+CH2.sim('cv1', S1, 'wc', { aspect: 0.8, maxH: 480 });
+LS.ask(document.getElementById('ask1'), { fields: [{ label: t('L<sub>T</sub> = 0.12 m: z ของจุดศูนย์กลางข้อมือ (m) =', 'L<sub>T</sub> = 0.12 m: z of the wrist centre (m) ='), ok: x => Math.abs(x - 0.22) < 0.002, w: 5 }],
+  check: v => Math.abs(v[0] + 0.02) < 0.003 ? t('ถอยกลับตามแกน Z ของเครื่องมือ ซึ่งชี้ลง: ถอยกลับคือขึ้น', 'move back along the tool\'s Z, which points down: back is up') : '' });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>แกน Z ของเป้าหมาย</b> คือคอลัมน์ 3 ของ ⁰_GR: ชี้ลง', '<b>The goal\'s Z axis</b> is column 3 of ⁰_GR: it points down'), tex: '{}^0\\hat Z_G = (r_{13}, r_{23}, r_{33}) = (0, 0, -1)' },
+  { why: t('<b>ถอยกลับ</b> ไปตามแกนนั้นเป็นระยะ L_T', '<b>Move back</b> along it by L_T'), tex: 'p_c = p_G - L_T\\,{}^0\\hat Z_G = (0.45,\\ 0.15,\\ 0.10) - 0.12\\,(0, 0, -1) = (0.45,\\ 0.15,\\ 0.22)\\ \\text{m}' },
+  { why: t('<b>ทำไมจุดนี้</b>: แกน 4, 5, 6 ผ่านจุดศูนย์กลางข้อมือ หมุน θ₄–θ₆ แล้วจุดนี้ไม่ขยับ ตำแหน่งจึงขึ้นกับ θ₁–θ₃ เท่านั้น', '<b>Why this point</b>: axes 4, 5, 6 pass through it, so turning θ₄–θ₆ does not move it: its position depends on θ₁–θ₃ only') }],
+  answer: t('p_c = (0.45, 0.15, 0.22) m เลื่อนแถบดู: เครื่องมือยาวขึ้น จุดศูนย์กลางข้อมือก็ถอยขึ้นตาม แขนต้องหาท่าใหม่', 'p_c = (0.45, 0.15, 0.22) m; move the slider: a longer tool moves the wrist centre further up and the arm needs a new pose') });
+
+/* ---------- 2: solving the IRB 140 ---------- */
+const S = X.irb.sols, Tg = X.irb.T, S2 = { ex: 'irb', q: S[0].q, fit: true, xyz: true, frames: [0] }, ro2 = document.getElementById('ro2');
+const read2 = k => { ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(Tg)}</div><div class="term"><b>${k + 1}. ${name(S[k])}</b>: θ = (${S[k].q.map(x => dgs(x)).join(', ')}) · ${S[k].ok ? `<b class="ax-y">${t('ในช่วง ✓', 'in range ✓')}</b>` : t('เกินช่วง', 'out of range')}</div>`; };
+picker(document.getElementById('ctl2'), S.length, k => { S2.q = S[k].q; read2(k); }); read2(0);
+CH2.sim('cv2', S2, 'sol', { aspect: 0.8, maxH: 500 });
+const [px, py, pz] = [Tg[0][3], Tg[1][3], Tg[2][3]], th1 = Math.atan2(py, px), rr = Math.hypot(px, py), uu = rr - IR.a1, s3 = (IR.a2 ** 2 + IR.d4 ** 2 - uu * uu - pz * pz) / (2 * IR.a2 * IR.d4), fd = S.find(s => s.shoulder === 'front' && s.elbow === 'down' && s.wrist === 'no flip');
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('θ₁ ของคำตอบข้ามหลัง (°) =', 'θ₁ of the reach-over solutions (°) ='), ok: x => Math.abs(RB.wrap(rad(x) - (th1 + Math.PI))) < rad(0.2), w: 5 }, { label: t('s₃ (ด้านหน้า) =', 's₃ (front) ='), ok: x => Math.abs(x - s3) < 0.003, w: 5 }, { label: t('ใช้ได้กี่คำตอบ =', 'usable solutions ='), ok: x => x === 2, w: 3 }] });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>θ₁</b> จากตำแหน่งของจุดศูนย์กลางข้อมือ (คอลัมน์ 4)', '<b>θ₁</b> from the wrist-centre position (column 4)'), tex: `\\theta_1 = \\mathrm{atan2}(${u(py, 4)},\\ ${u(px, 4)}) = ${u(deg(th1), 2)}^\\circ \\ \\text{or}\\ ${u(deg(th1) - 180, 2)}^\\circ` },
+  { why: t('<b>s₃</b> (ด้านหน้า: r = +√(p_x² + p_y²))', '<b>s₃</b> (front: r = +√(p_x² + p_y²))'), tex: `u = r - a_1 = ${u(rr, 4)} - 0.07 = ${u(uu, 4)},\\quad s_3 = \\frac{a_2^2 + d_4^2 - u^2 - p_z^2}{2a_2d_4} = ${u(s3, 4)}` },
+  { why: t('<b>θ₃</b> สองแบบ (ข้อศอก) และ <b>θ₂</b> ของแต่ละแบบ', '<b>θ₃</b> two ways (the elbow) and <b>θ₂</b> for each'), tex: `\\theta_3 = \\mathrm{atan2}(${u(s3, 4)}, \\pm${u(Math.sqrt(1 - s3 * s3), 4)}) = ${u(deg(S[0].q[2]), 2)}^\\circ \\text{ or } ${u(deg(fd.q[2]), 2)}^\\circ,\\quad \\theta_2 = ${u(deg(S[0].q[1]), 2)}^\\circ \\text{ or } ${u(deg(fd.q[1]), 2)}^\\circ` },
+  { why: t('<b>ข้อมือ</b>: ³₆R = (⁰₃R)ᵀ ⁰₆R แล้วอ่าน θ₅, θ₄, θ₆ (ข้อมือกลับเป็นอีกคำตอบ)', '<b>Wrist</b>: ³₆R = (⁰₃R)ᵀ ⁰₆R, then read θ₅, θ₄, θ₆ (the flipped wrist is another solution)'), tex: `\\theta_5 = \\mathrm{atan2}(\\pm\\sqrt{r_{13}^2 + r_{33}^2},\\ r_{23}) = \\pm 50^\\circ,\\quad (\\theta_4, \\theta_6) = (40^\\circ, -30^\\circ) \\text{ or } (-140^\\circ, 150^\\circ)` },
+  { why: t('<b>ทั้งแปด</b> และช่วงข้อต่อ (θ₂ −180°…0°, θ₃ ±90°, θ₅ ±120°)', '<b>All eight</b> and the joint ranges (θ₂ −180°…0°, θ₃ ±90°, θ₅ ±120°)'), body: () => table(S, -1) }],
+  answer: t('8 คำตอบ ใช้ได้ 2: ท่าเดิม (30°, −60°, 20°, 40°, 50°, −30°) และข้อมือกลับ (30°, −60°, 20°, −140°, −50°, 150°)', '8 solutions, 2 usable: the original pose (30°, −60°, 20°, 40°, 50°, −30°) and its flipped wrist (30°, −60°, 20°, −140°, −50°, 150°)') });
+
+/* ---------- 3: SOLVE ---------- */
+const V = X.solve.sols, best = X.solve.best.s, S3 = { ex: 'irb', q: best.q, fit: true, xyz: true, frames: [0] }, ro3 = document.getElementById('ro3'), kb = V.findIndex(v => v.q.every((x, i) => Math.abs(x - best.q[i]) < 1e-9));
+const read3 = k => { ro3.innerHTML = `<div class="term"><b>${k + 1}. ${name(V[k])}</b>${k === kb ? t(' · ใกล้ท่าศูนย์ที่สุดในช่วง', ' · closest to the zero pose in range') : ''}</div>` + table(V, k); };
+const pk3 = picker(document.getElementById('ctl3'), V.length, k => { S3.q = V[k].q; read3(k); }); pk3.set('k' + kb); read3(kb);
+CH2.sim('cv3', S3, 'sol', { aspect: 0.8, maxH: 500 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('คำตอบที่เลือก: θ₁ (°) =', 'the chosen solution: θ₁ (°) ='), ok: x => Math.abs(x - deg(best.q[0])) < 0.1, w: 5 }, { label: 'θ₂ (°) =', ok: x => Math.abs(x - deg(best.q[1])) < 0.1, w: 5 }, { label: 'θ₃ (°) =', ok: x => Math.abs(x - deg(best.q[2])) < 0.1, w: 5 }] });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>ถอดเครื่องมือ</b>: ⁰₆T = ⁰_GT (⁶_TT)⁻¹ = ⁰_GT D_Z(−0.12)', '<b>Take the tool off</b>: ⁰₆T = ⁰_GT (⁶_TT)⁻¹ = ⁰_GT D_Z(−0.12)'), tex: `{}^0_6T = ${CH2.texM(X.solve.W, 3)}` },
+  { why: t('<b>แก้แบบหน้าที่แล้ว</b>: ได้ 8 คำตอบ', '<b>Solve as before</b>: 8 solutions'), body: () => table(V, -1) },
+  { why: t('<b>เลือก</b>: อยู่ในช่วงข้อต่อ และใกล้ท่าปัจจุบัน (ท่าศูนย์ (0, −90°, 0, 0, 90°, 0)) ที่สุด', '<b>Choose</b>: inside the ranges and closest to the present pose (the zero pose (0, −90°, 0, 0, 90°, 0))'), tex: `\\theta = (${best.q.map(x => u(deg(x), 2)).join('^\\circ,\\ ')}^\\circ)` }],
+  answer: t(`θ = (${best.q.map(x => u(deg(x), 2)).join('°, ')}°) ตรวจ: ⁰₆T(θ) D_Z(0.12) = ⁰_GT (ภาพปกของบทคือท่านี้บนแขนจริง)`, `θ = (${best.q.map(x => u(deg(x), 2)).join('°, ')}°); check: ⁰₆T(θ) D_Z(0.12) = ⁰_GT (the chapter's cover shows this pose on the real arm)`) });
+});
+</script>
+</body>
+</html>
