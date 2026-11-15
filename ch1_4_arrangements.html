@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="1.4 — Common kinematic arrangements">1.4 — โครงสร้างแขนกลที่พบบ่อย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">โครงสร้างแขนกลที่พบบ่อย <span class="en">Common kinematic arrangements — the first three joints decide the shape of the workspace</span></h1>
+<h1 data-l="en">Common kinematic arrangements <span class="en">The first three joints decide the shape of the workspace</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s35.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 35: classify an arm by its first three joints: articulated RRR, spherical RRP, SCARA RRP, cylindrical RPP, Cartesian PPP">
+    <figcaption data-l="th">สไลด์บทที่ 1 หน้า 35 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 1 slides, p. 35 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">แขนกลอุตสาหกรรมจำแนกตาม <b>สามข้อต่อแรก</b> (โครงสร้างวางตำแหน่ง) ซึ่งกำหนดรูปร่างของปริภูมิทำงาน ข้อมือที่ต่อท้ายกำหนดทิศของเครื่องมือ หน้านี้ครอบคลุมสไลด์หน้า 34–45 มี <b>เครื่องมือ 1 ชิ้น (A)</b> ที่หมุนดูทั้งห้าแบบในสามมิติ และ <b>3 โจทย์</b> รวมการบ้านข้อ 1.3</p>
+    <p class="sub" data-l="en">Industrial arms are classified by their <b>first three joints</b> (the positioning structure), which set the shape of the workspace; the wrist after them sets the tool direction. This page covers slides pp. 34–45. It has <b>one tool (A)</b> to turn all five structures in 3-D and <b>3 problems</b>, including homework 1.3.</p>
+    <div class="equation-box" style="margin:10px 0 0">$$ \text{planar Grübler:}\quad M = 3(n-1) - 2j $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>ข้อพับ RRR</b>: \(Z_2 \parallel Z_3 \perp Z_1\) ปริภูมิทำงานคล้ายเปลือกทรงกลม เอื้อมอ้อมสิ่งกีดขวางได้ดี</li><li><b>ทรงกลม RRP กับ SCARA RRP</b> ชื่อเหมือนกันแต่แกนต่างกัน: SCARA มีแกนทั้งสามขนานกันในแนวตั้ง</li><li><b>ทรงกระบอก RPP และคาร์ทีเซียน PPP</b>: ตัวแปรข้อต่อคือพิกัดทรงกระบอกและพิกัดคาร์ทีเซียนของปลายแขนโดยตรง</li><li><b>แขนขนาน</b>: ก้านต่อเป็นวงปิดกับพื้น องศาอิสระไม่เท่ากับจำนวนข้อต่อ ต้องนับด้วยสูตรของ Grübler</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Articulated RRR</b>: \(Z_2 \parallel Z_3 \perp Z_1\); a roughly spherical-shell workspace; reaches around obstacles.</li><li><b>Spherical RRP and SCARA RRP</b> share a name but not their axes: the SCARA's three axes are parallel and vertical.</li><li><b>Cylindrical RPP and Cartesian PPP</b>: the joint variables are directly the cylindrical and Cartesian coordinates of the tool.</li><li><b>Parallel arms</b>: the links close a loop with the ground; DOF ≠ number of joints, so count with Grübler's formula.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>ห้าโครงสร้างในสามมิติ</a><a href="#ex1"><b>1</b>เลือกโครงสร้างให้เหมาะกับงาน</a><a href="#ex2"><b>2</b>แขนขนาน</a><a href="#ex3"><b>3</b>การบ้าน 1.3</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Five structures in 3-D</a><a href="#ex1"><b>1</b>Pick a structure</a><a href="#ex2"><b>2</b>Parallel arm</a><a href="#ex3"><b>3</b>Homework 1.3</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: หมุนดูห้าโครงสร้างพร้อมปริภูมิทำงาน</h2><h2 data-l="en">Tool: turn the five structures and their workspaces</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 36–40 · Spong 1.3 · Craig 8.3 · <b>ลากในภาพเพื่อหมุนมุมมอง</b></div><div class="src" data-l="en">Chapter 1 slides, pp. 36–40 · Spong 1.3 · Craig 8.3 · <b>drag in the picture to turn the view</b></div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA" class="grab"></canvas><div id="typA" style="padding:0 8px"></div><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img id="slA" src="slides/ch1/s36.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide of the chosen arrangement"><figcaption id="capA"></figcaption></figure>
+      <p class="lead" data-l="th">ภาพสไลด์ข้างบนเปลี่ยนตามโครงสร้างที่เลือก ลวดสีฟ้าคือขอบของปริภูมิทำงานของจุดปลายแขนเมื่อข้อต่อทั้งสามเคลื่อนที่ครบช่วง ลองเลื่อนข้อต่อทีละตัวแล้วสังเกตว่าปลายแขนวิ่งบนเส้นลวดเส้นไหน</p>
+      <p class="lead" data-l="en">The slide above follows the structure you choose. The blue wires outline the workspace of the tool point as the three joints go through their ranges. Move one joint at a time and see which wire the tool runs along.</p></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">เทียบห้าโครงสร้าง (สไลด์หน้า 41)</h2><h2 data-l="en">The five side by side (slide p. 41)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s41.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 41: table of the five arrangements: first three joints, axes, workspace, typical use"><figcaption data-l="th">สไลด์หน้า 41 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 41 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">อ่านตารางแบบนี้: <b>ยิ่งข้อต่อหมุนมาก</b> แขนยิ่งเอื้อมอ้อมสิ่งกีดขวางได้และใช้พื้นที่ติดตั้งน้อย แต่การคำนวณมุมข้อต่อ (จลนศาสตร์ผกผัน) ยากขึ้น <b>ยิ่งข้อต่อเลื่อนมาก</b> การคำนวณยิ่งง่ายและโครงสร้างแข็งแรง แต่ต้องมีโครงขนาดใหญ่ล้อมพื้นที่ทำงาน คาร์ทีเซียนอยู่สุดปลายข้างหนึ่ง (ตัวแปรข้อต่อคือ x, y, z เลย) ข้อพับอยู่อีกปลายหนึ่ง</p>
+  <p class="sub" data-l="en">Read the table this way: <b>the more revolute joints</b>, the better the arm reaches around obstacles and the less floor it needs, but the harder its joint angles are to compute (inverse kinematics). <b>The more prismatic joints</b>, the simpler the computation and the stiffer the structure, but a large frame must surround the work. Cartesian sits at one end (its joint variables are x, y, z), articulated at the other.</p>
+</div>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">เลือกโครงสร้างให้เหมาะกับงาน</h2><h2 data-l="en">Pick a structure for the job</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 43 · แบบฝึกในห้อง (บางข้อตอบได้มากกว่าหนึ่งแบบถ้าเหตุผลดี)</div><div class="src" data-l="en">Chapter 1 slides, p. 43 · in-class practice (some tasks allow more than one answer with a good reason)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s43.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 43: five tasks: insert components into boards, spot-weld a car body, move parts over 10 m by 4 m, pick light parts from a fast conveyor, load parts through a narrow door">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 43 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 43 · tap to enlarge</figcaption></figure>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="simnote" id="note1"></div></div>
+    <div class="card solve"><table class="pick" id="pick1"></table><div class="pickbar"><button type="button" class="btn on" id="chk1"></button><span id="res1"></span></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">แขนขนานห้าก้าน: มีกี่องศาอิสระ</h2><h2 data-l="en">A five-bar parallel arm: how many DOF?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 42 · Craig 8.5 (โครงสร้างวงปิด)</div><div class="src" data-l="en">Chapter 1 slides, p. 42 · Craig 8.5 (closed-chain structures)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s42.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 42: parallel manipulators; a planar five-bar arm; Grübler's formula M = 3(n − 1) − 2j">
+    <figcaption data-l="th">สไลด์หน้า 42 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 42 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">การบ้านข้อ 1.3: จากตำแหน่ง (x, y) สู่มุมข้อต่อของแขนสองก้าน</h2><h2 data-l="en">Homework 1.3: from (x, y) to the joint angles of a two-link arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 33 · การบ้านชุดที่ 1 (สไลด์เดิมข้อ 5.3) · โจทย์ให้พิสูจน์สูตร หน้านี้มีเพียงภาพจำลองที่ใช้สูตรตามโจทย์และช่องตรวจตัวเลข</div><div class="src" data-l="en">Chapter 1 slides, p. 33 · homework 1 (5.3 in the old slides) · the task is to derive the formulas; this page only has a simulation that uses the given formulas and a number check</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3" class="grab"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">สูตรที่โจทย์ให้พิสูจน์</div><div class="gl" data-l="en">The formulas to derive</div>
+      $$ \begin{aligned} D &= \frac{x^2 + y^2 - a_1^2 - a_2^2}{2a_1a_2} = \cos\theta_2 \\ \theta_2 &= \operatorname{atan2}\!\left(\pm\sqrt{1 - D^2},\; D\right) \\ \theta_1 &= \operatorname{atan2}(y, x) - \operatorname{atan2}\!\left(a_2\sin\theta_2,\; a_1 + a_2\cos\theta_2\right) \end{aligned} $$</div>
+      <div class="hwbox" data-l="th"><b class="hw">การบ้าน</b>: พิสูจน์สูตรด้วยกฎของโคไซน์ แล้วใช้สูตรหามุมเมื่อ \(a_1 = 0.5\) m, \(a_2 = 0.4\) m, \((x, y) = (0.55, 0.5)\) m ใส่คำตอบเป็นองศาเพื่อตรวจ (คำตอบใดคำตอบหนึ่งในสองชุดก็ได้) สไลด์เดิมเขียน \(\tan^{-1}\) ฉบับนี้ใช้ atan2 ซึ่งเลือกจตุภาคให้ถูกเอง</div>
+      <div class="hwbox" data-l="en"><b class="hw">Homework</b>: derive the formulas with the law of cosines, then use them for \(a_1 = 0.5\) m, \(a_2 = 0.4\) m, \((x, y) = (0.55, 0.5)\) m. Enter the angles in degrees to check (either of the two solutions). The old slide wrote \(\tan^{-1}\); this version uses atan2, which picks the right quadrant by itself.</div>
+      <div id="ask3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — RRP สองแบบ</h3>
+    <ol><li>ในเครื่องมือ A สลับระหว่าง "ทรงกลม" กับ "SCARA": ทั้งคู่เป็น RRP แต่ปริภูมิทำงานคนละรูป เพราะทิศของแกนต่างกัน</li><li>SCARA หมุนแกนตั้งสองแกน จึงแข็งในแนวตั้งและยอมตัวในแนวนอน เหมาะกับงานกดชิ้นส่วนลงรู</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — แขนขนานประกอบไม่ได้</h3>
+    <ol><li>ในข้อ 2 กาง \(\theta_1\) และ \(\theta_2\) ออกจากกันมาก ๆ: ก้านปลายสองก้านมาบรรจบกันไม่ได้ ปริภูมิทำงานของแขนขนานจึงเล็กกว่าแขนแบบอนุกรมที่ขนาดเท่ากัน</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ศอกขึ้นหรือศอกลง</h3>
+    <ol><li>ในข้อ 3 กดสลับเครื่องหมาย ± : จุดปลายแขนเดียวกันมีสองคำตอบ ยกเว้นบนขอบปริภูมิทำงาน (D = ±1) ที่สองคำตอบรวมเป็นคำตอบเดียว</li><li>ลากจุดออกนอกวงกลมประ: |D| > 1 รากที่สองติดลบ ไม่มีคำตอบ</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 1 หน้า 34–45 (ภาพอยู่ในหน้านี้แล้ว) · Spong 1.3 · Craig 8.3 และ 8.5</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — two kinds of RRP</h3>
+    <ol><li>In tool A switch between "spherical" and "SCARA": both are RRP but their workspaces differ, because their axes point differently.</li><li>A SCARA turns about two vertical axes, so it is stiff vertically and compliant sideways: right for pressing parts into holes.</li></ol></div>
+  <div class="card"><h3>Try this 2 — a parallel arm that cannot close</h3>
+    <ol><li>In problem 2 spread \(\theta_1\) and \(\theta_2\) far apart: the two outer links cannot meet. That is why a parallel arm has a smaller workspace than a serial arm of the same size.</li></ol></div>
+  <div class="card"><h3>Try this 3 — elbow up or elbow down</h3>
+    <ol><li>In problem 3 flip the ± sign: the same tool point has two solutions, except on the edge of the workspace (D = ±1), where the two become one.</li><li>Drag the point outside the dashed circle: |D| > 1, the square root is of a negative number, and there is no solution.</li></ol>
+    <div class="book">Source: chapter 1 slides, pp. 34–45 (the pictures are on this page) · Spong 1.3 · Craig 8.3 and 8.5</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, G = RB.G, u = RB.u, deg = RB.deg, rad = RB.rad;
+const al = rows => `\\begin{aligned} ${rows.join(' \\\\ ')} \\end{aligned}`;
+const TYPES = [['RRR', t('ข้อพับ (RRR)', 'Articulated (RRR)'), 36], ['RRP', t('ทรงกลม (RRP)', 'Spherical (RRP)'), 37], ['SCARA', 'SCARA (RRP)', 38], ['RPP', t('ทรงกระบอก (RPP)', 'Cylindrical (RPP)'), 39], ['PPP', t('คาร์ทีเซียน (PPP)', 'Cartesian (PPP)'), 40]];
+
+/* ---------- A: five arrangements in 3-D ---------- */
+const SA = { type: 'RRR', q: RB.ARR.RRR.lim.map(l => l[2]), az: -58, el: 22, xyz: true };
+const ctlA = document.getElementById('ctlA'), roA = document.getElementById('roA'), slA = document.getElementById('slA'), capA = document.getElementById('capA'); let slidersA = [];
+const readA = () => { const p = RB.arrTip(SA.type, RB.arrQ(SA.type, SA.q)); roA.innerHTML = `${t('ปลายแขน', 'tool point')} (x, y, z) = <code>(${u(p[0], 3)}, ${u(p[1], 3)}, ${u(p[2], 3)}) m</code>`; };
+const buildA = () => { ctlA.innerHTML = ''; const A = RB.ARR[SA.type]; slidersA = A.lim.map((l, i) => { const isDeg = A.unit[i] === 'deg', sym = (A.joints[i] === 'R' ? 'θ' : 'd') + '₁₂₃'[i];
+    return ui.slider(ctlA, { id: 'qA' + i, label: sym, min: l[0], max: l[1], step: isDeg ? 1 : 0.01, value: SA.q[i], fmt: v => isDeg ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { SA.q[i] = v; readA(); } }); });
+  const n = TYPES.find(x => x[0] === SA.type)[2]; slA.src = `slides/ch1/s${n}.webp`; capA.textContent = t(`สไลด์หน้า ${n} · แตะรูปเพื่อขยาย`, `Slide p. ${n} · tap to enlarge`); readA(); };
+ui.radio(document.getElementById('typA'), TYPES.map(([k, lab], i) => ({ id: k, label: lab, on: !i })), id => { SA.type = id; SA.q = RB.ARR[id].lim.map(l => l[2]); buildA(); });
+ui.buttons(document.getElementById('typA'), [{ id: 'wsA', label: t('ปริภูมิทำงาน ✓', 'workspace ✓'), on: true, onclick: el => { SA.ws = SA.ws === false; el.classList.toggle('on', SA.ws !== false); el.textContent = t('ปริภูมิทำงาน ', 'workspace ') + (SA.ws !== false ? '✓' : '✗'); } }]);
+buildA();
+const cvA = document.getElementById('cvA'); RB.stage(cvA, 0.786, (c, W, H, dt, P) => CH1.view.arr(c, W, H, SA, P), { maxH: 540 });
+let lastA = null; RB.drag(cvA, null, (p, ph) => { if (!p) { lastA = null; return; } if (lastA) { SA.az -= (p.x - lastA.x) * 0.4; SA.el = NUM.clamp(SA.el + (p.y - lastA.y) * 0.3, 3, 80); } lastA = p; });
+
+/* ---------- 1: pick a structure ---------- */
+const JOBS = [{ th: 'ใส่ชิ้นส่วนลงแผงวงจรด้วยความเร็วสูง', en: 'Insert components into circuit boards, fast', key: ['SCARA'], ok: ['SCARA', 'PAR'], show: 'SCARA', why: t('<b>SCARA</b>: แกนตั้งสามแกนทำให้ยอมตัวด้านข้างเล็กน้อย (ช่วยให้ขาชิ้นส่วนลงรูได้) แต่แข็งในแนวตั้งขณะกด และเคลื่อนที่บนโต๊ะได้เร็ว', '<b>SCARA</b>: its vertical axes let it give a little sideways (helping pins find their holes) while staying stiff vertically as it presses, and it moves fast over a table') },
+  { th: 'เชื่อมจุดตัวถังรถยนต์จากหลายทิศ', en: 'Spot-weld a car body from many directions', key: ['RRR'], ok: ['RRR'], show: 'RRR', why: t('<b>ข้อพับ</b>: เอื้อมข้ามและอ้อมตัวถังไปถึงจุดเชื่อมได้หลายทิศ ใช้พื้นที่ติดตั้งน้อยข้างสายพาน', '<b>Articulated</b>: it reaches over and around the body to weld points from many directions, with a small footprint beside the line') },
+  { th: 'ขนชิ้นงานไปที่ใดก็ได้บนพื้นที่ 10 m × 4 m', en: 'Move parts anywhere over a 10 m × 4 m area', key: ['PPP'], ok: ['PPP'], show: 'PPP', why: t('<b>คาร์ทีเซียน (แกนทรี)</b>: ปริภูมิทำงานเป็นกล่องที่ขยายได้ตามความยาวราง โครงสร้างแข็งแรงแม้มีขนาดใหญ่มาก', '<b>Cartesian (gantry)</b>: a box-shaped workspace that grows with the rails, and stiff even when very large') },
+  { th: 'หยิบชิ้นงานเบาจากสายพานเร็ว 100 ชิ้นต่อนาที', en: 'Pick light parts from a fast conveyor, 100 per minute', key: ['PAR'], ok: ['PAR', 'SCARA'], show: 'SCARA', why: t('<b>แขนขนาน (เดลต้า)</b>: มอเตอร์อยู่ที่ฐาน ก้านเบามาก เร่งได้สูง SCARA ก็ใช้ได้ถ้าความเร็วไม่สูงมาก', '<b>Parallel (delta)</b>: the motors stay on the base and the links are very light, so it accelerates hard. A SCARA also works at lower rates') },
+  { th: 'ป้อนชิ้นงานเข้าเครื่องจักรผ่านประตูแคบ', en: 'Load parts into a machine through a narrow door', key: ['RPP'], ok: ['RPP', 'RRP'], show: 'RPP', why: t('<b>ทรงกระบอก</b>: ข้อต่อเลื่อนแนวรัศมียื่นเข้าไปตรง ๆ ผ่านช่องแคบได้ (แบบทรงกลมก็ยื่นได้แต่ต้องปรับมุมเงยด้วย)', '<b>Cylindrical</b>: its radial slide reaches straight in through a narrow opening (a spherical arm can too, but must also set its elevation)') }];
+const OPT = [['RRR', t('ข้อพับ RRR', 'articulated RRR')], ['RRP', t('ทรงกลม RRP', 'spherical RRP')], ['SCARA', 'SCARA'], ['RPP', t('ทรงกระบอก RPP', 'cylindrical RPP')], ['PPP', t('คาร์ทีเซียน PPP', 'Cartesian PPP')], ['PAR', t('แขนขนาน', 'parallel')]];
+const S1 = { type: 'SCARA', q: RB.ARR.SCARA.lim.map(l => l[2]), az: -58, el: 22, tm: 0, xyz: true }, note1 = document.getElementById('note1');
+const show1 = k => { const j = JOBS[k]; S1.type = j.show; S1.q = RB.ARR[j.show].lim.map(l => l[2]); note1.innerHTML = `<b>${t(j.th, j.en)}</b> → ${OPT.find(o => o[0] === j.key[0])[1]}${j.key[0] === 'PAR' ? t(' (ภาพแสดง SCARA ซึ่งเป็นทางเลือกรอง ดูแขนขนานในข้อ 2)', ' (the picture shows the SCARA, the second choice; see problem 2 for a parallel arm)') : ''}`; };
+RB.stage(document.getElementById('cv1'), 0.786, (c, W, H, dt, P) => { S1.tm += dt; const A = RB.ARR[S1.type]; S1.q = A.lim.map((l, i) => { const m = (l[0] + l[1]) / 2, a = (l[1] - l[0]) * 0.32; return m + a * Math.sin(S1.tm * 0.8 + i * 2.1); }); CH1.view.arr(c, W, H, S1, P); }, { maxH: 460 });
+const pk = document.getElementById('pick1');
+pk.innerHTML = `<tr><th>${t('งาน', 'task')}</th><th>${t('โครงสร้าง', 'structure')}</th></tr>` + JOBS.map((j, i) => `<tr data-i="${i}"><td>${i + 1}. ${t(j.th, j.en)}</td><td><select aria-label="structure"><option value="">—</option>${OPT.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('')}</select></td></tr>`).join('');
+pk.querySelectorAll('select').forEach(s => s.addEventListener('change', () => { const k = +s.closest('tr').dataset.i; if (s.value && s.value !== 'PAR') { S1.type = s.value; note1.innerHTML = `${k + 1}. ${t(JOBS[k].th, JOBS[k].en)} → ${OPT.find(o => o[0] === s.value)[1]}`; } }));
+const chk1 = document.getElementById('chk1'); chk1.textContent = t('ตรวจ', 'Check');
+chk1.addEventListener('click', () => { let ok = 0; pk.querySelectorAll('tr[data-i]').forEach(tr => { const j = JOBS[+tr.dataset.i], s = tr.querySelector('select'), g = j.ok.includes(s.value); if (g) ok++; s.classList.toggle('ok', g); s.classList.toggle('no', !g); });
+  document.getElementById('res1').innerHTML = ok === 5 ? `<span class="pill good">✓</span> ${t('เหมาะสมทุกข้อ!', 'All sensible!')}` : `<span class="pill bad">${ok} / 5</span> ${t('เปิดเหตุผลทีละข้อทางขวา', 'open the reasons one by one')}`; });
+show1(0);
+LS.stepper(document.getElementById('st1'), { steps: JOBS.map((j, k) => ({ why: `${k + 1}. ${j.why}`, onShow: () => show1(k) })),
+  answer: t('1 SCARA · 2 ข้อพับ · 3 คาร์ทีเซียน · 4 แขนขนาน (เดลต้า) · 5 ทรงกระบอก', '1 SCARA · 2 articulated · 3 Cartesian · 4 parallel (delta) · 5 cylindrical') });
+
+/* ---------- 2: five-bar and Grübler ---------- */
+const S2 = { t1: rad(115), t2: rad(60), xyz: true }, ro2 = document.getElementById('ro2'), ctl2 = document.getElementById('ctl2');
+const read2 = () => { const F = RB.fivebar(CH1.FB.c, CH1.FB.La, CH1.FB.Lb, S2.t1, S2.t2); ro2.innerHTML = F.ok ? `${t('จุดเครื่องมือ', 'tool point')} (x, y) = <code>(${u(F.P[0], 3)}, ${u(F.P[1], 3)}) m</code>` : t('ประกอบไม่ได้ที่มุมนี้', 'cannot close at these angles'); };
+ui.slider(ctl2, { id: 'f1', label: 'θ₁', min: 20, max: 170, step: 1, value: 115, fmt: v => `${v}°`, oninput: v => { S2.t1 = rad(v); read2(); } });
+ui.slider(ctl2, { id: 'f2', label: 'θ₂', min: 10, max: 160, step: 1, value: 60, fmt: v => `${v}°`, oninput: v => { S2.t2 = rad(v); read2(); } }); read2();
+RB.stage(document.getElementById('cv2'), 0.77, (c, W, H, dt, P) => CH1.view.fivebar(c, W, H, S2, P), { maxH: 470 });
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('ห้าก้าน M =', 'five-bar M ='), ok: x => x === 2, w: 3 }, { label: t('สี่ก้าน M =', 'four-bar M ='), ok: x => x === 1, w: 3 }],
+  check: v => v[0] === 5 ? t('5 คือจำนวนข้อต่อ ไม่ใช่องศาอิสระ ใช้สูตรของ Grübler', '5 is the number of joints, not the DOF; use Grübler\'s formula') : (v[0] === 4 ? t('อย่าลืมนับพื้นเป็นก้านต่อด้วย (n = 5)', 'count the ground as a link (n = 5)') : '') });
+LS.stepper(document.getElementById('st2'), {
+  steps: [{ why: t('<b>นับก้านต่อ รวมพื้น</b>: พื้น 1 ก้านต้น 2 ก้านปลาย 2', '<b>Count the links, the ground included</b>: ground 1, inner links 2, outer links 2'), tex: 'n = 1 + 2 + 2 = 5' },
+    { why: t('<b>นับข้อต่อที่มีหนึ่งองศาอิสระ</b>: มอเตอร์ 2 ข้อต่ออิสระที่ข้อศอก 2 ข้อต่อที่จุดเครื่องมือ 1', '<b>Count the one-DOF joints</b>: 2 motor joints, 2 free elbow joints, 1 at the tool point'), tex: 'j = 2 + 2 + 1 = 5' },
+    { why: t('<b>สูตรของ Grübler ในระนาบ</b>: ก้านอิสระแต่ละก้านมี 3 องศาอิสระ ข้อต่อแต่ละตัวตัดออก 2', '<b>Planar Grübler</b>: each free link has 3 DOF, each joint removes 2'), tex: 'M = 3(n - 1) - 2j = 3(4) - 2(5) = 2' },
+    { why: t('<b>ตรวจกับภาพจำลอง</b>: ต้องกำหนดสองมุม (\\(\\theta_1, \\theta_2\\)) จุดเครื่องมือจึงถูกกำหนด สอดคล้องกับ M = 2 · กลไกสี่ก้าน: n = 4, j = 4', '<b>Check with the simulation</b>: two angles (\\(\\theta_1, \\theta_2\\)) fix the tool point, so M = 2 · a four-bar: n = 4, j = 4'), tex: 'M_{\\text{four-bar}} = 3(3) - 2(4) = 1' }],
+  answer: t('ห้าก้าน <b>M = 2</b> (มีข้อต่อ 5 ตัว แต่องศาอิสระเพียง 2) · สี่ก้าน <b>M = 1</b>', 'five-bar <b>M = 2</b> (5 joints but only 2 DOF) · four-bar <b>M = 1</b>') });
+
+/* ---------- 3: homework 1.3 (two-link inverse kinematics) ---------- */
+const SK = { xyz: true, l1: 0.5, l2: 0.4, x: 0.55, y: 0.5, elbow: 1, win: [-0.95, 0.95, -0.95, 0.95], ctr: [0, 0.08], dist: 4.7, ax: [1.0, 1.0], inner: true }; const ro3 = document.getElementById('ro3'), cv3 = document.getElementById('cv3'); let geo3 = { W: 1, H: 1 };
+const read3 = () => { const q = RB.ik2(SK.l1, SK.l2, SK.x, SK.y, SK.elbow); ro3.innerHTML = `(x, y) = <code>(${u(SK.x, 3)}, ${u(SK.y, 3)})</code> · D = <code>${u(q.D, 4)}</code>` + (q.ok ? ` · θ₁ = <code>${u(deg(q.t1), 2)}°</code> · θ₂ = <code>${u(deg(q.t2), 2)}°</code>` : ` · <b>${t('ไม่มีคำตอบ', 'no solution')}</b>`); };
+ui.buttons(document.getElementById('ctl3'), [{ label: t('สลับ ± (ศอก)', 'flip ± (elbow)'), onclick: () => { SK.elbow = -SK.elbow; read3(); } }, { label: t('↺ จุดของการบ้าน', '↺ homework point'), onclick: () => { SK.x = 0.55; SK.y = 0.5; read3(); } }]);
+read3();
+RB.stage(cv3, 0.81, (c, W, H, dt, P) => { geo3 = { W, H }; CH1.view.ik2(c, W, H, SK, P); }, { maxH: 540 });
+RB.drag(cv3, null, (p) => { if (!p) return; const w = CH1.pick(SK, p) || RB.fitWorld(geo3.W, geo3.H, ...SK.win, 4).inv(p.x, p.y); SK.x = NUM.clamp(w[0], -0.95, 0.95); SK.y = NUM.clamp(w[1], -0.95, 0.95); read3(); });
+const sol = [1, -1].map(e => RB.ik2(0.5, 0.4, 0.55, 0.5, e)).map(q => [deg(q.t1), deg(q.t2)]);
+LS.ask(document.getElementById('ask3'), { fields: [{ label: 'θ₁ (°) =', ok: (x, v) => sol.some(s => Math.abs(x - s[0]) < 0.5 && Math.abs(v[1] - s[1]) < 0.5), w: 5 }, { label: 'θ₂ (°) =', ok: (x, v) => sol.some(s => Math.abs(v[0] - s[0]) < 0.5 && Math.abs(x - s[1]) < 0.5), w: 5 }],
+  check: v => sol.some(s => Math.abs(v[1] - s[1]) < 0.5) ? t('θ₂ ถูกแล้ว แต่ θ₁ ต้องคู่กับเครื่องหมายของ θ₂ ชุดเดียวกัน', 'θ₂ is right, but θ₁ must go with the same sign of θ₂') : (sol.some(s => Math.abs(v[0] - RB.deg(Math.atan(0.5 / 0.55))) < 0.5) ? t('42.3° คือ atan2(y, x) เพียงพจน์แรก ต้องลบพจน์ที่สอง', '42.3° is only atan2(y, x); subtract the second term') : '') });
+});
+</script>
+</body>
+</html>

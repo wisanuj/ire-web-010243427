@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="3.3 — Forward kinematics of industrial arms">3.3 — จลนศาสตร์ไปข้างหน้าของแขนกลอุตสาหกรรม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">จลนศาสตร์ไปข้างหน้าของแขนกลอุตสาหกรรม <span class="en">Forward kinematics of industrial arms — from the picture to the table to ⁰ₙT</span></h1>
+<h1 data-l="en">Forward kinematics of industrial arms <span class="en">From the picture to the table to ⁰ₙT</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch3/s26.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 26: an ABB IRB 140 with its DH frames and table">
+    <figcaption data-l="th">สไลด์บทที่ 3 หน้า 26 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 3 slides, p. 26 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">ทุกข้อในหน้านี้ทำสามขั้นเหมือนกัน: <b>ติดเฟรม</b> → <b>เขียนตาราง DH</b> → <b>คูณเมทริกซ์ก้านต่อ</b> เริ่มจากแขน 3 ข้อต่อสามแบบในสไลด์เดิม แล้วทำแขน 6 แกนจริงครบทุกขั้น (เพิ่มจากตำรา Craig 3.7) ต่อด้วยเฟรมมาตรฐาน (Craig 3.8) และช่องตรวจการบ้านชุดที่ 3 ครอบคลุมสไลด์หน้า 22–30 และ 38 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>5 โจทย์</b></p>
+    <p class="sub" data-l="en">Every problem here takes the same three steps: <b>attach frames</b> → <b>write the DH table</b> → <b>multiply the link transforms</b>. First three three-joint arms from the old slides, then a real six-axis arm worked in full (added from Craig 3.7), the standard frames (Craig 3.8) and the answer checks of homework 3. This page covers slides pp. 22–30 and 38, with <b>one tool (A)</b> and <b>5 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>แกนตัดกันที่ 90°: a = 0, α = ±90° · แกนขนาน: α = 0 · แกนอยู่แนวเดียวกัน: a = 0, α = 0 เหลือเพียง d</li><li>ข้อต่อเลื่อนมี d เป็นตัวแปร θ คงที่ (มักเป็นศูนย์)</li><li>แขน 6 แกน: คูณจากข้อมือเข้ามา ตำแหน่งของจุดศูนย์กลางข้อมือขึ้นกับ θ₁–θ₃ เท่านั้น</li><li>เฟรมมาตรฐาน {B}, {S}, {W}, {T}, {G} และคำถาม "เครื่องมืออยู่ที่ไหน": \({}^{S}_{T}T = {}^{B}_{S}T^{-1}\,{}^{B}_{W}T\,{}^{W}_{T}T\)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>Axes crossing at 90°: a = 0, α = ±90° · parallel axes: α = 0 · axes on one line: a = 0, α = 0, only d remains.</li><li>A sliding joint has d as its variable and a fixed θ (often zero).</li><li>Six-axis arm: multiply from the wrist inward; the wrist centre depends on θ₁–θ₃ only.</li><li>Standard frames {B}, {S}, {W}, {T}, {G} and "where is the tool?": \({}^{S}_{T}T = {}^{B}_{S}T^{-1}\,{}^{B}_{W}T\,{}^{W}_{T}T\).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>แขน RPR</a><a href="#ex2"><b>2</b>แขนบิด 90°</a><a href="#ex3"><b>3</b>แขนสี่เฟรม</a><a href="#ex4"><b>4</b>แขน 6 แกน</a><a href="#tA"><b>A</b>เฟรมมาตรฐาน</a><a href="#ex5"><b>5</b>การบ้าน 3</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>RPR arm</a><a href="#ex2"><b>2</b>90° twist</a><a href="#ex3"><b>3</b>Four-frame arm</a><a href="#ex4"><b>4</b>Six-axis arm</a><a href="#tA"><b>A</b>Standard frames</a><a href="#ex5"><b>5</b>Homework 3</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">Craig ตัวอย่าง 3.4: แขน RPR</h2><h2 data-l="en">Craig example 3.4: the RPR arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 22–23 (สไลด์เดิม Chapter 3.1 หน้า 2–3) · L₂ = 0.15 m · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, pp. 22–23 (old chapter 3.1 slides pp. 2–3) · L₂ = 0.15 m · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s22.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 22: an RPR arm; write the DH table">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 22 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 22 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div id="tab1"></div><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">แขนที่แกนแรกบิด 90°</h2><h2 data-l="en">An arm whose first axis is twisted 90°</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 24 (สไลด์เดิม Chapter 3.1 หน้า 6–7) · L₁ = 0.25 m, L₂ = 0.5 m</div><div class="src" data-l="en">Chapter 3 slides, p. 24 (old chapter 3.1 slides pp. 6–7) · L₁ = 0.25 m, L₂ = 0.5 m</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s24.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 24: an arm with a 90 degree twist between axes 1 and 2; write the table and the kinematic equations">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 24 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 24 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="tab2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">แขนสี่เฟรมที่มีจุดเครื่องมือ</h2><h2 data-l="en">A four-frame arm with a tool point</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 25 (สไลด์เดิม Chapter 3.1 หน้า 8–9) · L₁ = 0.3, L₂ = 0.2, L₃ = 0.5, L₄ = 0.4 m</div><div class="src" data-l="en">Chapter 3 slides, p. 25 (old chapter 3.1 slides pp. 8–9) · L₁ = 0.3, L₂ = 0.2, L₃ = 0.5, L₄ = 0.4 m</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s25.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 25: an arm on a column with an upper arm and a forearm to a tool frame">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 25 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 25 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="tab3"></div><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">แขน 6 แกนครบทุกขั้น (ABB IRB 140)</h2><h2 data-l="en">A six-axis arm in full (ABB IRB 140)</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 26–29 · เพิ่มจากตำรา: วิธีของ Craig 3.7 (ที่ทำกับ PUMA 560) ใช้กับตารางของ IRB 140 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, pp. 26–29 · added from the textbook: Craig's method of §3.7 (worked there on the PUMA 560) applied to the IRB 140 table · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: the kinematic equations of the six-axis arm and a numeric check">
+    <figcaption data-l="th">สไลด์หน้า 29 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 29 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div></div>
+    <div class="card solve"><div id="tab4"></div><div id="ask4"></div><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: เฟรมมาตรฐานและ "เครื่องมืออยู่ที่ไหน"</h2><h2 data-l="en">Tool: standard frames and "where is the tool?"</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 30 · Craig 3.8–3.9 (ไม่มีในสไลด์เดิม) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, p. 30 · Craig 3.8–3.9 (not in the old slides) · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch3/s30.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 30: the standard frames base, station, wrist, tool and goal">
+      <figcaption data-l="th">สไลด์หน้า 30 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 30 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">จลนศาสตร์ไปข้างหน้าของแขนให้ ᴮ<sub>W</sub>T (ข้อมือเทียบฐาน) เครื่องมือยื่นจากข้อมือไปอีก ᵂ<sub>T</sub>T (คงที่) และโต๊ะงานอยู่ที่ ᴮ<sub>S</sub>T (วัดครั้งเดียวตอนติดตั้ง) จึงตอบได้ว่าเครื่องมืออยู่ที่ไหนเมื่อมองจากโต๊ะ เลื่อนเครื่องมือจนตำแหน่งของ ˢ<sub>T</sub>T ตรงกับ ˢ<sub>G</sub>T (สลักเกลียว)</p>
+      <p class="lead" data-l="en">The arm's forward kinematics gives ᴮ<sub>W</sub>T (wrist relative to base); the tool reaches ᵂ<sub>T</sub>T further (fixed), and the table sits at ᴮ<sub>S</sub>T (measured once at installation). So we can say where the tool is, seen from the table. Move the tool until the position of ˢ<sub>T</sub>T matches ˢ<sub>G</sub>T (the bolt).</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex5">
+  <div class="prob-head"><span class="prob-no">5</span><div><h2 data-l="th">การบ้านชุดที่ 3: แขนสองแบบที่มีเฟรมเครื่องมือ</h2><h2 data-l="en">Homework 3: two arms with tool frames</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 38 · หน้านี้มีเพียงภาพของโจทย์และช่องตรวจคำตอบ ไม่มีวิธีทำ</div><div class="src" data-l="en">Chapter 3 slides, p. 38 · this page has only the pictures of the problems and answer checks, no worked solution</div></div></div>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv5a"></canvas><div class="simnote" data-l="th">(a) แขน RPR: {0} บนพื้น (d₁ = L₁ = 0.45 m) L₂ = 0.15 m เครื่องมือ {4} ที่ d₄ = L₃ = 0.1 m</div><div class="simnote" data-l="en">(a) RPR arm: {0} on the floor (d₁ = L₁ = 0.45 m), L₂ = 0.15 m, tool {4} at d₄ = L₃ = 0.1 m</div><div id="tab5a"></div><div id="ask5a"></div></div>
+    <div class="card sim"><canvas id="cv5b"></canvas><div class="simnote" data-l="th">(b) แขน 3R ในระนาบ L₁ = 0.5, L₂ = 0.4 m เครื่องมือ {4} ที่ a₃ = L₃ = 0.15 m</div><div class="simnote" data-l="en">(b) planar 3R arm, L₁ = 0.5, L₂ = 0.4 m, tool {4} at a₃ = L₃ = 0.15 m</div><div id="tab5b"></div><div id="ask5b"></div></div>
+  </div>
+  <div class="hwbox" data-l="th"><b class="hw">การบ้าน</b>: เขียนตาราง DH และ ⁰<sub>4</sub>T ในรูปตัวแปร แล้วแทนค่าเพื่อตรวจ: (a) ที่ θ₁ = 30°, d₂ = 0.35 m, θ₃ = 45° · (b) ที่ θ = (30°, 45°, −60°) ใส่สามแถวบนของ ⁰<sub>4</sub>T</div>
+  <div class="hwbox" data-l="en"><b class="hw">Homework</b>: write the DH table and ⁰<sub>4</sub>T in symbols, then put in numbers to check: (a) at θ₁ = 30°, d₂ = 0.35 m, θ₃ = 45° · (b) at θ = (30°, 45°, −60°). Enter the top three rows of ⁰<sub>4</sub>T.</div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ข้อต่อเลื่อน</h3>
+    <ol><li>ในข้อ 1 เลื่อน d₂: เฉพาะคอลัมน์ 4 ของ ⁰₃T ที่เปลี่ยน (ทิศไม่เปลี่ยน) เพราะการเลื่อนไม่หมุนอะไร</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ข้อมือไม่ย้ายจุดศูนย์กลาง</h3>
+    <ol><li>ในข้อ 4 เลื่อน θ₄, θ₅, θ₆: เครื่องมือหมุนแต่จุดศูนย์กลางข้อมือ (คอลัมน์ 4 ของ ⁰₆T) อยู่ที่เดิม บทที่ 4 ใช้ข้อนี้แยกปัญหาตำแหน่งออกจากปัญหาทิศ</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ไปจับสลักเกลียว</h3>
+    <ol><li>ในเครื่องมือ A เลื่อนจนระยะเป็นศูนย์: นั่นคือค่าที่โปรแกรมหุ่นยนต์ต้องการ ส่วนการหามุมข้อต่อที่ทำให้ได้ตำแหน่งนั้นคือบทที่ 4</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 3 หน้า 21–30 และ 38 (ภาพอยู่ในหน้านี้แล้ว) · Craig 3.6–3.9 · สไลด์เดิม Chapter 3.1 หน้า 2–9</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — a sliding joint</h3>
+    <ol><li>In problem 1 move d₂: only column 4 of ⁰₃T changes (the orientation does not), because sliding turns nothing.</li></ol></div>
+  <div class="card"><h3>Try this 2 — the wrist does not move the wrist centre</h3>
+    <ol><li>In problem 4 move θ₄, θ₅, θ₆: the tool turns but the wrist centre (column 4 of ⁰₆T) stays. Chapter 4 uses this to split position from orientation.</li></ol></div>
+  <div class="card"><h3>Try this 3 — reach the bolt</h3>
+    <ol><li>In tool A make the distance zero: that is what a robot program asks for; finding the joint angles that give it is chapter 4.</li></ol>
+    <div class="book">Source: chapter 3 slides, pp. 21–30 and 38 (the pictures are on this page) · Craig 3.6–3.9 · old chapter 3.1 slides pp. 2–9</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, E = CH3.EX, T4 = (T, d = 3) => CH2.htmlM(T, d, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true }), TT = T => CH2.texM(T, 3);
+const Tx = rows => `\\begin{bmatrix} ${rows.map(r => r.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+/* joint sliders for an example: names, kinds (R in degrees, P in metres) */
+const jsl = (el, S, names, kinds, onch, ranges) => names.forEach((n, i) => ui.slider(el, { id: el.id + i, label: n, min: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][0] : -150) : 0.1, max: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][1] : 150) : 0.6, step: kinds[i] === 'R' ? 1 : 0.01, value: kinds[i] === 'R' ? Math.round(deg(S.q[i])) : S.q[i], fmt: v => kinds[i] === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { S.q[i] = kinds[i] === 'R' ? rad(v) : v; onch(); } }));
+
+/* ---------- 1: RPR ---------- */
+const R3 = E.rpr, S1 = { ex: 'rpr', q: R3.q.slice(), xyz: true }, ro1 = document.getElementById('ro1');
+const read1 = () => { ro1.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(R3.T03(R3.L, S1.q))}</div>`; };
+jsl(document.getElementById('ctl1'), S1, ['θ₁', 'd₂', 'θ₃'], ['R', 'P', 'R'], read1); read1(); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 460 });
+CH3.dhAsk(document.getElementById('tab1'), { ans: R3.sym, opts: ['0', '90°', 'L₂', 'd₂', 'θ₁', 'θ₂', 'θ₃'], check: v => v[7] === 'θ₂' ? t('ข้อต่อ 2 เป็นข้อต่อเลื่อน: ตัวแปรคือ d₂ ส่วน θ₂ คงที่ (= 0)', 'Joint 2 slides: its variable is d₂; θ₂ is fixed (= 0)') : '' });
+const p1 = R3.T03(R3.L, R3.q);
+LS.ask(document.getElementById('ask1'), { fields: [{ label: t('ที่ค่าตั้งต้น (30°, 0.35 m, 45°): p<sub>x</sub> =', 'at the start values (30°, 0.35 m, 45°): p<sub>x</sub> ='), ok: x => Math.abs(x - p1[0][3]) < 0.006, w: 5 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x - p1[1][3]) < 0.006, w: 5 }] });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>ตาราง</b>: แกน 1 กับ 2 ตัดกันตั้งฉาก (a₁ = 0, α₁ = 90°) แกน 3 อยู่แนวเดียวกับแกน 2 (α₂ = a₂ = 0, d₃ = L₂)', '<b>The table</b>: axes 1 and 2 cross at right angles (a₁ = 0, α₁ = 90°); axis 3 lies on axis 2 (α₂ = a₂ = 0, d₃ = L₂)'), body: CH3.dhTable(R3.sym) },
+  { why: t('<b>เมทริกซ์ของแต่ละแถว</b>', '<b>One matrix per row</b>'), tex: `{}^{0}_{1}T = ${Tx([['c_1', '-s_1', 0, 0], ['s_1', 'c_1', 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])},\\ {}^{1}_{2}T = ${Tx([[1, 0, 0, 0], [0, 0, -1, '-d_2'], [0, 1, 0, 0], [0, 0, 0, 1]])},\\ {}^{2}_{3}T = ${Tx([['c_3', '-s_3', 0, 0], ['s_3', 'c_3', 0, 0], [0, 0, 1, 'L_2'], [0, 0, 0, 1]])}` },
+  { why: t('<b>คูณ</b> (Craig ตัวอย่าง 3.4)', '<b>Multiply</b> (Craig example 3.4)'), tex: `{}^{0}_{3}T = ${Tx([['c_1c_3', '-c_1s_3', 's_1', 's_1(d_2 + L_2)'], ['s_1c_3', '-s_1s_3', '-c_1', '-c_1(d_2 + L_2)'], ['s_3', 'c_3', 0, 0], [0, 0, 0, 1]])}` },
+  { why: t('<b>แทนค่า</b> θ₁ = 30°, d₂ = 0.35, L₂ = 0.15', '<b>Put in</b> θ₁ = 30°, d₂ = 0.35, L₂ = 0.15'), tex: `p_x = \\sin 30^\\circ (0.5) = ${RB.d(p1[0][3], 3)},\\quad p_y = -\\cos 30^\\circ (0.5) = ${RB.d(p1[1][3], 3)}` }],
+  answer: t('ปลายแขนอยู่ห่างแกน 1 เป็นระยะ d₂ + L₂ ในทิศ (s₁, −c₁, 0)', 'The end of the arm is d₂ + L₂ from axis 1, in the direction (s₁, −c₁, 0)') });
+
+/* ---------- 2: 90° twist ---------- */
+const TW = E.twist, S2 = { ex: 'twist', q: TW.q.slice(), xyz: true }, ro2 = document.getElementById('ro2');
+const read2 = () => { ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(TW.T03(TW.L, S2.q))}</div>`; };
+jsl(document.getElementById('ctl2'), S2, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read2); read2(); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 460 });
+CH3.dhAsk(document.getElementById('tab2'), { ans: TW.sym, opts: ['0', '90°', 'L₁', 'L₂', 'θ₁', 'θ₂', 'θ₃'], check: v => v[5] === '0' ? t('แกน 1 กับแกน 2 อยู่ห่างกัน L₁ ตามเส้นตั้งฉากร่วม: a₁ = L₁', 'Axes 1 and 2 are L₁ apart along their common perpendicular: a₁ = L₁') : '' });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>ตาราง</b>: แกน 1 ตั้ง แกน 2 นอน ห่างกัน L₁ และบิด 90° แกน 2 กับ 3 ขนาน ห่างกัน L₂ เฟรม {W} = {3} จึงไม่มี L₃', '<b>The table</b>: axis 1 vertical, axis 2 horizontal, L₁ apart and twisted 90°; axes 2 and 3 parallel, L₂ apart; {W} = {3}, so no L₃'), body: CH3.dhTable(TW.sym) },
+  { why: t('<b>สองตัวหลัง</b>', '<b>The last two</b>'), tex: `{}^{1}_{3}T = {}^{1}_{2}T\\,{}^{2}_{3}T = ${Tx([['c_{23}', '-s_{23}', 0, 'L_1 + L_2c_2'], [0, 0, -1, 0], ['s_{23}', 'c_{23}', 0, 'L_2s_2'], [0, 0, 0, 1]])}` },
+  { why: t('<b>คูณด้วย ⁰₁T</b>', '<b>Multiply by ⁰₁T</b>'), tex: `{}^{0}_{3}T = ${Tx([['c_1c_{23}', '-c_1s_{23}', 's_1', 'c_1(L_1 + L_2c_2)'], ['s_1c_{23}', '-s_1s_{23}', '-c_1', 's_1(L_1 + L_2c_2)'], ['s_{23}', 'c_{23}', 0, 'L_2s_2'], [0, 0, 0, 1]])}` }],
+  answer: t('ตารางตรงกับลายมือในฉบับผู้สอนเดิม ตรวจสูตรกับภาพจำลองได้: เลื่อนแถบแล้วเทียบตัวเลข', 'The table matches the old teacher slides; check the formula against the simulation by moving the sliders') });
+
+/* ---------- 3: four-frame arm ---------- */
+const A4 = E.arm4, S3s = { ex: 'arm4', q: A4.q.slice(), xyz: true }, ro3 = document.getElementById('ro3');
+const read3 = () => { ro3.innerHTML = `<div class="live"><span class="eq">⁰<sub>4</sub>T =</span>${T4(A4.T04(A4.L, S3s.q))}</div>`; };
+jsl(document.getElementById('ctl3'), S3s, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read3); read3(); CH2.sim('cv3', S3s, 'dh', { aspect: 0.8, maxH: 460 });
+CH3.dhAsk(document.getElementById('tab3'), { ans: A4.sym, opts: ['0', '90°', 'L₁ + L₂', 'L₃', 'L₄', 'θ₁', 'θ₂', 'θ₃'], check: v => v[15] !== '0' ? t('เฟรม {4} ไม่มีข้อต่อ: θ₄ = 0 คงที่', 'Frame {4} has no joint: θ₄ = 0, fixed') : '' });
+const p3 = A4.T04(A4.L, A4.q);
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('ที่ (30°, 35°, −60°): ความสูงของเครื่องมือ p<sub>z</sub> =', 'at (30°, 35°, −60°): tool height p<sub>z</sub> ='), ok: x => Math.abs(x - p3[2][3]) < 0.006, w: 5 }] });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>ตาราง</b>: เสาสูง L₁ + L₂ (d₁) แกน 2 นอนตัดแกน 1 (α₁ = 90°) แขน L₃ และ L₄ ตาม X', '<b>The table</b>: a column L₁ + L₂ high (d₁), axis 2 horizontal through axis 1 (α₁ = 90°), arms L₃ and L₄ along X'), body: CH3.dhTable(A4.sym) },
+  { why: t('<b>ผลคูณ</b> (คูณจากปลายเข้ามา: ²₄T, ¹₄T, ⁰₄T)', '<b>The product</b> (from the tip inward: ²₄T, ¹₄T, ⁰₄T)'), tex: `{}^{0}_{4}T = ${Tx([['c_1c_{23}', '-c_1s_{23}', 's_1', 'c_1(L_3c_2 + L_4c_{23})'], ['s_1c_{23}', '-s_1s_{23}', '-c_1', 's_1(L_3c_2 + L_4c_{23})'], ['s_{23}', 'c_{23}', 0, 'L_1 + L_2 + L_3s_2 + L_4s_{23}'], [0, 0, 0, 1]])}` },
+  { why: t('<b>แทนค่า</b>', '<b>Put in numbers</b>'), tex: `p_z = 0.5 + 0.5\\sin 35^\\circ + 0.4\\sin(-25^\\circ) = ${RB.d(p3[2][3], 3)}` }],
+  answer: t(`ความสูงของเครื่องมือ ${RB.u(p3[2][3], 3)} m`, `Tool height ${RB.u(p3[2][3], 3)} m`) });
+
+/* ---------- 4: six-axis arm ---------- */
+const IR = E.irb, S4 = { ex: 'irb', q: IR.zero.slice(), xyz: true }, ro4 = document.getElementById('ro4');
+const read4 = () => { const T = IR.T06(S4.q, IR.a1, IR.a2, IR.d4); ro4.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(T)}</div><div class="term">${t('ตำแหน่ง (คอลัมน์ 4) คือจุดศูนย์กลางข้อมือ เทียบเฟรม {0} ที่ความสูงไหล่ 0.352 m', 'the position (column 4) is the wrist centre, relative to {0} at the shoulder height 0.352 m')}</div>`; };
+jsl(document.getElementById('ctl4'), S4, ['θ₁', 'θ₂', 'θ₃', 'θ₄', 'θ₅', 'θ₆'], ['R', 'R', 'R', 'R', 'R', 'R'], read4, [[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]]); read4();
+CH2.sim('cv4', S4, 'dh', { aspect: 0.8, maxH: 500 });
+document.getElementById('tab4').innerHTML = CH3.dhTable(IR.symL) + `<div class="term">a₁ = 0.07 m, a₂ = 0.36 m, d₄ = 0.38 m</div>`;
+LS.ask(document.getElementById('ask4'), { fields: [{ label: t('ที่ θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> =', 'at θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> ='), ok: x => Math.abs(x) < 0.006, w: 4 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x - 0.45) < 0.006, w: 4 }, { label: 'p<sub>z</sub> =', ok: x => Math.abs(x - 0.36) < 0.006, w: 4 }],
+  check: v => Math.abs(v[2] - 0.712) < 0.01 ? t('0.712 m คือความสูงจากพื้น แต่ ⁰₆T วัดจากเฟรม {0} ที่ความสูงไหล่ 0.352 m', '0.712 m is the height above the floor; ⁰₆T is measured from {0} at the shoulder height 0.352 m') : '' });
+LS.stepper(document.getElementById('st4'), { steps: [
+  { why: t('<b>ข้อมือก่อน</b>: ⁴₆T = ⁴₅T ⁵₆T แล้ว ³₆T = ³₄T ⁴₆T (เมทริกซ์ของข้อมือมีศูนย์มาก คูณง่าย)', '<b>The wrist first</b>: ⁴₆T = ⁴₅T ⁵₆T, then ³₆T = ³₄T ⁴₆T (the wrist matrices are full of zeros)'), tex: `{}^{3}_{6}T = ${Tx([['c_4c_5c_6 - s_4s_6', '-c_4c_5s_6 - s_4c_6', '-c_4s_5', 0], ['s_5c_6', '-s_5s_6', 'c_5', 'd_4'], ['-s_4c_5c_6 - c_4s_6', 's_4c_5s_6 - c_4c_6', 's_4s_5', 0], [0, 0, 0, 1]])}` },
+  { why: t('<b>ส่วนแขน</b>: ¹₃T = ¹₂T ²₃T', '<b>The arm part</b>: ¹₃T = ¹₂T ²₃T'), tex: `{}^{1}_{3}T = ${Tx([['c_{23}', '-s_{23}', 0, 'a_1 + a_2c_2'], [0, 0, 1, 0], ['-s_{23}', '-c_{23}', 0, '-a_2s_2'], [0, 0, 0, 1]])}` },
+  { why: t('<b>ตำแหน่ง</b> จาก ¹₆T = ¹₃T ³₆T แล้วหมุนด้วย θ₁ (คอลัมน์ 4 ของ ³₆T คือ (0, d₄, 0))', '<b>The position</b> from ¹₆T = ¹₃T ³₆T, then turned by θ₁ (column 4 of ³₆T is (0, d₄, 0))'), tex: 'p_x = c_1(a_1 + a_2c_2 - d_4s_{23}),\\quad p_y = s_1(a_1 + a_2c_2 - d_4s_{23}),\\quad p_z = -a_2s_2 - d_4c_{23}' },
+  { why: t('<b>แทนค่า</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0', '<b>Put in</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0'), tex: 'p_x = 0,\\quad p_y = 0.07 + 0 + 0.38 = 0.45,\\quad p_z = 0.36 - 0 = 0.36' }],
+  answer: t('(0, 0.45, 0.36) m: แขนหันไปทาง Y แต่ความสูงเท่าเดิม ทิศของเครื่องมือขึ้นกับ θ₄–θ₆ ด้วย ดูเมทริกซ์ใต้ภาพ', '(0, 0.45, 0.36) m: the arm faces Y at the same height. The tool orientation also depends on θ₄–θ₆: see the matrix under the picture') });
+
+/* ---------- A: standard frames ---------- */
+const BO = CH2.EX.bolt, SA = { std: true, p: RB.Tp(BO.BT).slice(), yaw: 0 }, roA = document.getElementById('roA'), ctlA = document.getElementById('ctlA');
+const readA = () => { const BW = RB.T(RB.Rx(Math.PI), RB.add(SA.p, [0, 0, CH2.TOOL])), WT = RB.trans(0, 0, CH2.TOOL), ST = RB.Tm(RB.Ti(BO.BS), BW, WT), SG = BO.SG, d = Math.hypot(...RB.Tp(ST).map((x, i) => x - RB.Tp(SG)[i]));
+  roA.innerHTML = `<div class="live"><span class="eq">ˢ<sub>T</sub>T =</span>${T4(ST)}<span class="eq">ˢ<sub>G</sub>T: (${RB.Tp(SG).map(x => u(x, 2)).join(', ')})</span></div><div class="term">${d < 0.012 ? `<b class="ax-y">${t('เครื่องมือถึงเป้าหมายแล้ว ✓', 'the tool is at the goal ✓')}</b>` : t(`ระยะถึงเป้าหมาย ${u(d, 3)} m`, `distance to the goal: ${u(d, 3)} m`)}</div>`; };
+[['x', 0, 0.2, 0.9], ['y', 1, -0.5, 0.5], ['z', 2, 0.3, 0.8]].forEach(([n, i, lo, hi]) => ui.slider(ctlA, { id: 'sa' + n, label: `ᴮP<sub>TORG</sub> ${n}`, min: lo, max: hi, step: 0.01, value: SA.p[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.p[i] = v; readA(); } })); readA();
+CH2.sim('cvA', SA, 'bolt', { aspect: 0.75, maxH: 540 });
+
+/* ---------- 5: homework 3 (answer checks only) ---------- */
+const S5a = { ex: 'rprHW', q: R3.q.slice() }, S5b = { ex: 'p3r', q: E.p3r.q.slice(), tool: true };
+CH2.sim('cv5a', S5a, 'dh', { aspect: 0.8, maxH: 400 }); CH2.sim('cv5b', S5b, 'dh', { aspect: 0.8, maxH: 400 });
+CH3.dhAsk(document.getElementById('tab5a'), { ans: R3.hwSym, opts: ['0', '90°', 'L₁', 'L₂', 'L₃', 'd₂', 'θ₁', 'θ₃'] });
+CH3.dhAsk(document.getElementById('tab5b'), { ans: [...E.p3r.sym, E.p3r.symTool], opts: ['0', '90°', 'L₁', 'L₂', 'L₃', 'θ₁', 'θ₂', 'θ₃'] });
+CH2.matAsk(document.getElementById('ask5a'), { label: '⁰<sub>4</sub>T =', rows: 3, cols: 4, ans: R3.T04(R3.L, R3.q).slice(0, 3) });
+CH2.matAsk(document.getElementById('ask5b'), { label: '⁰<sub>4</sub>T =', rows: 3, cols: 4, ans: E.p3r.T04(E.p3r.L, E.p3r.q).slice(0, 3) });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="2.3 — Operators and transform arithmetic">2.3 — ตัวดำเนินการและเลขคณิตของการแปลง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">ตัวดำเนินการและเลขคณิตของการแปลง <span class="en">Operators, compound and inverse transforms, transform equations</span></h1>
+<h1 data-l="en">Operators and transform arithmetic <span class="en">Compound and inverse transforms, transform equations</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s26.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 26: the same matrix as a mapping (the frame turns) and as an operator (the point turns)">
+    <figcaption data-l="th">สไลด์บทที่ 2 หน้า 26 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 2 slides, p. 26 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">เมทริกซ์การแปลงตัวเดียวมีสามความหมาย: บรรยายเฟรม ส่งจุดระหว่างเฟรม หรือ<b>เลื่อนจุด</b>ภายในเฟรมเดียว (ตัวดำเนินการ) จากนั้นหน้านี้ใช้การแปลงเป็นเครื่องคิดเลข: <b>คูณต่อกัน</b>เมื่อเฟรมต่อเป็นสาย <b>หาผกผัน</b>เมื่อเดินย้อนลูกศร และ<b>แก้สมการการแปลง</b>เพื่อหาเฟรมที่ไม่รู้ ครอบคลุมสไลด์หน้า 26–37 (Craig 2.4–2.6) มี <b>เครื่องมือ 2 ชิ้น (A, B)</b> และ <b>4 โจทย์</b> รวมการบ้านข้อ 2.1</p>
+    <p class="sub" data-l="en">One transform has three meanings: it describes a frame, maps a point between frames, or <b>moves a point</b> inside one frame (an operator). This page then uses transforms as a calculator: <b>multiply</b> them along a chain of frames, <b>invert</b> them to walk against an arrow, and <b>solve a transform equation</b> for an unknown frame. It covers slides pp. 26–37 (Craig 2.4–2.6), with <b>two tools (A, B)</b> and <b>4 problems</b>, including homework 2.1.</p>
+    <div class="equation-box">$$ {}^{A}_{C}T = {}^{A}_{B}T\,{}^{B}_{C}T, \qquad {}^{B}_{A}T = {}^{A}_{B}T^{-1} = \begin{bmatrix} {}^{A}_{B}R^{T} & -{}^{A}_{B}R^{T}\,{}^{A}P_{BORG} \\ 0\;0\;0 & 1 \end{bmatrix} $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>การส่ง</b>: จุดเดียว สองเฟรม · <b>ตัวดำเนินการ</b>: เฟรมเดียว สองจุด · ตัวเลขชุดเดียวกัน (Craig 2.2 กับ 2.4 ได้คำตอบเดียวกัน)</li><li><b>คูณต่อกัน</b>: ตัวห้อยกับตัวยกที่ติดกันตัดกัน \({}^{A}_{B}T\,{}^{B}_{C}T = {}^{A}_{C}T\) ลำดับสลับไม่ได้</li><li><b>ผกผัน</b>: ส่วนหมุนใช้ \(R^T\) ส่วนตำแหน่งคือ \(-R^T P\) · \(T^{-1} \ne T^T\)</li><li><b>สมการการแปลง</b>: เดินตามลูกศรใช้ T เดินสวนลูกศรใช้ \(T^{-1}\)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Mapping</b>: one point, two frames · <b>operator</b>: one frame, two points · the same numbers (Craig 2.2 and 2.4 share their answer).</li><li><b>Compound</b>: adjacent indices cancel, \({}^{A}_{B}T\,{}^{B}_{C}T = {}^{A}_{C}T\); the order cannot be swapped.</li><li><b>Inverse</b>: the rotation part is \(R^T\), the position part is \(-R^T P\); \(T^{-1} \ne T^T\).</li><li><b>Transform equations</b>: along an arrow use T, against an arrow use \(T^{-1}\).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>การส่งหรือตัวดำเนินการ</a><a href="#ex1"><b>1</b>Craig 2.4</a><a href="#tB"><b>B</b>คูณการแปลงต่อกัน</a><a href="#ex2"><b>2</b>Craig 2.5 ผกผัน</a><a href="#ex3"><b>3</b>แขนกลกับสลักเกลียว</a><a href="#ex4"><b>4</b>การบ้าน 2.1</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Mapping or operator</a><a href="#ex1"><b>1</b>Craig 2.4</a><a href="#tB"><b>B</b>Compound transforms</a><a href="#ex2"><b>2</b>Craig 2.5 inverse</a><a href="#ex3"><b>3</b>The arm and the bolt</a><a href="#ex4"><b>4</b>Homework 2.1</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: เมทริกซ์เดียว สองความหมาย</h2><h2 data-l="en">Tool: one matrix, two meanings</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 26–29 · Craig 2.4</div><div class="src" data-l="en">Chapter 2 slides, pp. 26–29 · Craig 2.4</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch2/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: a transform describes a frame, maps a point, or moves a point">
+      <figcaption data-l="th">สไลด์หน้า 29 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 29 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">ซ้าย (<b>การส่ง</b>): จุด P อยู่กับที่ เฟรม {B} หมุนไป θ ตัวเลขของ P ใน {B} เปลี่ยน แต่จุดไม่ขยับ ขวา (<b>ตัวดำเนินการ</b>): มีเฟรมเดียว จุด P<sub>1</sub> หมุนไปเป็น P<sub>2</sub> เมทริกซ์ R<sub>Z</sub>(θ) ตัวเดียวกันทั้งสองข้าง ตัวเลขใต้ภาพยืนยัน: ᴬP ทางซ้ายเท่ากับ ᴬP<sub>2</sub> ทางขวาเสมอ</p>
+      <p class="lead" data-l="en">Left (<b>mapping</b>): P stays put while frame {B} turns by θ; the numbers of P in {B} change, the point does not move. Right (<b>operator</b>): one frame; P<sub>1</sub> turns into P<sub>2</sub>. The same R<sub>Z</sub>(θ) on both sides: the numbers under the picture show that ᴬP on the left always equals ᴬP<sub>2</sub> on the right.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">Craig ตัวอย่าง 2.4: หมุนจุดแล้วเลื่อน</h2><h2 data-l="en">Craig example 2.4: turn a point, then move it</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 28 (สไลด์เดิม Part I หน้า 33) · กด ▶ เพื่อดูทีละขั้น</div><div class="src" data-l="en">Chapter 2 slides, p. 28 (old Part I slide p. 33) · press ▶ to play it step by step</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s28.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 28: turn A P1 = (3, 7, 0) by 30 degrees about Z A, then move it by (10, 5, 0)">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 28 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 28 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="tB">
+  <div class="prob-head"><span class="prob-no">B</span><div><h2 data-l="th">เครื่องมือ: คูณการแปลงต่อกัน ᴬ<sub>C</sub>T = ᴬ<sub>B</sub>T ᴮ<sub>C</sub>T</h2><h2 data-l="en">Tool: compound transforms ᴬ<sub>C</sub>T = ᴬ<sub>B</sub>T ᴮ<sub>C</sub>T</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 31 · Craig 2.5 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, p. 31 · Craig 2.5 · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvB"></canvas><div id="optB" style="padding:0 8px"></div><div class="ctl" id="ctlB"></div></div>
+    <div class="card solve"><div class="readout" id="roB" style="margin-top:0"></div>
+      <p class="lead" data-l="th">เฟรม {B} รู้เทียบ {A} และ {C} รู้เทียบ {B} เลื่อนแถบเลื่อนแล้วดูว่าลูกศรประสีชมพู (ᴬP<sub>CORG</sub>) คือคอลัมน์สุดท้ายของผลคูณ กดปุ่ม "สลับลำดับ" เพื่อดูว่า ᴮ<sub>C</sub>T ᴬ<sub>B</sub>T ให้เมทริกซ์อื่น: การคูณเมทริกซ์สลับลำดับไม่ได้</p>
+      <p class="lead" data-l="en">{B} is known in {A} and {C} is known in {B}. Move the sliders and check that the dashed pink arrow (ᴬP<sub>CORG</sub>) is the last column of the product. Press "swap the order" to see that ᴮ<sub>C</sub>T ᴬ<sub>B</sub>T gives another matrix: matrix products do not commute.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">Craig ตัวอย่าง 2.5: หาการแปลงผกผัน</h2><h2 data-l="en">Craig example 2.5: invert a transform</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 32–33 (สไลด์เดิม Part I หน้า 35–36)</div><div class="src" data-l="en">Chapter 2 slides, pp. 32–33 (old Part I slides pp. 35–36)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s33.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 33: frame B turned 30 degrees about Z A and moved (4, 3, 0); find the transform and its inverse">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 33 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 33 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">สมการการแปลง: สลักเกลียวอยู่ที่ไหนเมื่อมองจากเครื่องมือ</h2><h2 data-l="en">Transform equation: where is the bolt, seen from the tool?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 36–37 · Craig 2.6 (รูป 2.16) ตัวเลขตั้งใหม่สำหรับวิชานี้ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, pp. 36–37 · Craig 2.6 (figure 2.16), numbers made for this course · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s37.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 37: the arm, the table and the bolt with frames B, T, S, G; find the transform from the tool to the bolt">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 37 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 37 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div id="opt3" style="padding:0 8px"></div><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">การบ้านข้อ 2.1: การแปลงระหว่างสามเฟรม</h2><h2 data-l="en">Homework 2.1: transforms between three frames</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 34 (สไลด์เดิม Part I หน้า 37, Spong ข้อ 2-37) · หน้านี้มีเพียงภาพสามมิติของโจทย์และช่องตรวจคำตอบ ไม่มีวิธีทำ</div><div class="src" data-l="en">Chapter 2 slides, p. 34 (old Part I slide p. 37, Spong problem 2-37) · this page has only a 3-D picture of the problem and answer checks, no worked solution</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="simnote" id="note4"></div></div>
+    <div class="card solve"><div class="hwbox" data-l="th"><b class="hw">การบ้าน</b>: หา ⁰<sub>1</sub>T, ⁰<sub>2</sub>T และ ¹<sub>2</sub>T แล้วแสดงว่า ⁰<sub>2</sub>T = ⁰<sub>1</sub>T ¹<sub>2</sub>T ใส่สามแถวบนของแต่ละเมทริกซ์ (แถวล่างคือ 0 0 0 1 เสมอ) ระยะ 1 หน่วยตามภาพ หมุนภาพเพื่ออ่านทิศของแกนให้ชัด</div>
+      <div class="hwbox" data-l="en"><b class="hw">Homework</b>: find ⁰<sub>1</sub>T, ⁰<sub>2</sub>T and ¹<sub>2</sub>T, then show that ⁰<sub>2</sub>T = ⁰<sub>1</sub>T ¹<sub>2</sub>T. Enter the top three rows of each matrix (the bottom row is always 0 0 0 1); lengths in the units of the picture. Turn the picture to read the axis directions clearly.</div>
+      <div id="ask4a"></div><div id="ask4b"></div><div id="ask4c"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ลำดับของการคูณ</h3>
+    <ol><li>ในเครื่องมือ B กด "สลับลำดับ" ที่มุมต่าง ๆ: ผลคูณสองแบบเท่ากันเฉพาะบางกรณีพิเศษ เช่น มุมทั้งสองเป็น 0 และตำแหน่งขนานกัน</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — T⁻¹ ไม่ใช่ Tᵀ</h3>
+    <ol><li>ในข้อ 2 ทรานสโพสเมทริกซ์ 4 × 4 ทั้งตัว: ตำแหน่ง (4, 3) ย้ายไปอยู่แถวล่าง แถวล่างไม่เป็น 0 0 0 1 อีกต่อไป จึงไม่ใช่การแปลงเอกพันธุ์เลย</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ไปจับสลักเกลียว</h3>
+    <ol><li>ในข้อ 3 เลื่อนเครื่องมือจนตัวเลขตำแหน่งของ ᵀ<sub>G</sub>T เป็นศูนย์ทั้งหมด: นั่นคือเครื่องมืออยู่ที่สลักเกลียวพอดี ตัวควบคุมหุ่นยนต์คำนวณแบบนี้ทุกครั้งที่สั่ง "ไปจับชิ้นงาน"</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 2 หน้า 25–37 (ภาพอยู่ในหน้านี้แล้ว) · Craig 2.4–2.6 · สไลด์เดิม Part I หน้า 29–37 และ Part II หน้า 3–5</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the order of a product</h3>
+    <ol><li>In tool B press "swap the order" at various angles: the two products agree only in special cases, e.g. both angles 0 and parallel offsets.</li></ol></div>
+  <div class="card"><h3>Try this 2 — T⁻¹ is not Tᵀ</h3>
+    <ol><li>In problem 2 transpose the whole 4 × 4 matrix: the position (4, 3) moves into the bottom row, which is no longer 0 0 0 1, so it is not a homogeneous transform at all.</li></ol></div>
+  <div class="card"><h3>Try this 3 — reach the bolt</h3>
+    <ol><li>In problem 3 move the tool until the position numbers of ᵀ<sub>G</sub>T are all zero: the tool is then exactly at the bolt. A robot controller does this calculation every time it is told to "go and pick the part".</li></ol>
+    <div class="book">Source: chapter 2 slides, pp. 25–37 (the pictures are on this page) · Craig 2.4–2.6 · old Part I slides pp. 29–37 and Part II slides pp. 3–5</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, E = CH2.EX, V = (p, d = 3) => CH2.htmlM(p.map(x => [x]), d, { cls: ['mp'] }), T4 = (T, d = 3) => CH2.htmlM(T, d, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true });
+const TT = T => CH2.texM(T, 3), TV = p => CH2.texV(p, 3);
+
+/* ---------- A: mapping or operator ---------- */
+const SA = { th: rad(35) }, roA = document.getElementById('roA'), p0 = [0.05, 0.42, 0.18];
+const readA = () => { const R = RB.Rz(SA.th), bp = RB.mv(RB.tr(R), RB.mv(R, p0)); const ap = RB.mv(R, p0);
+  roA.innerHTML = `<div class="term">${t('ซ้าย: ᴬP = R ᴮP โดย ᴮP คงที่', 'left: ᴬP = R ᴮP with ᴮP fixed')} = (${p0.map(x => u(x, 3)).join(', ')}) → ᴬP = (${ap.map(x => u(x, 3)).join(', ')}) · ${t('ขวา: ᴬP₂ = R ᴬP₁', 'right: ᴬP₂ = R ᴬP₁')} = (${ap.map(x => u(x, 3)).join(', ')})</div>`; };
+ui.slider(document.getElementById('ctlA'), { id: 'thA', label: 'θ', min: -180, max: 180, step: 1, value: 35, fmt: v => `${v}°`, oninput: v => { SA.th = rad(v); readA(); } }); readA();
+CH2.sim('cvA', SA, 'mapVsOp', { aspect: 0.46, maxH: 420, orbit: false });
+
+/* ---------- 1: Craig 2.4 ---------- */
+const S1 = { kind: 'gen', th: rad(30), q: [10, 5, 0], p1: [3, 7, 0], k: 0.06, xy: true, grid: [0, 14, 0, 14, 2], num: true, az: -90, el: 58, tgt0: [0.4, 0.4, 0.05], dist0: 2.6, u: 0 }, ro1 = document.getElementById('ro1'); let play1 = false;
+const read1 = () => { const ur = Math.min(1, S1.u), us = Math.max(0, S1.u - 1), p = RB.add(RB.mv(RB.Rz(S1.th * ur), S1.p1), RB.sc(S1.q, us));
+  ro1.innerHTML = `${S1.u < 1 ? t('ขั้น 1: หมุนรอบ Z<sub>A</sub> ', 'step 1: turning about Z<sub>A</sub> ') + Math.round(30 * ur) + '°' : t('ขั้น 2: เลื่อนตาม ᴬQ = (10, 5, 0) ', 'step 2: moving by ᴬQ = (10, 5, 0) ') + Math.round(100 * us) + '%'} · ${t('จุดอยู่ที่', 'the point is at')} (${u(p[0], 3)}, ${u(p[1], 3)}, 0)`; };
+const sl1 = ui.slider(document.getElementById('ctl1'), { id: 'u1', label: t('ความคืบหน้า', 'progress'), min: 0, max: 2, step: 0.01, value: 0, fmt: v => v < 1 ? t('หมุน', 'turn') : t('เลื่อน', 'move'), oninput: v => { S1.u = v; play1 = false; read1(); } });
+ui.buttons(document.getElementById('ctl1'), [{ label: t('▶ เล่น', '▶ play'), onclick: () => { if (S1.u >= 1.999) S1.u = 0; play1 = true; } }]); read1();
+CH2.sim('cv1', S1, 'oper', { aspect: 0.8, maxH: 480, tick: dt => { if (play1) { S1.u = Math.min(2, S1.u + dt * 0.6); sl1.set(S1.u); read1(); if (S1.u >= 2) play1 = false; } } });
+LS.ask(document.getElementById('ask1'), { fields: [{ label: 'ᴬP<sub>2,x</sub> =', ok: x => Math.abs(x - 9.098) < 0.006, w: 5 }, { label: 'ᴬP<sub>2,y</sub> =', ok: x => Math.abs(x - 12.562) < 0.006, w: 5 }] });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>ตัวดำเนินการ T</b>: ส่วนหมุน R<sub>Z</sub>(30°) ส่วนเลื่อน Q = (10, 5, 0) (ไม่มีเฟรมที่สอง จึงไม่มีตัวห้อยตัวยก)', '<b>The operator T</b>: rotation part R<sub>Z</sub>(30°), translation Q = (10, 5, 0) (no second frame, so no sub- or superscripts)'), tex: `T = ${TT(E.ex24.T)}`, onShow: () => { S1.u = 0; sl1.set(0); read1(); } },
+  { why: t('<b>หมุนก่อน</b> (ลูกศรประในภาพ)', '<b>Turn first</b> (the dashed arrow in the picture)'), tex: `R_Z(30^\\circ)\\,{}^{A}P_1 = ${TV(RB.mv(RB.Rz(rad(30)), [3, 7, 0]))}`, onShow: () => { S1.u = 1; sl1.set(1); read1(); } },
+  { why: t('<b>แล้วเลื่อน</b> ด้วย Q', '<b>Then move</b> by Q'), tex: `{}^{A}P_2 = ${TV(RB.mv(RB.Rz(rad(30)), [3, 7, 0]))} + ${TV([10, 5, 0])} = ${TV(E.ex24.p2)}`, onShow: () => { S1.u = 2; sl1.set(2); read1(); } }],
+  answer: t('\\({}^{A}P_2 = (9.098,\\ 12.562,\\ 0)^T\\) เท่ากับคำตอบของ Craig 2.2 ทุกตัว: เมทริกซ์เดียวกัน ตีความต่างกัน', '\\({}^{A}P_2 = (9.098,\\ 12.562,\\ 0)^T\\), exactly the answer of Craig 2.2: the same matrix, read differently') });
+
+/* ---------- B: compound transforms ---------- */
+const SB = { yaw: 35, tilt: 25, tgt: [0.05, 0.75, 0.3], dist: 4.2 }, roB = document.getElementById('roB'); let swap = false;
+const mk = () => { SB.TAB = RB.T(RB.Rz(rad(SB.yaw)), [-0.05, 0.62, 0.18]); SB.TBC = RB.T(RB.mm(RB.Rz(rad(-30)), RB.Rx(rad(SB.tilt))), [0.05, 0.5, 0.2]); };
+const readB = () => { mk(); const P = RB.Tm(SB.TAB, SB.TBC), Q = RB.Tm(SB.TBC, SB.TAB);
+  roB.innerHTML = `<div class="live"><span class="eq">ᴬ<sub>B</sub>T</span>${T4(SB.TAB, 2)}</div><div class="live"><span class="eq">ᴮ<sub>C</sub>T</span>${T4(SB.TBC, 2)}</div><div class="live"><span class="eq">ᴬ<sub>C</sub>T = ᴬ<sub>B</sub>T ᴮ<sub>C</sub>T</span>${T4(P, 2)}</div>` +
+    (swap ? `<div class="live"><span class="eq">${t('สลับลำดับ', 'swapped')}: ᴮ<sub>C</sub>T ᴬ<sub>B</sub>T</span>${T4(Q, 2)}<span class="eq">${Math.max(...P.flat().map((x, i) => Math.abs(x - Q.flat()[i]))) < 1e-9 ? '=' : '≠'} ᴬ<sub>C</sub>T</span></div>` : ''); };
+const ctlB = document.getElementById('ctlB');
+ui.slider(ctlB, { id: 'yawB', label: t('{B}: หมุนรอบ Z<sub>A</sub>', '{B}: turn about Z<sub>A</sub>'), min: -180, max: 180, step: 1, value: 35, fmt: v => `${v}°`, oninput: v => { SB.yaw = v; readB(); } });
+ui.slider(ctlB, { id: 'tiltB', label: t('{C}: เอียงรอบ X', '{C}: tilt about X'), min: -90, max: 90, step: 1, value: 25, fmt: v => `${v}°`, oninput: v => { SB.tilt = v; readB(); } });
+ui.buttons(document.getElementById('optB'), [{ id: 'swapB', label: t('สลับลำดับ ✗', 'swap the order ✗'), onclick: el => { swap = !swap; el.classList.toggle('on', swap); el.textContent = t('สลับลำดับ ', 'swap the order ') + (swap ? '✓' : '✗'); readB(); } }]);
+readB(); CH2.sim('cvB', SB, 'chain3', { aspect: 0.78, maxH: 520 });
+
+/* ---------- 2: Craig 2.5 inverse ---------- */
+const S2 = { TAB: RB.T(RB.Rz(rad(30)), [0.4, 0.3, 0]), inv: true, xy: true, az: -90, el: 55, tgt: [0.22, 0.2, 0.05], dist: 2.3, LA: 0.3, LB: 0.25 };
+CH2.sim('cv2', S2, 'chain3', { aspect: 0.8, maxH: 460 });
+document.getElementById('ro2').innerHTML = t('ภาพย่อ 1 หน่วย = 0.1 m · สีส้ม: ᴬP<sub>BORG</sub> = (4, 3, 0) · สีน้ำเงิน: ᴮP<sub>AORG</sub> ลูกศรย้อนกลับ ซึ่งต้องอ่านตามแกนของ {B}', 'Scale 1 unit = 0.1 m · orange: ᴬP<sub>BORG</sub> = (4, 3, 0) · blue: ᴮP<sub>AORG</sub>, the arrow back, read along the axes of {B}');
+LS.ask(document.getElementById('ask2'), { fields: [{ label: 'ᴮP<sub>AORG,x</sub> =', ok: x => Math.abs(x + 4.964) < 0.006, w: 5 }, { label: 'ᴮP<sub>AORG,y</sub> =', ok: x => Math.abs(x + 0.598) < 0.006, w: 5 }],
+  check: v => Math.abs(v[0] + 4) < 0.01 && Math.abs(v[1] + 3) < 0.01 ? t('(−4, −3) ยังเขียนตามแกนของ {A}: ต้องคูณด้วย Rᵀ ด้วย', '(−4, −3) is still written along the axes of {A}: multiply by Rᵀ as well') : (Math.abs(v[0] - 4.964) < 0.01 ? t('ลืมเครื่องหมายลบ', 'You forgot the minus sign') : '') });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>เขียน ᴬ<sub>B</sub>T</b>', '<b>Write ᴬ<sub>B</sub>T</b>'), tex: `{}^{A}_{B}T = ${TT(E.ex25.T)}` },
+  { why: t('<b>ส่วนหมุน</b>: ทรานสโพส', '<b>Rotation part</b>: transpose'), tex: `{}^{B}_{A}R = {}^{A}_{B}R^T = ${CH2.texM(RB.tr(RB.TR(E.ex25.T)), 3)}` },
+  { why: t('<b>ส่วนตำแหน่ง</b>: −Rᵀ ᴬP<sub>BORG</sub>', '<b>Position part</b>: −Rᵀ ᴬP<sub>BORG</sub>'), tex: '-\\begin{bmatrix} 0.866 & 0.5 & 0 \\\\ -0.5 & 0.866 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix}\\begin{bmatrix} 4 \\\\ 3 \\\\ 0 \\end{bmatrix} = -\\begin{bmatrix} 4.964 \\\\ 0.598 \\\\ 0 \\end{bmatrix}' },
+  { why: t('<b>รวมเป็น ᴮ<sub>A</sub>T</b> และตรวจ: ความยาว 5 เท่ากับ |(4, 3)|', '<b>Assemble ᴮ<sub>A</sub>T</b> and check: its length is 5, like |(4, 3)|'), tex: `{}^{B}_{A}T = ${TT(E.ex25.Ti)}` }],
+  answer: t('\\({}^{B}P_{AORG} = (-4.964,\\ -0.598,\\ 0)^T\\) · ตรวจได้อีกทางด้วย \\({}^{A}_{B}T\\,{}^{B}_{A}T = I\\)', '\\({}^{B}P_{AORG} = (-4.964,\\ -0.598,\\ 0)^T\\) · another check: \\({}^{A}_{B}T\\,{}^{B}_{A}T = I\\)') });
+
+/* ---------- 3: the bolt ---------- */
+const B = E.bolt, S3s = { p: RB.Tp(B.BT).slice(), yaw: 0 }, ro3 = document.getElementById('ro3');
+const read3 = () => { const BT = RB.T(RB.mm(RB.Rz(S3s.yaw), RB.Rx(Math.PI)), S3s.p), TG = RB.Tm(RB.Ti(BT), B.BS, B.SG), d = Math.hypot(...RB.Tp(TG)), reach = !!CH2.armTo(S3s.p);
+  ro3.innerHTML = `<div class="live"><span class="eq">ᵀ<sub>G</sub>T = ᴮ<sub>T</sub>T⁻¹ ᴮ<sub>S</sub>T ˢ<sub>G</sub>T =</span>${T4(TG, 3)}</div><div class="term">${!reach ? `<b class="ax-x">${t('แขนเอื้อมไม่ถึงตำแหน่งนี้', 'the arm cannot reach this position')}</b> · ` : ''}${d < 0.012 ? `<b class="ax-y">${t('เครื่องมืออยู่ที่สลักเกลียวแล้ว ✓', 'the tool is at the bolt ✓')}</b>` : t(`ระยะจากเครื่องมือถึงสลักเกลียว ${u(d, 3)} m`, `distance from the tool to the bolt: ${u(d, 3)} m`)}</div>`; };
+const ctl3 = document.getElementById('ctl3'), sl3 = [];
+[['x', 0, 0.2, 0.9], ['y', 1, -0.5, 0.5], ['z', 2, 0.3, 0.8]].forEach(([n, i, lo, hi]) => sl3.push(ui.slider(ctl3, { id: 'tp' + n, label: `ᴮP<sub>TORG</sub> ${n}`, min: lo, max: hi, step: 0.01, value: S3s.p[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { S3s.p[i] = v; read3(); } })));
+const slY = ui.slider(ctl3, { id: 'tyaw', label: t('หมุนเครื่องมือรอบแกนตั้ง', 'turn the tool about the vertical'), min: -180, max: 180, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { S3s.yaw = rad(v); read3(); } });
+ui.buttons(document.getElementById('opt3'), [{ label: t('↺ ตำแหน่งของโจทย์', '↺ problem position'), onclick: () => { S3s.p = RB.Tp(B.BT).slice(); S3s.yaw = 0; sl3.forEach((s, i) => s.set(S3s.p[i])); slY.set(0); read3(); } },
+  { label: t('ไปที่สลักเกลียว', 'go to the bolt'), onclick: () => { S3s.p = RB.Tp(B.BG).slice(); sl3.forEach((s, i) => s.set(S3s.p[i])); read3(); } }]); read3();
+CH2.sim('cv3', S3s, 'bolt', { aspect: 0.75, maxH: 540 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('ที่ตำแหน่งของโจทย์: ᵀP<sub>GORG</sub> = (', 'at the problem position: ᵀP<sub>GORG</sub> = ('), ok: x => Math.abs(x - 0.1) < 0.006, w: 4 }, { label: ',', ok: x => Math.abs(x - 0.5) < 0.006, w: 4 }, { label: ',', ok: x => Math.abs(x - 0.3) < 0.006, w: 4 }],
+  check: v => Math.abs(v[1] + 0.5) < 0.01 || Math.abs(v[2] + 0.3) < 0.01 ? t('นั่นคือ ᴮP<sub>GORG</sub> − ᴮP<sub>TORG</sub> ซึ่งยังเขียนตามแกนของ {B}: Z<sub>T</sub> ชี้ลง Y<sub>T</sub> ชี้ไปทาง −Y<sub>B</sub>', 'That is ᴮP<sub>GORG</sub> − ᴮP<sub>TORG</sub>, still along the axes of {B}: Z<sub>T</sub> points down and Y<sub>T</sub> along −Y<sub>B</sub>') : '' });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>เดินจาก {T} ไป {G}</b>: สวนลูกศร B→T แล้วตาม B→S และ S→G', '<b>Walk from {T} to {G}</b>: against B→T, then along B→S and S→G'), tex: '{}^{T}_{G}T = {}^{B}_{T}T^{-1}\\;{}^{B}_{S}T\\;{}^{S}_{G}T' },
+  { why: t('<b>สลักเกลียวในเฟรมฐาน</b> (สองตัวหลัง)', '<b>The bolt in the base frame</b> (the last two factors)'), tex: `{}^{B}_{G}T = {}^{B}_{S}T\\,{}^{S}_{G}T = ${TT(B.BG)}` },
+  { why: t('<b>หาผกผันของ ᴮ<sub>T</sub>T</b> ด้วยกฎ [Rᵀ, −RᵀP]', '<b>Invert ᴮ<sub>T</sub>T</b> with the rule [Rᵀ, −RᵀP]'), tex: `{}^{B}_{T}T^{-1} = ${TT(RB.Ti(B.BT))}` },
+  { why: t('<b>คูณ</b> แล้วอ่านความหมาย', '<b>Multiply</b> and read the result'), tex: `{}^{T}_{G}T = ${TT(B.TG)}` }],
+  answer: t('สลักเกลียวอยู่ห่างเครื่องมือ 0.1 m ตาม X<sub>T</sub>, 0.5 m ตาม Y<sub>T</sub> และ 0.3 m ตาม Z<sub>T</sub> (ใต้เครื่องมือ เพราะ Z<sub>T</sub> ชี้ลง)', 'The bolt is 0.1 m along X<sub>T</sub>, 0.5 m along Y<sub>T</sub> and 0.3 m along Z<sub>T</sub> from the tool (below it, since Z<sub>T</sub> points down)') });
+
+/* ---------- 4: homework 2.1 (answer check only) ---------- */
+CH2.sim('cv4', {}, 'hw21', { aspect: 0.8, maxH: 500 });
+document.getElementById('note4').innerHTML = t('1 หน่วยในภาพ = ด้านของลิ่ม · x<sub>0</sub> ชี้เข้าหาลิ่ม y<sub>0</sub> ชี้ไปทางเฟรม 2 z<sub>0</sub> ชี้ขึ้น', '1 unit = an edge of the wedge · x<sub>0</sub> points into the wedge, y<sub>0</sub> towards frame 2, z<sub>0</sub> up');
+const H = E.hw21, top3 = T => T.slice(0, 3);
+CH2.matAsk(document.getElementById('ask4a'), { label: '⁰<sub>1</sub>T =', rows: 3, cols: 4, ans: top3(H.T01) });
+CH2.matAsk(document.getElementById('ask4b'), { label: '⁰<sub>2</sub>T =', rows: 3, cols: 4, ans: top3(H.T02) });
+CH2.matAsk(document.getElementById('ask4c'), { label: '¹<sub>2</sub>T =', rows: 3, cols: 4, ans: top3(H.T12), check: M => t('ตรวจ: ⁰<sub>1</sub>T คูณ ¹<sub>2</sub>T ของคุณต้องได้ ⁰<sub>2</sub>T', 'Check: your ⁰<sub>1</sub>T times your ¹<sub>2</sub>T must give ⁰<sub>2</sub>T') });
+});
+</script>
+</body>
+</html>

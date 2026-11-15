@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="1.1 — What is a robot?">1.1 — หุ่นยนต์คืออะไร</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">หุ่นยนต์คืออะไร <span class="en">What is a robot? — a machine that senses, thinks and acts, and can be reprogrammed</span></h1>
+<h1 data-l="en">What is a robot? <span class="en">A machine that senses, thinks and acts, and can be reprogrammed</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s07.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 7: three cores of a robot, sense, think and act, with an arm that finds a part with a camera">
+    <figcaption data-l="th">สไลด์บทที่ 1 หน้า 7 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 1 slides, p. 7 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">บทที่ 1 เปิดด้วยคำถามง่าย ๆ ที่ตอบยาก: <b>อะไรทำให้เครื่องจักรกลายเป็นหุ่นยนต์</b> หน้านี้ครอบคลุมสไลด์หน้า 4–9 มี <b>เครื่องมือ 1 ชิ้น (A)</b> ที่ให้ปิดแกนรับรู้ คิด หรือกระทำทีละแกน และ <b>2 โจทย์</b> ที่ใช้เกณฑ์สามข้อแยกหุ่นยนต์ออกจากเครื่องจักร</p>
+    <p class="sub" data-l="en">Chapter 1 opens with a simple question that is hard to answer: <b>what turns a machine into a robot?</b> This page covers slides pp. 4–9. It has <b>one tool (A)</b> that lets you switch sensing, thinking or acting off one at a time, and <b>2 problems</b> that use three criteria to tell robots from machines.</p>
+    <div class="callout" data-l="th">หุ่นยนต์ต้อง <b>โปรแกรมใหม่ได้</b> เพื่อทำการกระทำหลายขั้นตอน และปิดวงรอบ <b>รับรู้ → คิด → กระทำ</b> กับสิ่งแวดล้อมของมัน</div>
+    <div class="callout" data-l="en">A robot can be <b>reprogrammed</b> to carry out a series of actions, and it closes the loop <b>sense → think → act</b> with its surroundings.</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>วิทยาการหุ่นยนต์รวมหลายสาขา</b>: เครื่องกล ไฟฟ้า คอมพิวเตอร์ และการควบคุม วิชานี้เน้นกลไกและคณิตศาสตร์ของการเคลื่อนที่</li><li><b>หุ่นยนต์ทุกตัวเป็นเครื่องจักร แต่เครื่องจักรไม่ใช่หุ่นยนต์ทุกตัว</b>: สิ่งที่แยกคือการโปรแกรมใหม่ได้</li><li><b>รับรู้ – คิด – กระทำ</b>: ขาดแกนใดแกนหนึ่ง หุ่นยนต์ทำงานไม่สำเร็จ</li><li><b>คำว่า robot</b> มาจากภาษาเช็ก robota (แรงงานบังคับ) ในบทละคร R.U.R. ปี ค.ศ. 1920</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Robotics joins several fields</b>: mechanical, electrical, computing and control. This course is about the mechanics and mathematics of motion.</li><li><b>Every robot is a machine, but not every machine is a robot</b>: being reprogrammable is what sets it apart.</li><li><b>Sense – think – act</b>: without any one of the three the robot fails.</li><li><b>The word robot</b> comes from the Czech robota (forced labour), in the 1920 play R.U.R.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>รับรู้–คิด–กระทำ</a><a href="#ex1"><b>1</b>หุ่นยนต์หรือไม่</a><a href="#ex2"><b>2</b>สิ่งที่แยกหุ่นยนต์</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Sense–think–act</a><a href="#ex1"><b>1</b>Robot or not?</a><a href="#ex2"><b>2</b>What sets a robot apart</a></nav>
+
+<div class="group-head"><h2 data-l="th">วิทยาการหุ่นยนต์และนิยามของหุ่นยนต์ (สไลด์หน้า 5–6)</h2><h2 data-l="en">Robotics and what a robot is (slides pp. 5–6)</h2></div>
+<div class="slides">
+  <figure class="slide"><img src="slides/ch1/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: robotics brings together mechanical engineering, electrical engineering, computer science, and control and information"><figcaption data-l="th">สไลด์หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 5 · tap to enlarge</figcaption></figure>
+  <figure class="slide"><img src="slides/ch1/s06.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 6: every robot is a machine, not every machine is a robot; robota means forced labour; a robot can be reprogrammed"><figcaption data-l="th">สไลด์หน้า 6</figcaption><figcaption data-l="en">Slide p. 6</figcaption></figure>
+</div>
+<p class="sub" data-l="th">เครื่องซักผ้าทำงานเองได้ แต่ทำได้เพียงรอบซักที่โรงงานกำหนดไว้ แขนกลอุตสาหกรรมตัวเดียวกันวันนี้เชื่อม พรุ่งนี้เปลี่ยนโปรแกรมไปจัดเรียงกล่อง <b>การโปรแกรมใหม่ได้</b> คือเส้นแบ่งระหว่างเครื่องจักรอัตโนมัติกับหุ่นยนต์ เครื่องมือ A ข้างล่างแสดงอีกด้านหนึ่ง: หุ่นยนต์ต้องปิดวงรอบรับรู้ คิด และกระทำให้ครบ</p>
+<p class="sub" data-l="en">A washing machine runs by itself, but only through the cycles its maker built in. The same industrial arm welds today and, with a new program, stacks boxes tomorrow. <b>Being reprogrammable</b> is the line between an automatic machine and a robot. Tool A below shows the other side: a robot has to close the loop of sensing, thinking and acting.</p>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: แขนกลหยิบชิ้นงาน ด้วยวงรอบรับรู้ – คิด – กระทำ</h2><h2 data-l="en">Tool: an arm picks a part with the sense – think – act loop</h2>
+    <div class="src" data-l="th">เหมือนภาพในสไลด์หน้า 7 · มองจากด้านบน แขนสองก้านยาว 0.5 m และ 0.4 m</div><div class="src" data-l="en">As in the figure on slide p. 7 · seen from above; a two-link arm with links of 0.5 m and 0.4 m</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div id="ctlA" style="padding:0 8px"></div>
+      <div class="simnote" data-l="th">ทุกครั้งที่ชิ้นงานถูกวางที่ใหม่ วงรอบจะวิ่ง: <b>รับรู้</b> (กากบาทสีฟ้าคือตำแหน่งที่กล้องวัดได้) → <b>คิด</b> (แขนจาง ๆ สีม่วงคือมุมข้อต่อที่คำนวณได้) → <b>กระทำ</b> (มอเตอร์พาแขนไปถึงแล้วหนีบ)</div>
+      <div class="simnote" data-l="en">Each time the part is moved, the loop runs: <b>sense</b> (the blue cross is where the camera measures the part) → <b>think</b> (the faint purple arm is the computed joint angles) → <b>act</b> (the motors take the arm there and close the gripper).</div></div>
+    <div class="card solve"><h3 data-l="th">ลองปิดทีละแกน</h3><h3 data-l="en">Switch the cores off one at a time</h3>
+      <div class="status" id="stA"></div>
+      <ol class="looplist" data-l="th" style="margin-top:10px"><li><b>ปิด SENSE</b> แล้วกด "วางชิ้นงานใหม่": แขนยังคิดและขยับได้ แต่ไปที่ <b>ตำแหน่งเดิมที่จำไว้</b> ซึ่งไม่ใช่ที่ชิ้นงานอยู่</li><li><b>ปิด THINK</b>: กล้องเห็นชิ้นงาน แต่ไม่มีใครแปลงตำแหน่งเป็นมุมข้อต่อ แขนจึงไม่ขยับ (การแปลงนี้คือ <b>จลนศาสตร์ผกผัน</b> ในบทที่ 4)</li><li><b>ปิด ACT</b>: คำนวณมุมได้ถูก (แขนจาง ๆ อยู่ที่ชิ้นงาน) แต่มอเตอร์ไม่ทำงาน</li></ol>
+      <ol class="looplist" data-l="en" style="margin-top:10px"><li><b>Switch SENSE off</b> and press "Move the part": the arm still thinks and moves, but to the <b>old position it remembers</b>, not to where the part is.</li><li><b>Switch THINK off</b>: the camera sees the part, but nothing turns its position into joint angles, so the arm stays still (that step is <b>inverse kinematics</b>, chapter 4).</li><li><b>Switch ACT off</b>: the angles are right (the faint arm is on the part) but the motors do nothing.</li></ol></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">กฎสามข้อของ Asimov (สไลด์หน้า 8)</h2><h2 data-l="en">Asimov's three laws (slide p. 8)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s08.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 8: Asimov first used the word robotics in 1941; the three laws in Runaround (1942), paraphrased"><figcaption data-l="th">สไลด์หน้า 8 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 8 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">Isaac Asimov เป็นคนแรกที่ใช้คำว่า <b>robotics</b> ในเรื่องสั้นปี ค.ศ. 1941 และเขียนกฎสามข้อครบในเรื่อง "Runaround" ปี ค.ศ. 1942 กฎข้อแรก (ห้ามทำร้ายมนุษย์) ยังสะท้อนอยู่ในงานจริงทุกวันนี้: รั้วนิรภัย ปุ่มหยุดฉุกเฉิน และการจำกัดความเร็วกับแรงของหุ่นยนต์ที่ทำงานร่วมกับคน (collaborative robot)</p>
+  <p class="sub" data-l="en">Isaac Asimov was the first to use the word <b>robotics</b>, in a 1941 story, and set out his three laws in full in "Runaround" (1942). The first law (do not harm a human) still shows in real work today: safety fences, emergency stops, and the speed and force limits of robots that work beside people (collaborative robots).</p>
+</div>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">กิจกรรม: อุปกรณ์ไหนเป็นหุ่นยนต์</h2><h2 data-l="en">Activity: which devices are robots?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 9 · กิจกรรมกลุ่มในห้อง สัปดาห์ที่ 1</div><div class="src" data-l="en">Chapter 1 slides, p. 9 · group activity in week 1</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s09.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 9: table of six devices with three criteria: reprogrammable for a series of actions, senses its surroundings, acts on them">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 9 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 9 · tap to enlarge</figcaption></figure>
+  <div class="duo">
+    <div class="card sim"><div style="overflow-x:auto;padding:4px 6px"><table class="pick" id="pick1"></table></div>
+      <div class="pickbar"><button type="button" class="btn on" id="chk1"></button><button type="button" class="btn" id="rst1"></button><span id="res1"></span></div>
+      <div class="simnote" data-l="th">กดปุ่มในแต่ละช่องเพื่อสลับ <b>✓ / ✗</b> แล้วเลือกคำตอบในช่องสุดท้าย กด "ตรวจ" ช่องที่ถูกจะมีกรอบสีเขียว</div>
+      <div class="simnote" data-l="en">Press a cell to switch it between <b>✓ / ✗</b>, then choose a verdict in the last column. Press "Check": correct cells get a green ring.</div></div>
+    <div class="card solve"><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">อะไรแยกหุ่นยนต์ออกจากเครื่องจักรอัตโนมัติ</h2><h2 data-l="en">What sets a robot apart from an automatic machine?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 6 · ถอดความจากนิยามของ Robot Institute of America ที่ Spong อ้างในหัวข้อ 1.1</div><div class="src" data-l="en">Chapter 1 slides, p. 6 · paraphrased from the Robot Institute of America definition quoted in Spong §1.1</div></div></div>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv2"></canvas><div id="ctl2" style="padding:0 8px"></div>
+      <div class="simnote" data-l="th">แขนตัวเดียวกัน โปรแกรมต่างกัน: เลือกงานแล้วดูแขนเดินตามจุดที่สอนไว้ของงานนั้น เครื่องจักรอัตโนมัติแบบงานเดียวทำได้เพียงงานแรก</div>
+      <div class="simnote" data-l="en">The same arm, different programs: choose a job and watch the arm go through that job's taught points. A single-purpose automatic machine could only ever do the first one.</div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — วงรอบต้องครบ</h3>
+    <ol><li>ในเครื่องมือ A ปิด SENSE แล้ววางชิ้นงานใหม่สองสามครั้ง: แขน <b>ทำงานอย่างมั่นใจแต่ผิดที่</b> ซึ่งอันตรายกว่าแขนที่หยุดนิ่ง</li><li>เปิด SENSE กลับ: กล้องวัดตำแหน่งได้ไม่เป๊ะ 100% (กากบาทไม่ตรงกลางชิ้นงานพอดี) แต่ความคลาดเคลื่อนเล็กพอที่มือจับจะหนีบได้</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — โปรแกรมใหม่ได้</h3>
+    <ol><li>ในโจทย์ข้อ 2 สลับงานไปมา: แขนเดิม มอเตอร์เดิม เปลี่ยนเพียงรายการจุดที่สอน</li><li>เครื่องซักผ้าทำอย่างนี้ไม่ได้ เพราะลำดับการทำงานถูกกำหนดตายตัวตั้งแต่ออกแบบ</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 1 หน้า 4–9 (ภาพอยู่ในหน้านี้แล้ว) · Spong 1.1 · Craig 1.1</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the loop must be complete</h3>
+    <ol><li>In tool A switch SENSE off and move the part a few times: the arm <b>moves confidently to the wrong place</b>, which is more dangerous than an arm that stays still.</li><li>Switch SENSE back on: the camera is not perfect (the cross is not exactly on the centre of the part), but the error is small enough for the gripper.</li></ol></div>
+  <div class="card"><h3>Try this 2 — reprogrammable</h3>
+    <ol><li>In problem 2 switch between the jobs: the same arm and the same motors; only the list of taught points changes.</li><li>A washing machine cannot do this: its sequence is fixed when it is designed.</li></ol>
+    <div class="book">Source: chapter 1 slides, pp. 4–9 (the pictures are on this page) · Spong 1.1 · Craig 1.1</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, G = RB.G, { l1, l2 } = CH1.LOOP;
+
+/* ---------- A: sense – think – act ---------- */
+const A = { tx: 0.45, ty: 0.55, mx: null, my: null, qd: null, q: [-0.6, 2.2], sense: true, think: true, act: true, stage: 0, grip: false, tm: 0, mem: null, xyz: true };
+const rnd = CH1.rand(11);
+const place = () => { let x, y; do { const r = 0.35 + 0.5 * rnd(), a = -0.1 + 1.6 * rnd(); x = r * Math.cos(a); y = r * Math.sin(a); } while (Math.hypot(x, y) > 0.86 || Math.hypot(x, y) < 0.3);
+  A.tx = x; A.ty = y; A.stage = 0; A.tm = 0; A.grip = false; A.qd = null; };
+const ctlA = document.getElementById('ctlA');
+const tg = ui.buttons(ctlA, [{ id: 'bS', label: 'SENSE ✓', on: true, onclick: el => { A.sense = !A.sense; el.classList.toggle('on', A.sense); el.textContent = 'SENSE ' + (A.sense ? '✓' : '✗'); place(); } },
+  { id: 'bT', label: 'THINK ✓', on: true, onclick: el => { A.think = !A.think; el.classList.toggle('on', A.think); el.textContent = 'THINK ' + (A.think ? '✓' : '✗'); place(); } },
+  { id: 'bA', label: 'ACT ✓', on: true, onclick: el => { A.act = !A.act; el.classList.toggle('on', A.act); el.textContent = 'ACT ' + (A.act ? '✓' : '✗'); place(); } },
+  { id: 'bN', label: t('วางชิ้นงานใหม่', 'Move the part'), onclick: () => place() }]);
+const stA = document.getElementById('stA');
+const say = () => { const f = RB.fk2(l1, l2, A.q[0], A.q[1]), d = Math.hypot(f.x - A.tx, f.y - A.ty);
+  const msg = [t('รับรู้: กล้องกำลังหาชิ้นงาน', 'Sense: the camera is locating the part'), t('คิด: คำนวณมุมข้อต่อจากตำแหน่งที่วัดได้', 'Think: computing joint angles from the measured position'), t('กระทำ: มอเตอร์กำลังพาแขนไป', 'Act: the motors are moving the arm'), ''][A.stage];
+  if (A.stage < 3) ui.setStatus(stA, ['SENSE', 'THINK', 'ACT'][A.stage], msg, ''); else if (d < 0.025) ui.setStatus(stA, t('สำเร็จ', 'done'), t('หยิบชิ้นงานได้ ✓', 'part picked ✓'), 'good');
+  else ui.setStatus(stA, t('ล้มเหลว', 'failed'), !A.sense ? t('ไปผิดที่: ไม่ได้รับรู้ตำแหน่งใหม่ของชิ้นงาน', 'wrong place: the new position of the part was never sensed') : !A.think ? t('แขนไม่ขยับ: ไม่มีการคำนวณมุมข้อต่อ', 'the arm did not move: no joint angles were computed') : t('แขนไม่ขยับ: คำนวณถูกแต่มอเตอร์ไม่ทำงาน', 'the arm did not move: the angles are right but the motors are off'), 'bad'); };
+let lastSay = -1;
+RB.stage(document.getElementById('cvA'), 0.68, (c, W, H, dt, P) => {
+  A.tm += dt;
+  if (A.stage === 0) { if (A.sense) { const k = Math.min(1, A.tm / 1.0); const nx = A.tx + 0.012, ny = A.ty - 0.008; A.mx = A.mx === null ? nx : A.mx + (nx - A.mx) * k; A.my = A.my === null ? ny : A.my + (ny - A.my) * k; A.mem = [A.mx, A.my]; }
+    if (A.tm > 1.1) { A.stage = 1; A.tm = 0; } }
+  else if (A.stage === 1) { if (A.tm > 0.9) { if (A.think && A.mem) { const q = RB.ik2(l1, l2, A.mem[0], A.mem[1], 1); A.qd = q.ok ? [q.t1, q.t2] : null; } else A.qd = null; A.stage = 2; A.tm = 0; } }
+  else if (A.stage === 2) { if (A.act && A.qd) { const k = Math.min(1, dt * 2.4); A.q = [A.q[0] + RB.wrap(A.qd[0] - A.q[0]) * k, A.q[1] + (A.qd[1] - A.q[1]) * k]; }
+    if (A.tm > 2.2) { A.stage = 3; A.tm = 0; const f = RB.fk2(l1, l2, A.q[0], A.q[1]); A.grip = Math.hypot(f.x - A.tx, f.y - A.ty) < 0.025; } }
+  else if (A.stage === 3 && A.tm > 2.6) place();   // a new part after a short pause, so the loop keeps running
+  if (A.stage !== lastSay) { lastSay = A.stage; say(); }
+  CH1.view.loop(c, W, H, A, P);
+}, { maxH: 480 });
+place();
+
+/* ---------- 1: robot or not ---------- */
+const DEV = [
+  { th: 'เครื่องดูดฝุ่นหุ่นยนต์', en: 'Robot vacuum cleaner', key: [[1], [1], [1]], v: ['r'], why: t('<b>เครื่องดูดฝุ่นหุ่นยนต์</b>: ตั้งโปรแกรมพื้นที่และตารางเวลาได้ รับรู้สิ่งกีดขวางและแผนที่ห้อง และเคลื่อนที่ทำความสะอาดเอง ครบทั้งสามข้อ <b>เป็นหุ่นยนต์ (หุ่นยนต์เคลื่อนที่)</b>', '<b>Robot vacuum</b>: its areas and schedule are programmable, it senses obstacles and maps the room, and it moves and cleans by itself. All three: <b>a robot (mobile robot)</b>.') },
+  { th: 'เครื่องซักผ้า', en: 'Washing machine', key: [[0], [1], [1]], v: ['m'], why: t('<b>เครื่องซักผ้า</b>: มีเซนเซอร์ระดับน้ำและอุณหภูมิ และกระทำกับผ้า แต่ <b>ทำได้เพียงรอบซักที่โรงงานกำหนด</b> โปรแกรมงานใหม่ไม่ได้ จึงเป็น <b>เครื่องจักรอัตโนมัติ</b>', '<b>Washing machine</b>: it has water-level and temperature sensors and acts on the clothes, but <b>it only runs the cycles built in at the factory</b>; it cannot be given a new job. <b>An automatic machine.</b>') },
+  { th: 'เครื่องกัดซีเอ็นซี', en: 'CNC milling machine', key: [[1], [0, 1], [1]], v: ['m', 'r'], why: t('<b>เครื่องกัดซีเอ็นซี</b>: โปรแกรมใหม่ได้ (G-code) และกระทำกับชิ้นงาน แต่รับรู้สิ่งแวดล้อมน้อยและทำได้เฉพาะงานตัดเฉือน ส่วนใหญ่เรียกว่า <b>เครื่องมือกล</b> ข้อนี้ยอมรับได้ทั้งสองคำตอบถ้าให้เหตุผลด้วยเกณฑ์', '<b>CNC mill</b>: reprogrammable (G-code) and acts on the part, but senses little and only cuts. Usually called a <b>machine tool</b>; either verdict is accepted here if the reasoning uses the criteria.') },
+  { th: 'รถบังคับวิทยุ', en: 'Remote-control car', key: [[0], [0], [1]], v: ['m'], why: t('<b>รถบังคับวิทยุ</b>: คนบังคับตลอดเวลา ตัวรถไม่รับรู้และไม่ตัดสินใจเอง เป็น <b>ระบบบังคับระยะไกล ไม่ใช่หุ่นยนต์</b>', '<b>Remote-control car</b>: a person drives it all the time; the car neither senses nor decides. <b>Teleoperated, not a robot.</b>') },
+  { th: 'แขนกลทำงานร่วมกับคน', en: 'Collaborative robot arm', key: [[1], [1], [1]], v: ['r'], why: t('<b>แขนกลทำงานร่วมกับคน</b>: สอนงานใหม่ได้ วัดแรงและใช้กล้อง และหยิบจับชิ้นงาน <b>เป็นหุ่นยนต์</b>', '<b>Collaborative arm</b>: it can be taught new jobs, senses force and uses vision, and handles parts. <b>A robot.</b>') },
+  { th: 'โดรนบินสำรวจตามโปรแกรม', en: 'Drone flying a programmed survey', key: [[1], [1], [1]], v: ['r'], why: t('<b>โดรนบินสำรวจตามโปรแกรม</b>: วางเส้นทางใหม่ได้ ใช้ GPS และกล้อง และบินเอง <b>เป็นหุ่นยนต์ (หุ่นยนต์บิน)</b>', '<b>Survey drone</b>: new routes can be planned, it uses GPS and a camera, and it flies itself. <b>A robot (aerial robot).</b>') }];
+const tb = document.getElementById('pick1');
+tb.innerHTML = `<tr><th>${t('อุปกรณ์', 'Device')}</th><th class="c">${t('โปรแกรมใหม่ได้', 'Reprogrammable')}</th><th class="c">${t('รับรู้', 'Senses')}</th><th class="c">${t('กระทำ', 'Acts')}</th><th>${t('หุ่นยนต์หรือไม่', 'Robot?')}</th></tr>` +
+  DEV.map((d, i) => `<tr data-i="${i}"><td>${t(d.th, d.en)}</td>${[0, 1, 2].map(j => `<td class="c"><button type="button" class="tog" data-j="${j}" aria-label="criterion ${j + 1}">?</button></td>`).join('')}` +
+    `<td><select aria-label="verdict"><option value="">—</option><option value="r">${t('หุ่นยนต์', 'robot')}</option><option value="m">${t('ไม่ใช่ (เครื่องจักร)', 'not a robot')}</option></select></td></tr>`).join('');
+const val = {}; tb.querySelectorAll('.tog').forEach(b => b.addEventListener('click', () => { const k = b.closest('tr').dataset.i + ':' + b.dataset.j, v = val[k] === 1 ? 0 : 1; val[k] = v; b.textContent = v ? '✓' : '✗'; b.classList.toggle('on', !!v); b.classList.remove('ok', 'no'); }));
+const res1 = document.getElementById('res1'), chk1 = document.getElementById('chk1'), rst1 = document.getElementById('rst1'); chk1.textContent = t('ตรวจ', 'Check'); rst1.textContent = t('↺ ล้าง', '↺ Clear');
+chk1.addEventListener('click', () => { let ok = 0, tot = 0; DEV.forEach((d, i) => { const tr = tb.querySelector(`tr[data-i="${i}"]`);
+    tr.querySelectorAll('.tog').forEach(b => { const v = val[i + ':' + b.dataset.j]; tot++; const good = v !== undefined && d.key[+b.dataset.j].includes(v); if (good) ok++; b.classList.toggle('ok', good); b.classList.toggle('no', !good); });
+    const s = tr.querySelector('select'); tot++; const good = d.v.includes(s.value); if (good) ok++; s.classList.toggle('ok', good); s.classList.toggle('no', !good); });
+  res1.innerHTML = ok === tot ? `<span class="pill good">✓</span> ${t('ถูกทุกช่อง!', 'All correct!')}` : `<span class="pill bad">${ok} / ${tot}</span> ${t('ช่องกรอบแดงยังไม่ใช่ เปิดเฉลยทีละขั้นได้ทางขวา', 'red rings are not right yet; open the solution step by step')}`; });
+rst1.addEventListener('click', () => { Object.keys(val).forEach(k => delete val[k]); tb.querySelectorAll('.tog').forEach(b => { b.textContent = '?'; b.classList.remove('on', 'ok', 'no'); }); tb.querySelectorAll('select').forEach(s => { s.value = ''; s.classList.remove('ok', 'no'); }); res1.innerHTML = ''; });
+const mark = k => tb.querySelectorAll('tr[data-i]').forEach((tr, i) => { tr.style.background = i === k - 2 ? 'color-mix(in srgb,var(--accent) 12%,transparent)' : ''; });
+LS.stepper(document.getElementById('st1'), {
+  steps: [{ why: t('<b>ใช้เกณฑ์สามข้อเหมือนกันทุกแถว</b>: (1) โปรแกรมใหม่ให้ทำการกระทำหลายขั้นตอนได้ไหม (2) รับรู้สิ่งแวดล้อมไหม (3) กระทำต่อสิ่งแวดล้อมไหม หุ่นยนต์ต้องผ่านทั้งสามข้อ โดยข้อ (1) สำคัญที่สุด', '<b>Use the same three criteria on every row</b>: (1) can it be reprogrammed for a series of actions? (2) does it sense its surroundings? (3) does it act on them? A robot passes all three, and (1) matters most.') },
+    ...DEV.map(d => ({ why: d.why }))],
+  answer: t('หุ่นยนต์: <b>เครื่องดูดฝุ่นหุ่นยนต์ แขนกลทำงานร่วมกับคน โดรนสำรวจ</b> · ไม่ใช่: <b>เครื่องซักผ้า รถบังคับวิทยุ</b> · เครื่องกัดซีเอ็นซีถกเถียงได้ (ส่วนใหญ่เรียกว่าเครื่องมือกล)', 'Robots: <b>the robot vacuum, the collaborative arm, the survey drone</b> · not robots: <b>the washing machine, the remote-control car</b> · the CNC mill is open to debate (usually called a machine tool)'),
+  onStep: k => mark(k) });
+
+/* ---------- 2: reprogrammable — one arm, three programs ---------- */
+const JOBS = [{ th: 'งาน 1: หยิบวาง', en: 'Job 1: pick and place', pts: [[0.55, 0.15], [0.3, 0.62], [-0.35, 0.55], [0.3, 0.62]] }, { th: 'งาน 2: เชื่อมตามแนว', en: 'Job 2: seam welding', pts: [[0.25, 0.7], [0.4, 0.6], [0.55, 0.5], [0.7, 0.4], [0.55, 0.5], [0.4, 0.6]] },
+  { th: 'งาน 3: จัดเรียงกล่อง', en: 'Job 3: palletising', pts: [[0.7, 0.1], [-0.2, 0.75], [0.7, 0.1], [-0.45, 0.6], [0.7, 0.1], [-0.65, 0.35]] }];
+const B2 = { job: 0, u: 0, q: [0.3, 1.2] };
+ui.radio(document.getElementById('ctl2'), JOBS.map((j, i) => ({ id: 'j' + i, label: t(j.th, j.en), on: i === 0 })), id => { B2.job = +id.slice(1); B2.u = 0; });
+RB.stage(document.getElementById('cv2'), 0.73, (c, W, H, dt, P) => { const J = JOBS[B2.job], n = J.pts.length;
+  B2.u = (B2.u + dt * 0.55) % n; const i = Math.floor(B2.u), f = B2.u - i, a = J.pts[i], b = J.pts[(i + 1) % n], s = f < 0.35 ? 0 : Math.min(1, (f - 0.35) / 0.65), p = [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s], q = RB.ik2(l1, l2, p[0], p[1], 1);
+  if (window.R3 && R3.ok()) { CH1.view.jobs(c, W, H, Object.assign(B2.v || (B2.v = {}), { pts: J.pts, q: [q.t1, q.t2], open: f < 0.35 ? 0.2 : 1, xyz: true }), P); return; }
+  G.clear(c, W, H, P); const M = RB.fitWorld(W, H, -0.95, 0.95, -0.2, 0.95, 6);   // flat drawing when WebGL is not available
+  G.grid(c, M, -0.9, 0.9, -0.2, 0.9, 0.1, P.grid); G.poly(c, J.pts.concat([J.pts[0]]).map(v => M.p(v[0], v[1])), { stroke: RB.rgba(P.sel, 0.6), lw: 1.5, dash: [5, 4] });
+  J.pts.forEach((v, k) => { const m = M.p(v[0], v[1]); G.circle(c, m[0], m[1], 6, { fill: P.warn, stroke: P.bg, lw: 1.5 }); G.text(c, 'P' + (k + 1), m[0] + 8, m[1] - 8, { color: P.warn, size: 12, weight: 700, halo: P.bg }); });
+  if (q.ok) CH1.arm2(c, M, l1, l2, q.t1, q.t2, P, { w: 10, open: f < 0.35 ? 0.3 : 1 });
+  G.text(c, t('โปรแกรม = รายการจุดที่สอน', 'program = list of taught points'), 10, 20, { color: P.muted, size: 12.5, weight: 600 }); }, { maxH: 420 });
+LS.choose(document.getElementById('ask2'), { options: [t('มีมอเตอร์ไฟฟ้า', 'it has electric motors'), t('โปรแกรมใหม่ให้ทำงานชุดใหม่ได้', 'it can be reprogrammed for a new series of actions'), t('มีรูปร่างเหมือนคน', 'it looks like a human'), t('ทำงานได้โดยไม่ต้องมีคนกดปุ่ม', 'it runs without anyone pressing a button')], answer: 1 });
+LS.stepper(document.getElementById('st2'), {
+  steps: [{ why: t('<b>ตัดตัวเลือก (a)</b>: เครื่องซักผ้าและพัดลมก็มีมอเตอร์ มอเตอร์เป็นเพียงส่วน "กระทำ"', '<b>Rule out (a)</b>: washing machines and fans have motors too; a motor is only the "act" part') },
+    { why: t('<b>ตัดตัวเลือก (c)</b>: แขนกลอุตสาหกรรมส่วนใหญ่ไม่เหมือนคนเลย ส่วนตุ๊กตาที่เหมือนคนอาจไม่ใช่หุ่นยนต์', '<b>Rule out (c)</b>: most industrial arms look nothing like a person, and a lifelike doll need not be a robot') },
+    { why: t('<b>ตัดตัวเลือก (d)</b>: เครื่องจักรอัตโนมัติก็ทำงานเองได้ แต่ทำได้งานเดียว', '<b>Rule out (d)</b>: an automatic machine also runs by itself, but only its one job') },
+    { why: t('<b>เหลือ (b)</b>: ในภาพจำลอง แขนและมอเตอร์เดิมทำได้สามงานต่างกัน เพียงเปลี่ยนรายการจุดที่สอน นี่คือ "โปรแกรมใหม่ได้" ในนิยาม', '<b>That leaves (b)</b>: in the simulation the same arm and motors do three different jobs just by changing the list of taught points. That is "reprogrammable" in the definition') }],
+  answer: t('<b>(b)</b> โปรแกรมใหม่ให้ทำงานชุดใหม่ได้', '<b>(b)</b> it can be reprogrammed for a new series of actions') });
+});
+</script>
+</body>
+</html>

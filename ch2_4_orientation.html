@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="2.4 — Fixed angles, Euler angles and angle–axis">2.4 — มุมแกนตรึง มุมออยเลอร์ และการหมุนรอบแกน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">มุมแกนตรึง มุมออยเลอร์ และการหมุนรอบแกน <span class="en">Representing orientation with three or four numbers</span></h1>
+<h1 data-l="en">Fixed angles, Euler angles and angle–axis <span class="en">Representing orientation with three or four numbers</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s39.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 39: rotation matrix, fixed angles, Euler angles, angle–axis and Euler parameters compared">
+    <figcaption data-l="th">สไลด์บทที่ 2 หน้า 39 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 2 slides, p. 39 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">เมทริกซ์การหมุนมี 9 ตัวเลขแต่มีอิสระเพียง 3 คนจึงบอกการวางตัวด้วย<b>มุมสามมุม</b> (มุมแกนตรึง หรือมุมออยเลอร์) หรือด้วย<b>แกนกับมุม</b> หรือ<b>พารามิเตอร์ออยเลอร์</b> (ควอเทอร์เนียนหนึ่งหน่วย) หน้านี้ครอบคลุมสไลด์หน้า 39–48 (Craig 2.8) มี <b>เครื่องมือ 2 ชิ้น (A, B)</b> และ <b>4 โจทย์</b> รวมการบ้านข้อ 2.2 ส่วนการหมุนรอบแกนใด ๆ และพารามิเตอร์ออยเลอร์ใช้เรียนเองได้จากโจทย์ข้อ 3</p>
+    <p class="sub" data-l="en">A rotation matrix has 9 numbers but only 3 are free, so people give an orientation as <b>three angles</b> (fixed angles or Euler angles), as an <b>axis and an angle</b>, or as <b>Euler parameters</b> (a unit quaternion). This page covers slides pp. 39–48 (Craig 2.8). It has <b>two tools (A, B)</b> and <b>4 problems</b>, including homework 2.2; problem 3 is the self-study part on the angle–axis form and Euler parameters.</p>
+    <div class="equation-box">$$ {}^{A}_{B}R_{XYZ}(\gamma, \beta, \alpha) = {}^{A}_{B}R_{Z'Y'X'}(\alpha, \beta, \gamma) = R_Z(\alpha)\,R_Y(\beta)\,R_X(\gamma) $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>มุมแกนตรึง X–Y–Z</b>: หมุนรอบแกนของ {A} ที่อยู่กับที่ γ, β, α ตามลำดับ · <b>มุมออยเลอร์ Z–Y–X</b>: หมุนรอบแกนของ {B} ที่เคลื่อนไปด้วย α, β, γ ตามลำดับ · ได้เมทริกซ์เดียวกัน</li><li>หมุนรอบแกนตรึง: <b>คูณทางซ้าย</b> · หมุนรอบแกนเคลื่อน: <b>คูณทางขวา</b></li><li>ย้อนจาก R หามุมด้วย atan2 ที่ β = ±90° หาได้เพียงผลต่างหรือผลบวกของ α กับ γ</li><li>การหมุนครั้งเดียวรอบแกน K̂ ไปมุม θ แทนการวางตัวใดก็ได้ พารามิเตอร์ออยเลอร์คือ (K̂ sin θ/2, cos θ/2)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>X–Y–Z fixed angles</b>: turn about the axes of {A}, which stay put, by γ, β, α in that order · <b>Z–Y–X Euler angles</b>: turn about the axes of {B}, which move along, by α, β, γ · the same matrix.</li><li>About a fixed axis: <b>multiply on the left</b> · about a moving axis: <b>multiply on the right</b>.</li><li>Back from R with atan2; at β = ±90° only the difference or the sum of α and γ can be found.</li><li>One turn by θ about an axis K̂ gives any orientation; the Euler parameters are (K̂ sin θ/2, cos θ/2).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>แกนตรึงเทียบแกนเคลื่อน</a><a href="#ex1"><b>1</b>จากเมทริกซ์กลับเป็นมุม</a><a href="#tB"><b>B</b>เมื่อ β = 90°</a><a href="#ex2"><b>2</b>หมุนห้าครั้ง</a><a href="#ex3"><b>3</b>การหมุนรอบแกนใด ๆ</a><a href="#ex4"><b>4</b>การบ้าน 2.2</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Fixed against moving axes</a><a href="#ex1"><b>1</b>From a matrix back to angles</a><a href="#tB"><b>B</b>When β = 90°</a><a href="#ex2"><b>2</b>Five turns</a><a href="#ex3"><b>3</b>Rotation about any axis</a><a href="#ex4"><b>4</b>Homework 2.2</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: X–Y–Z แกนตรึง เทียบกับ Z–Y–X ออยเลอร์</h2><h2 data-l="en">Tool: X–Y–Z fixed angles against Z–Y–X Euler angles</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 40–44 · Craig 2.8 · กด ▶ เพื่อเล่นทีละขั้น · ลากในภาพเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, pp. 40–44 · Craig 2.8 · press ▶ to play the turns · drag in a picture to turn the view</div></div></div>
+  <div class="duo">
+    <div class="card sim"><div class="simnote" id="capF"></div><canvas id="cvF"></canvas></div>
+    <div class="card sim"><div class="simnote" id="capE"></div><canvas id="cvE"></canvas></div>
+  </div>
+  <div class="card"><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+</section>
+
+<div class="group-head"><h2 data-l="th">สูตรเต็มและทางย้อนกลับ (สไลด์หน้า 41)</h2><h2 data-l="en">The full matrix and the way back (slide p. 41)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s41.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 41: the fixed-angle rotation matrix and the atan2 formulas back to the angles"><figcaption data-l="th">สไลด์หน้า 41 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 41 · tap to enlarge</figcaption></figure>
+  <div><p class="sub" data-l="th">ย้อนจาก R = [r<sub>ij</sub>] ไปหามุม (เมื่อ cos β ≠ 0) ใช้ atan2 ทุกตัวเพื่อให้ได้จตุภาคถูก สูตรเลือกคำตอบที่ −90° ≤ β ≤ 90°</p><p class="sub" data-l="en">Back from R = [r<sub>ij</sub>] to the angles (when cos β ≠ 0). Use atan2 every time so the quadrant comes out right; the formulas pick the solution with −90° ≤ β ≤ 90°.</p>
+    <div class="equation-box">$$ \begin{aligned} \beta &= \operatorname{atan2}\!\left(-r_{31},\ \sqrt{r_{11}^2 + r_{21}^2}\right) \\ \alpha &= \operatorname{atan2}\!\left(r_{21}/c\beta,\ r_{11}/c\beta\right) \\ \gamma &= \operatorname{atan2}\!\left(r_{32}/c\beta,\ r_{33}/c\beta\right) \end{aligned} $$</div></div>
+</div>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">จากเมทริกซ์กลับเป็นมุม</h2><h2 data-l="en">From a matrix back to the angles</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 42 (แบบฝึกใหม่) · เลื่อนแถบเลื่อนให้เฟรมสีทับเฟรมจาง (เป้าหมาย) หรือคำนวณด้วยสูตร</div><div class="src" data-l="en">Chapter 2 slides, p. 42 (new practice) · move the sliders until the coloured frame covers the faint one (the target), or use the formulas</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s42.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 42: a rotation matrix; find its X–Y–Z fixed angles">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 42 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 42 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="tB">
+  <div class="prob-head"><span class="prob-no">B</span><div><h2 data-l="th">เครื่องมือ: เมื่อ β = 90° สองมุมทำงานเหมือนกัน</h2><h2 data-l="en">Tool: at β = 90° two angles do the same job</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 41 (สไลด์เดิม Part II หน้า 11–12) · Craig 2.8 สมการ 2.67–2.68</div><div class="src" data-l="en">Chapter 2 slides, p. 41 (old Part II slides pp. 11–12) · Craig 2.8, equations 2.67–2.68</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvB"></canvas><div class="ctl" id="ctlB"></div><div class="readout" id="roB"></div></div>
+    <div class="card solve"><p class="lead" data-l="th">เมื่อ β = 90° แกน X<sub>B</sub> หลังหมุนขั้นแรกถูกพับไปทับแกน Z<sub>A</sub> การหมุนรอบ X<sub>A</sub> (γ) กับรอบ Z<sub>A</sub> (α) จึงหมุนรอบแกนเดียวกัน เลื่อน α กับ γ ไปในทิศเดียวกันเท่า ๆ กัน: ถ้าผลต่าง α − γ คงที่ เฟรมไม่ขยับเลย สูตรย้อนกลับหาได้เพียงผลต่าง Craig จึงกำหนด α = 0 แล้วให้ γ รับผลต่างทั้งหมด</p>
+      <p class="lead" data-l="en">At β = 90° the first turn's axis X<sub>B</sub> has been folded onto Z<sub>A</sub>, so turning about X<sub>A</sub> (γ) and about Z<sub>A</sub> (α) turn about the same line. Move α and γ by the same amount: while α − γ stays the same the frame does not move at all. The way back can only find the difference, so Craig sets α = 0 and lets γ carry it.</p>
+      <div class="hwbox" data-l="th"><b class="hw">ในงานจริง</b>: ตัวควบคุมหุ่นยนต์ที่ใช้มุมสามมุมจะมีท่าแบบนี้ซึ่งค่ามุมกระโดดได้ทั้งที่การวางตัวเปลี่ยนนิดเดียว จึงนิยมเก็บการวางตัวเป็นเมทริกซ์หรือควอเทอร์เนียนแทน (โจทย์ข้อ 3)</div>
+      <div class="hwbox" data-l="en"><b class="hw">In practice</b>: a controller that stores three angles has poses like this, where the angles jump although the orientation barely changes; this is why orientations are often stored as matrices or quaternions (problem 3).</div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">หมุนห้าครั้ง: แกนตรึงคูณซ้าย แกนเคลื่อนคูณขวา</h2><h2 data-l="en">Five turns: fixed axes on the left, moving axes on the right</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 44 (สไลด์เดิม Part II หน้า 17–18) · กดปุ่มทีละขั้น</div><div class="src" data-l="en">Chapter 2 slides, p. 44 (old Part II slides pp. 17–18) · press the steps one by one</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s44.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 44: five turns, some about fixed axes and some about moving axes; find the matrix">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 44 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 44 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="stepline" id="line2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">Craig ตัวอย่าง 2.6 และ 2.7: หมุนรอบแกน K̂ (ผ่านจุดใด ๆ ได้)</h2><h2 data-l="en">Craig examples 2.6 and 2.7: a turn about an axis K̂ (through any point)</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 45–47 (สไลด์เดิม Part II หน้า 19–25) · ส่วนเรียนเอง · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, pp. 45–47 (old Part II slides pp. 19–25) · self-study part · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s46.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 46: turn frame B by 30 degrees about K = (0.707, 0.707, 0), through the origin and through the point (1, 2, 3)">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 46 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 46 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div id="opt3" style="padding:0 8px"></div><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">การบ้านข้อ 2.2: การหมุนระหว่างเฟรม 2 กับเฟรม 3</h2><h2 data-l="en">Homework 2.2: the rotation between frames 2 and 3</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 48 (สไลด์เดิม Part II หน้า 26) · หน้านี้มีเพียงภาพของสามเฟรมและช่องตรวจคำตอบ ไม่มีวิธีทำ</div><div class="src" data-l="en">Chapter 2 slides, p. 48 (old Part II slide p. 26) · this page has only a picture of the three frames and an answer check, no worked solution</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="simnote" id="note4"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+      $$ {}^{1}_{2}R = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \tfrac12 & -\tfrac{\sqrt3}{2} \\ 0 & \tfrac{\sqrt3}{2} & \tfrac12 \end{bmatrix}, \qquad {}^{1}_{3}R = \begin{bmatrix} 0 & 0 & -1 \\ 0 & 1 & 0 \\ 1 & 0 & 0 \end{bmatrix}, \qquad {}^{2}_{3}R = \ ? $$</div>
+      <div class="hwbox" data-l="th"><b class="hw">การบ้าน</b>: หา ²<sub>3</sub>R แล้วใส่คำตอบเพื่อตรวจ (ใช้ 0.866 หรือ √3/2 ก็ได้) ทบทวน: ผกผันของเมทริกซ์การหมุนคืออะไร และตัวห้อยกับตัวยกที่ติดกันต้องตัดกันอย่างไร</div>
+      <div class="hwbox" data-l="en"><b class="hw">Homework</b>: find ²<sub>3</sub>R and enter it to check (0.866 or √3/2 both work). Revise: what is the inverse of a rotation matrix, and how must adjacent indices cancel?</div>
+      <div id="ask4"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ลำดับกลับกัน ผลเดียวกัน</h3>
+    <ol><li>ในเครื่องมือ A เล่นทั้งสองภาพพร้อมกัน: ระหว่างทางเฟรมผ่านท่าคนละแบบ แต่จบที่ท่าเดียวกันทุกครั้ง</li><li>ลองคิดในใจว่าถ้าหมุนรอบแกนตรึง Z, Y, X (ลำดับเดียวกับออยเลอร์) จะได้ R<sub>X</sub>R<sub>Y</sub>R<sub>Z</sub> ซึ่งเป็นเมทริกซ์อื่น</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — atan2 กับ tan⁻¹</h3>
+    <ol><li>ในข้อ 1 ตั้ง γ = 150°: tan⁻¹(r<sub>32</sub>/r<sub>33</sub>) ให้ −30° ซึ่งผิด atan2 ให้ 150° ถูกต้อง</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — แกนผ่านจุดอื่น</h3>
+    <ol><li>ในข้อ 3 สลับระหว่าง "ผ่านจุดกำเนิด" กับ "ผ่าน (1, 2, 3)": เมทริกซ์การหมุนเหมือนกันทุกตัว แต่จุดกำเนิดของ {B} เคลื่อนไปตามวงกลมรอบแกน</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 2 หน้า 38–48 (ภาพอยู่ในหน้านี้แล้ว) · Craig 2.8 · สไลด์เดิม Part II หน้า 6–26</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — reversed order, same result</h3>
+    <ol><li>In tool A play both pictures together: the frames pass through different poses on the way but always end in the same one.</li><li>Think it through: turning about the fixed axes Z, Y, X (the Euler order) would give R<sub>X</sub>R<sub>Y</sub>R<sub>Z</sub>, another matrix.</li></ol></div>
+  <div class="card"><h3>Try this 2 — atan2 against tan⁻¹</h3>
+    <ol><li>In problem 1 set γ = 150°: tan⁻¹(r<sub>32</sub>/r<sub>33</sub>) gives −30°, which is wrong; atan2 gives 150°.</li></ol></div>
+  <div class="card"><h3>Try this 3 — an axis through another point</h3>
+    <ol><li>In problem 3 switch between "through the origin" and "through (1, 2, 3)": the rotation matrix is the same, but the origin of {B} moves along a circle about the axis.</li></ol>
+    <div class="book">Source: chapter 2 slides, pp. 38–48 (the pictures are on this page) · Craig 2.8 · old Part II slides pp. 6–26</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, E = CH2.EX, M = (R, d = 3) => CH2.htmlM(R, d, { cls: CH2.R3cls }), TM = R => CH2.texM(R, 3, { cols: [CH2.COL.x, CH2.COL.y, CH2.COL.z] });
+const sub = s => s.replace(/_([AB])/g, '<sub>$1</sub>');
+
+/* ---------- A: fixed against Euler ---------- */
+const SF = { kind: 'fixed', al: rad(50), be: rad(40), ga: rad(60), u: 3, ghost: true }, SE = { kind: 'euler', al: rad(50), be: rad(40), ga: rad(60), u: 3, ghost: true }, roA = document.getElementById('roA'); let playA = false;
+const capF = document.getElementById('capF'), capE = document.getElementById('capE');
+const readA = () => { const f = CH2.seqAt('fixed', SF.al, SF.be, SF.ga, SF.u), e = CH2.seqAt('euler', SE.al, SE.be, SE.ga, SE.u), done = SF.u >= 2.999;
+  capF.innerHTML = `<b>${t('X–Y–Z แกนตรึง', 'X–Y–Z fixed angles')}</b> · ${SF.u <= 0.001 ? t('เริ่ม: {B} ทับ {A}', 'start: {B} on {A}') : `${f.k + 1}. ${f.an} ${t('รอบ', 'about')} ${sub(f.ax)}`}`;
+  capE.innerHTML = `<b>${t('Z–Y–X ออยเลอร์', 'Z–Y–X Euler angles')}</b> · ${SE.u <= 0.001 ? t('เริ่ม: {B} ทับ {A}', 'start: {B} on {A}') : `${e.k + 1}. ${e.an} ${t('รอบ', 'about')} ${sub(e.ax)}`}`;
+  const R = RB.Rzyx(SF.al, SF.be, SF.ga), d = Math.max(...f.R.flat().map((x, i) => Math.abs(x - e.R.flat()[i])));
+  roA.innerHTML = `<div class="live"><span class="eq">R<sub>Z</sub>(α) R<sub>Y</sub>(β) R<sub>X</sub>(γ) =</span>${M(R)}<span class="eq">${done ? (d < 1e-9 ? t('· ภาพทั้งสองจบที่ท่าเดียวกัน ✓', '· both pictures end in the same pose ✓') : '') : t('· ระหว่างทาง: สองภาพยังต่างกัน', '· on the way: the two pictures still differ')}</span></div>`; };
+const ctlA = document.getElementById('ctlA'), slU = [];
+[['al', 'α', 50], ['be', 'β', 40], ['ga', 'γ', 60]].forEach(([k, n, v0]) => ui.slider(ctlA, { id: 'A' + k, label: n, min: k === 'be' ? -90 : -180, max: k === 'be' ? 90 : 180, step: 1, value: v0, fmt: v => `${v}°`, oninput: v => { SF[k] = SE[k] = rad(v); readA(); } }));
+slU.push(ui.slider(ctlA, { id: 'Au', label: t('ความคืบหน้า (ขั้น 0–3)', 'progress (steps 0–3)'), min: 0, max: 3, step: 0.01, value: 3, fmt: v => v.toFixed(2), oninput: v => { SF.u = SE.u = v; playA = false; readA(); } }));
+ui.buttons(ctlA, [{ label: t('▶ เล่นตั้งแต่ต้น', '▶ play from the start'), onclick: () => { SF.u = SE.u = 0; playA = true; } }]);
+readA();
+const tickA = dt => { if (!playA) return; SF.u = SE.u = Math.min(3, SF.u + dt * 0.55); slU[0].set(SF.u); readA(); if (SF.u >= 3) playA = false; };
+CH2.sim('cvF', SF, 'seq', { aspect: 0.85, maxH: 420, tick: tickA }); CH2.sim('cvE', SE, 'seq', { aspect: 0.85, maxH: 420 });
+
+/* ---------- 1: back to the angles ---------- */
+const Rt = E.inv.R, S1 = { kind: 'fixed', al: 0, be: 0, ga: 0, u: 3, target: Rt }, ro1 = document.getElementById('ro1');
+const read1 = () => { const R = RB.Rzyx(S1.al, S1.be, S1.ga), d = Math.max(...R.flat().map((x, i) => Math.abs(x - Rt.flat()[i])));
+  ro1.innerHTML = `<div class="live"><span class="eq">${t('เป้าหมาย', 'target')} R =</span>${M(Rt)}<span class="eq">${t('ของคุณ', 'yours')} =</span>${M(R)}</div><div class="term">${d < 0.02 ? `<b class="ax-y">${t('ทับกันแล้ว ✓', 'they match ✓')}</b>` : t(`ต่างกันมากสุด ${u(d, 3)} (ช่องใดช่องหนึ่ง)`, `largest difference ${u(d, 3)} (in one entry)`)}</div>`; };
+const ctl1 = document.getElementById('ctl1');
+[['ga', 'γ (X<sub>A</sub>)'], ['be', 'β (Y<sub>A</sub>)'], ['al', 'α (Z<sub>A</sub>)']].forEach(([k, n]) => ui.slider(ctl1, { id: '1' + k, label: n, min: k === 'be' ? -90 : -180, max: k === 'be' ? 90 : 180, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { S1[k] = rad(v); read1(); } }));
+read1(); CH2.sim('cv1', S1, 'seq', { aspect: 0.82, maxH: 480 });
+const a1 = RB.zyx(Rt);
+LS.ask(document.getElementById('ask1'), { fields: [{ label: 'γ (°) =', ok: x => Math.abs(x + 45) < 0.5, w: 4 }, { label: 'β (°) =', ok: x => Math.abs(x - 30) < 0.5, w: 4 }, { label: 'α (°) =', ok: x => Math.abs(x - 60) < 0.5, w: 4 }],
+  check: v => Math.abs(v[0] - 60) < 0.5 && Math.abs(v[2] + 45) < 0.5 ? t('สลับ α กับ γ: γ เป็นการหมุนรอบ X<sub>A</sub> (ขั้นแรก) α รอบ Z<sub>A</sub> (ขั้นสุดท้าย)', 'α and γ are swapped: γ is the turn about X<sub>A</sub> (first), α about Z<sub>A</sub> (last)') : '' });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>β</b> จาก r<sub>31</sub> และความยาวของ (r<sub>11</sub>, r<sub>21</sub>)', '<b>β</b> from r<sub>31</sub> and the length of (r<sub>11</sub>, r<sub>21</sub>)'), tex: `\\beta = \\operatorname{atan2}\\!\\left(${RB.d(-Rt[2][0], 3)},\\ \\sqrt{${RB.d(Rt[0][0], 3)}^2 + ${RB.d(Rt[1][0], 3)}^2}\\right) = \\operatorname{atan2}(0.5,\\ 0.866) = ${RB.d(deg(a1.be), 1)}^\\circ` },
+  { why: t('<b>α</b> จาก r<sub>21</sub> และ r<sub>11</sub> (cos β = 0.866)', '<b>α</b> from r<sub>21</sub> and r<sub>11</sub> (cos β = 0.866)'), tex: `\\alpha = \\operatorname{atan2}(${RB.d(Rt[1][0], 3)}/0.866,\\ ${RB.d(Rt[0][0], 3)}/0.866) = ${RB.d(deg(a1.al), 1)}^\\circ` },
+  { why: t('<b>γ</b> จาก r<sub>32</sub> และ r<sub>33</sub>', '<b>γ</b> from r<sub>32</sub> and r<sub>33</sub>'), tex: `\\gamma = \\operatorname{atan2}(${RB.d(Rt[2][1], 3)}/0.866,\\ ${RB.d(Rt[2][2], 3)}/0.866) = ${RB.d(deg(a1.ga), 1)}^\\circ` },
+  { why: t('<b>ตรวจ</b>: ตั้งแถบเลื่อนตามคำตอบ เฟรมสีต้องทับเฟรมจาง', '<b>Check</b>: set the sliders to the answer; the coloured frame must cover the faint one'), onShow: () => { S1.ga = rad(-45); S1.be = rad(30); S1.al = rad(60); [['1ga', -45], ['1be', 30], ['1al', 60]].forEach(([id, v]) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input')); }); } }],
+  answer: t('(γ, β, α) = (−45°, 30°, 60°)', '(γ, β, α) = (−45°, 30°, 60°)') });
+
+/* ---------- B: β = 90° ---------- */
+const SB = { kind: 'fixed', al: rad(30), be: rad(90), ga: rad(70), u: 3 }, roB = document.getElementById('roB');
+const readB = () => { const R = RB.Rzyx(SB.al, SB.be, SB.ga), b = RB.zyx(R);
+  roB.innerHTML = `<div class="live"><span class="eq">R =</span>${M(R)}</div><div class="term">α − γ = ${u(deg(SB.al - SB.ga), 0)}° · ${t('สูตรย้อนกลับให้', 'the way back gives')} α = ${u(deg(b.al), 0)}°, β = ${u(deg(b.be), 0)}°, γ = ${u(deg(b.ga), 0)}°${b.deg ? t(' (กรณีพิเศษ: α ถูกตั้งเป็น 0)', ' (special case: α set to 0)') : ''}</div>`; };
+const ctlB = document.getElementById('ctlB');
+ui.slider(ctlB, { id: 'Bal', label: 'α', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { SB.al = rad(v); readB(); } });
+ui.slider(ctlB, { id: 'Bbe', label: 'β', min: 60, max: 90, step: 1, value: 90, fmt: v => `${v}°`, oninput: v => { SB.be = rad(v); readB(); } });
+ui.slider(ctlB, { id: 'Bga', label: 'γ', min: -180, max: 180, step: 1, value: 70, fmt: v => `${v}°`, oninput: v => { SB.ga = rad(v); readB(); } });
+ui.buttons(ctlB, [{ label: t('เพิ่ม α และ γ อย่างละ 20°', 'add 20° to both α and γ'), onclick: () => { [['Bal', SB.al], ['Bga', SB.ga]].forEach(([id, a]) => { const el = document.getElementById(id); el.value = Math.round(deg(a)) + 20 > 180 ? Math.round(deg(a)) - 340 : Math.round(deg(a)) + 20; el.dispatchEvent(new Event('input')); }); } }]);
+readB(); CH2.sim('cvB', SB, 'seq', { aspect: 0.82, maxH: 460 });
+
+/* ---------- 2: five turns ---------- */
+const L2 = E.seq, S2 = { steps: L2, k: 0 }, ro2 = document.getElementById('ro2'), line2 = document.getElementById('line2'); let goal2 = 0;
+const fac = k => { let f = []; L2.slice(0, k).forEach(([a, d, kind]) => { const x = `R<sub>${a.toUpperCase()}</sub>(${d}°)`; f = kind === 'fixed' ? [x, ...f] : [...f, x]; }); return f.length ? f.join(' ') : 'I'; };
+const read2 = () => { const k = Math.round(goal2), R = CH2.seqR(L2.slice(0, k)); ro2.innerHTML = `<div class="live"><span class="eq">${t('หลังขั้นที่', 'after step')} ${k}: R = ${fac(k)} =</span>${M(R)}</div>`; line2.querySelectorAll('button').forEach((b, i) => b.classList.toggle('cur', i === k)); };
+line2.innerHTML = [t('เริ่ม', 'start'), ...L2.map(([a, d, kind], i) => `${i + 1}. ${d}° ${t('รอบ', 'about')} ${a} (${kind === 'fixed' ? t('ตรึง', 'fixed') : t('เคลื่อน', 'moving')})`)].map((x, i) => `<button type="button" class="btn" data-k="${i}">${x}</button>`).join('');
+line2.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; goal2 = +b.dataset.k; if (goal2 < S2.k) S2.k = Math.max(0, goal2 - 1); read2(); });
+read2(); CH2.sim('cv2', S2, 'steps', { aspect: 0.82, maxH: 480, tick: dt => { if (S2.k < goal2) S2.k = Math.min(goal2, S2.k + dt * 0.8); else if (S2.k > goal2) S2.k = goal2; } });
+CH2.matAsk(document.getElementById('ask2'), { label: 'R =', ans: E.seq.R, tol: 0.006, check: M2 => { const W = [RB.Rz(rad(60)), RB.Ry(rad(45)), RB.Rx(rad(60)), RB.Ry(rad(45))].reduce(RB.mm); return Math.max(...M2.flat().map((x, i) => Math.abs(x - W.flat()[i]))) < 0.01 ? t('คุณเรียงลำดับกลับด้าน: ขั้นที่หมุนรอบแกนตรึงต้องคูณทางซ้าย', 'Your order is reversed: turns about fixed axes multiply on the left') : ''; } });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>ขั้น 1</b> (แกนตรึง x 30°): R เริ่มจาก I', '<b>Step 1</b> (fixed x, 30°): R starts at I'), tex: 'R = R_X(30^\\circ)', onShow: () => { goal2 = 1; read2(); } },
+  { why: t('<b>ขั้น 2–3</b> (แกนเคลื่อน): คูณทางขวา', '<b>Steps 2–3</b> (moving axes): multiply on the right'), tex: 'R = R_X(30^\\circ)\\,R_Y(45^\\circ)\\,R_Z(60^\\circ)', onShow: () => { goal2 = 3; read2(); } },
+  { why: t('<b>ขั้น 4–5</b> (แกนตรึง): คูณทางซ้าย ทีละตัว', '<b>Steps 4–5</b> (fixed axes): multiply on the left, one at a time'), tex: `R = ${CH2.seqTeX(L2)}`, onShow: () => { goal2 = 5; read2(); } },
+  { why: t('<b>คูณออกมาเป็นตัวเลข</b>', '<b>Multiply out</b>'), tex: `R = ${TM(E.seq.R)}` }],
+  answer: t('\\(R = R_Y(45^\\circ)R_X(30^\\circ)R_X(30^\\circ)R_Y(45^\\circ)R_Z(60^\\circ)\\) ตรงกับลายมือในฉบับผู้สอนเดิม', '\\(R = R_Y(45^\\circ)R_X(30^\\circ)R_X(30^\\circ)R_Y(45^\\circ)R_Z(60^\\circ)\\), as in the old teacher slides') });
+
+/* ---------- 3: angle–axis and Euler parameters ---------- */
+const S3s = { k: [Math.SQRT1_2, Math.SQRT1_2, 0], th: rad(30), p: [0, 0, 0], u: 1 }, ro3 = document.getElementById('ro3'); let kaz = 45, kel = 0, thp = false;
+const read3 = () => { S3s.k = [Math.cos(rad(kel)) * Math.cos(rad(kaz)), Math.cos(rad(kel)) * Math.sin(rad(kaz)), Math.sin(rad(kel))]; S3s.p = thp ? [1, 2, 3] : [0, 0, 0];
+  const R = RB.Rk(S3s.k, S3s.th), back = RB.axisAngle(R), ep = RB.eulerP(S3s.k, S3s.th), T = RB.Tm(RB.trans(...S3s.p), RB.T(R), RB.trans(...S3s.p.map(x => -x)));
+  ro3.innerHTML = `<div class="live"><span class="eq">K̂ = (${S3s.k.map(x => u(x, 3)).join(', ')}) · R<sub>K</sub>(θ) =</span>${M(R)}${thp ? `<span class="eq">ᴬP<sub>BORG</sub> =</span>${CH2.htmlM(RB.Tp(T).map(x => [x]), 3, { cls: ['mp'] })}` : ''}</div>` +
+    `<div class="term">${t('ย้อนจาก R', 'back from R')}: θ = ${back.k ? u(deg(back.th), 1) + '°, K̂ = (' + back.k.map(x => u(x, 3)).join(', ') + ')' : t('θ = 0: แกนไม่กำหนด', 'θ = 0: the axis is undefined')} · ${t('พารามิเตอร์ออยเลอร์', 'Euler parameters')} ε = (${ep.map(x => u(x, 3)).join(', ')}), Σε² = ${u(ep.reduce((a, x) => a + x * x, 0), 3)}</div>`; };
+const ctl3 = document.getElementById('ctl3');
+ui.slider(ctl3, { id: 'kaz', label: t('ทิศของ K̂ ในแนวนอน', 'K̂ azimuth'), min: -180, max: 180, step: 1, value: 45, fmt: v => `${v}°`, oninput: v => { kaz = v; read3(); } });
+ui.slider(ctl3, { id: 'kel', label: t('มุมเงยของ K̂', 'K̂ elevation'), min: -90, max: 90, step: 1, value: 0, fmt: v => `${v}°`, oninput: v => { kel = v; read3(); } });
+ui.slider(ctl3, { id: 'kth', label: 'θ', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S3s.th = rad(v); read3(); } });
+ui.radio(document.getElementById('opt3'), [{ id: 'o', label: t('ผ่านจุดกำเนิด (2.6)', 'through the origin (2.6)'), on: true }, { id: 'p', label: t('ผ่าน (1, 2, 3) (2.7)', 'through (1, 2, 3) (2.7)') }], id => { thp = id === 'p'; read3(); });
+read3(); CH2.sim('cv3', S3s, 'axis', { aspect: 0.82, maxH: 500 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('Craig 2.6: r₁₁ =', 'Craig 2.6: r₁₁ ='), ok: x => Math.abs(x - 0.933) < 0.006, w: 5 }, { label: 'r₁₂ =', ok: x => Math.abs(x - 0.067) < 0.006, w: 5 }, { label: 'r₁₃ =', ok: x => Math.abs(x - 0.354) < 0.006, w: 5 }] });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>ค่าที่ใช้</b>: k<sub>x</sub> = k<sub>y</sub> = 0.707, k<sub>z</sub> = 0, θ = 30°', '<b>The values</b>: k<sub>x</sub> = k<sub>y</sub> = 0.707, k<sub>z</sub> = 0, θ = 30°'), tex: 'c\\theta = 0.866,\\quad s\\theta = 0.5,\\quad v\\theta = 1 - c\\theta = 0.134' },
+  { why: t('<b>แถวแรก</b> ของสูตร R<sub>K</sub>(θ)', '<b>Row 1</b> of the formula R<sub>K</sub>(θ)'), tex: '\\begin{aligned} r_{11} &= k_x^2 v\\theta + c\\theta = 0.5(0.134) + 0.866 = 0.933 \\\\ r_{12} &= k_xk_yv\\theta - k_zs\\theta = 0.067 \\\\ r_{13} &= k_xk_zv\\theta + k_ys\\theta = 0.354 \\end{aligned}' },
+  { why: t('<b>ทั้งเมทริกซ์</b> (Craig 2.6)', '<b>The whole matrix</b> (Craig 2.6)'), tex: `{}^{A}_{B}R = ${TM(E.ex26.R)}`, onShow: () => { document.querySelector('#opt3 button').click(); } },
+  { why: t('<b>Craig 2.7: แกนผ่าน (1, 2, 3)</b> ย้ายจุดไปที่จุดกำเนิด หมุน แล้วย้ายกลับ ส่วนหมุนเท่าเดิม ส่วนตำแหน่งคือ P − R P', '<b>Craig 2.7: the axis through (1, 2, 3)</b>: move the point to the origin, turn, move back. Same rotation part; the position part is P − R P'), tex: `{}^{A}P_{BORG} = \\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} - {}^{A}_{B}R\\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} = ${CH2.texV(RB.Tp(E.ex27.T), 3)}`, onShow: () => { document.querySelectorAll('#opt3 button')[1].click(); } },
+  { why: t('<b>พารามิเตอร์ออยเลอร์</b> ของการหมุนเดียวกัน', '<b>Euler parameters</b> of the same turn'), tex: `\\varepsilon = (k_x s_{15^\\circ},\\ k_y s_{15^\\circ},\\ k_z s_{15^\\circ},\\ c_{15^\\circ}) = (${RB.eulerP(E.ex26.k, rad(30)).map(x => RB.d(x, 3)).join(',\\ ')})` }],
+  answer: t('ตรงกับ Craig ตัวอย่าง 2.6 และ 2.7: ตำแหน่ง (−1.13, 1.13, 0.05)', 'As in Craig examples 2.6 and 2.7: position (−1.13, 1.13, 0.05)') });
+
+/* ---------- 4: homework 2.2 (answer check only) ---------- */
+CH2.sim('cv4', {}, 'multi', { aspect: 0.5, maxH: 360, orbit: false });
+document.getElementById('note4').innerHTML = t('เฟรม {1} (เทา) และเฟรม {2}, {3} วางเรียงกันเพื่อให้ดูทิศของแกนได้ชัด (การวางตัวไม่ขึ้นกับตำแหน่ง) เส้นจางข้าง {2} และ {3} คือแกนของ {1}', 'Frame {1} (grey) with frames {2} and {3} placed beside it so their axes are easy to see (an orientation does not depend on position); the faint lines next to {2} and {3} are the axes of {1}');
+CH2.matAsk(document.getElementById('ask4'), { label: '²<sub>3</sub>R =', ans: E.hw22.R23, check: M2 => { const W = RB.mm(E.hw22.R12, E.hw22.R13); return Math.max(...M2.flat().map((x, i) => Math.abs(x - W.flat()[i]))) < 0.01 ? t('นั่นคือ ¹<sub>2</sub>R ¹<sub>3</sub>R: ตัวห้อยกับตัวยกที่ติดกันไม่ตัดกัน', 'That is ¹<sub>2</sub>R ¹<sub>3</sub>R: the adjacent indices do not cancel') : ''; } });
+});
+</script>
+</body>
+</html>

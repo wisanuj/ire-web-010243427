@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="3.2 — The link transform and forward kinematics">3.2 — เมทริกซ์การแปลงของก้านต่อและจลนศาสตร์ไปข้างหน้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">เมทริกซ์การแปลงของก้านต่อและจลนศาสตร์ไปข้างหน้า <span class="en">The link transform and forward kinematics — four steps per link, one product per arm</span></h1>
+<h1 data-l="en">The link transform and forward kinematics <span class="en">Four steps per link, one product per arm</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch3/s16.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 16: from frame i−1 to frame i in four steps through intermediate frames R, Q and P">
+    <figcaption data-l="th">สไลด์บทที่ 3 หน้า 16 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 3 slides, p. 16 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">เมื่อมีตาราง DH แล้ว แต่ละแถวให้เมทริกซ์การแปลงจากเฟรม {i−1} ไป {i} หนึ่งตัว ซึ่งเป็นผลคูณของการหมุนและการเลื่อนสี่ขั้น (บทที่ 2) คูณเมทริกซ์ของทุกแถวต่อกันจากฐานถึงปลายได้ <b>สมการจลนศาสตร์</b>ของแขน หน้านี้ครอบคลุมสไลด์หน้า 16–20 และ 31 (Craig 3.5–3.7) มี <b>เครื่องมือ 2 ชิ้น (A, B)</b> และ <b>2 โจทย์</b></p>
+    <p class="sub" data-l="en">With a DH table, each row gives one transform from frame {i−1} to {i}, a product of four turns and shifts (chapter 2). Multiplying the rows from base to tip gives the <b>kinematic equations</b> of the arm. This page covers slides pp. 16–20 and 31 (Craig 3.5–3.7), with <b>two tools (A, B)</b> and <b>2 problems</b>.</p>
+    <div class="equation-box">$$ {}^{i-1}_{\;\;\,i}T = R_X(\alpha_{i-1})\,D_X(a_{i-1})\,R_Z(\theta_i)\,D_Z(d_i), \qquad {}^{0}_{N}T = {}^{0}_{1}T\,{}^{1}_{2}T \cdots {}^{N-1}_{\;\;\;\;\;N}T $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>สี่ขั้นจาก {i−1} ไป {i}: หมุน α<sub>i−1</sub> รอบ X → เลื่อน a<sub>i−1</sub> ตาม X → หมุน θ<sub>i</sub> รอบ Z → เลื่อน d<sub>i</sub> ตาม Z ทุกขั้นใช้แกนของเฟรมที่เคลื่อนไปแล้ว จึงคูณทางขวา</li><li>คอลัมน์ 4 ของ \({}^{i-1}_{\;\;\,i}T\) คือ \((a_{i-1},\ -\sin\alpha_{i-1}\,d_i,\ \cos\alpha_{i-1}\,d_i)\)</li><li>\({}^{0}_{N}T\) เป็นฟังก์ชันของตัวแปรข้อต่อทุกตัว: แทนค่ามุมแล้วได้ตำแหน่งและทิศของปลายแขนทันที</li><li>ตำแหน่งของแขนบอกได้สามปริภูมิ: ตัวขับเร้า → ข้อต่อ → คาร์ทีเซียน (Craig 3.7)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>Four steps from {i−1} to {i}: turn α<sub>i−1</sub> about X → move a<sub>i−1</sub> along X → turn θ<sub>i</sub> about Z → move d<sub>i</sub> along Z; each step uses the axes of the frame already moved, so it multiplies on the right.</li><li>Column 4 of \({}^{i-1}_{\;\;\,i}T\) is \((a_{i-1},\ -\sin\alpha_{i-1}\,d_i,\ \cos\alpha_{i-1}\,d_i)\).</li><li>\({}^{0}_{N}T\) is a function of every joint variable: put in the angles and the tool frame follows.</li><li>An arm's position lives in three spaces: actuator → joint → Cartesian (Craig 3.7).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>สี่ขั้นของเมทริกซ์ก้านต่อ</a><a href="#ex1"><b>1</b>อ่านช่องของเมทริกซ์</a><a href="#ex2"><b>2</b>แขน 3 ข้อต่อในระนาบ</a><a href="#tB"><b>B</b>ตาราง DH ของคุณเอง</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Four steps of a link transform</a><a href="#ex1"><b>1</b>Read entries of the matrix</a><a href="#ex2"><b>2</b>Planar three-link arm</a><a href="#tB"><b>B</b>Your own DH table</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: จาก {i−1} ไป {i} ทีละขั้น</h2><h2 data-l="en">Tool: from {i−1} to {i}, step by step</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 16–17 · Craig 3.5 · กด ▶ เพื่อเล่น · ลากในภาพเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, pp. 16–17 · Craig 3.5 · press ▶ to play · drag in the picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div></div>
+    <div class="card solve"><div class="readout" id="roA" style="margin-top:0"></div>
+      <p class="lead" data-l="th">เฟรมสีเทาคือ {i−1} เฟรมจางคือเฟรมกลาง {R}, {Q}, {P} ใต้ภาพแสดงเมทริกซ์ของขั้นที่กำลังทำและผลคูณสะสมจนถึงขั้นนั้น เมื่อครบสี่ขั้น ผลคูณต้องเท่ากับสูตรของ Craig (สไลด์หน้า 17) ทุกช่อง ลองตั้ง α = 0 และ d = 0: ผลเหลือเพียงการหมุนรอบ Z กับการเลื่อนตาม X เหมือนแขนในระนาบ</p>
+      <p class="lead" data-l="en">The grey frame is {i−1}; the faint frames are the intermediate {R}, {Q}, {P}. Under the picture: the matrix of the current step and the running product. After all four steps the product must equal Craig's formula (slide p. 17) in every entry. Try α = 0 and d = 0: only a turn about Z and a shift along X remain, as in a planar arm.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">อ่านช่องของเมทริกซ์การแปลงของก้านต่อ</h2><h2 data-l="en">Read entries of the link transform</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 17 · แถวที่ 2 ของแขน RPR (Craig ตัวอย่าง 3.4)</div><div class="src" data-l="en">Chapter 3 slides, p. 17 · row 2 of the RPR arm (Craig example 3.4)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s17.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 17: the link transform matrix in Craig's convention">
+    <figcaption data-l="th">สไลด์หน้า 17 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 17 · tap to enlarge</figcaption></figure>
+  <div class="duo">
+    <div class="card"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+      <p data-l="th">แถวหนึ่งของตารางคือ \(\alpha_{i-1} = 90^\circ,\ a_{i-1} = 0,\ d_i = 0.3\text{ m},\ \theta_i = 0\) (ข้อต่อเลื่อน) จงหาคอลัมน์สุดท้าย (ตำแหน่งของจุดกำเนิด {i} ใน {i−1}) และช่อง r₂₃ ของ \({}^{i-1}_{\;\;\,i}T\)</p>
+      <p data-l="en">A row of the table is \(\alpha_{i-1} = 90^\circ,\ a_{i-1} = 0,\ d_i = 0.3\text{ m},\ \theta_i = 0\) (a sliding joint). Find the last column (the origin of {i} in {i−1}) and the entry r₂₃ of \({}^{i-1}_{\;\;\,i}T\).</p></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">Craig ตัวอย่าง 3.3: สมการจลนศาสตร์ของแขน 3 ข้อต่อในระนาบ</h2><h2 data-l="en">Craig example 3.3: kinematic equations of the planar three-link arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 19–20 · L₁ = 0.5 m, L₂ = 0.4 m · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, pp. 19–20 · L₁ = 0.5 m, L₂ = 0.4 m · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s20.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 20: multiply the three link transforms of the planar arm">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 20 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 20 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">ปริภูมิตัวขับเร้า ปริภูมิข้อต่อ และปริภูมิคาร์ทีเซียน (สไลด์หน้า 31)</h2><h2 data-l="en">Actuator, joint and Cartesian space (slide p. 31)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch3/s31.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 31: actuator space, joint space and Cartesian space, with three drive mechanisms"><figcaption data-l="th">สไลด์หน้า 31 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 31 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">เนื้อหาเพิ่มจากตำรา (Craig 3.7): ตัวควบคุมหุ่นยนต์วัดมุมของ<b>มอเตอร์</b> ไม่ได้วัดมุมของข้อต่อโดยตรง ต้องแปลงผ่านกลไกส่งกำลังก่อน (เฟืองทด ก้านต่อสี่เหลี่ยมด้านขนาน สกรูขับ) จึงได้ตัวแปรข้อต่อ แล้วจลนศาสตร์ไปข้างหน้าของบทนี้จึงแปลงต่อเป็นตำแหน่งและทิศของเครื่องมือ ตัวอย่าง: แขนที่ขับข้อศอกด้วยก้านต่อสี่เหลี่ยมด้านขนาน มุมข้อศอกเทียบแขนบนคือผลต่างของมุมมอเตอร์สองตัว</p>
+  <p class="sub" data-l="en">Added from the textbook (Craig 3.7): a robot controller measures its <b>motors</b>, not its joint angles. A drive mechanism (a gearbox, a parallelogram linkage, a ball screw) converts motor values into joint variables, and the forward kinematics of this chapter then gives the tool frame. Example: on an arm whose elbow is driven through a parallelogram linkage, the elbow angle relative to the upper arm is the difference of two motor angles.</p>
+</div>
+
+<section class="prob" id="tB">
+  <div class="prob-head"><span class="prob-no">B</span><div><h2 data-l="th">เครื่องมือ: ตาราง DH ของคุณเอง</h2><h2 data-l="en">Tool: your own DH table</h2>
+    <div class="src" data-l="th">แก้ตัวเลขในตาราง (มุมเป็นองศา ความยาวเป็นเมตร) เลือกชนิดข้อต่อ แล้วเลื่อนตัวแปรข้อต่อ · เลือกแบบตัวอย่างเพื่อโหลดตาราง · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Edit the numbers (angles in degrees, lengths in metres), choose the joint types, then move the joint variables · pick an example to load its table · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvB"></canvas><div id="optB" style="padding:0 8px"></div><div class="ctl" id="ctlB"></div></div>
+    <div class="card solve"><div class="dhask" id="tabB"></div><div class="readout" id="roB"></div>
+      <p class="lead" data-l="th">แต่ละแถวคือก้านหนึ่งก้าน ตัวแปรของข้อต่อหมุนบวกเข้ากับ θ ตัวแปรของข้อต่อเลื่อนบวกเข้ากับ d ภาพวาดก้านตามกติกาของ DH: เดิน a<sub>i−1</sub> ตาม X<sub>i−1</sub> ไปถึงแกนข้อต่อ แล้วเดิน d<sub>i</sub> ตามแกนนั้นไปถึงเฟรม {i} ลองสร้างแขนของการบ้านหรือแขนที่เห็นในโรงงานดู</p>
+      <p class="lead" data-l="en">Each row is one link. A revolute joint's variable is added to θ, a prismatic joint's to d. The picture draws each link by the DH rule: a<sub>i−1</sub> along X<sub>i−1</sub> to the joint axis, then d<sub>i</sub> along that axis to frame {i}. Try building the homework arms, or an arm you have seen in a factory.</p></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ลำดับของสี่ขั้น</h3>
+    <ol><li>ในเครื่องมือ A หมุน θ ก่อนเลื่อน a ในใจ (สลับขั้น 2 กับ 3): ปลายเฟรมจะไปอยู่คนละที่ เพราะการคูณเมทริกซ์สลับลำดับไม่ได้</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — มุมรวมของแขนในระนาบ</h3>
+    <ol><li>ในข้อ 2 ตั้ง θ₁ + θ₂ + θ₃ ให้คงที่แต่เปลี่ยนแต่ละมุม: ทิศของเครื่องมือไม่เปลี่ยน (r₁₁ = cos(θ₁ + θ₂ + θ₃)) ส่วนตำแหน่งเปลี่ยน</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — สร้างแขนเอง</h3>
+    <ol><li>ในเครื่องมือ B โหลด "3R ระนาบ" แล้วเปลี่ยน α ของแถว 2 เป็น 90°: แขนลุกขึ้นจากระนาบกลายเป็นแขนแบบข้อพับ</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 3 หน้า 15–20 และ 31 (ภาพอยู่ในหน้านี้แล้ว) · Craig 3.5–3.7 · สไลด์เดิม Part I หน้า 15–16</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the order of the four steps</h3>
+    <ol><li>In tool A imagine turning θ before moving a (steps 2 and 3 swapped): the frame would end elsewhere, because matrix products do not commute.</li></ol></div>
+  <div class="card"><h3>Try this 2 — the total angle of a planar arm</h3>
+    <ol><li>In problem 2 keep θ₁ + θ₂ + θ₃ fixed while changing the angles: the tool direction stays (r₁₁ = cos(θ₁ + θ₂ + θ₃)); its position moves.</li></ol></div>
+  <div class="card"><h3>Try this 3 — build an arm</h3>
+    <ol><li>In tool B load "planar 3R" and change α of row 2 to 90°: the arm rises out of the plane and becomes an articulated arm.</li></ol>
+    <div class="book">Source: chapter 3 slides, pp. 15–20 and 31 (the pictures are on this page) · Craig 3.5–3.7 · old Part I slides pp. 15–16</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, E = CH3.EX, T4 = (T, d = 3) => CH2.htmlM(T, d, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true }), TT = T => CH2.texM(T, 3);
+
+/* ---------- A: four steps ---------- */
+const SA = { al: rad(-40), a: 0.5, th: rad(55), d: 0.22, u: 4 }, roA = document.getElementById('roA'), ctlA = document.getElementById('ctlA'); let playA = false, slU;
+const NAMES = ['R_X(α)', 'D_X(a)', 'R_Z(θ)', 'D_Z(d)'], FR = ['{R}', '{Q}', '{P}', '{i}'];
+const readA = () => { const k = Math.min(4, Math.ceil(SA.u - 1e-9)), steps = [RB.T(RB.Rx(SA.al)), RB.trans(SA.a, 0, 0), RB.T(RB.Rz(SA.th)), RB.trans(0, 0, SA.d)], prod = CH3.steps4(SA.al, SA.a, SA.th, SA.d, SA.u)[4], full = RB.dhT(SA.al, SA.a, SA.th, SA.d);
+  const done = SA.u >= 3.999, eq = Math.max(...prod.flat().map((x, i) => Math.abs(x - full.flat()[i]))) < 1e-9;
+  roA.innerHTML = (k ? `<div class="live"><span class="eq">${t('ขั้น', 'step')} ${k}: ${NAMES[k - 1]} → ${FR[k - 1]}</span>${T4(steps[k - 1])}</div>` : `<div class="term">${t('เริ่ม: เฟรมอยู่ที่ {i−1}', 'start: the frame is at {i−1}')}</div>`) +
+    `<div class="live"><span class="eq">${t('ผลคูณถึงตอนนี้', 'product so far')} =</span>${T4(prod)}</div>` + (done ? `<div class="term">${eq ? t('<b class="ax-y">ครบสี่ขั้น: เท่ากับสูตร ^{i−1}_iT ของ Craig ทุกช่อง ✓</b>', '<b class="ax-y">all four steps: equal to Craig\'s ^{i−1}_iT in every entry ✓</b>').replace('^{i−1}_iT', '<sup>i−1</sup><sub>i</sub>T') : ''}</div>` : ''); };
+ui.slider(ctlA, { id: 'Aal', label: 'α<sub>i−1</sub>', min: -90, max: 90, step: 1, value: -40, fmt: v => `${v}°`, oninput: v => { SA.al = rad(v); readA(); } });
+ui.slider(ctlA, { id: 'Aa', label: 'a<sub>i−1</sub>', min: 0, max: 0.7, step: 0.01, value: 0.5, fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.a = v; readA(); } });
+ui.slider(ctlA, { id: 'Ath', label: 'θ<sub>i</sub>', min: -180, max: 180, step: 1, value: 55, fmt: v => `${v}°`, oninput: v => { SA.th = rad(v); readA(); } });
+ui.slider(ctlA, { id: 'Ad', label: 'd<sub>i</sub>', min: -0.3, max: 0.4, step: 0.01, value: 0.22, fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.d = v; readA(); } });
+slU = ui.slider(ctlA, { id: 'Au', label: t('ขั้น (0–4)', 'step (0–4)'), min: 0, max: 4, step: 0.01, value: 4, fmt: v => v.toFixed(2), oninput: v => { SA.u = v; playA = false; readA(); } });
+ui.buttons(ctlA, [{ label: t('▶ เล่นตั้งแต่ต้น', '▶ play from the start'), onclick: () => { SA.u = 0; playA = true; } }]); readA();
+CH2.sim('cvA', SA, 'steps4', { aspect: 0.8, maxH: 540, tick: dt => { if (!playA) return; SA.u = Math.min(4, SA.u + dt * 0.7); slU.set(SA.u); readA(); if (SA.u >= 4) playA = false; } });
+
+/* ---------- 1: entries of the link transform ---------- */
+LS.ask(document.getElementById('ask1'), { fields: [{ label: 'p<sub>x</sub> =', ok: x => Math.abs(x) < 0.006, w: 4 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x + 0.3) < 0.006, w: 4 }, { label: 'p<sub>z</sub> =', ok: x => Math.abs(x) < 0.006, w: 4 }, { label: 'r₂₃ =', ok: x => Math.abs(x + 1) < 0.006, w: 4 }],
+  check: v => Math.abs(v[2] - 0.3) < 0.01 ? t('d เดินตามแกน Z<sub>i</sub> ซึ่งบิดไป 90° รอบ X<sub>i−1</sub>: Z<sub>i</sub> ชี้ไปทาง −Y<sub>i−1</sub> ไม่ใช่ Z<sub>i−1</sub>', 'd runs along Z<sub>i</sub>, which is twisted 90° about X<sub>i−1</sub>: Z<sub>i</sub> points along −Y<sub>i−1</sub>, not Z<sub>i−1</sub>') : '' });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>สูตรทั่วไป</b> (สไลด์หน้า 17)', '<b>The general formula</b> (slide p. 17)'), tex: '{}^{i-1}_{\\;\\;\\,i}T = \\begin{bmatrix} c\\theta & -s\\theta & 0 & a_{i-1} \\\\ s\\theta\\,c\\alpha & c\\theta\\,c\\alpha & -s\\alpha & -s\\alpha\\,d_i \\\\ s\\theta\\,s\\alpha & c\\theta\\,s\\alpha & c\\alpha & c\\alpha\\,d_i \\\\ 0 & 0 & 0 & 1 \\end{bmatrix}' },
+  { why: t('<b>แทนค่า</b> α = 90° (cα = 0, sα = 1), θ = 0 (cθ = 1, sθ = 0), a = 0, d = 0.3', '<b>Put in</b> α = 90° (cα = 0, sα = 1), θ = 0 (cθ = 1, sθ = 0), a = 0, d = 0.3'), tex: `{}^{i-1}_{\\;\\;\\,i}T = ${TT(RB.dhT(rad(90), 0, 0, 0.3))}` },
+  { why: t('<b>อ่านความหมาย</b>: Z<sub>i</sub> (คอลัมน์ 3) ชี้ไปทาง −Y<sub>i−1</sub> จุดกำเนิด {i} จึงอยู่ที่ 0.3 m ตาม −Y<sub>i−1</sub>', '<b>Read it</b>: Z<sub>i</sub> (column 3) points along −Y<sub>i−1</sub>, so the origin of {i} is 0.3 m along −Y<sub>i−1</sub>') }],
+  answer: t('ตำแหน่ง (0, −0.3, 0) m และ r₂₃ = −1 ตรงกับ ¹₂T ของแขน RPR เมื่อ d₂ = 0.3', 'Position (0, −0.3, 0) m and r₂₃ = −1: the ¹₂T of the RPR arm with d₂ = 0.3') });
+
+/* ---------- 2: the planar three-link arm ---------- */
+const P3 = E.p3r, S2 = { ex: 'p3r', q: P3.q.slice(), show: 0, xyz: true }, ro2 = document.getElementById('ro2'), ctl2 = document.getElementById('ctl2');
+const read2 = () => { const T = P3.T03(P3.L, S2.q); ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(T)}</div><div class="term">θ₁ + θ₂ + θ₃ = ${Math.round(deg(S2.q[0] + S2.q[1] + S2.q[2]))}° · ${t('ตำแหน่ง', 'position')} (${u(T[0][3], 3)}, ${u(T[1][3], 3)}) m</div>`; };
+['θ₁', 'θ₂', 'θ₃'].forEach((n, i) => ui.slider(ctl2, { id: 'b' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S2.q[i])), fmt: v => `${v}°`, oninput: v => { S2.q[i] = rad(v); read2(); } })); read2();
+CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
+const T30 = P3.T03(P3.L, P3.q);
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('ที่ (30°, 45°, −60°): x =', 'at (30°, 45°, −60°): x ='), ok: x => Math.abs(x - T30[0][3]) < 0.006, w: 5 }, { label: 'y =', ok: x => Math.abs(x - T30[1][3]) < 0.006, w: 5 }, { label: t('มุมของเครื่องมือ (°) =', 'tool angle (°) ='), ok: x => Math.abs(x - 15) < 0.5, w: 4 }],
+  check: v => Math.abs(v[0] - (T30[0][3] + 0)) > 0.006 && Math.abs(v[0] - (0.5 * Math.cos(rad(30)) + 0.4 * Math.cos(rad(45)))) < 0.01 ? t('ก้าน 2 ทำมุม θ₁ + θ₂ กับแกน X₀ ไม่ใช่ θ₂', 'Link 2 makes the angle θ₁ + θ₂ with X₀, not θ₂') : '' });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>เมทริกซ์ของแต่ละแถว</b> (α = 0, d = 0)', '<b>One matrix per row</b> (α = 0, d = 0)'), tex: '{}^{0}_{1}T = \\begin{bmatrix} c_1 & -s_1 & 0 & 0 \\\\ s_1 & c_1 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix},\\ {}^{1}_{2}T = \\begin{bmatrix} c_2 & -s_2 & 0 & L_1 \\\\ s_2 & c_2 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix},\\ {}^{2}_{3}T = \\begin{bmatrix} c_3 & -s_3 & 0 & L_2 \\\\ s_3 & c_3 & 0 & 0 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix}' },
+  { why: t('<b>คูณสองตัวหลังก่อน</b>', '<b>Multiply the last two first</b>'), tex: '{}^{1}_{3}T = \\begin{bmatrix} c_{23} & -s_{23} & 0 & L_1 + L_2c_2 \\\\ s_{23} & c_{23} & 0 & L_2s_2 \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix}' },
+  { why: t('<b>คูณด้วย ⁰₁T</b> ใช้ c₁c₂₃ − s₁s₂₃ = c₁₂₃', '<b>Multiply by ⁰₁T</b>, with c₁c₂₃ − s₁s₂₃ = c₁₂₃'), tex: '{}^{0}_{3}T = \\begin{bmatrix} c_{123} & -s_{123} & 0 & L_1c_1 + L_2c_{12} \\\\ s_{123} & c_{123} & 0 & L_1s_1 + L_2s_{12} \\\\ 0&0&1&0 \\\\ 0&0&0&1 \\end{bmatrix}' },
+  { why: t('<b>แทนตัวเลข</b> L₁ = 0.5, L₂ = 0.4, θ = (30°, 45°, −60°)', '<b>Put in numbers</b> L₁ = 0.5, L₂ = 0.4, θ = (30°, 45°, −60°)'), tex: `x = 0.5\\cos 30^\\circ + 0.4\\cos 75^\\circ = ${RB.d(T30[0][3], 3)},\\quad y = 0.5\\sin 30^\\circ + 0.4\\sin 75^\\circ = ${RB.d(T30[1][3], 3)}` }],
+  answer: t('(x, y) = (0.537, 0.636) m และเครื่องมือชี้ไปทาง θ₁ + θ₂ + θ₃ = 15°', '(x, y) = (0.537, 0.636) m and the tool points at θ₁ + θ₂ + θ₃ = 15°') });
+
+/* ---------- B: your own DH table ---------- */
+const PRE = { p3r: { lab: t('3R ระนาบ', 'planar 3R'), rows: [[0, 0, 0, 0, 'R'], [0, 0.5, 0, 0, 'R'], [0, 0.4, 0, 0, 'R']], h0: 0.12, tool: 'x' },
+  rpr: { lab: 'RPR', rows: [[0, 0, 0, 0, 'R'], [90, 0, 0.35, 0, 'P'], [0, 0, 0.15, 0, 'R']], h0: 0.45, tool: 'z' },
+  twist: { lab: t('บิด 90°', '90° twist'), rows: [[0, 0, 0, 0, 'R'], [90, 0.25, 0, 0, 'R'], [0, 0.5, 0, 0, 'R']], h0: 0.35, tool: 'x' },
+  scara: { lab: 'SCARA', rows: [[0, 0, 0, 0, 'R'], [0, 0.45, 0, 0, 'R'], [180, 0.35, 0.15, 0, 'P'], [0, 0, 0.05, 0, 'R']], h0: 0.6, tool: 'z' } };
+const SB = { rows: [], q: [], h0: 0.12, toolDir: 'x', xyz: true }, tabB = document.getElementById('tabB'), ctlB = document.getElementById('ctlB'), roB = document.getElementById('roB'); let rowsB = [];
+const sync = () => { SB.rows = rowsB.map(r => ({ al: rad(r[0]), a: r[1], d: r[2], th: rad(r[3]), j: r[4] })); const F = RB.fkDH(SB.rows, SB.q); roB.innerHTML = `<div class="live"><span class="eq">⁰<sub>N</sub>T =</span>${T4(F[F.length - 1])}</div>`; };
+const sliders = () => { ctlB.innerHTML = ''; SB.q = rowsB.map(() => 0); rowsB.forEach((r, i) => ui.slider(ctlB, { id: 'qb' + i, label: (r[4] === 'R' ? 'θ' : 'd') + '₁₂₃₄₅₆'[i] + (r[4] === 'R' ? '' : t(' (เพิ่ม)', ' (added)')), min: r[4] === 'R' ? -180 : -0.2, max: r[4] === 'R' ? 180 : 0.3, step: r[4] === 'R' ? 1 : 0.01, value: 0, fmt: v => r[4] === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { SB.q[i] = r[4] === 'R' ? rad(v) : v; sync(); } })); };
+const table = () => { tabB.innerHTML = `<table class="dhtab"><tr><th>i</th><th>α<sub>i−1</sub> (°)</th><th>a<sub>i−1</sub> (m)</th><th>d<sub>i</sub> (m)</th><th>θ<sub>i</sub> (°)</th><th>${t('ข้อต่อ', 'joint')}</th></tr>` + rowsB.map((r, i) => `<tr><td>${i + 1}</td>${[0, 1, 2, 3].map(j => `<td><input data-i="${i}" data-j="${j}" value="${r[j]}" inputmode="decimal"></td>`).join('')}<td><select data-i="${i}"><option${r[4] === 'R' ? ' selected' : ''}>R</option><option${r[4] === 'P' ? ' selected' : ''}>P</option></select></td></tr>`).join('') + '</table>' +
+  `<div class="pickbar"><button type="button" class="btn" id="addB">${t('+ เพิ่มแถว', '+ add a row')}</button><button type="button" class="btn" id="delB">${t('− ลบแถวสุดท้าย', '− remove the last row')}</button></div>`;
+  tabB.querySelectorAll('input').forEach(x => x.addEventListener('input', () => { const v = CH2.parseNum(x.value); if (isFinite(v)) { rowsB[+x.dataset.i][+x.dataset.j] = v; sync(); } }));
+  tabB.querySelectorAll('select').forEach(x => x.addEventListener('change', () => { rowsB[+x.dataset.i][4] = x.value; sliders(); sync(); }));
+  document.getElementById('addB').addEventListener('click', () => { if (rowsB.length < 6) { rowsB.push([0, 0.3, 0, 0, 'R']); table(); sliders(); sync(); } });
+  document.getElementById('delB').addEventListener('click', () => { if (rowsB.length > 1) { rowsB.pop(); table(); sliders(); sync(); } }); };
+const load = k => { const p = PRE[k]; rowsB = p.rows.map(r => r.slice()); SB.h0 = p.h0; SB.toolDir = p.tool; SB.az = undefined; SB.el = undefined; table(); sliders(); sync(); };
+ui.radio(document.getElementById('optB'), Object.entries(PRE).map(([k, p], i) => ({ id: k, label: p.lab, on: !i })), id => load(id)); load('p3r');
+CH2.sim('cvB', SB, 'free', { aspect: 0.82, maxH: 540 });
+});
+</script>
+</body>
+</html>

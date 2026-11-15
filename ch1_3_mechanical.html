@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="1.3 — Robots as mechanical devices">1.3 — หุ่นยนต์ในฐานะอุปกรณ์เชิงกล</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">หุ่นยนต์ในฐานะอุปกรณ์เชิงกล <span class="en">Robots as mechanical devices — how they are driven, controlled, measured and fitted with tools</span></h1>
+<h1 data-l="en">Robots as mechanical devices <span class="en">How they are driven, controlled, measured and fitted with tools</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s24.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 24: four ways to classify a manipulator: power source, application area, method of control, geometry">
+    <figcaption data-l="th">สไลด์บทที่ 1 หน้า 24 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 1 slides, p. 24 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">สัปดาห์ที่ 2 มองหุ่นยนต์เป็นเครื่องจักรจริง: <b>ขับด้วยอะไร ใช้ทำงานอะไร ควบคุมแบบไหน แม่นแค่ไหน</b> และติดเครื่องมืออะไรที่ปลาย หน้านี้ครอบคลุมสไลด์หน้า 23–33 มี <b>เครื่องมือ 2 ชิ้น (A, B)</b> และ <b>3 โจทย์</b> รวมการบ้านข้อ 1.2</p>
+    <p class="sub" data-l="en">Week 2 looks at the robot as a real machine: <b>what drives it, what it is used for, how it is controlled, how precise it is</b>, and which tool sits at its end. This page covers slides pp. 23–33. It has <b>2 tools (A, B)</b> and <b>3 problems</b>, including homework 1.2.</p>
+    <div class="equation-box eqwrap" style="margin:10px 0 0">$$ d = l\sqrt{2(1-\cos\theta)} $$ $$ \text{resolution} = \frac{\text{travel}}{2^{n}} $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>จำแนกได้สี่แบบ</b>: แหล่งกำลัง งานที่ใช้ วิธีควบคุม และเรขาคณิต (หน้า 1.4)</li><li><b>จุดต่อจุด</b> ควบคุมเฉพาะจุดที่สอน <b>เส้นทางต่อเนื่อง</b> ควบคุมทั้งเส้นทาง เช่น แนวเชื่อม</li><li><b>ความแม่นยำ</b> = ไปถึงจุดที่สั่งได้ใกล้แค่ไหน <b>ความสามารถทำซ้ำ</b> = กลับมาจุดเดิมได้ใกล้กันแค่ไหน</li><li><b>ข้อมือทรงกลม</b>: แกนสามแกนตัดกันที่จุดเดียว แขนวางตำแหน่ง ข้อมือวางทิศ</li><li><b>แกนหมุน</b> ที่ไปถึงสองจุดเดียวกับแกนเชิงเส้น เดินทางไกลกว่า (ส่วนโค้ง) จึงมีความละเอียดหยาบกว่า</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Four ways to classify</b>: power source, application, control method and geometry (page 1.4).</li><li><b>Point-to-point</b> controls only the taught points; <b>continuous path</b> controls the whole path, e.g. a weld seam.</li><li><b>Accuracy</b> = how close it gets to the commanded point; <b>repeatability</b> = how close it comes back to the same point.</li><li><b>Spherical wrist</b>: three axes meet at one point; the arm sets the position, the wrist the orientation.</li><li><b>A rotating link</b> reaching the same two points as a linear axis travels farther (the arc), so its resolution is coarser.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>จุดต่อจุด กับ เส้นทางต่อเนื่อง</a><a href="#tA"><b>A</b>ความแม่นยำ</a><a href="#tB"><b>B</b>ข้อมือทรงกลม</a><a href="#ex2"><b>2</b>ตัวอย่างที่ 3</a><a href="#ex3"><b>3</b>การบ้าน 1.2</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>Point-to-point vs continuous path</a><a href="#tA"><b>A</b>Accuracy</a><a href="#tB"><b>B</b>Spherical wrist</a><a href="#ex2"><b>2</b>Example 3</a><a href="#ex3"><b>3</b>Homework 1.2</a></nav>
+
+<div class="group-head"><h2 data-l="th">แหล่งกำลังและงานที่ใช้ (สไลด์หน้า 25–26)</h2><h2 data-l="en">Power source and application area (slides pp. 25–26)</h2></div>
+<div class="slides">
+  <figure class="slide"><img src="slides/ch1/s25.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 25: table comparing electric, hydraulic and pneumatic drives: actuator, strengths, limits, typical use"><figcaption data-l="th">สไลด์หน้า 25 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 25 · tap to enlarge</figcaption></figure>
+  <figure class="slide"><img src="slides/ch1/s26.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 26: assembly robots (small, electric, fast) and non-assembly robots (welding, painting, material handling)"><figcaption data-l="th">สไลด์หน้า 26</figcaption><figcaption data-l="en">Slide p. 26</figcaption></figure>
+</div>
+<p class="sub" data-l="th">แขนกลอุตสาหกรรมส่วนใหญ่ปัจจุบันขับด้วย <b>มอเตอร์ไฟฟ้าแบบเซอร์โว</b> เพราะสะอาด เงียบ และควบคุมตำแหน่งได้แม่น ระบบ <b>ไฮดรอลิก</b> ยังใช้กับงานยกหนัก ส่วน <b>นิวแมติก</b> นิยมใช้กับมือจับและงานหยิบวางที่หยุดชนปลายระยะ เพราะลมอัดตัวได้ จึงหยุดกลางช่วงชักให้แม่นยาก หุ่นยนต์ตัวเดียวมักผสมหลายแบบ เช่น ข้อต่อไฟฟ้ากับมือจับลม</p>
+<p class="sub" data-l="en">Most industrial arms today are driven by <b>electric servo motors</b>: clean, quiet and precise. <b>Hydraulics</b> are still used for heavy lifting, and <b>pneumatics</b> for grippers and pick-and-place between end stops, because compressed air is springy and hard to stop accurately mid-stroke. One robot often mixes them, e.g. electric joints with a pneumatic gripper.</p>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">จุดต่อจุด (PTP) กับ เส้นทางต่อเนื่อง (CP) บนแนวเชื่อม</h2><h2 data-l="en">Point-to-point (PTP) against continuous path (CP) on a weld seam</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 27 · Spong 1.2.1</div><div class="src" data-l="en">Chapter 1 slides, p. 27 · Spong 1.2.1</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s27.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 27: non-servo and servo control; point-to-point and continuous-path; figure of a tool path bowing off a straight seam">
+    <figcaption data-l="th">สไลด์หน้า 27 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 27 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+      <div data-l="th">แขนสองก้าน (0.5 m, 0.4 m) ต้องเชื่อมตามแนวตรงจาก A ไป B ผู้ควบคุมสอนเพียงจุด A และ B แล้วสั่งแบบจุดต่อจุด ปลายแขนจะเดินตามแนวเชื่อมหรือไม่ ถ้าไม่ จะแก้อย่างไร</div>
+      <div data-l="en">A two-link arm (0.5 m, 0.4 m) must weld along the straight seam from A to B. The operator teaches only A and B and runs it point-to-point. Does the tool follow the seam? If not, how do we fix it?</div></div>
+      <div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">ระบบหุ่นยนต์ และความแม่นยำกับความสามารถทำซ้ำ (สไลด์หน้า 28–29)</h2><h2 data-l="en">The robotic system, accuracy and repeatability (slides pp. 28–29)</h2></div>
+<div class="slides">
+  <figure class="slide"><img src="slides/ch1/s28.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 28: block diagram of a robotic system: input device, computer controller, program storage, sensors, power supply, mechanical arm, end-of-arm tooling"><figcaption data-l="th">สไลด์หน้า 28 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 28 · tap to enlarge</figcaption></figure>
+  <figure class="slide"><img src="slides/ch1/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: three targets showing accuracy and repeatability; definitions of accuracy, repeatability and resolution"><figcaption data-l="th">สไลด์หน้า 29</figcaption><figcaption data-l="en">Slide p. 29</figcaption></figure>
+</div>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: สั่งแขนไปจุดเดิม 5 ครั้ง</h2><h2 data-l="en">Tool: send the arm to the same point five times</h2>
+    <div class="src" data-l="th">เลื่อนความคลาดเชิงระบบ (ทำให้ไม่แม่นยำ) และการกระจาย (ทำให้ทำซ้ำไม่ได้) แยกกัน</div><div class="src" data-l="en">Move the systematic error (spoils accuracy) and the scatter (spoils repeatability) separately</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div></div>
+    <div class="card solve"><h3 data-l="th">อ่านภาพ</h3><h3 data-l="en">Reading the picture</h3>
+      <p class="lead" data-l="th"><b>ความแม่นยำ</b> วัดจากระยะระหว่างเป้าที่สั่ง (จุดชมพู) กับค่าเฉลี่ยของจุดที่ไปถึง (กากบาทฟ้า) <b>ความสามารถทำซ้ำ</b> วัดจากการกระจายของจุดรอบค่าเฉลี่ย (วงประสีเหลือง)</p>
+      <p class="lead" data-l="en"><b>Accuracy</b> is the distance from the commanded point (pink) to the mean of where the tool went (blue cross). <b>Repeatability</b> is the scatter of the points round their mean (yellow dashed circle).</p>
+      <ul class="looplist" data-l="th"><li>ความคลาดเชิงระบบมาจาก <b>แบบจำลองที่ไม่ตรงกับแขนจริง</b>: ความยาวก้านคลาด การสอบเทียบศูนย์ของเอนโค้ดเดอร์ แก้ได้ด้วยการสอบเทียบ (calibration)</li><li>การกระจายมาจาก <b>ระยะคลอนของเฟือง ความยืดหยุ่น และความละเอียดของเอนโค้ดเดอร์</b> แก้ด้วยกลไกที่ดีขึ้น</li><li>หุ่นยนต์อุตสาหกรรมมัก <b>ทำซ้ำได้ดีกว่าแม่นยำ</b> จึงนิยม <b>สอนจุด</b> ด้วยอุปกรณ์สอน (teach pendant) แทนการพิมพ์พิกัด</li></ul>
+      <ul class="looplist" data-l="en"><li>The systematic error comes from <b>a model that does not match the real arm</b>: wrong link lengths, encoder zero offsets. Calibration fixes it.</li><li>The scatter comes from <b>gear backlash, flexibility and encoder resolution</b>: only better mechanics fix it.</li><li>Industrial robots are usually <b>more repeatable than accurate</b>, which is why their points are <b>taught</b> with a teach pendant instead of typed in as coordinates.</li></ul></div>
+  </div>
+</section>
+
+<section class="prob" id="tB">
+  <div class="prob-head"><span class="prob-no">B</span><div><h2 data-l="th">เครื่องมือ: ข้อมือทรงกลม</h2><h2 data-l="en">Tool: the spherical wrist</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 30 · Spong 1.2.3 · Craig 8.3 (ข้อมือ)</div><div class="src" data-l="en">Chapter 1 slides, p. 30 · Spong 1.2.3 · Craig 8.3 (wrists)</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvB"></canvas><div class="ctl" id="ctlB"></div></div>
+    <div class="card solve"><figure class="slide"><img src="slides/ch1/s30.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 30: wrists and end-effectors; spherical wrist with roll, pitch and yaw axes through one point"><figcaption data-l="th">สไลด์หน้า 30 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 30 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">เลื่อนแถบทั้งสาม: เครื่องมือหมุนไปทุกทิศ แต่ <b>จุดศูนย์กลางข้อมือไม่ขยับเลย</b> เพราะแกนทั้งสามผ่านจุดนั้น ผลคือแยกโจทย์ได้: สามข้อต่อแรกหาตำแหน่งของจุดศูนย์กลางข้อมือ ข้อมือหาทิศของเครื่องมือ (ใช้ในบทที่ 4)</p>
+      <p class="lead" data-l="en">Move the three sliders: the tool turns every way, but <b>the wrist centre never moves</b>, because all three axes pass through it. That splits the problem: the first three joints place the wrist centre, the wrist sets the tool direction (used in chapter 4).</p></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">ความละเอียดการควบคุม (สไลด์หน้า 31)</h2><h2 data-l="en">Control resolution (slide p. 31)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s31.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 31: a linear axis travels the chord d, a rotating link the arc l theta between the same two points; resolution = travel / 2^n"><figcaption data-l="th">สไลด์หน้า 31 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 31 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">เอนโค้ดเดอร์ \(n\) บิตแบ่งช่วงที่ข้อต่อเคลื่อนที่ได้เป็น \(2^n\) ขั้น แกนเชิงเส้นที่วิ่งจากจุดหนึ่งไปอีกจุดหนึ่งเดินทางเป็นเส้นตรง (คอร์ด \(d\)) แต่ปลายก้านที่หมุนไปถึงสองจุดเดียวกันเดินทางเป็นส่วนโค้ง \(l\theta\) ซึ่งยาวกว่าเสมอ ขั้นละหนึ่งบิตของแกนหมุนจึงพาปลายแขนไปไกลกว่า กฎของโคไซน์ในสามเหลี่ยมหน้าจั่วด้าน \(l, l\) มุม \(\theta\) ให้ \(d^2 = 2l^2(1 - \cos\theta)\)</p>
+  <p class="sub" data-l="en">An \(n\)-bit encoder splits the joint's travel into \(2^n\) steps. A linear axis going from one point to the other travels a straight line (the chord \(d\)), but the tip of a link turning between the same two points travels the arc \(l\theta\), which is always longer. So one step of the rotating joint moves the tip farther. The law of cosines in the isosceles triangle with sides \(l, l\) and angle \(\theta\) gives \(d^2 = 2l^2(1 - \cos\theta)\).</p>
+</div>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ตัวอย่างที่ 3: ความละเอียด 10 บิต l = 1 m, θ = 90°</h2><h2 data-l="en">Worked example 3: 10-bit resolution, l = 1 m, θ = 90°</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 32 · โจทย์ข้อ 1.1 (สไลด์เดิมข้อ 5.1)</div><div class="src" data-l="en">Chapter 1 slides, p. 32 · problem 1.1 (5.1 in the old slides)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s32.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 32: the tip of a 1 m link moves between two points 90 degrees apart; with 10-bit accuracy, find the resolution of a linear axis and of the rotating link">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 32 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 32 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">การบ้านข้อ 1.2: ก้านเดียวยาว 50 cm หมุน 180° เอนโค้ดเดอร์ 8 บิต</h2><h2 data-l="en">Homework 1.2: a 50 cm link turning 180° with an 8-bit encoder</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 33 · การบ้านชุดที่ 1 (สไลด์เดิมข้อ 5.2) · หน้านี้มีเพียงช่องตรวจคำตอบ วิธีทำเฉลยในห้อง</div><div class="src" data-l="en">Chapter 1 slides, p. 33 · homework 1 (5.2 in the old slides) · this page only checks your answer; the working is discussed in class</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s33.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 33: homework 1.2 (single link 50 cm, 180 degrees, 8-bit encoder) and 1.3 (derive the two-link inverse kinematics)">
+    <figcaption data-l="th">สไลด์หน้า 33 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 33 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div></div>
+    <div class="card solve"><div class="hwbox" data-l="th"><b class="hw">การบ้าน</b>: ทำบนกระดาษก่อน แล้วใส่คำตอบเป็น <b>มิลลิเมตร</b> เพื่อตรวจ ภาพจำลองข้างซ้ายตั้งค่าให้ลองเปลี่ยนจำนวนบิตดูแนวโน้มได้ แต่ไม่แสดงตัวเลขคำตอบ</div>
+      <div class="hwbox" data-l="en"><b class="hw">Homework</b>: work it out on paper first, then enter the answer in <b>millimetres</b> to check it. The simulation lets you change the number of bits to see the trend, but does not print the answer.</div>
+      <div id="ask3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — จุดสอนเท่าไรจึงพอ</h3>
+    <ol><li>ในข้อ 1 เพิ่มจุดสอนจาก 2 เป็น 3, 5, 9 จุด: ความคลาดจากแนวเชื่อมลดลงอย่างรวดเร็ว (ประมาณ 107 → 33 → 10 → 3 mm)</li><li>ตัวควบคุมแบบเส้นทางต่อเนื่องทำแบบนี้ในตัว: คำนวณจุดบนเส้นตรงถี่มาก แล้วหามุมข้อต่อทุกจุด (จลนศาสตร์ผกผัน บทที่ 4 และแนววิถี บทที่ 7)</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — แม่นยำ กับ ทำซ้ำได้</h3>
+    <ol><li>ในเครื่องมือ A ตั้งความคลาดเชิงระบบ 1 mm การกระจาย 0.1 mm: จุดเกาะกลุ่มแน่นแต่ไม่อยู่บนเป้า (ทำซ้ำได้ดี ไม่แม่นยำ)</li><li>สอนจุดใหม่ ณ ตำแหน่งที่แขนไปถึงจริง ความคลาดเชิงระบบก็หมดไปทันที นี่คือเหตุผลที่โรงงานใช้การสอนจุด</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — มุมกว้างขึ้น ความต่างมากขึ้น</h3>
+    <ol><li>ในข้อ 2 เลื่อน θ เป็น 180°: คอร์ดยาว 2l แต่ส่วนโค้งยาว πl อัตราส่วนเพิ่มเป็น 1.57 เท่า</li><li>มุมเล็กมาก ๆ คอร์ดกับส่วนโค้งแทบเท่ากัน ความละเอียดของทั้งสองแบบจึงใกล้กัน</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 1 หน้า 23–33 (ภาพอยู่ในหน้านี้แล้ว) · Spong 1.2 และโจทย์ท้ายบทที่ 1 · Craig 8.3</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — how many taught points are enough?</h3>
+    <ol><li>In problem 1 raise the taught points from 2 to 3, 5, 9: the error from the seam falls fast (about 107 → 33 → 10 → 3 mm).</li><li>A continuous-path controller does this by itself: it computes many points along the line and the joint angles at each (inverse kinematics, chapter 4, and trajectories, chapter 7).</li></ol></div>
+  <div class="card"><h3>Try this 2 — accurate or repeatable</h3>
+    <ol><li>In tool A set a systematic error of 1 mm and a scatter of 0.1 mm: the points are tight but off the target (repeatable, not accurate).</li><li>Teach the point again where the arm really goes and the systematic error is gone at once: that is why factories teach points.</li></ol></div>
+  <div class="card"><h3>Try this 3 — a wider angle, a bigger gap</h3>
+    <ol><li>In problem 2 move θ to 180°: the chord is 2l but the arc πl, a ratio of 1.57.</li><li>For a very small angle the chord and the arc are almost equal, and so are the two resolutions.</li></ol>
+    <div class="book">Source: chapter 1 slides, pp. 23–33 (the pictures are on this page) · Spong 1.2 and the chapter 1 problems · Craig 8.3</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, G = RB.G, u = RB.u, deg = RB.deg, rad = RB.rad;
+const al = rows => `\\begin{aligned} ${rows.join(' \\\\ ')} \\end{aligned}`;
+
+/* ---------- 1: PTP vs CP ---------- */
+const S1 = { A: [0.2, 0.62], B: [0.8, 0.22], n: 2, mode: 'ptp', u: 0, xyz: true }, SV = {};
+const ctl1 = document.getElementById('ctl1'), ro1 = document.getElementById('ro1');
+const read1 = () => { const dv = CH1.pathDev(S1); ro1.innerHTML = `${t('จุดต่อจุด', 'point-to-point')}, ${S1.n} ${t('จุดสอน', 'taught points')}: ${t('ออกนอกแนวมากสุด', 'max. distance from the seam')} <code>${u(dv * 1000, 1)} mm</code>`; };
+ui.slider(ctl1, { id: 'n1', label: t('จำนวนจุดสอน', 'taught points'), min: 2, max: 12, step: 1, value: 2, fmt: v => String(v), oninput: v => { S1.n = v; read1(); } });
+ui.radio(ctl1, [{ id: 'ptp', label: t('เดินแบบจุดต่อจุด', 'run point-to-point'), on: true }, { id: 'cp', label: t('เดินแบบเส้นทางต่อเนื่อง', 'run continuous path') }], id => { S1.mode = id; });
+read1();
+RB.stage(document.getElementById('cv1'), 0.714, (c, W, H, dt, P) => { S1.u = (S1.u + dt * 0.25) % 1.25; const sv = Object.assign(SV, S1, { u: Math.min(1, S1.u) }); CH1.view.path(c, W, H, sv, P); }, { maxH: 480 });
+LS.choose(document.getElementById('ask1'), { options: [t('ตามแนวเชื่อมพอดี', 'follows the seam exactly'), t('โค้งออกนอกแนว', 'bows off the seam')], answer: 1 });
+LS.stepper(document.getElementById('st1'), {
+  steps: [{ why: t('<b>จุดต่อจุด</b>: ตัวควบคุมรู้เพียงมุมข้อต่อที่ A และที่ B แล้วเปลี่ยนแต่ละมุมจากค่าเริ่มไปค่าสุดท้าย <b>เป็นเส้นตรงในปริภูมิข้อต่อ</b>', '<b>Point-to-point</b>: the controller only knows the joint angles at A and at B, and changes each angle from start to end <b>along a straight line in joint space</b>'),
+      tex: '\\theta_i(s) = \\theta_i^A + s\\,(\\theta_i^B - \\theta_i^A),\\quad 0 \\le s \\le 1' },
+    { why: t('<b>แต่ตำแหน่งปลายแขนเป็นฟังก์ชันไม่เชิงเส้นของมุม</b> (มี sin และ cos) เส้นตรงในปริภูมิข้อต่อจึงกลายเป็น <b>เส้นโค้ง</b> ในปริภูมิทำงาน (เส้นสีชมพู)', '<b>But the tool position is a non-linear function of the angles</b> (sines and cosines), so a straight line in joint space becomes <b>a curve</b> in the workspace (pink)'),
+      tex: 'x = l_1\\cos\\theta_1 + l_2\\cos(\\theta_1 + \\theta_2),\\quad y = l_1\\sin\\theta_1 + l_2\\sin(\\theta_1 + \\theta_2)' },
+    { why: t('<b>ผลลัพธ์</b>: สอนสองจุด ปลายแขนออกนอกแนวเชื่อมได้เป็นร้อยมิลลิเมตร เพิ่มจุดสอนช่วยได้ แต่ไม่มีวันตรงพอดี', '<b>Result</b>: with two taught points the tool strays about a hundred millimetres from the seam. More taught points help, but it is never exactly on it'),
+      body: () => `<div class="sub2">${t('ค่าจากภาพจำลอง', 'from the simulation')}: n = 2 → <code>${u(CH1.pathDev({ ...S1, n: 2 }) * 1000, 1)} mm</code>, n = 5 → <code>${u(CH1.pathDev({ ...S1, n: 5 }) * 1000, 1)} mm</code></div>` },
+    { why: t('<b>เส้นทางต่อเนื่อง</b>: ตัวควบคุมคำนวณจุดบนเส้นตรง A–B ถี่ ๆ และหามุมข้อต่อของทุกจุด ปลายแขนจึงอยู่บนแนวตลอด (กด "เดินแบบเส้นทางต่อเนื่อง")', '<b>Continuous path</b>: the controller computes many points along the line A–B and the joint angles at every one, so the tool stays on the seam (press "run continuous path")') }],
+  answer: t('ไม่ตาม: <b>จุดต่อจุดทำให้ปลายแขนโค้งออกนอกแนว</b> งานเชื่อมจึงต้องใช้ <b>การควบคุมแบบเส้นทางต่อเนื่อง</b>', 'No: <b>point-to-point makes the tool bow off the seam</b>, so welding needs <b>continuous-path control</b>') });
+
+/* ---------- A: accuracy and repeatability ---------- */
+const SA = { bias: 0.5, spread: 0.3, ang: 0.8, seed: 3, R: 2, pts: [] }; const ctlA = document.getElementById('ctlA');
+const shoot = () => { SA.pts = CH1.shots(SA.bias, SA.ang, SA.spread, 5, SA.seed); };
+ui.slider(ctlA, { id: 'bA', label: t('ความคลาดเชิงระบบ', 'systematic error'), min: 0, max: 1.5, step: 0.05, value: 0.5, fmt: v => `${v.toFixed(2)} mm`, oninput: v => { SA.bias = v; shoot(); } });
+ui.slider(ctlA, { id: 'sA', label: t('การกระจาย', 'scatter'), min: 0.02, max: 1.5, step: 0.02, value: 0.3, fmt: v => `${v.toFixed(2)} mm`, oninput: v => { SA.spread = v; shoot(); } });
+ui.buttons(ctlA, [{ label: t('สั่งอีก 5 ครั้ง', 'five more moves'), onclick: () => { SA.seed++; shoot(); } }]); shoot();
+RB.stage(document.getElementById('cvA'), 0.62, (c, W, H, dt, P) => CH1.draw.shots(c, W, H, SA, P), { maxH: 400 });
+
+/* ---------- B: spherical wrist ---------- */
+const SB = { yaw: rad(25), pitch: rad(30), roll: rad(35), az: -64, el: 18 }; const ctlB = document.getElementById('ctlB');
+[['yaw', t('หันซ้ายขวา (yaw)', 'yaw')], ['pitch', t('ก้มเงย (pitch)', 'pitch')], ['roll', t('หมุนรอบแกนเครื่องมือ (roll)', 'roll')]].forEach(([k, lab]) => ui.slider(ctlB, { id: 'w' + k, label: lab, min: -90, max: 90, step: 1, value: Math.round(deg(SB[k])), fmt: v => `${v}°`, oninput: v => { SB[k] = rad(v); } }));
+{ const cvB = document.getElementById('cvB'); cvB.classList.add('grab'); RB.stage(cvB, 0.77, (c, W, H, dt, P) => CH1.view.wristS(c, W, H, SB, P), { maxH: 470 });
+  let last = null; RB.drag(cvB, null, p => { if (!p) { last = null; return; } if (last) { SB.az -= (p.x - last.x) * 0.4; SB.el = NUM.clamp(SB.el + (p.y - last.y) * 0.3, 3, 80); } last = p; }); }
+
+/* ---------- 2: worked example 3 ---------- */
+const S2 = { l: 1, th: rad(90), bits: 4, u: 0.75, quant: true }; const ctl2 = document.getElementById('ctl2'), ro2 = document.getElementById('ro2');
+const read2 = () => { const N = 2 ** S2.bits, d = RB.chord(S2.l, S2.th), arc = S2.l * S2.th;
+  ro2.innerHTML = `2<sup>${S2.bits}</sup> = <code>${N}</code> ${t('ขั้น', 'steps')} · d = <code>${u(d, 4)} m</code> → <code>${u(d / N * 1000, 3)} mm</code>/${t('ขั้น', 'step')} · lθ = <code>${u(arc, 4)} m</code> → <code>${u(arc / N * 1000, 3)} mm</code>/${t('ขั้น', 'step')}`; };
+ui.slider(ctl2, { id: 'b2', label: t('จำนวนบิต n', 'bits n'), min: 2, max: 12, step: 1, value: 4, fmt: v => String(v), oninput: v => { S2.bits = v; read2(); } });
+ui.slider(ctl2, { id: 't2', label: 'θ', min: 10, max: 180, step: 1, value: 90, fmt: v => `${v}°`, oninput: v => { S2.th = rad(v); read2(); } });
+ui.slider(ctl2, { id: 'u2', label: t('ตำแหน่งที่สั่ง', 'commanded position'), min: 0, max: 1, step: 0.001, value: 0.75, fmt: v => `${Math.round(v * 100)}%`, oninput: v => { S2.u = v; } });
+read2();
+RB.stage(document.getElementById('cv2'), 0.68, (c, W, H, dt, P) => CH1.view.resol(c, W, H, S2, P), { maxH: 460 });
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('(a) เชิงเส้น (mm) =', '(a) linear (mm) ='), ok: x => Math.abs(x - 1.381) < 0.006, w: 5 }, { label: t('(b) หมุน (mm) =', '(b) rotating (mm) ='), ok: x => Math.abs(x - 1.534) < 0.006, w: 5 }],
+  check: v => Math.abs(v[0] - 1.534) < 0.006 ? t('(a) ต้องใช้ระยะคอร์ด d = √2 m ไม่ใช่ส่วนโค้ง', '(a) uses the chord d = √2 m, not the arc') : (Math.abs(v[1] - 0.088) < 0.002 ? t('0.088° คือขั้นของมุม ต้องคูณด้วยความยาวก้าน (เป็นเรเดียน) จึงได้ระยะที่ปลาย', '0.088° is the angular step; multiply by the link length (in radians) to get the distance at the tip') : '') });
+LS.stepper(document.getElementById('st2'), {
+  steps: [{ why: t('<b>จำนวนขั้นของเอนโค้ดเดอร์ 10 บิต</b> (ภาพจำลองตั้งค่าตามโจทย์ให้แล้ว)', '<b>Number of steps of a 10-bit encoder</b> (the simulation is now set to the problem)'), tex: '2^{10} = 1024\\ \\text{steps}' },
+    { why: t('<b>(a) ระยะคอร์ด</b> ระหว่างสองจุด ด้วยกฎของโคไซน์', '<b>(a) The chord</b> between the two points, by the law of cosines'), tex: 'd = l\\sqrt{2(1 - \\cos\\theta)} = 1\\cdot\\sqrt{2(1 - \\cos 90^\\circ)} = \\sqrt2 = 1.4142\\ \\text{m}' },
+    { why: t('<b>แบ่งเป็น 1024 ขั้น</b>', '<b>Split it into 1024 steps</b>'), tex: '\\frac{1.4142}{1024} = 1.381\\times10^{-3}\\ \\text{m} \\approx \\boxed{1.38\\ \\text{mm}}' },
+    { why: t('<b>(b) ส่วนโค้งที่ปลายก้านเดินทาง</b>: ใช้ θ เป็นเรเดียน', '<b>(b) The arc travelled by the tip</b>: θ in radians'), tex: 'l\\theta = 1 \\times \\frac{\\pi}{2} = 1.5708\\ \\text{m} \\;\\Rightarrow\\; \\frac{1.5708}{1024} = 1.534\\times10^{-3}\\ \\text{m} \\approx \\boxed{1.53\\ \\text{mm}}' },
+    { why: t('<b>ตรวจ</b>: ขั้นของมุม และเหตุที่แกนหมุนหยาบกว่า', '<b>Check</b>: the angular step, and why the rotating link is coarser'), tex: al(['\\Delta\\theta &= 90^\\circ / 1024 = 0.088^\\circ', 'l\\theta &= 1.571\\ \\text{m} > d = 1.414\\ \\text{m}']) }],
+  answer: t('(a) เชิงเส้น <b>1.381 × 10⁻³ m</b> · (b) หมุน <b>1.534 × 10⁻³ m</b> · ตรงกับคำตอบในสไลด์เดิม', '(a) linear <b>1.381 × 10⁻³ m</b> · (b) rotating <b>1.534 × 10⁻³ m</b> · the same as the answers on the old slides'),
+  onStep: k => { if (k >= 1) { S2.bits = 10; S2.th = rad(90); S2.l = 1; document.getElementById('b2').value = 10; document.getElementById('t2').value = 90; document.getElementById('b2').dispatchEvent(new Event('input')); document.getElementById('t2').dispatchEvent(new Event('input')); } } });
+
+/* ---------- 3: homework 1.2 (check only) ---------- */
+const SH = { l: 0.5, th: Math.PI, bits: 3, u: 0.3, show: 'rot' }; const ctl3 = document.getElementById('ctl3');
+ui.slider(ctl3, { id: 'b3', label: t('จำนวนบิต n', 'bits n'), min: 2, max: 8, step: 1, value: 3, fmt: v => String(v), oninput: v => { SH.bits = v; } });
+ui.slider(ctl3, { id: 'u3', label: t('ตำแหน่งที่สั่ง', 'commanded position'), min: 0, max: 1, step: 0.001, value: 0.3, fmt: v => `${Math.round(v * 100)}%`, oninput: v => { SH.u = v; } });
+RB.stage(document.getElementById('cv3'), 0.63, (c, W, H, dt, P) => CH1.view.resol(c, W, H, SH, P), { maxH: 420 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('ความละเอียด (mm) =', 'resolution (mm) ='), ok: x => Math.abs(x - 6.136) < 0.01, w: 5.5 }],
+  check: v => Math.abs(v[0] - 1.9531) < 0.01 ? t('นี่คือค่าเมื่อหารระยะคอร์ด 1 m … ปลายก้านที่หมุนเดินทางตามส่วนโค้ง', 'that divides the 1 m chord; the tip of a turning link travels the arc') : Math.abs(v[0] - 6.16) < 0.03 ? t('ใกล้แล้ว: ใช้ 2⁸ = 256 ขั้น ไม่ใช่ 255', 'close: use 2⁸ = 256 steps, not 255') : (Math.abs(v[0] - 0.703) < 0.01 ? t('0.703° คือขั้นของมุม ต้องแปลงเป็นระยะที่ปลายก้าน', '0.703° is the angular step; turn it into a distance at the tip') : '') });
+});
+</script>
+</body>
+</html>

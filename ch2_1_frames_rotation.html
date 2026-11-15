@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="2.1 — Positions, orientations and frames">2.1 — ตำแหน่ง การวางตัว และเฟรม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">ตำแหน่ง การวางตัว และเฟรม <span class="en">Positions, orientations and frames — the rotation matrix is three arrows written side by side</span></h1>
+<h1 data-l="en">Positions, orientations and frames <span class="en">The rotation matrix is three arrows written side by side</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: coordinate frames on a robot arm, its tool, a table and a bolt">
+    <figcaption data-l="th">สไลด์บทที่ 2 หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 2 slides, p. 5 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หุ่นยนต์ต้องรู้ว่าชิ้นงาน เครื่องมือ และตัวมันเอง <b>อยู่ที่ไหน</b>และ<b>หันไปทางไหน</b> จึงติด<b>เฟรมพิกัด</b>ไว้กับทุกสิ่ง ตำแหน่งบอกด้วยเวกเตอร์ การวางตัวบอกด้วย<b>เมทริกซ์การหมุน</b> ซึ่งคือแกนทั้งสามของเฟรมที่หมุนแล้ว เขียนเรียงเป็นคอลัมน์ หน้านี้ครอบคลุมสไลด์หน้า 5–17 (Craig 2.1–2.2) มี <b>เครื่องมือ 2 ชิ้น (A, B)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">A robot must know <b>where</b> parts, tools and its own links are and <b>which way they face</b>, so a <b>coordinate frame</b> is attached to each. A position is a vector; an orientation is a <b>rotation matrix</b>: the three axes of the turned frame written side by side as columns. This page covers slides pp. 5–17 (Craig 2.1–2.2). It has <b>two tools (A, B)</b> and <b>3 problems</b>.</p>
+    <div class="equation-box">$$ {}^{A}_{B}R = \begin{bmatrix} {}^{A}\hat X_B & {}^{A}\hat Y_B & {}^{A}\hat Z_B \end{bmatrix}, \qquad {}^{B}_{A}R = {}^{A}_{B}R^{-1} = {}^{A}_{B}R^{T} $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>ตัวยกนำหน้า</b>บอกว่าเขียนในเฟรมไหน: \({}^{A}P\) คือจุด P เมื่อมองจาก {A} · \({}^{A}_{B}R\) คือการวางตัวของ {B} เมื่อมองจาก {A}</li><li><b>คอลัมน์</b>ของ \({}^{A}_{B}R\) = แกนของ {B} เขียนใน {A} · <b>แถว</b> = แกนของ {A} เขียนใน {B} · ทุกช่องคือผลคูณจุด (โคไซน์แสดงทิศทาง)</li><li>เมทริกซ์การหมุน: คอลัมน์ยาว 1 ตั้งฉากกัน และ det = +1 ผลคือ \(R^{-1} = R^T\)</li><li><b>เฟรม</b> {B} = {\({}^{A}_{B}R\), \({}^{A}P_{BORG}\)}: การวางตัวกับตำแหน่งของจุดกำเนิด</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>The <b>leading superscript</b> names the frame: \({}^{A}P\) is P seen from {A}; \({}^{A}_{B}R\) is the orientation of {B} seen from {A}.</li><li>The <b>columns</b> of \({}^{A}_{B}R\) are the axes of {B} in {A}; the <b>rows</b> are the axes of {A} in {B}; every entry is a dot product (a direction cosine).</li><li>A rotation matrix has unit, orthogonal columns and det = +1, so \(R^{-1} = R^T\).</li><li>A <b>frame</b> {B} = {\({}^{A}_{B}R\), \({}^{A}P_{BORG}\)}: an orientation and the position of its origin.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>หมุนเฟรมแล้วอ่านเมทริกซ์</a><a href="#ex1"><b>1</b>อ่านเมทริกซ์จากภาพ</a><a href="#ex2"><b>2</b>หมุนรอบแกน Z</a><a href="#ex3"><b>3</b>เมทริกซ์ใดเป็นการหมุน</a><a href="#tB"><b>B</b>การบรรยายเฟรม</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Turn a frame, read the matrix</a><a href="#ex1"><b>1</b>Read R from a picture</a><a href="#ex2"><b>2</b>A turn about Z</a><a href="#ex3"><b>3</b>Which are rotations?</a><a href="#tB"><b>B</b>Description of a frame</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: หมุนเฟรม {B} แล้วอ่านเมทริกซ์การหมุน</h2><h2 data-l="en">Tool: turn frame {B} and read its rotation matrix</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 9–11 · Craig 2.2 · <b>ลากในภาพเพื่อหมุนมุมมอง</b></div><div class="src" data-l="en">Chapter 2 slides, pp. 9–11 · Craig 2.2 · <b>drag in the picture to turn the view</b></div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div id="optA" style="padding:0 8px"></div><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch2/s10.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 10: every entry of the rotation matrix is a dot product of two unit axes">
+      <figcaption data-l="th">สไลด์หน้า 10 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 10 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">เฟรมสีเทาคือ {A} ซึ่งอยู่กับที่ เฟรมสีคือ {B} ซึ่งติดกับกล่อง เลื่อนแถบเลื่อนแล้วดู <b>คอลัมน์สีแดง</b>ของเมทริกซ์: มันคือส่วนประกอบของลูกศร X<sub>B</sub> ตามแกน X<sub>A</sub>, Y<sub>A</sub>, Z<sub>A</sub> พอดี กดปุ่ม "ภาพฉาย" เพื่อดูเส้นประที่ฉายลูกศรลงบนแกนของ {A} ตัวเลขสามตัวที่เส้นประชี้คือคอลัมน์นั้น</p>
+      <p class="lead" data-l="en">The grey frame is {A}, which stays put; the coloured frame is {B}, fixed to the block. Move the sliders and watch the <b>red column</b> of the matrix: it is exactly the components of the arrow X<sub>B</sub> along X<sub>A</sub>, Y<sub>A</sub>, Z<sub>A</sub>. Press "projection" to see the dashed lines that project the arrow on the axes of {A}: the three numbers they mark are that column.</p>
+      <div class="hwbox" data-l="th"><b class="hw">สังเกต</b>: ไม่ว่าจะหมุนอย่างไร ความยาวคอลัมน์เป็น 1 ผลคูณจุดของคอลัมน์ต่างกันเป็น 0 และ det = +1 เสมอ (บรรทัดตรวจใต้เมทริกซ์)</div>
+      <div class="hwbox" data-l="en"><b class="hw">Notice</b>: however you turn it, each column has length 1, different columns have dot product 0, and det = +1 (the check line under the matrix).</div></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">สามข้อตรวจ และเมทริกซ์ผกผันคือทรานสโพส (สไลด์หน้า 11–12)</h2><h2 data-l="en">Three checks, and the inverse is the transpose (slides pp. 11–12)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s12.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 12: unit columns, orthogonal columns, determinant +1"><figcaption data-l="th">สไลด์หน้า 12 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 12 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">คอลัมน์ทั้งสามเป็นเวกเตอร์หนึ่งหน่วยที่ตั้งฉากกัน ดังนั้น \(R^T R = I\) หรือ \(R^{-1} = R^T\): การหมุนกลับไม่ต้องคำนวณอะไรเลย แค่สลับแถวกับคอลัมน์ ข้อที่สาม det = +1 แยกการหมุนออกจาก<b>ภาพสะท้อนในกระจก</b> (เฟรมมือซ้าย) ซึ่งผ่านสองข้อแรกได้แต่ det = −1 เงื่อนไขทั้งหมด 6 ข้อทำให้ตัวเลข 9 ตัวเหลืออิสระเพียง 3 ตัว ตรงกับ 3 องศาอิสระของการวางตัว</p>
+  <p class="sub" data-l="en">The three columns are unit vectors at right angles, so \(R^T R = I\), i.e. \(R^{-1} = R^T\): turning back costs nothing but swapping rows and columns. The third check, det = +1, separates a rotation from a <b>mirror image</b> (a left-handed frame), which passes the first two but has det = −1. The six conditions leave 3 of the 9 numbers free: the 3 DOF of an orientation.</p>
+</div>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">อ่านเมทริกซ์การหมุนจากภาพ</h2><h2 data-l="en">Read a rotation matrix from a picture</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 13 (สไลด์เดิม Part I หน้า 16–17) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, p. 13 (old Part I slides pp. 16–17) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s13.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 13: frames A and B share an origin; X B along X A, Y B along Z A, Z B along minus Y A; find the rotation matrix">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 13 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 13 · tap to enlarge</figcaption></figure>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="simnote" id="note1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">หมุนรอบแกน Z<sub>A</sub> ไปมุม θ</h2><h2 data-l="en">A turn θ about Z<sub>A</sub></h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 14–15 (สไลด์เดิม Part I หน้า 18–19) · Craig 2.2</div><div class="src" data-l="en">Chapter 2 slides, pp. 14–15 (old Part I slides pp. 18–19) · Craig 2.2</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s14.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 14: frame B turned by theta about Z A; find the rotation matrix">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 14 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 14 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">เมทริกซ์ใดเป็นเมทริกซ์การหมุน</h2><h2 data-l="en">Which of these matrices are rotations?</h2>
+    <div class="src" data-l="th">แบบฝึกใหม่ประกอบสไลด์หน้า 12 · ภาพวาดคอลัมน์ทั้งสามของเมทริกซ์ที่เลือกเป็นลูกศร X (แดง) Y (เขียว) Z (น้ำเงิน)</div><div class="src" data-l="en">New practice for slide p. 12 · the picture draws the three columns of the chosen matrix as arrows X (red), Y (green), Z (blue)</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div id="opt3" style="padding:0 8px"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><table class="pick" id="pick3"></table><div class="pickbar"><button type="button" class="btn on" id="chk3"></button><span id="res3"></span></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="tB">
+  <div class="prob-head"><span class="prob-no">B</span><div><h2 data-l="th">เครื่องมือ: การบรรยายเฟรม {B} = {ᴬ<sub>B</sub>R, ᴬP<sub>BORG</sub>}</h2><h2 data-l="en">Tool: the description of a frame {B} = {ᴬ<sub>B</sub>R, ᴬP<sub>BORG</sub>}</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 6 และ 16–17 · Craig 2.2 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, pp. 6 and 16–17 · Craig 2.2 · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvB"></canvas><div id="optB" style="padding:0 8px"></div><div class="ctl" id="ctlB"></div><div class="readout" id="roB"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch2/s16.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 16: a frame is described by a rotation matrix and the position of its origin">
+      <figcaption data-l="th">สไลด์หน้า 16 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 16 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">ตัวเลขหกตัวในแถบเลื่อน (ตำแหน่ง 3 การหมุน 3) กำหนดเฟรม {B} ได้ครบ ตรงกับ 6 องศาอิสระของวัตถุแข็งเกร็ง (สไลด์หน้า 6) แต่การบรรยายเฟรมใช้ตัวเลข 12 ตัว: เมทริกซ์ 9 ตัว (มีเงื่อนไข 6 ข้อ) และเวกเตอร์ 3 ตัว ลองเปิด "จุดสามจุด": ระยะระหว่างจุดทั้งสามไม่เปลี่ยนเลยไม่ว่าจะเลื่อนหรือหมุนอย่างไร</p>
+      <p class="lead" data-l="en">The six slider values (3 for position, 3 for the turn) fix frame {B} completely, matching the 6 DOF of a rigid body (slide p. 6). The description itself uses 12 numbers: 9 in the matrix (with 6 conditions) and 3 in the vector. Switch on "three points": the distances between them never change, however you move or turn the frame.</p></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — คอลัมน์หรือแถว</h3>
+    <ol><li>ในเครื่องมือ A เลือกภาพฉายของ Y<sub>B</sub> แล้วอ่านตัวเลขสามตัว: ตรงกับคอลัมน์ที่ 2 ไม่ใช่แถวที่ 2</li><li>แถวที่ 1 ของเมทริกซ์คือแกน X<sub>A</sub> เมื่อมองจาก {B} ซึ่งก็คือคอลัมน์ที่ 1 ของ \({}^{B}_{A}R = {}^{A}_{B}R^T\)</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — เครื่องหมายลบของ R<sub>Y</sub></h3>
+    <ol><li>ในเครื่องมือ A ตั้งการหมุนรอบ Y<sub>A</sub> อย่างเดียว 30° แล้วดูช่อง r<sub>13</sub> กับ r<sub>31</sub>: บวกที่ r<sub>13</sub> ลบที่ r<sub>31</sub> กลับกับ R<sub>X</sub> และ R<sub>Z</sub></li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ภาพสะท้อนในกระจก</h3>
+    <ol><li>ในข้อ 3 เลือกเมทริกซ์ (c): ลูกศรทั้งสามยาวเท่ากันและตั้งฉากกัน แต่ใช้กฎมือขวากับ X และ Y แล้วนิ้วโป้งชี้ทางตรงข้ามกับ Z</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 2 หน้า 5–17 (ภาพอยู่ในหน้านี้แล้ว) · Craig 2.1–2.2 · สไลด์เดิม Part I หน้า 3–21</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — columns or rows?</h3>
+    <ol><li>In tool A choose the projection of Y<sub>B</sub> and read its three numbers: they are column 2, not row 2.</li><li>Row 1 of the matrix is X<sub>A</sub> seen from {B}, which is column 1 of \({}^{B}_{A}R = {}^{A}_{B}R^T\).</li></ol></div>
+  <div class="card"><h3>Try this 2 — the minus sign of R<sub>Y</sub></h3>
+    <ol><li>In tool A turn about Y<sub>A</sub> only, by 30°, and look at r<sub>13</sub> and r<sub>31</sub>: plus at r<sub>13</sub>, minus at r<sub>31</sub>, the other way round from R<sub>X</sub> and R<sub>Z</sub>.</li></ol></div>
+  <div class="card"><h3>Try this 3 — a mirror image</h3>
+    <ol><li>In problem 3 choose matrix (c): the three arrows have equal length and are at right angles, but the right-hand rule on X and Y points the thumb against Z.</li></ol>
+    <div class="book">Source: chapter 2 slides, pp. 5–17 (the pictures are on this page) · Craig 2.1–2.2 · old Part I slides pp. 3–21</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, E = CH2.EX, M = (R, o) => CH2.htmlM(R, 3, { cls: CH2.R3cls, ...(o || {}) }), TM = (R, o) => CH2.texM(R, 3, { cols: [CH2.COL.x, CH2.COL.y, CH2.COL.z], ...(o || {}) });
+const checks = R => { const c = [0, 1, 2].map(j => Math.hypot(...RB.col(R, j))), d = [[0, 1], [1, 2], [2, 0]].map(([a, b]) => RB.dot(RB.col(R, a), RB.col(R, b))), det = RB.det3(R);
+  return { c, d, det, ok: c.every(x => Math.abs(x - 1) < 1e-6) && d.every(x => Math.abs(x) < 1e-6) && Math.abs(det - 1) < 1e-6 }; };
+const checkLine = R => { const k = checks(R), ok = (b) => b ? '✓' : '✗';
+  return `<div class="term">|X<sub>B</sub>|, |Y<sub>B</sub>|, |Z<sub>B</sub>| = ${k.c.map(x => u(x, 3)).join(', ')} ${ok(k.c.every(x => Math.abs(x - 1) < 1e-6))} · ${t('ผลคูณจุดระหว่างคอลัมน์', 'dot products of columns')} = ${k.d.map(x => u(x, 3)).join(', ')} ${ok(k.d.every(x => Math.abs(x) < 1e-6))} · det = ${u(k.det, 3)} ${ok(Math.abs(k.det - 1) < 1e-6)}</div>`; };
+
+/* ---------- A: turn a frame, read its matrix ---------- */
+const SA = { al: rad(40), be: rad(-20), ga: rad(25), body: true, proj: 0 }, roA = document.getElementById('roA');
+const readA = () => { const R = RB.Rzyx(SA.al, SA.be, SA.ga); roA.innerHTML = `<div class="live"><span class="eq">ᴬ<sub>B</sub>R =</span>${M(R)}</div>` + checkLine(R); };
+const ctlA = document.getElementById('ctlA');
+ui.slider(ctlA, { id: 'aG', label: t('หมุนรอบ X<sub>A</sub> (γ)', 'turn about X<sub>A</sub> (γ)'), min: -180, max: 180, step: 1, value: 25, fmt: v => `${v}°`, oninput: v => { SA.ga = rad(v); readA(); } });
+ui.slider(ctlA, { id: 'aB', label: t('หมุนรอบ Y<sub>A</sub> (β)', 'turn about Y<sub>A</sub> (β)'), min: -90, max: 90, step: 1, value: -20, fmt: v => `${v}°`, oninput: v => { SA.be = rad(v); readA(); } });
+ui.slider(ctlA, { id: 'aA', label: t('หมุนรอบ Z<sub>A</sub> (α)', 'turn about Z<sub>A</sub> (α)'), min: -180, max: 180, step: 1, value: 40, fmt: v => `${v}°`, oninput: v => { SA.al = rad(v); readA(); } });
+const optA = document.getElementById('optA');
+ui.radio(optA, [{ id: '-1', label: t('ไม่มีภาพฉาย', 'no projection') }, { id: '0', label: t('ภาพฉายของ X_B', 'projection of X_B'), on: true }, { id: '1', label: t('ของ Y_B', 'of Y_B') }, { id: '2', label: t('ของ Z_B', 'of Z_B') }], id => { SA.proj = +id; });
+ui.buttons(optA, [{ id: 'bodyA', label: t('กล่อง ✓', 'block ✓'), on: true, onclick: el => { SA.body = !SA.body; el.classList.toggle('on', SA.body); el.textContent = t('กล่อง ', 'block ') + (SA.body ? '✓' : '✗'); } }, { label: t('↺ ตั้งศูนย์', '↺ reset'), onclick: () => { SA.al = SA.be = SA.ga = 0; ['aA', 'aB', 'aG'].forEach(id => { const el = document.getElementById(id); el.value = 0; el.dispatchEvent(new Event('input')); }); } }]);
+optA.querySelectorAll('button').forEach(b => { b.innerHTML = b.textContent.replace(/([XYZ])_B/, '$1<sub>B</sub>'); });
+readA(); CH2.sim('cvA', SA, 'orient', { aspect: 0.82, maxH: 540 });
+
+/* ---------- 1: read R from a picture ---------- */
+const S1 = { R: E.ex1.R }; CH2.sim('cv1', S1, 'orient', { aspect: 0.82, maxH: 460 });
+document.getElementById('note1').innerHTML = t('เฟรมเทาคือ {A} เฟรมสีคือ {B} มีจุดกำเนิดเดียวกัน', 'Grey: {A}; coloured: {B}; same origin');
+CH2.matAsk(document.getElementById('ask1'), { label: '\\({}^{A}_{B}R =\\)', ans: E.ex1.R, check: M2 => { const T = RB.tr(E.ex1.R); return M2.every((r, i) => r.every((x, j) => Math.abs(x - T[i][j]) < 0.006)) ? t('คุณเขียนแกนของ {B} เป็น<b>แถว</b> ต้องเขียนเป็น<b>คอลัมน์</b>', 'You wrote the axes of {B} as <b>rows</b>; they go in as <b>columns</b>') : ''; } });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>อ่านแกน X<sub>B</sub></b>: ทับแกน X<sub>A</sub> พอดี', '<b>Read X<sub>B</sub></b>: it lies on X<sub>A</sub>'), tex: '{}^{A}\\hat X_B = (1,\\ 0,\\ 0)^T' },
+  { why: t('<b>อ่านแกน Y<sub>B</sub> และ Z<sub>B</sub></b>: Y<sub>B</sub> ชี้ตาม Z<sub>A</sub>, Z<sub>B</sub> ชี้ตาม −Y<sub>A</sub>', '<b>Read Y<sub>B</sub> and Z<sub>B</sub></b>: Y<sub>B</sub> points along Z<sub>A</sub>, Z<sub>B</sub> along −Y<sub>A</sub>'), tex: '{}^{A}\\hat Y_B = (0,\\ 0,\\ 1)^T, \\quad {}^{A}\\hat Z_B = (0,\\ -1,\\ 0)^T' },
+  { why: t('<b>วางเป็นคอลัมน์</b> (สีตามแกน)', '<b>Stack them as columns</b> (coloured by axis)'), tex: `{}^{A}_{B}R = ${TM(E.ex1.R)} = R_X(90^\\circ)` },
+  { why: t('<b>ตรวจ</b>: คอลัมน์ยาว 1 ตั้งฉากกัน และ det = 1·(0·0 − (−1)·1) = +1', '<b>Check</b>: unit, orthogonal columns and det = 1·(0·0 − (−1)·1) = +1') }],
+  answer: t('\\({}^{A}_{B}R = R_X(90^\\circ)\\): {B} คือ {A} ที่หมุนรอบแกน X ไป 90°', '\\({}^{A}_{B}R = R_X(90^\\circ)\\): {B} is {A} turned 90° about X') });
+
+/* ---------- 2: a turn about Z ---------- */
+const S2 = { R: RB.Rz(rad(30)), arcZ: true, el: 38 }, ro2 = document.getElementById('ro2'); let th2 = 30;
+const read2 = () => { S2.R = RB.Rz(rad(th2)); ro2.innerHTML = `<div class="live"><span class="eq">R<sub>Z</sub>(${th2}°) =</span>${M(S2.R)}</div>`; };
+ui.slider(document.getElementById('ctl2'), { id: 'th2', label: 'θ', min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { th2 = v; read2(); } }); read2();
+CH2.sim('cv2', S2, 'orient', { aspect: 0.82, maxH: 480 });
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('θ = 30°: r₁₁ =', 'θ = 30°: r₁₁ ='), ok: x => Math.abs(x - 0.866) < 0.006, w: 5 }, { label: 'r₂₁ =', ok: x => Math.abs(x - 0.5) < 0.006, w: 5 }, { label: 'r₁₂ =', ok: x => Math.abs(x + 0.5) < 0.006, w: 5 }],
+  check: v => Math.abs(v[2] - 0.5) < 0.006 ? t('r₁₂ คือส่วน X<sub>A</sub> ของ Y<sub>B</sub> ซึ่งชี้ไปทาง −X<sub>A</sub> เครื่องหมายต้องเป็นลบ', 'r₁₂ is the X<sub>A</sub> part of Y<sub>B</sub>, which leans towards −X<sub>A</sub>: it must be negative') : '' });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>X<sub>B</sub> อยู่ในระนาบ X–Y</b> ทำมุม θ กับ X<sub>A</sub>', '<b>X<sub>B</sub> stays in the X–Y plane</b>, at θ from X<sub>A</sub>'), tex: '{}^{A}\\hat X_B = (\\cos\\theta,\\ \\sin\\theta,\\ 0)^T' },
+  { why: t('<b>Y<sub>B</sub> คือ X<sub>B</sub> ที่หมุนต่ออีก 90°</b> และ Z<sub>B</sub> ไม่ขยับ', '<b>Y<sub>B</sub> is X<sub>B</sub> turned another 90°</b>, and Z<sub>B</sub> does not move'), tex: '{}^{A}\\hat Y_B = (-\\sin\\theta,\\ \\cos\\theta,\\ 0)^T, \\quad {}^{A}\\hat Z_B = (0,\\ 0,\\ 1)^T' },
+  { why: t('<b>วางเป็นคอลัมน์</b>', '<b>Columns side by side</b>'), tex: `R_Z(\\theta) = \\begin{bmatrix} \\textcolor{${CH2.COL.x}}{\\cos\\theta} & \\textcolor{${CH2.COL.y}}{-\\sin\\theta} & \\textcolor{${CH2.COL.z}}{0} \\\\ \\textcolor{${CH2.COL.x}}{\\sin\\theta} & \\textcolor{${CH2.COL.y}}{\\cos\\theta} & \\textcolor{${CH2.COL.z}}{0} \\\\ \\textcolor{${CH2.COL.x}}{0} & \\textcolor{${CH2.COL.y}}{0} & \\textcolor{${CH2.COL.z}}{1} \\end{bmatrix}` },
+  { why: t('<b>แทน θ = 30°</b>', '<b>Put in θ = 30°</b>'), tex: `R_Z(30^\\circ) = ${TM(RB.Rz(rad(30)))}` }],
+  answer: t('ทำแบบเดียวกันรอบ X และ Y ได้ R<sub>X</sub>(θ) และ R<sub>Y</sub>(θ) ในสไลด์หน้า 15', 'The same reasoning about X and Y gives R<sub>X</sub>(θ) and R<sub>Y</sub>(θ) on slide p. 15') });
+
+/* ---------- 3: which matrices are rotations? ---------- */
+const MS = [{ k: 'a', M: [[0, -1, 0], [1, 0, 0], [0, 0, 1]], rot: true, why: t('(a) คอลัมน์ยาว 1 ตั้งฉากกัน det = +1: <b>เป็นการหมุน</b> คือ R<sub>Z</sub>(90°)', '(a) unit, orthogonal columns, det = +1: <b>a rotation</b>, R<sub>Z</sub>(90°)') },
+  { k: 'b', M: [[0.6, -0.8, 0], [0.8, 0.6, 0], [0, 0, 2]], rot: false, why: t('(b) คอลัมน์ที่ 3 ยาว 2: <b>ไม่ใช่</b> (ยืดตามแกน Z ด้วย)', '(b) column 3 has length 2: <b>not</b> a rotation (it also stretches along Z)') },
+  { k: 'c', M: [[0, 1, 0], [1, 0, 0], [0, 0, 1]], rot: false, why: t('(c) ผ่านสองข้อแรก แต่ det = −1: <b>ไม่ใช่</b> เป็นภาพสะท้อน (สลับ X กับ Y)', '(c) passes the first two checks but det = −1: <b>not</b> a rotation, a mirror image (it swaps X and Y)') },
+  { k: 'd', M: [[0.6, 0.8, 0], [0.8, 0.6, 0], [0, 0, 1]], rot: false, why: t('(d) คอลัมน์ยาว 1 แต่ X·Y = 0.96 ≠ 0: <b>ไม่ใช่</b> (แกนไม่ตั้งฉาก)', '(d) unit columns but X·Y = 0.96 ≠ 0: <b>not</b> a rotation (the axes are not at right angles)') }];
+const S3s = { R: MS[0].M, nb: '' }, ro3 = document.getElementById('ro3');
+const show3 = i => { S3s.R = MS[i].M; ro3.innerHTML = `<div class="live"><span class="eq">(${MS[i].k}) =</span>${M(MS[i].M)}</div>` + checkLine(MS[i].M); };
+ui.radio(document.getElementById('opt3'), MS.map((m, i) => ({ id: String(i), label: t('วาด ', 'draw ') + `(${m.k})`, on: !i })), id => show3(+id)); show3(0);
+CH2.sim('cv3', S3s, 'orient', { aspect: 0.8, maxH: 460 });
+const pk = document.getElementById('pick3');
+pk.innerHTML = `<tr><th>${t('เมทริกซ์', 'matrix')}</th><th>${t('เป็นการหมุน?', 'a rotation?')}</th></tr>` + MS.map((m, i) => `<tr data-i="${i}"><td>(${m.k}) ${M(m.M, { cls: null })}</td><td><select aria-label="rotation"><option value="">—</option><option value="1">${t('ใช่', 'yes')}</option><option value="0">${t('ไม่ใช่', 'no')}</option></select></td></tr>`).join('');
+const chk3 = document.getElementById('chk3'); chk3.textContent = t('ตรวจ', 'Check');
+chk3.addEventListener('click', () => { let ok = 0; pk.querySelectorAll('tr[data-i]').forEach(tr => { const m = MS[+tr.dataset.i], s = tr.querySelector('select'), g = s.value !== '' && (s.value === '1') === m.rot; if (g) ok++; s.classList.toggle('ok', g); s.classList.toggle('no', !g); });
+  document.getElementById('res3').innerHTML = ok === 4 ? `<span class="pill good">✓</span> ${t('ถูกทุกข้อ!', 'All correct!')}` : `<span class="pill bad">${ok} / 4</span> ${t('ใช้สามข้อตรวจใต้ภาพ หรือเปิดเฉลยทีละข้อ', 'use the three checks under the picture, or open the reasons one by one')}`; });
+LS.stepper(document.getElementById('st3'), { steps: MS.map((m, i) => ({ why: m.why, onShow: () => { show3(i); } })), answer: t('มีเพียง (a) ที่เป็นเมทริกซ์การหมุน', 'Only (a) is a rotation matrix') });
+
+/* ---------- B: description of a frame ---------- */
+const SB = { p: [-0.05, 0.85, 0.32], yaw: 35, tilt: 18, pts3: false }, roB = document.getElementById('roB');
+const RBm = () => RB.mm(RB.Rz(rad(SB.yaw)), RB.Rx(rad(SB.tilt)));
+const readB = () => { SB.R = RBm(); roB.innerHTML = `<div class="live"><span class="eq">{B} = {</span>${M(SB.R)}<span class="eq">,</span>${CH2.htmlM(SB.p.map(x => [x]), 2, { cls: ['mp'] })}<span class="eq">}</span></div><div class="term">${t('ซ้าย: ᴬ<sub>B</sub>R (การวางตัว) · ขวา: ᴬP<sub>BORG</sub> (ตำแหน่งจุดกำเนิด, m)', 'left: ᴬ<sub>B</sub>R (orientation) · right: ᴬP<sub>BORG</sub> (origin, m)')}</div>`; };
+const ctlB = document.getElementById('ctlB');
+[['x', 0, -0.6, 0.8], ['y', 1, -0.2, 1.0], ['z', 2, 0, 0.7]].forEach(([n, i, lo, hi]) => ui.slider(ctlB, { id: 'p' + n, label: `ᴬP<sub>BORG</sub> ${n}`, min: lo, max: hi, step: 0.01, value: SB.p[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SB.p[i] = v; readB(); } }));
+ui.slider(ctlB, { id: 'yawB', label: t('หมุนรอบแกนตั้ง', 'turn about the vertical'), min: -180, max: 180, step: 1, value: 35, fmt: v => `${v}°`, oninput: v => { SB.yaw = v; readB(); } });
+ui.slider(ctlB, { id: 'tiltB', label: t('เอียง', 'tilt'), min: -90, max: 90, step: 1, value: 18, fmt: v => `${v}°`, oninput: v => { SB.tilt = v; readB(); } });
+ui.buttons(document.getElementById('optB'), [{ id: 'pts3', label: t('จุดสามจุด ✗', 'three points ✗'), onclick: el => { SB.pts3 = !SB.pts3; el.classList.toggle('on', SB.pts3); el.textContent = t('จุดสามจุด ', 'three points ') + (SB.pts3 ? '✓' : '✗'); } }]);
+readB(); CH2.sim('cvB', SB, 'desc', { aspect: 0.78, maxH: 520 });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="Numeric Tests">ชุดทดสอบตัวเลข</title>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script><script src="assets/tests.js?v=11"></script>
+<style>.t-ok{color:var(--good)}.t-bad{color:var(--bad);font-weight:700}table.tbl td{font-family:"IBM Plex Mono",monospace;font-size:13px}</style>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1><span data-l="th">ชุดทดสอบตัวเลข </span><span class="en">Numeric tests — robot.js, ch1.js and ch2.js against hand calculations, Craig and the slide answers</span></h1>
+<p class="sub" data-l="th">ทุกหน้าใช้ไฟล์ robot.js และ ch1.js ชุดเดียวกับที่วาดรูปลงสไลด์ หน้านี้ตรวจทั้งสองไฟล์กับค่าที่คำนวณด้วยมือและคำตอบในสไลด์ เปิดแล้วต้องขึ้น <b>ALL PASS</b> (ชุดเดียวกันรันด้วย deno ได้: <code>deno run --allow-read IRE_Web/assets/run_tests.mjs</code>)</p>
+<p class="sub" data-l="en">Every page uses the same robot.js and ch1.js that draw the slide figures. This page checks both against hand calculations and the answers on the slides. It must show <b>ALL PASS</b> (the same set runs in deno: <code>deno run --allow-read IRE_Web/assets/run_tests.mjs</code>).</p>
+<div id="sum" class="status"></div>
+<div style="overflow-x:auto"><table class="tbl" id="tbl"><thead><tr><th>#</th><th>test</th><th>got</th><th>expected</th><th></th></tr></thead><tbody></tbody></table></div>
+</div>
+<script>
+(function(){
+const rows = []; let n = 0, bad = 0;
+RBTESTS((name, got, exp, tol = 1e-6) => { n++; const ok = typeof exp === 'string' ? String(got) === exp : Math.abs(+got - exp) <= tol; if (!ok) bad++;
+  rows.push(`<tr><td>${n}</td><td>${name}</td><td>${typeof got === 'number' ? +got.toPrecision(10) : got}</td><td>${exp}</td><td class="${ok ? 't-ok' : 't-bad'}">${ok ? 'PASS' : 'FAIL'}</td></tr>`); });
+document.querySelector('#tbl tbody').innerHTML = rows.join('');
+document.getElementById('sum').innerHTML = bad ? `<span class="pill bad">${bad} FAIL</span> ${n - bad} / ${n}` : `<span class="pill good">ALL PASS</span> ${n} / ${n}`;
+})();
+</script>
+</body>
+</html>

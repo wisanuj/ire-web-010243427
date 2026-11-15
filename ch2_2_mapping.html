@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="2.2 — Mappings between frames">2.2 — การส่งจุดระหว่างเฟรม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">การส่งจุดระหว่างเฟรม <span class="en">Mappings — one point, two descriptions</span></h1>
+<h1 data-l="en">Mappings between frames <span class="en">One point, two descriptions</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s22.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 22: a general frame: A P equals the rotation matrix times B P plus A P BORG">
+    <figcaption data-l="th">สไลด์บทที่ 2 หน้า 22 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 2 slides, p. 22 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">เรารู้ตำแหน่งของจุดในเฟรม {B} (เช่น จุดบนชิ้นงานที่วัดจากเฟรมของชิ้นงาน) และรู้ว่า {B} อยู่ที่ไหนใน {A} ต้องการตำแหน่งของจุดเดียวกันใน {A} เรียกว่า<b>การส่ง (mapping)</b>: จุดไม่ขยับ เปลี่ยนแค่เฟรมที่ใช้เขียน หน้านี้ครอบคลุมสไลด์หน้า 19–24 (Craig 2.3) มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">We know a point in frame {B} (say a point of a part, measured in the part's own frame) and where {B} is in {A}; we want the same point in {A}. This is a <b>mapping</b>: the point does not move, only the frame it is written in changes. This page covers slides pp. 19–24 (Craig 2.3). It has <b>one tool (A)</b> and <b>3 problems</b>.</p>
+    <div class="equation-box">$$ {}^{A}P = {}^{A}_{B}R\,{}^{B}P + {}^{A}P_{BORG} \quad\Longleftrightarrow\quad \begin{bmatrix} {}^{A}P \\ 1 \end{bmatrix} = \begin{bmatrix} {}^{A}_{B}R & {}^{A}P_{BORG} \\ 0\;0\;0 & 1 \end{bmatrix} \begin{bmatrix} {}^{B}P \\ 1 \end{bmatrix} $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>เฟรมเลื่อน</b> (แกนขนานกัน): \({}^{A}P = {}^{B}P + {}^{A}P_{BORG}\) บวกกันได้เพราะเขียนในทิศเดียวกัน</li><li><b>เฟรมหมุน</b> (จุดกำเนิดเดียวกัน): \({}^{A}P = {}^{A}_{B}R\,{}^{B}P\) ตัวห้อยของ R ตัดกับตัวยกของ P</li><li><b>กรณีทั่วไป</b>: หมุนก่อน แล้วบวกตำแหน่งจุดกำเนิด รวมเป็นเมทริกซ์ 4 × 4 ตัวเดียว \({}^{A}P = {}^{A}_{B}T\,{}^{B}P\) (ต่อเลข 1 ท้ายเวกเตอร์)</li><li>ย้อนกลับจาก {A} ไป {B}: ลบตำแหน่งจุดกำเนิดก่อน แล้วหมุนกลับด้วย \(R^T\)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Translated frame</b> (parallel axes): \({}^{A}P = {}^{B}P + {}^{A}P_{BORG}\); the vectors add because they are written along the same directions.</li><li><b>Rotated frame</b> (same origin): \({}^{A}P = {}^{A}_{B}R\,{}^{B}P\); the subscript of R cancels the superscript of P.</li><li><b>General case</b>: turn first, then add the origin; one 4 × 4 matrix does both, \({}^{A}P = {}^{A}_{B}T\,{}^{B}P\) (append a 1 to the vectors).</li><li>Back from {A} to {B}: subtract the origin first, then turn back with \(R^T\).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>ส่งจุดระหว่างสองเฟรม</a><a href="#ex1"><b>1</b>Craig 2.1 เฟรมหมุน</a><a href="#ex2"><b>2</b>Craig 2.2 เฟรมทั่วไป</a><a href="#ex3"><b>3</b>ย้อนจาก {A} ไป {B}</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Map a point between two frames</a><a href="#ex1"><b>1</b>Craig 2.1, rotated frame</a><a href="#ex2"><b>2</b>Craig 2.2, general frame</a><a href="#ex3"><b>3</b>Back from {A} to {B}</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: ส่งจุดจาก {B} ไป {A}</h2><h2 data-l="en">Tool: map a point from {B} to {A}</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 19–23 · Craig 2.3 · <b>ลากในภาพเพื่อหมุนมุมมอง</b></div><div class="src" data-l="en">Chapter 2 slides, pp. 19–23 · Craig 2.3 · <b>drag in the picture to turn the view</b></div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div id="modeA" style="padding:0 8px"></div><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img id="slA" src="slides/ch2/s22.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide of the chosen case"><figcaption id="capA"></figcaption></figure>
+      <p class="lead" data-l="th">ลูกศรสีส้มคือตำแหน่งจุดกำเนิดของ {B} (ᴬP<sub>BORG</sub>) สีม่วงคือจุด P ที่วัดจาก {B} (ᴮP) สีชมพูคือจุดเดียวกันที่วัดจาก {A} (ᴬP) ลูกศรทั้งสามเป็นสามเหลี่ยมเสมอ แต่บวกตัวเลขของสีส้มกับสีม่วงตรง ๆ ได้ก็ต่อเมื่อ {B} ไม่หมุน (โหมด "เลื่อน") ในโหมดอื่นต้องหมุน ᴮP ด้วย ᴬ<sub>B</sub>R ก่อน ดูตัวเลขด้านล่างภาพ</p>
+      <p class="lead" data-l="en">Orange: the origin of {B} (ᴬP<sub>BORG</sub>). Purple: the point P measured from {B} (ᴮP). Pink: the same point measured from {A} (ᴬP). The three arrows always form a triangle, but the numbers of the orange and purple arrows add directly only when {B} is not turned ("translated" mode). Otherwise ᴮP must first be turned by ᴬ<sub>B</sub>R: see the numbers under the picture.</p></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">เมทริกซ์การแปลงเอกพันธุ์ (สไลด์หน้า 23)</h2><h2 data-l="en">The homogeneous transform (slide p. 23)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch2/s23.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 23: the 4 by 4 homogeneous transform holds the rotation and the translation"><figcaption data-l="th">สไลด์หน้า 23 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 23 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">ต่อเลข 1 ท้ายเวกเตอร์ตำแหน่งแล้ววาง R กับ P<sub>BORG</sub> ไว้ในเมทริกซ์ 4 × 4 ตัวเดียว แถวที่ 1–3 ของการคูณให้ \({}^{A}_{B}R\,{}^{B}P + {}^{A}P_{BORG}\) แถวที่ 4 ให้ 1 = 1 ข้อดีคือการแปลงหลายขั้นกลายเป็นการคูณเมทริกซ์ต่อกัน (หน้า 2.3) ซึ่งเป็นหัวใจของจลนศาสตร์ไปข้างหน้าในบทที่ 3 ระวัง: \({}^{A}_{B}T\) ไม่ใช่เมทริกซ์การหมุน จึงหาผกผันด้วยการทรานสโพสไม่ได้</p>
+  <p class="sub" data-l="en">Append a 1 to the position vectors and put R and P<sub>BORG</sub> into one 4 × 4 matrix. Rows 1–3 of the product give \({}^{A}_{B}R\,{}^{B}P + {}^{A}P_{BORG}\); row 4 gives 1 = 1. Several steps then become a product of matrices (page 2.3), the heart of forward kinematics in chapter 3. Careful: \({}^{A}_{B}T\) is not a rotation matrix, so it does not invert by transposing.</p>
+</div>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">Craig ตัวอย่าง 2.1: จุดในเฟรมที่หมุน</h2><h2 data-l="en">Craig example 2.1: a point in a rotated frame</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 21 (สไลด์เดิม Part I หน้า 25) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, p. 21 (old Part I slide p. 25) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s21.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 21: frame B turned 30 degrees about Z A, B P = (0, 2, 0); find A P">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 21 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 21 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">Craig ตัวอย่าง 2.2: จุดในเฟรมที่ทั้งเลื่อนและหมุน</h2><h2 data-l="en">Craig example 2.2: a point in a moved and turned frame</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 2 หน้า 24 (สไลด์เดิม Part I หน้า 28) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 2 slides, p. 24 (old Part I slide p. 28) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch2/s24.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 24: frame B turned 30 degrees and moved to (10, 5, 0); B P = (3, 7, 0); find A P">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 24 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 24 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">ย้อนกลับ: จาก ᴬP หา ᴮP</h2><h2 data-l="en">The other way: from ᴬP to ᴮP</h2>
+    <div class="src" data-l="th">แบบฝึกใหม่ ใช้เฟรมเดียวกับข้อ 2 · ปูทางสู่การแปลงผกผัน (หน้า 2.3)</div><div class="src" data-l="en">New practice with the frames of problem 2 · leads to the inverse transform (page 2.3)</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+      <p data-l="th">{B} หมุนรอบ Z<sub>A</sub> 30° และจุดกำเนิดอยู่ที่ \({}^{A}P_{BORG} = (10, 5, 0)^T\) (เหมือนข้อ 2) จุด Q อยู่ที่ \({}^{A}Q = (12, 10, 0)^T\) จงหา \({}^{B}Q\)</p>
+      <p data-l="en">{B} is turned 30° about Z<sub>A</sub> and its origin is at \({}^{A}P_{BORG} = (10, 5, 0)^T\) (as in problem 2). A point Q is at \({}^{A}Q = (12, 10, 0)^T\). Find \({}^{B}Q\).</p></div>
+      <div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — บวกเวกเตอร์ผิดเฟรม</h3>
+    <ol><li>ในเครื่องมือ A เลือกโหมด "ทั่วไป" แล้วเทียบ ᴮP + ᴬP<sub>BORG</sub> (บวกตรง ๆ) กับ ᴬP: ไม่เท่ากัน เพราะ ᴮP เขียนตามแกนของ {B} ซึ่งหันต่างจาก {A}</li><li>ตั้งมุมทั้งสองเป็น 0: สองค่าเท่ากัน กลายเป็นกรณีเลื่อนอย่างเดียว</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — การหมุนไม่เปลี่ยนความยาว</h3>
+    <ol><li>ในโหมด "หมุน" ดูความยาว |ᴬP| กับ |ᴮP| ใต้ภาพ: เท่ากันเสมอ เพราะเวกเตอร์เดียวกันแค่เขียนในอีกเฟรม</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ย้อนกลับต้องลบก่อน</h3>
+    <ol><li>ในข้อ 3 ลองหมุนกลับก่อนแล้วค่อยลบ: ได้คำตอบผิด เพราะ ᴬP<sub>BORG</sub> เขียนใน {A} ต้องลบใน {A} ก่อนหมุนกลับ</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 2 หน้า 18–24 (ภาพอยู่ในหน้านี้แล้ว) · Craig 2.3 · สไลด์เดิม Part I หน้า 22–28</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — adding vectors from different frames</h3>
+    <ol><li>In tool A choose "general" and compare ᴮP + ᴬP<sub>BORG</sub> (added directly) with ᴬP: they differ, because ᴮP is written along the axes of {B}, which point elsewhere.</li><li>Set both angles to 0: the two agree, the translation-only case.</li></ol></div>
+  <div class="card"><h3>Try this 2 — a rotation keeps lengths</h3>
+    <ol><li>In "rotated" mode compare |ᴬP| and |ᴮP| under the picture: always equal, since it is one vector written in another frame.</li></ol></div>
+  <div class="card"><h3>Try this 3 — going back, subtract first</h3>
+    <ol><li>In problem 3 try turning back first and subtracting afterwards: the answer is wrong, because ᴬP<sub>BORG</sub> is written in {A} and must be subtracted in {A}, before turning back.</li></ol>
+    <div class="book">Source: chapter 2 slides, pp. 18–24 (the pictures are on this page) · Craig 2.3 · old Part I slides pp. 22–28</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, E = CH2.EX, M = (R, d = 3) => CH2.htmlM(R, d, { cls: CH2.R3cls }), V = (p, cls = 'mp', d = 3) => CH2.htmlM(p.map(x => [x]), d, { cls: [cls] });
+const TM = (R, o) => CH2.texM(R, 3, { cols: [CH2.COL.x, CH2.COL.y, CH2.COL.z], ...(o || {}) }), TV = p => CH2.texV(p, 3);
+const T4 = T => CH2.htmlM(T, 3, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true });
+
+/* ---------- A: map a point ---------- */
+const SA = { mode: 'gen', th: 35, tilt: 15, p: [-0.05, 0.78, 0.2], bp: [0.1, 0.3, 0.22], tgt0: [0, 0.45, 0.2] }, roA = document.getElementById('roA'), slA = document.getElementById('slA'), capA = document.getElementById('capA');
+const SLIDE = { trans: 19, rot: 20, gen: 22 };
+const apply = () => { SA.R = SA.mode === 'trans' ? RB.I3() : RB.mm(RB.Rz(rad(SA.th)), RB.Rx(rad(SA.tilt))); SA.p = SA.mode === 'rot' ? [0, 0, 0] : SA.pp; };
+SA.pp = SA.p.slice();
+const readA = () => { apply(); const ap = RB.add(RB.mv(SA.R, SA.bp), SA.p), naive = RB.add(SA.bp, SA.p);
+  roA.innerHTML = `<div class="live"><span class="eq">ᴬP =</span>${M(SA.R)}${V(SA.bp, 'mp')}<span class="eq">+</span>${V(SA.p, 'mp')}<span class="eq">=</span>${V(ap, 'mp')}</div>` +
+    `<div class="term">${t('ซ้ายไปขวา', 'left to right')}: ᴬ<sub>B</sub>R · ᴮP + ᴬP<sub>BORG</sub> = ᴬP (m) · |ᴮP| = ${u(Math.hypot(...SA.bp), 3)}, |ᴬP| = ${u(Math.hypot(...ap), 3)} · ${t('บวกตรง ๆ', 'added directly')} ᴮP + ᴬP<sub>BORG</sub> = (${naive.map(x => u(x, 3)).join(', ')}) ${Math.hypot(...naive.map((x, i) => x - ap[i])) < 1e-6 ? '= ᴬP ✓' : '≠ ᴬP ✗'}</div>` +
+    `<div class="live"><span class="eq">ᴬ<sub>B</sub>T =</span>${T4(RB.T(SA.R, SA.p))}</div>`;
+  slA.src = `slides/ch2/s${SLIDE[SA.mode]}.webp`; capA.textContent = t(`สไลด์หน้า ${SLIDE[SA.mode]} · แตะรูปเพื่อขยาย`, `Slide p. ${SLIDE[SA.mode]} · tap to enlarge`); };
+ui.radio(document.getElementById('modeA'), [{ id: 'trans', label: t('เลื่อน', 'translated') }, { id: 'rot', label: t('หมุน', 'rotated') }, { id: 'gen', label: t('ทั่วไป', 'general'), on: true }], id => { SA.mode = id; readA(); });
+const ctlA = document.getElementById('ctlA');
+ui.slider(ctlA, { id: 'thA', label: t('หมุนรอบแกนตั้ง', 'turn about the vertical'), min: -180, max: 180, step: 1, value: 35, fmt: v => `${v}°`, oninput: v => { SA.th = v; readA(); } });
+ui.slider(ctlA, { id: 'tiltA', label: t('เอียง', 'tilt'), min: -90, max: 90, step: 1, value: 15, fmt: v => `${v}°`, oninput: v => { SA.tilt = v; readA(); } });
+[['x', 0, -0.5, 0.6], ['y', 1, 0, 1.0], ['z', 2, 0, 0.6]].forEach(([n, i, lo, hi]) => ui.slider(ctlA, { id: 'pA' + n, label: `ᴬP<sub>BORG</sub> ${n}`, min: lo, max: hi, step: 0.01, value: SA.pp[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.pp[i] = v; readA(); } }));
+[['x', 0], ['y', 1], ['z', 2]].forEach(([n, i]) => ui.slider(ctlA, { id: 'bA' + n, label: `ᴮP ${n}`, min: -0.4, max: 0.5, step: 0.01, value: SA.bp[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.bp[i] = v; readA(); } }));
+readA(); CH2.sim('cvA', SA, 'map', { aspect: 0.8, maxH: 540 });
+
+/* ---------- 1: Craig 2.1 ---------- */
+const S1 = { mode: 'rot', R: RB.Rz(rad(30)), bp: [0, 2, 0], k: 0.3, xy: true, grid: [-1.5, 1.5, -0.5, 2.5, 0.5], num: true, az: -90, el: 58, tgt0: [0.03, 0.3, 0.05], dist0: 2.6 }, ro1 = document.getElementById('ro1'); let th1 = 30;
+const read1 = () => { S1.R = RB.Rz(rad(th1)); const ap = RB.mv(S1.R, S1.bp); ro1.innerHTML = `<div class="live"><span class="eq">ᴬP = R<sub>Z</sub>(${th1}°)</span>${V(S1.bp)}<span class="eq">=</span>${V(ap)}</div>`; };
+ui.slider(document.getElementById('ctl1'), { id: 'th1', label: t('มุมที่ {B} หมุนรอบ Z<sub>A</sub>', 'turn of {B} about Z<sub>A</sub>'), min: -180, max: 180, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { th1 = v; read1(); } }); read1();
+CH2.sim('cv1', S1, 'map', { aspect: 0.8, maxH: 480 });
+LS.ask(document.getElementById('ask1'), { fields: [{ label: 'ᴬP<sub>x</sub> =', ok: x => Math.abs(x + 1) < 0.006, w: 5 }, { label: 'ᴬP<sub>y</sub> =', ok: x => Math.abs(x - 1.732) < 0.006, w: 5 }],
+  check: v => Math.abs(v[0] - 1) < 0.006 ? t('ใช้ R<sup>T</sup> แทน R หรือเปล่า? การส่งจาก {B} ไป {A} ใช้ ᴬ<sub>B</sub>R ตรง ๆ', 'Did you use Rᵀ instead of R? Mapping from {B} to {A} uses ᴬ<sub>B</sub>R itself') : '' });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>เมทริกซ์การหมุน</b>: {B} หมุนรอบ Z<sub>A</sub> 30°', '<b>The rotation matrix</b>: {B} is turned 30° about Z<sub>A</sub>'), tex: `{}^{A}_{B}R = R_Z(30^\\circ) = ${TM(RB.Rz(rad(30)))}` },
+  { why: t('<b>คูณ</b>: ᴮP = (0, 2, 0) จึงเลือกคอลัมน์ที่ 2 คูณ 2', '<b>Multiply</b>: ᴮP = (0, 2, 0) picks column 2, times 2'), tex: `{}^{A}P = {}^{A}_{B}R\\,{}^{B}P = 2\\begin{bmatrix} -0.5 \\\\ 0.866 \\\\ 0 \\end{bmatrix} = ${TV(E.ex21.ap)}` },
+  { why: t('<b>ตรวจความยาว</b>: การหมุนไม่เปลี่ยนความยาว', '<b>Check the length</b>: a rotation keeps it'), tex: '|{}^{A}P| = \\sqrt{(-1)^2 + 1.732^2} = 2 = |{}^{B}P|' }],
+  answer: t('\\({}^{A}P = (-1.000,\\ 1.732,\\ 0.000)^T\\)', '\\({}^{A}P = (-1.000,\\ 1.732,\\ 0.000)^T\\)') });
+
+/* ---------- 2: Craig 2.2 ---------- */
+const S2 = { mode: 'gen', R: RB.Rz(rad(30)), p: [10, 5, 0], bp: [3, 7, 0], k: 0.06, xy: true, grid: [0, 14, 0, 14, 2], num: true, az: -90, el: 58, tgt0: [0.4, 0.4, 0.05], dist0: 2.6 }, ro2 = document.getElementById('ro2');
+const read2 = () => { const T = RB.T(S2.R, S2.p), ap = RB.Tv(T, S2.bp); ro2.innerHTML = `<div class="live">${T4(T)}${CH2.htmlM([...S2.bp, 1].map(x => [x]), 3, { cls: ['mp'], last: true })}<span class="eq">=</span>${CH2.htmlM([...ap, 1].map(x => [x]), 3, { cls: ['mp'], last: true })}</div>`; };
+const ctl2 = document.getElementById('ctl2');
+ui.slider(ctl2, { id: 'bx2', label: 'ᴮP x', min: -6, max: 8, step: 0.5, value: 3, fmt: v => v.toFixed(1), oninput: v => { S2.bp[0] = v; read2(); } });
+ui.slider(ctl2, { id: 'by2', label: 'ᴮP y', min: -4, max: 9, step: 0.5, value: 7, fmt: v => v.toFixed(1), oninput: v => { S2.bp[1] = v; read2(); } }); read2();
+CH2.sim('cv2', S2, 'map', { aspect: 0.8, maxH: 480 });
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('ที่ ᴮP = (3, 7, 0): ᴬP<sub>x</sub> =', 'at ᴮP = (3, 7, 0): ᴬP<sub>x</sub> ='), ok: x => Math.abs(x - 9.098) < 0.006, w: 5 }, { label: 'ᴬP<sub>y</sub> =', ok: x => Math.abs(x - 12.562) < 0.006, w: 5 }],
+  check: v => Math.abs(v[0] - 13) < 0.01 ? t('13 = 3 + 10 คือการบวกตรง ๆ ต้องหมุน ᴮP ก่อน', '13 = 3 + 10 adds directly; turn ᴮP first') : (Math.abs(v[0] - (-0.902)) < 0.01 ? t('ลืมบวก ᴬP<sub>BORG</sub>', 'You forgot to add ᴬP<sub>BORG</sub>') : '') });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>สร้าง ᴬ<sub>B</sub>T</b>: ส่วนหมุน R<sub>Z</sub>(30°) ส่วนเลื่อน (10, 5, 0)', '<b>Build ᴬ<sub>B</sub>T</b>: rotation part R<sub>Z</sub>(30°), translation (10, 5, 0)'), tex: `{}^{A}_{B}T = ${CH2.texM(E.ex22.T, 3)}` },
+  { why: t('<b>แถวที่ 1</b>', '<b>Row 1</b>'), tex: '0.866(3) - 0.5(7) + 0(0) + 10(1) = 9.098' },
+  { why: t('<b>แถวที่ 2 และ 3</b>', '<b>Rows 2 and 3</b>'), tex: '0.5(3) + 0.866(7) + 5 = 12.562, \\qquad 0' },
+  { why: t('<b>คำตอบ</b> (ตรงกับฉบับผู้สอนเดิม)', '<b>Answer</b> (as in the old teacher slides)'), tex: `{}^{A}P = ${TV(E.ex22.ap)}` }],
+  answer: t('\\({}^{A}P = (9.098,\\ 12.562,\\ 0.0)^T\\)', '\\({}^{A}P = (9.098,\\ 12.562,\\ 0.0)^T\\)') });
+
+/* ---------- 3: from ᴬQ back to ᴮQ ---------- */
+const R30 = RB.Rz(rad(30)), AQ = [12, 10, 0], BQ = RB.mv(RB.tr(R30), RB.add(AQ, [-10, -5, 0]));
+const S3s = { mode: 'gen', R: R30, p: [10, 5, 0], bp: BQ, k: 0.06, xy: true, grid: [0, 14, 0, 14, 2], num: '(12, 10)', az: -90, el: 58, tgt0: [0.4, 0.4, 0.05], dist0: 2.6, lbp: { dx: 26, dy: -6, a: 'l' } };
+CH2.sim('cv3', S3s, 'map', { aspect: 0.8, maxH: 480 });
+document.getElementById('ro3').innerHTML = t('ลูกศรสีม่วง (ᴮQ) คือสิ่งที่ต้องหา: ลูกศรจากจุดกำเนิดของ {B} ถึง Q แต่ตัวเลขต้องอ่านตามแกนของ {B}', 'The purple arrow (ᴮQ) is what we want: from the origin of {B} to Q, but its numbers are read along the axes of {B}');
+LS.ask(document.getElementById('ask3'), { fields: [{ label: 'ᴮQ<sub>x</sub> =', ok: x => Math.abs(x - BQ[0]) < 0.006, w: 5 }, { label: 'ᴮQ<sub>y</sub> =', ok: x => Math.abs(x - BQ[1]) < 0.006, w: 5 }],
+  check: v => { const wrong = RB.add(RB.mv(RB.tr(R30), AQ), [-10, -5, 0]); return Math.abs(v[0] - wrong[0]) < 0.01 ? t('หมุนกลับก่อนแล้วจึงลบ: ต้องลบ ᴬP<sub>BORG</sub> ก่อน (ยังอยู่ใน {A})', 'You turned back first and subtracted afterwards: subtract ᴬP<sub>BORG</sub> first, while still in {A}') : (Math.abs(v[0] - 2) < 0.01 ? t('(2, 5) คือ ᴬQ − ᴬP<sub>BORG</sub> ซึ่งยังเขียนตามแกนของ {A} ต้องหมุนกลับด้วย Rᵀ', '(2, 5) is ᴬQ − ᴬP<sub>BORG</sub>, still written along the axes of {A}; turn it back with Rᵀ') : ''); } });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>กลับสมการ</b> ᴬQ = R ᴮQ + ᴬP<sub>BORG</sub>', '<b>Turn the mapping around</b>: ᴬQ = R ᴮQ + ᴬP<sub>BORG</sub>'), tex: '{}^{B}Q = {}^{A}_{B}R^{T}\\,({}^{A}Q - {}^{A}P_{BORG})' },
+  { why: t('<b>ลบก่อน</b> (ยังอยู่ในทิศของ {A})', '<b>Subtract first</b> (still along the axes of {A})'), tex: '{}^{A}Q - {}^{A}P_{BORG} = (12 - 10,\\ 10 - 5,\\ 0)^T = (2,\\ 5,\\ 0)^T' },
+  { why: t('<b>หมุนกลับด้วยทรานสโพส</b>', '<b>Turn back with the transpose</b>'), tex: `{}^{B}Q = ${CH2.texM(RB.tr(R30), 3)}\\begin{bmatrix} 2 \\\\ 5 \\\\ 0 \\end{bmatrix} = ${TV(BQ)}` },
+  { why: t('<b>ตรวจ</b>: ส่งกลับด้วย ᴬ<sub>B</sub>T ต้องได้ (12, 10, 0)', '<b>Check</b>: mapping back with ᴬ<sub>B</sub>T must give (12, 10, 0)'), tex: `{}^{A}_{B}T\\,${TV(BQ)} = ${TV(RB.Tv(E.ex22.T, BQ))}` }],
+  answer: t(`\\({}^{B}Q = (${RB.d(BQ[0], 3)},\\ ${RB.d(BQ[1], 3)},\\ 0)^T\\) · ขั้นตอนนี้คือการคูณด้วย \\({}^{B}_{A}T = {}^{A}_{B}T^{-1}\\) ในหน้า 2.3`, `\\({}^{B}Q = (${RB.d(BQ[0], 3)},\\ ${RB.d(BQ[1], 3)},\\ 0)^T\\) · these steps are the product with \\({}^{B}_{A}T = {}^{A}_{B}T^{-1}\\) of page 2.3`) });
+});
+</script>
+</body>
+</html>

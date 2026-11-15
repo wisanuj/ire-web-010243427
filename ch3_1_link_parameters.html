@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="3.1 — Link parameters and link frames">3.1 — พารามิเตอร์ของก้านต่อและเฟรมของก้านต่อ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">พารามิเตอร์ของก้านต่อและเฟรมของก้านต่อ <span class="en">Link parameters and link frames — four numbers per link</span></h1>
+<h1 data-l="en">Link parameters and link frames <span class="en">Four numbers per link</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch3/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: forward kinematics: from the joint variables to the frame of the end-effector">
+    <figcaption data-l="th">สไลด์บทที่ 3 หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 3 slides, p. 5 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th"><b>จลนศาสตร์ไปข้างหน้า</b>: รู้ตัวแปรข้อต่อทุกตัว หาเฟรมของปลายแขนเทียบฐาน วิธีของ Denavit–Hartenberg (DH) บอกความสัมพันธ์ระหว่างก้านต่อที่อยู่ติดกันด้วยตัวเลขเพียง <b>สี่ตัว</b> แล้วติดเฟรมให้ทุกก้านตามกติกาเดียวกัน หน้านี้ครอบคลุมสไลด์หน้า 5–14 (Craig 3.1–3.4) มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en"><b>Forward kinematics</b>: given every joint variable, find the frame of the end-effector relative to the base. The Denavit–Hartenberg (DH) method describes two neighbouring links with only <b>four numbers</b> and attaches a frame to every link by one rule. This page covers slides pp. 5–14 (Craig 3.1–3.4), with <b>one tool (A)</b> and <b>3 problems</b>.</p>
+    <div class="equation-box">$$ a_{i-1},\ \alpha_{i-1}:\ \hat Z_{i-1} \to \hat Z_i \text{ along / about } \hat X_{i-1} \qquad d_i,\ \theta_i:\ \hat X_{i-1} \to \hat X_i \text{ along / about } \hat Z_i $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>ความยาวก้าน a<sub>i−1</sub></b> และ<b>มุมบิด α<sub>i−1</sub></b>: บอกรูปร่างของก้าน i−1 จากแกนข้อต่อ i−1 ถึงแกน i (ตามและรอบแกน X)</li><li><b>ระยะเยื้อง d<sub>i</sub></b> และ<b>มุมข้อต่อ θ<sub>i</sub></b>: บอกการต่อกันของก้าน i−1 กับก้าน i ที่แกน i (ตามและรอบแกน Z)</li><li>ข้อต่อหมุน: θ<sub>i</sub> เป็นตัวแปร · ข้อต่อเลื่อน: d<sub>i</sub> เป็นตัวแปร · ค่าอื่นคงที่</li><li>ติดเฟรม: Z<sub>i</sub> ตามแกนข้อต่อ i, X<sub>i</sub> ตามเส้นตั้งฉากร่วมไปหาแกน i+1 และเลือก {0} ให้ทับ {1} เมื่อตัวแปรแรกเป็นศูนย์</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Link length a<sub>i−1</sub></b> and <b>link twist α<sub>i−1</sub></b> give the shape of link i−1, from joint axis i−1 to axis i (along and about X).</li><li><b>Link offset d<sub>i</sub></b> and <b>joint angle θ<sub>i</sub></b> give how link i joins link i−1 at axis i (along and about Z).</li><li>Revolute joint: θ<sub>i</sub> varies · prismatic joint: d<sub>i</sub> varies · everything else is fixed.</li><li>Frames: Z<sub>i</sub> on joint axis i, X<sub>i</sub> along the common perpendicular towards axis i+1; {0} coincides with {1} when the first variable is zero.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>พารามิเตอร์สี่ตัว</a><a href="#ex1"><b>1</b>ตัวแปรข้อต่อ</a><a href="#ex2"><b>2</b>ก้านแรก</a><a href="#ex3"><b>3</b>แขน 3 ข้อต่อในระนาบ</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>The four parameters</a><a href="#ex1"><b>1</b>The joint variable</a><a href="#ex2"><b>2</b>The first link</a><a href="#ex3"><b>3</b>Planar three-link arm</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: พารามิเตอร์สี่ตัวของก้านต่อ</h2><h2 data-l="en">Tool: the four parameters of a link</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 7–9 · Craig 3.3 · <b>ลากในภาพเพื่อหมุนมุมมอง</b></div><div class="src" data-l="en">Chapter 3 slides, pp. 7–9 · Craig 3.3 · <b>drag in the picture to turn the view</b></div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div id="optA" style="padding:0 8px"></div><div class="ctl" id="ctlA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch3/s09.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 9: the four Denavit–Hartenberg parameters and how each is measured">
+      <figcaption data-l="th">สไลด์หน้า 9 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 9 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">แท่งสีเทายาวคือแกนข้อต่อ i−1, i, i+1 ซึ่งเป็นเส้นเบ้ในปริภูมิ ก้านต่อ (สีส้ม สีน้ำเงิน) วางตาม<b>เส้นตั้งฉากร่วม</b>ของแกนที่อยู่ติดกัน เลื่อน a<sub>i−1</sub> แล้วดูว่าแกน i ขยับออก เลื่อน α<sub>i−1</sub> แล้วแกน i บิดรอบ X<sub>i−1</sub> เลื่อน d<sub>i</sub> แล้วก้าน i เลื่อนตามแกน i และเลื่อน θ<sub>i</sub> แล้วก้าน i หมุนรอบแกน i</p>
+      <p class="lead" data-l="en">The long grey bars are joint axes i−1, i, i+1, skew lines in space. The links (orange, blue) lie along the <b>common perpendiculars</b> of neighbouring axes. Move a<sub>i−1</sub> and axis i moves away; α<sub>i−1</sub> twists axis i about X<sub>i−1</sub>; d<sub>i</sub> slides link i along axis i; θ<sub>i</sub> turns link i about axis i.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">ตัวแปรข้อต่ออยู่ช่องไหนของตาราง</h2><h2 data-l="en">Which entry of the table is the joint variable?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 10 · แขน RPR ของ Craig ตัวอย่าง 3.4 · ลากแถบเลื่อนแล้วดูว่าอะไรเปลี่ยน</div><div class="src" data-l="en">Chapter 3 slides, p. 10 · the RPR arm of Craig example 3.4 · move a slider and watch what changes</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ก้านแรก: เลือกเฟรม {0} ให้ทับ {1}</h2><h2 data-l="en">The first link: choose {0} to coincide with {1}</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 11 (สไลด์เดิม Part I หน้า 7–8)</div><div class="src" data-l="en">Chapter 3 slides, p. 11 (old Part I slides pp. 7–8)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s11.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 11: frame 0 coincides with frame 1 when the first joint variable is zero; revolute and prismatic first joints">
+    <figcaption data-l="th">สไลด์หน้า 11 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 11 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div id="opt2" style="padding:0 8px"></div><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">Craig ตัวอย่าง 3.3: ติดเฟรมและเขียนตาราง DH ของแขน 3 ข้อต่อในระนาบ</h2><h2 data-l="en">Craig example 3.3: frames and DH table of the planar three-link arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 13–14 (สไลด์เดิม Part I หน้า 13–14) · เลือกแถวเพื่อดูพารามิเตอร์ในภาพ</div><div class="src" data-l="en">Chapter 3 slides, pp. 13–14 (old Part I slides pp. 13–14) · choose a row to see its parameters in the picture</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s14.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 14: the planar three-link arm; attach the frames and write the DH table">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 14 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 14 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div id="opt3" style="padding:0 8px"></div><div class="ctl" id="ctl3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — แกนขนานและแกนตัดกัน</h3>
+    <ol><li>ในเครื่องมือ A ตั้ง α<sub>i−1</sub> = 0: แกน i−1 กับแกน i ขนานกัน เส้นตั้งฉากร่วมเลื่อนขึ้นลงได้ ระยะเยื้อง d จึงเลือกได้หลายค่า (Craig เลือกให้เป็นศูนย์ถ้าทำได้)</li><li>ตั้ง a<sub>i−1</sub> = 0: แกนตัดกัน ทิศของ X<sub>i−1</sub> ตั้งฉากกับทั้งสองแกน</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — เฟรมไม่ได้มีแบบเดียว</h3>
+    <ol><li>ถ้ากลับทิศ Z<sub>i</sub> (ชี้อีกด้านของแกน) ค่า α และ θ บางตัวเปลี่ยนเครื่องหมาย แต่หุ่นยนต์และ ⁰<sub>N</sub>T ยังเหมือนเดิม</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — อ่านพารามิเตอร์จากภาพ</h3>
+    <ol><li>ในข้อ 3 เลือกแถวที่ 2: เส้นสีเหลืองคือ a<sub>1</sub> = L<sub>1</sub> ตาม X<sub>1</sub> และมุมสีชมพูคือ θ<sub>2</sub> รอบ Z<sub>2</sub> ส่วน α<sub>1</sub> และ d<sub>2</sub> ไม่มีให้เห็นเพราะเป็นศูนย์</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 3 หน้า 4–14 (ภาพอยู่ในหน้านี้แล้ว) · Craig 3.1–3.4 · สไลด์เดิม Part I หน้า 3–14</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — parallel and crossing axes</h3>
+    <ol><li>In tool A set α<sub>i−1</sub> = 0: axes i−1 and i are parallel, the common perpendicular can slide along them, so the offset d is not unique (Craig picks zero when he can).</li><li>Set a<sub>i−1</sub> = 0: the axes cross; X<sub>i−1</sub> is then normal to both.</li></ol></div>
+  <div class="card"><h3>Try this 2 — frames are not unique</h3>
+    <ol><li>Reverse Z<sub>i</sub> (point it the other way along the axis): some α and θ change sign, but the robot and ⁰<sub>N</sub>T stay the same.</li></ol></div>
+  <div class="card"><h3>Try this 3 — read the parameters off the picture</h3>
+    <ol><li>In problem 3 choose row 2: the yellow line is a<sub>1</sub> = L<sub>1</sub> along X<sub>1</sub> and the pink angle is θ<sub>2</sub> about Z<sub>2</sub>; α<sub>1</sub> and d<sub>2</sub> do not show because they are zero.</li></ol>
+    <div class="book">Source: chapter 3 slides, pp. 4–14 (the pictures are on this page) · Craig 3.1–3.4 · old Part I slides pp. 3–14</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, E = CH3.EX;
+
+/* ---------- A: the four parameters ---------- */
+const SA = { a: 0.5, al: rad(-40), d: 0.22, th: rad(55), show: 'all' }, ctlA = document.getElementById('ctlA');
+ui.radio(document.getElementById('optA'), [{ id: 'a', label: t('a และ α (ก้าน)', 'a and α (the link)') }, { id: 'd', label: t('d และ θ (ข้อต่อ)', 'd and θ (the joint)') }, { id: 'all', label: t('ทั้งสี่ตัว', 'all four'), on: true }], id => { SA.show = id; });
+ui.slider(ctlA, { id: 'Aa', label: 'a<sub>i−1</sub>', min: 0, max: 0.7, step: 0.01, value: 0.5, fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.a = v; } });
+ui.slider(ctlA, { id: 'Aal', label: 'α<sub>i−1</sub>', min: -90, max: 90, step: 1, value: -40, fmt: v => `${v}°`, oninput: v => { SA.al = rad(v); } });
+ui.slider(ctlA, { id: 'Ad', label: 'd<sub>i</sub>', min: -0.3, max: 0.4, step: 0.01, value: 0.22, fmt: v => `${v.toFixed(2)} m`, oninput: v => { SA.d = v; } });
+ui.slider(ctlA, { id: 'Ath', label: 'θ<sub>i</sub>', min: -180, max: 180, step: 1, value: 55, fmt: v => `${v}°`, oninput: v => { SA.th = rad(v); } });
+CH2.sim('cvA', SA, 'link', { aspect: 0.8, maxH: 540 });
+
+/* ---------- 1: the joint variable (RPR arm) ---------- */
+const S1 = { ex: 'rpr', q: E.rpr.q.slice(), show: 2, xyz: true }, ro1 = document.getElementById('ro1'), ctl1 = document.getElementById('ctl1');
+const read1 = () => { ro1.innerHTML = CH3.dhTable([['0', '0', '0', `θ₁ = ${Math.round(deg(S1.q[0]))}°`], ['90°', '0', `d₂ = ${S1.q[1].toFixed(2)} m`, '0'], ['0', '0', 'L₂ = 0.15 m', `θ₃ = ${Math.round(deg(S1.q[2]))}°`]], { hl: 1 }); };
+ui.slider(ctl1, { id: 'q1', label: 'θ₁', min: -120, max: 120, step: 1, value: 30, fmt: v => `${v}°`, oninput: v => { S1.q[0] = rad(v); read1(); } });
+ui.slider(ctl1, { id: 'q2', label: t('d₂ (ข้อต่อเลื่อน)', 'd₂ (sliding joint)'), min: 0.1, max: 0.6, step: 0.01, value: 0.35, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S1.q[1] = v; read1(); } });
+ui.slider(ctl1, { id: 'q3', label: 'θ₃', min: -180, max: 180, step: 1, value: 45, fmt: v => `${v}°`, oninput: v => { S1.q[2] = rad(v); read1(); } }); read1();
+CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
+LS.choose(document.getElementById('ask1'), { options: ['α₁', 'a₁', 'd₂', 'θ₂'], answer: 2, labels: ['', '', '', ''] });
+document.querySelector('#ask1 .asklab').textContent = t('ข้อต่อ 2 เป็นข้อต่อเลื่อน ช่องไหนของแถวที่ 2 เปลี่ยนเมื่อมันเลื่อน?', 'Joint 2 slides. Which entry of row 2 changes when it moves?');
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>ข้อต่อหมุน</b> หมุนรอบแกนของตัวเอง (Z<sub>i</sub>): มุมระหว่าง X<sub>i−1</sub> กับ X<sub>i</sub> คือ θ<sub>i</sub> จึงเปลี่ยน', '<b>A revolute joint</b> turns about its own axis Z<sub>i</sub>: the angle from X<sub>i−1</sub> to X<sub>i</sub>, θ<sub>i</sub>, changes') },
+  { why: t('<b>ข้อต่อเลื่อน</b> เลื่อนตามแกนของตัวเอง: ระยะจาก X<sub>i−1</sub> ถึง X<sub>i</sub> ตาม Z<sub>i</sub> คือ d<sub>i</sub> จึงเปลี่ยน θ<sub>i</sub> คงที่', '<b>A prismatic joint</b> slides along its axis: the distance from X<sub>i−1</sub> to X<sub>i</sub> along Z<sub>i</sub>, d<sub>i</sub>, changes; θ<sub>i</sub> stays') },
+  { why: t('<b>a และ α ไม่เปลี่ยนเลย</b>: เป็นรูปร่างของก้าน (ระยะและมุมระหว่างแกนข้อต่อสองแกน) ลองเลื่อนแถบใดก็ได้ แถวสีเหลืองมีเพียง d₂ ที่ขยับ', '<b>a and α never change</b>: they are the shape of the link (distance and angle between two joint axes). Move any slider: in the yellow row only d₂ moves') }],
+  answer: t('ข้อต่อเลื่อนเปลี่ยน <b>d₂</b> · ข้อต่อหมุนเปลี่ยน θ<sub>i</sub>', 'The sliding joint changes <b>d₂</b> · a revolute joint changes θ<sub>i</sub>') });
+
+/* ---------- 2: the first link ---------- */
+const S2 = { kind: 'R', q: rad(40) }, ro2 = document.getElementById('ro2'), ctl2 = document.getElementById('ctl2'); let sl2;
+const read2 = () => { ro2.innerHTML = S2.kind === 'R' ? t(`ข้อต่อหมุน: θ₁ = ${Math.round(deg(S2.q))}° เป็นตัวแปร · a₀ = 0, α₀ = 0, d₁ = 0`, `revolute: θ₁ = ${Math.round(deg(S2.q))}° varies · a₀ = 0, α₀ = 0, d₁ = 0`) : t(`ข้อต่อเลื่อน: d₁ = ${S2.q.toFixed(2)} m เป็นตัวแปร · a₀ = 0, α₀ = 0, θ₁ = 0`, `prismatic: d₁ = ${S2.q.toFixed(2)} m varies · a₀ = 0, α₀ = 0, θ₁ = 0`); };
+const build2 = () => { ctl2.innerHTML = ''; sl2 = S2.kind === 'R' ? ui.slider(ctl2, { id: 'f1', label: 'θ₁', min: -180, max: 180, step: 1, value: Math.round(deg(S2.q)), fmt: v => `${v}°`, oninput: v => { S2.q = rad(v); read2(); } })
+  : ui.slider(ctl2, { id: 'f1', label: 'd₁', min: 0, max: 0.3, step: 0.01, value: S2.q, fmt: v => `${v.toFixed(2)} m`, oninput: v => { S2.q = v; read2(); } }); read2(); };
+ui.radio(document.getElementById('opt2'), [{ id: 'R', label: t('ข้อต่อแรกหมุน', 'revolute first joint'), on: true }, { id: 'P', label: t('ข้อต่อแรกเลื่อน', 'prismatic first joint') }], id => { S2.kind = id; S2.q = id === 'R' ? rad(40) : 0.18; build2(); }); build2();
+CH2.sim('cv2', S2, 'first', { aspect: 0.9, maxH: 460 });
+LS.choose(document.getElementById('ask2'), { options: [t('d₁ เป็นตัวแปร และ θ₁ = 0', 'd₁ varies and θ₁ = 0'), t('θ₁ เป็นตัวแปร และ d₁ = 0', 'θ₁ varies and d₁ = 0'), t('ทั้ง d₁ และ θ₁ เป็นตัวแปร', 'both d₁ and θ₁ vary')], answer: 0 });
+document.querySelector('#ask2 .asklab').textContent = t('ถ้าข้อต่อแรกเป็นข้อต่อเลื่อน และ {0} ทับ {1} เมื่อ d₁ = 0 ข้อใดถูก?', 'The first joint slides and {0} coincides with {1} when d₁ = 0. Which is right?');
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>ก้านแรกมีแกนข้อต่อข้างเดียว</b> จึงเลือก {0} ได้อิสระ Craig ให้ {0} ทับ {1} เมื่อตัวแปรข้อต่อ 1 เป็นศูนย์ เพื่อให้ค่าในตารางเป็นศูนย์มากที่สุด', '<b>The first link has a joint axis on one side only</b>, so {0} is free to choose. Craig makes {0} coincide with {1} when joint variable 1 is zero, so that most table entries are zero'), tex: 'a_0 = 0, \\quad \\alpha_0 = 0' },
+  { why: t('<b>ข้อต่อหมุน</b>: {1} หมุนรอบ Z₀ ไม่เลื่อน', '<b>Revolute</b>: {1} turns about Z₀ and does not slide'), tex: 'd_1 = 0,\\quad \\theta_1 \\text{ varies}', onShow: () => { document.querySelector('#opt2 button').click(); } },
+  { why: t('<b>ข้อต่อเลื่อน</b>: {1} เลื่อนตาม Z₀ ไม่หมุน', '<b>Prismatic</b>: {1} slides along Z₀ and does not turn'), tex: '\\theta_1 = 0,\\quad d_1 \\text{ varies}', onShow: () => { document.querySelectorAll('#opt2 button')[1].click(); } }],
+  answer: t('ข้อต่อแรกเลื่อน: <b>d₁ เป็นตัวแปร θ₁ = 0</b> ก้านสุดท้ายใช้กติกาเดียวกัน', 'Prismatic first joint: <b>d₁ varies, θ₁ = 0</b>. The last link follows the same rule') });
+
+/* ---------- 3: the planar three-link arm ---------- */
+const S3s = { ex: 'p3r', q: E.p3r.q.slice(), show: 0, xyz: true }, ctl3 = document.getElementById('ctl3');
+ui.radio(document.getElementById('opt3'), [{ id: '0', label: t('ไม่แสดงพารามิเตอร์', 'no parameters'), on: true }, { id: '1', label: t('แถว 1', 'row 1') }, { id: '2', label: t('แถว 2', 'row 2') }, { id: '3', label: t('แถว 3', 'row 3') }], id => { S3s.show = +id; });
+['θ₁', 'θ₂', 'θ₃'].forEach((n, i) => ui.slider(ctl3, { id: 'p' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S3s.q[i])), fmt: v => `${v}°`, oninput: v => { S3s.q[i] = rad(v); } }));
+CH2.sim('cv3', S3s, 'dh', { aspect: 0.8, maxH: 500 });
+CH3.dhAsk(document.getElementById('ask3'), { ans: E.p3r.sym, opts: ['0', '90°', 'L₁', 'L₂', 'L₃', 'θ₁', 'θ₂', 'θ₃'],
+  check: v => v[5] === 'L₂' || v[9] === 'L₁' ? t('a<sub>i−1</sub> คือความยาวของก้าน i−1: แถวที่ 2 ใช้ a₁ = L₁ แถวที่ 3 ใช้ a₂ = L₂', 'a<sub>i−1</sub> is the length of link i−1: row 2 has a₁ = L₁, row 3 has a₂ = L₂') : '' });
+const rowsWhy = [t('<b>แถว 1</b>: {0} ทับ {1} เมื่อ θ₁ = 0 จึง α₀ = a₀ = d₁ = 0 ตัวแปรคือ θ₁', '<b>Row 1</b>: {0} coincides with {1} when θ₁ = 0, so α₀ = a₀ = d₁ = 0; the variable is θ₁'),
+  t('<b>แถว 2</b>: แกน 1 กับ 2 ขนานกัน (α₁ = 0) ห่างกัน L₁ ตาม X₁ X ทุกแกนอยู่ในระนาบเดียวกัน (d₂ = 0)', '<b>Row 2</b>: axes 1 and 2 are parallel (α₁ = 0), L₁ apart along X₁; all X axes lie in one plane (d₂ = 0)'),
+  t('<b>แถว 3</b>: เหมือนแถว 2 ห่างกัน L₂', '<b>Row 3</b>: like row 2, L₂ apart')];
+LS.stepper(document.getElementById('st3'), { steps: [0, 1, 2].map(i => ({ why: rowsWhy[i], body: CH3.dhTable(E.p3r.sym.slice(0, i + 1)), onShow: () => { S3s.show = i + 1; document.querySelectorAll('#opt3 button')[i + 1].click(); } })),
+  answer: t('ตัวแปร θ₁, θ₂, θ₃ · ค่าคงที่ L₁, L₂ · เฟรมปลาย {4} ที่ระยะ L₃ เป็นการบ้านข้อ 3(b) (หน้า 3.3)', 'Variables θ₁, θ₂, θ₃ · constants L₁, L₂ · a tip frame {4} at L₃ is homework 3(b) (page 3.3)') });
+});
+</script>
+</body>
+</html>

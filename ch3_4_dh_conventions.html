@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="3.4 — Classical and modified DH">3.4 — แบบแผน DH แบบดั้งเดิมและแบบดัดแปลง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">แบบแผน DH แบบดั้งเดิมและแบบดัดแปลง <span class="en">Classical and modified Denavit–Hartenberg — same robot, two sets of frames</span></h1>
+<h1 data-l="en">Classical and modified DH <span class="en">Same robot, two sets of frames</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch3/s33.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 33: the modified and the classical convention side by side">
+    <figcaption data-l="th">สไลด์บทที่ 3 หน้า 33 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 3 slides, p. 33 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">วิชานี้ใช้แบบแผนของ Craig (<b>แบบดัดแปลง</b>: เฟรม {i} อยู่บนแกนของข้อต่อ i) แต่ Spong, Corke และโปรแกรมจำนวนมากใช้<b>แบบดั้งเดิม</b> (เฟรม {i} อยู่บนแกนของข้อต่อ i+1 ที่ปลายก้าน i) ตารางของหุ่นยนต์ตัวเดียวกันจึงหน้าตาต่างกัน หน้านี้ครอบคลุมสไลด์หน้า 33–37 (สไลด์เดิม Part II) มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">This course uses Craig's <b>modified</b> convention (frame {i} on the axis of joint i), but Spong, Corke and many programs use the <b>classical</b> one (frame {i} on the axis of joint i+1, at the far end of link i). The same robot therefore has two different-looking tables. This page covers slides pp. 33–37 (old Part II), with <b>one tool (A)</b> and <b>3 problems</b>.</p>
+    <div class="equation-box">$$ \text{modified: } R_X(\alpha_{i-1})\,D_X(a_{i-1})\,R_Z(\theta_i)\,D_Z(d_i) \qquad \text{classical: } R_Z(\theta_i)\,D_Z(d_i)\,D_X(a_i)\,R_X(\alpha_i) $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>แบบดัดแปลง (Craig, Khatib): a<sub>i−1</sub>, α<sub>i−1</sub> วัดตามและรอบ X<sub>i−1</sub> · แบบดั้งเดิม (Spong, Corke): a<sub>i</sub>, α<sub>i</sub> วัดตามและรอบ x<sub>i</sub></li><li>ลำดับการคูณกลับกัน: แบบดัดแปลงเริ่มที่ X แบบดั้งเดิมเริ่มที่ Z</li><li>ตารางและสูตรต้องมาจากแบบเดียวกันเสมอ ถ้าใช้ถูกคู่ ⁰<sub>N</sub>T ออกมาเท่ากัน</li><li>สไลด์เดิม Part II หน้า 7 เขียนหัวข้อ Classical แต่ข้อความเขียน Modified ฉบับนี้แก้แล้ว</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>Modified (Craig, Khatib): a<sub>i−1</sub>, α<sub>i−1</sub> along and about X<sub>i−1</sub> · classical (Spong, Corke): a<sub>i</sub>, α<sub>i</sub> along and about x<sub>i</sub>.</li><li>The products run in opposite orders: modified starts with X, classical with Z.</li><li>Always take the table and the formula from the same convention; used in matching pairs both give the same ⁰<sub>N</sub>T.</li><li>Old Part II slide 7 was titled Classical but its text said Modified; corrected here.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>SCARA สองแบบพร้อมกัน</a><a href="#ex1"><b>1</b>ตารางแบบ Craig</a><a href="#ex2"><b>2</b>ตารางแบบดั้งเดิม</a><a href="#ex3"><b>3</b>แหล่งนี้ใช้แบบไหน</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>A SCARA both ways</a><a href="#ex1"><b>1</b>Craig's table</a><a href="#ex2"><b>2</b>The classical table</a><a href="#ex3"><b>3</b>Which one does a source use?</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: SCARA ตัวเดียวกัน เฟรมสองชุด</h2><h2 data-l="en">Tool: one SCARA, two sets of frames</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 37 · ซ้าย: แบบ Craig ขวา: แบบดั้งเดิม · L₁ = 0.45, L₂ = 0.35, d₄ = 0.05 m</div><div class="src" data-l="en">Chapter 3 slides, p. 37 · left: Craig's frames, right: classical frames · L₁ = 0.45, L₂ = 0.35, d₄ = 0.05 m</div></div></div>
+  <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="readout" id="roA"></div></div>
+</section>
+
+<div class="group-head"><h2 data-l="th">เมทริกซ์ของก้านต่อสองแบบ (สไลด์หน้า 34)</h2><h2 data-l="en">The two link transforms (slide p. 34)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch3/s34.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 34: the link transform in the modified and in the classical convention"><figcaption data-l="th">สไลด์หน้า 34 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 34 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th">วิธีจำ: ดู<b>แถวแรกกับคอลัมน์สุดท้าย</b> แบบดัดแปลงมี a<sub>i−1</sub> ตรง ๆ ที่มุมขวาบน (เลื่อนตาม X ก่อนหมุนรอบ Z) แบบดั้งเดิมมี a<sub>i</sub> cos θ<sub>i</sub> (หมุนรอบ z ก่อนแล้วจึงเลื่อนตาม x) และแบบดั้งเดิมมี d<sub>i</sub> ตรง ๆ ที่แถวสาม ส่วนแบบดัดแปลงมี cos α<sub>i−1</sub> d<sub>i</sub></p>
+  <p class="sub" data-l="en">To remember: look at the <b>first row and the last column</b>. The modified matrix has a plain a<sub>i−1</sub> at the top right (it moves along X before turning about Z); the classical one has a<sub>i</sub> cos θ<sub>i</sub> (it turns about z, then moves along x). The classical matrix also has a plain d<sub>i</sub> in row 3, the modified one cos α<sub>i−1</sub> d<sub>i</sub>.</p>
+</div>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">ตาราง DH ของ SCARA แบบ Craig</h2><h2 data-l="en">The SCARA's DH table, Craig's convention</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 35 (สไลด์เดิม Part II หน้า 6) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, p. 35 (old Part II slide p. 6) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s35.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 35: write the SCARA's DH table in Craig's convention">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 35 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 35 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div></div>
+    <div class="card solve"><div id="tab1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ตาราง DH ของ SCARA แบบดั้งเดิม</h2><h2 data-l="en">The SCARA's DH table, classical convention</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 36 (สไลด์เดิม Part II หน้า 10) · คอลัมน์เรียง θ, d, a, α ตาม Spong</div><div class="src" data-l="en">Chapter 3 slides, p. 36 (old Part II slide p. 10) · columns in Spong's order θ, d, a, α</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch3/s36.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 36: write the same SCARA's table in the classical convention">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 36 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 36 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div></div>
+    <div class="card solve"><div id="tab2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">แหล่งนี้ใช้แบบไหน</h2><h2 data-l="en">Which convention does this source use?</h2>
+    <div class="src" data-l="th">แบบฝึกใหม่ประกอบสไลด์หน้า 37</div><div class="src" data-l="en">New practice for slide p. 37</div></div></div>
+  <div class="duo">
+    <div class="card"><div class="given"><div class="gl" data-l="th">ก. ตารางจากเอกสารของผู้ผลิตรายหนึ่ง</div><div class="gl" data-l="en">(a) A table from a maker's manual</div>
+      <table class="dhtab"><tr><th>i</th><th>θ<sub>i</sub></th><th>d<sub>i</sub></th><th>a<sub>i</sub></th><th>α<sub>i</sub></th></tr><tr><td>1</td><td>θ₁</td><td>0.352</td><td>0.070</td><td>−90°</td></tr><tr><td>2</td><td>θ₂</td><td>0</td><td>0.360</td><td>0</td></tr></table></div>
+      <div id="ask3a"></div>
+      <div class="given"><div class="gl" data-l="th">ข. สูตรเมทริกซ์ของก้านต่อในหนังสือเล่มหนึ่ง</div><div class="gl" data-l="en">(b) The link transform in a book</div>
+      $$ \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i c\alpha_{i-1} & c\theta_i c\alpha_{i-1} & -s\alpha_{i-1} & -s\alpha_{i-1} d_i \\ \cdots & & & \end{bmatrix} $$</div>
+      <div id="ask3b"></div></div>
+    <div class="card solve"><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — เฟรมปลายตรงกัน</h3>
+    <ol><li>ในเครื่องมือ A เลื่อนตัวแปรใดก็ได้: เมทริกซ์ ⁰₄T ทั้งสองแบบเท่ากันทุกช่อง แม้เฟรมระหว่างทางต่างกัน</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ทิศของ Z₃</h3>
+    <ol><li>ข้อ 1 เลือกให้ Z₃ ชี้ลง (α₂ = 180°) ถ้าเลือกให้ชี้ขึ้น α₂ = 0 แต่ d₃ จะติดลบเมื่อแกนเลื่อนลง ตารางต่างแต่ถูกทั้งคู่</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ตารางจากผู้ผลิต</h3>
+    <ol><li>ก่อนใช้ตาราง DH จากคู่มือหรือโปรแกรม ให้ดูดัชนีของ a และ α ก่อนเสมอ ตารางในข้อ 3(ก) คือแขน IRB 140 แบบดั้งเดิม เทียบกับตารางแบบ Craig ในหน้า 3.3</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 3 หน้า 32–37 (ภาพอยู่ในหน้านี้แล้ว) · Craig 3.4 · Spong 3.2 · สไลด์เดิม Part II หน้า 2–10</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the end frames agree</h3>
+    <ol><li>In tool A move any variable: both ⁰₄T matrices are equal in every entry, though the frames in between differ.</li></ol></div>
+  <div class="card"><h3>Try this 2 — the direction of Z₃</h3>
+    <ol><li>Problem 1 points Z₃ down (α₂ = 180°). Pointing it up gives α₂ = 0, but d₃ then turns negative as the quill moves down. Different tables, both right.</li></ol></div>
+  <div class="card"><h3>Try this 3 — a maker's table</h3>
+    <ol><li>Before using a DH table from a manual or a program, always look at the indices of a and α. The table of problem 3(a) is the IRB 140 in the classical form; compare it with Craig's table on page 3.3.</li></ol>
+    <div class="book">Source: chapter 3 slides, pp. 32–37 (the pictures are on this page) · Craig 3.4 · Spong 3.2 · old Part II slides pp. 2–10</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, S = CH3.EX.scara, T4 = (T, d = 3) => CH2.htmlM(T, d, { cls: ['mx', 'my', 'mz', 'mp'], sep: 3, last: true });
+const scSliders = (el, st, on) => [['θ₁', 'R', -130, 130], ['θ₂', 'R', -140, 140], ['d₃', 'P', 0, 0.3], ['θ₄', 'R', -180, 180]].forEach(([n, k, lo, hi], i) => ui.slider(el, { id: el.id + i, label: n, min: lo, max: hi, step: k === 'R' ? 1 : 0.01, value: k === 'R' ? Math.round(deg(st.q[i])) : st.q[i], fmt: v => k === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { st.q[i] = k === 'R' ? rad(v) : v; if (on) on(); } }));
+
+/* ---------- A: both conventions ---------- */
+const SA = { q: S.q.slice() }, roA = document.getElementById('roA');
+const readA = () => { const Tm = RB.fkDH(S.rows(S.L), SA.q)[4], Tc = RB.fkDH(S.rowsC(S.L), SA.q, 'c')[4], d = Math.max(...Tm.flat().map((x, i) => Math.abs(x - Tc.flat()[i])));
+  roA.innerHTML = `<div class="live"><span class="eq">${t('แบบ Craig', 'Craig')}: ⁰<sub>4</sub>T =</span>${T4(Tm)}<span class="eq">${t('แบบดั้งเดิม', 'classical')}: ⁰<sub>4</sub>T =</span>${T4(Tc)}</div><div class="term">${d < 1e-9 ? `<b class="ax-y">${t('เท่ากันทุกช่อง ✓', 'equal in every entry ✓')}</b>` : ''}</div>`; };
+scSliders(document.getElementById('ctlA'), SA, readA); readA();
+CH2.sim('cvA', SA, 'convs', { aspect: 0.48, maxH: 460, orbit: false });
+
+/* ---------- 1: Craig's table ---------- */
+const S1 = { ex: 'scara', q: S.q.slice(), xyz: true }; scSliders(document.getElementById('ctl1'), S1); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
+const OPT = ['0', '90°', '180°', 'L₁', 'L₂', 'd₃', 'd₄', 'θ₁', 'θ₂', 'θ₄'];
+CH3.dhAsk(document.getElementById('tab1'), { ans: S.sym, opts: OPT, check: v => v[5] === 'L₂' ? t('a<sub>i−1</sub> อยู่แถวเดียวกับข้อต่อ i: L₁ เป็น a₁ ในแถว 2 และ L₂ เป็น a₂ ในแถว 3', 'a<sub>i−1</sub> sits in the row of joint i: L₁ is a₁ in row 2 and L₂ is a₂ in row 3') : '' });
+LS.stepper(document.getElementById('st1'), { steps: [
+  { why: t('<b>แถว 1–2</b>: แกน 1, 2 ตั้งขนาน (α = 0) ห่างกัน L₁ ({0} ทับ {1} ที่ความสูงของแขน)', '<b>Rows 1–2</b>: axes 1 and 2 vertical and parallel (α = 0), L₁ apart ({0} = {1} at the height of the arm)'), body: CH3.dhTable(S.sym.slice(0, 2)) },
+  { why: t('<b>แถว 3</b>: แกน 3 (เลื่อน) ห่างจากแกน 2 เป็น L₂ เลือก Z₃ ชี้ลงจึงบิด α₂ = 180° ตัวแปร d₃', '<b>Row 3</b>: axis 3 (sliding) is L₂ from axis 2; Z₃ is chosen pointing down, so α₂ = 180°; the variable is d₃'), body: CH3.dhTable(S.sym.slice(0, 3)) },
+  { why: t('<b>แถว 4</b>: ข้อต่อ 4 หมุนรอบแกนเดียวกับแกน 3 ระยะ d₄ คือความยาวเครื่องมือ', '<b>Row 4</b>: joint 4 turns about the same line as axis 3; d₄ is the tool length'), body: CH3.dhTable(S.sym) }],
+  answer: t('ตัวแปร θ₁, θ₂, d₃, θ₄ · สไลด์เดิมให้เติมเองในห้อง ตารางนี้ตรวจกับตารางแบบดั้งเดิมด้วยโปรแกรมแล้ว', 'Variables θ₁, θ₂, d₃, θ₄ · the old slide left this to fill in class; this table is checked against the classical one in tests.js') });
+
+/* ---------- 2: classical table ---------- */
+const S2 = { ex: 'scara', q: S.q.slice(), conv: 'c', xyz: true }; scSliders(document.getElementById('ctl2'), S2); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
+CH3.dhAsk(document.getElementById('tab2'), { ans: S.symC, cols: CH3.COLS_C, opts: OPT, check: v => v[2] === '0' && v[6] === 'L₁' ? t('แบบดั้งเดิม เฟรม {1} อยู่ที่ข้อศอก: a₁ = L₁ อยู่แถว 1', 'In the classical form frame {1} sits at the elbow: a₁ = L₁ is in row 1') : '' });
+LS.stepper(document.getElementById('st2'), { steps: [
+  { why: t('<b>แถว 1</b>: θ₁ หมุนรอบ z₀ แล้วเลื่อน a₁ = L₁ ตาม x₁ ถึงข้อศอก', '<b>Row 1</b>: θ₁ about z₀, then a₁ = L₁ along x₁ to the elbow'), body: CH3.dhTable(S.symC.slice(0, 1), { cols: CH3.COLS_C }) },
+  { why: t('<b>แถว 2</b>: θ₂ รอบ z₁ เลื่อน a₂ = L₂ แล้วบิด α₂ = 180° ให้ z₂ ชี้ลงตามแกนเลื่อน', '<b>Row 2</b>: θ₂ about z₁, a₂ = L₂, then α₂ = 180° flips z₂ down along the quill'), body: CH3.dhTable(S.symC.slice(0, 2), { cols: CH3.COLS_C }) },
+  { why: t('<b>แถว 3–4</b>: d₃ เลื่อนตาม z₂ แล้ว θ₄ หมุนรอบ z₃ และ d₄ คือความยาวเครื่องมือ', '<b>Rows 3–4</b>: d₃ slides along z₂; then θ₄ turns about z₃, and d₄ is the tool length'), body: CH3.dhTable(S.symC, { cols: CH3.COLS_C }) }],
+  answer: t('ตัวแปรชุดเดียวกัน θ₁, θ₂, d₃, θ₄ แต่ค่าคงที่ย้ายแถว: a₁ = L₁ อยู่แถว 1 (Craig: แถว 2)', 'The same variables θ₁, θ₂, d₃, θ₄, but the constants move up a row: a₁ = L₁ in row 1 (Craig: row 2)') });
+
+/* ---------- 3: which convention? ---------- */
+const OP = [t('แบบดัดแปลง (Craig)', 'modified (Craig)'), t('แบบดั้งเดิม (Spong)', 'classical (Spong)')];
+LS.choose(document.getElementById('ask3a'), { options: OP, answer: 1, labels: ['', ''] }); LS.choose(document.getElementById('ask3b'), { options: OP, answer: 0, labels: ['', ''] });
+LS.stepper(document.getElementById('st3'), { steps: [
+  { why: t('<b>ก.</b> หัวตารางเขียน a<sub>i</sub>, α<sub>i</sub> (ดัชนีเดียวกับ θ<sub>i</sub>) และเรียง θ, d, a, α: <b>แบบดั้งเดิม</b> ค่า d₁ = 0.352 ยังบอกว่าเฟรม {0} อยู่บนพื้น ซึ่ง Craig ไม่ทำ', '<b>(a)</b> The header has a<sub>i</sub>, α<sub>i</sub> (the same index as θ<sub>i</sub>) in the order θ, d, a, α: <b>classical</b>. d₁ = 0.352 also puts {0} on the floor, which Craig avoids') },
+  { why: t('<b>ข.</b> มุมขวาบนเป็น a<sub>i−1</sub> ตรง ๆ และมี α<sub>i−1</sub>: <b>แบบดัดแปลง</b> (สูตร Craig 3.6)', '<b>(b)</b> The top-right entry is a plain a<sub>i−1</sub> and α carries i−1: <b>modified</b> (Craig 3.6)') }],
+  answer: t('ก. ดั้งเดิม · ข. ดัดแปลง', '(a) classical · (b) modified') });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="Industrial Robotics Engineering — Roadmap">วิศวกรรมหุ่นยนต์อุตสาหกรรม — แผนที่การเรียน</title>
+<meta name="description" content="แผนที่การเรียนวิชา 010243427 วิศวกรรมหุ่นยนต์อุตสาหกรรม ภาควิชาวิศวกรรมการผลิตและหุ่นยนต์ มจพ. หน้าโต้ตอบที่ขยับแขนกลได้จริงในทุกหน้า">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script>
+<script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar" id="mc-top"></header>
+  <div class="kicker"><span data-l="th">010243427 วิศวกรรมหุ่นยนต์อุตสาหกรรม · Industrial Robotics Engineering</span><span data-l="en">010243427 Industrial Robotics Engineering</span></div>
+  <h1 data-l="th">แผนที่การเรียนวิศวกรรมหุ่นยนต์อุตสาหกรรม <span class="en">Industrial Robotics Engineering Roadmap — move the arm yourself, on every page</span></h1>
+  <h1 data-l="en">Industrial Robotics Engineering Roadmap <span class="en">Move the arm yourself, on every page</span></h1>
+
+  <div class="hero">
+    <div>
+      <p class="lede" data-l="th">สื่อการเรียนแบบโต้ตอบสำหรับนักศึกษาปริญญาตรี ภาควิชาวิศวกรรมการผลิตและหุ่นยนต์ ทุกแขนกลบนจอคำนวณจลนศาสตร์จริงในเบราว์เซอร์ ลากหรือเลื่อนค่าเมื่อไรแขนก็ขยับตามทันที ลองลากจุดสีชมพูในภาพข้าง ๆ ดูได้เลย แขนจะหามุมข้อต่อที่พาปลายแขนไปถึงจุดนั้นเอง</p>
+      <p class="lede" data-l="en">Interactive lessons for undergraduates of the Department of Production and Robotics Engineering. Every arm on screen runs real kinematics in your browser: drag or slide a value and it moves at once. Try dragging the pink point in the picture; the arm works out the joint angles that put its tip there.</p>
+      <div class="meta"><span><b id="mLive">4</b> <span data-l="th">หน้าพร้อมใช้</span><span data-l="en">pages ready</span></span><span><b>9</b> <span data-l="th">บทตามแผนการสอน</span><span data-l="en">chapters, as in the syllabus</span></span><span><span data-l="th">ประมาณ <b>20–30 นาที</b> ต่อหน้า</span><span data-l="en">about <b>20–30 min</b> per page</span></span><span><span data-l="th">ตำราหลัก: <b>Craig</b></span><span data-l="en">Main textbook: <b>Craig</b></span></span></div>
+    </div>
+    <div class="card"><canvas id="hero" class="grab"></canvas>
+      <div class="cap" data-l="th">ลากจุดสีชมพู · ปุ่มด้านล่างสลับคำตอบศอกขึ้นและศอกลง (แขนจาง ๆ คืออีกคำตอบหนึ่ง)</div>
+      <div class="cap" data-l="en">Drag the pink point · the button switches between the elbow-up and elbow-down answers (the faint arm is the other one)</div>
+      <div style="padding:2px 6px 6px"><button type="button" class="btn" id="heroElbow"></button></div></div>
+  </div>
+
+  <div class="progress">
+    <div class="prow"><span><span data-l="th">ความคืบหน้า:</span><span data-l="en">Progress:</span> <b id="pCount">0 / 4</b> &nbsp;·&nbsp; <a id="pNext" href="#"></a></span><button id="pReset" type="button"><span data-l="th">ล้างความคืบหน้า</span><span data-l="en">Reset progress</span></button></div>
+    <div class="bar"><div class="fill" id="pFill"></div></div>
+  </div>
+
+  <div class="howto" data-l="th"><b>อ่านภาพให้เป็นก่อนเริ่ม:</b>
+    <div class="keys" style="margin-top:8px">
+      <span class="k ax" style="color:#ff6b6b">X</span><span><b>สีของแกนคงที่ทั้งวิชา</b>: แกน X สีแดง แกน Y สีเขียว แกน Z สีน้ำเงิน</span>
+      <span class="k"><i style="background:#ffb454"></i><i style="background:#5ad1ff"></i><i style="background:#c792ea"></i></span><span><b>สีของก้านต่อ</b>: ก้านที่ 1 ส้ม ก้านที่ 2 ฟ้า ก้านที่ 3 ม่วง ฐานซึ่งเป็นก้านที่ 0 สีเทา</span>
+      <span class="k" style="background:none;color:var(--muted);font-weight:700">◎ ▢</span><span><b>วงกลม</b> คือข้อต่อหมุน (R) <b>กล่อง</b> คือข้อต่อเลื่อน (P) การนับก้านและข้อต่อใช้แบบของตำรา Craig ทั้งวิชา</span>
+      <span class="k" style="background:none">🖱</span><span>เลื่อนแถบควบคุมหรือลากในภาพเพื่อเปลี่ยนค่า เฉลยทุกข้อเปิดทีละขั้นด้วยปุ่ม กลับมาหน้านี้ หน้าที่เปิดแล้วจะถูกติ๊กไว้ (บันทึกในเบราว์เซอร์เครื่องนี้)</span>
+    </div></div>
+  <div class="howto" data-l="en"><b>Learn to read the pictures first:</b>
+    <div class="keys" style="margin-top:8px">
+      <span class="k ax" style="color:#ff6b6b">X</span><span><b>Axis colours are fixed for the whole course</b>: X red, Y green, Z blue.</span>
+      <span class="k"><i style="background:#ffb454"></i><i style="background:#5ad1ff"></i><i style="background:#c792ea"></i></span><span><b>Link colours</b>: link 1 orange, link 2 blue, link 3 purple; the base (link 0) is grey.</span>
+      <span class="k" style="background:none;color:var(--muted);font-weight:700">◎ ▢</span><span>A <b>circle</b> is a revolute joint (R), a <b>box</b> a prismatic joint (P). Links and joints are numbered as in Craig throughout.</span>
+      <span class="k" style="background:none">🖱</span><span>Use the sliders or drag in the picture to change values. Every solution opens step by step with a button. Back on this page, visited pages are ticked (saved in this browser).</span>
+    </div></div>
+
+  <div class="road" id="road"></div>
+
+  <footer data-l="th">วิชา 010243427 วิศวกรรมหุ่นยนต์อุตสาหกรรม 3(3-0-6) ภาคการศึกษา 2/2569 · Asst. Prof. Dr. Amornphun Phunopas และ ผศ.ดร.วิษณุ จิตวิริยะ · ตำราหลัก: Craig, <i>Introduction to Robotics: Mechanics and Control</i> 3rd ed. · ตำราประกอบ: Spong, Hutchinson &amp; Vidyasagar, <i>Robot Modeling and Control</i> และ Corke, <i>Robotics, Vision and Control</i> · ภาพสามมิติเรนเดอร์ใหม่ด้วย CoppeliaSim Edu (โมเดลแขนกลของ Coppelia Robotics) ไม่มีภาพที่คัดลอกจากตำรา · เปิด <code>index.html</code> ได้โดยตรงหรือเสิร์ฟโฟลเดอร์นี้ด้วย <code>python3 -m http.server</code> · สูตรใช้ KaTeX และฟอนต์จากเครือข่าย จึงต้องต่ออินเทอร์เน็ตครั้งแรก · <a href="tests.html">ชุดทดสอบตัวเลข</a></footer>
+  <footer data-l="en">Course 010243427 Industrial Robotics Engineering 3(3-0-6), semester 2/2569 · Asst. Prof. Dr. Amornphun Phunopas and Asst. Prof. Dr. Wisanu Jitviriya · Main textbook: Craig, <i>Introduction to Robotics: Mechanics and Control</i>, 3rd ed. · Also: Spong, Hutchinson &amp; Vidyasagar, <i>Robot Modeling and Control</i>, and Corke, <i>Robotics, Vision and Control</i> · The 3-D figures are rendered with CoppeliaSim Edu (robot models by Coppelia Robotics); none is copied from the books · Open <code>index.html</code> directly or serve this folder with <code>python3 -m http.server</code> · Formulas use KaTeX and web fonts, so the first visit needs an internet connection · <a href="tests.html">numeric tests</a></footer>
+</div>
+<script>
+(function(){
+  /* ---------- roadmap ---------- */
+  const road=document.getElementById('road'); const stops=window.STOPS, stages=window.STAGES; const L=MC.lang;
+  function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  const pick=(th,en)=>MC.t(th,en);
+  const typeName={read:pick('หน้าอ่าน','Reading'),sim:pick('หน้าโต้ตอบ','Interactive'),cap:pick('แคปสโตน','Capstone'),soon:pick('กำลังสร้าง','In preparation')};
+  let html='', lastStage=null;
+  for(const s of stops){
+    if(s.stage!==lastStage){ lastStage=s.stage; const st=stages[s.stage];
+      const live=stops.some(x=>x.stage===s.stage&&!x.soon); const pinTxt=st.pin||'·';
+      html+=`<div class="milestone s${s.stage}${live?'':' soon'}"><div class="pin"${pinTxt.length>2?' style="font-size:13px"':''}>${pinTxt}</div><h2>${esc(pick(st.title,st.title_en))}</h2><p>${esc(pick(st.blurb,st.blurb_en))}</p></div>`; }
+    const titleMain=L==='en'?s.en:s.title, titleSub=L==='en'?'':s.en;
+    if(s.soon){
+      html+=`<div class="node soon"><div class="dot"><span>${s.ch}</span></div><div class="stop"><div class="head"><span class="step">${pick('บทที่','Chapter')} ${s.ch}</span><span class="type soon">${typeName.soon}</span></div>
+        <h3>${esc(titleMain)}<span class="en">${esc(titleSub)}</span></h3><p>${esc(pick(s.blurb,s.blurb_en))}</p></div></div>`;
+      continue; }
+    const tags=pick(s.tags,s.tags_en)||s.tags;
+    html+=`<div class="node s${s.stage} ${s.type}" data-page="${s.file}" id="n-${s.file.replace(/\W/g,'_')}"><div class="dot"><span>${s.step}</span></div>
+      <a class="stop" href="${s.file}"><span class="arrow">→</span><div class="head"><span class="step">${pick('หน้า','Page')} ${s.step}</span><span class="type ${s.type}">${typeName[s.type]}</span></div>
+      <h3>${esc(titleMain)}<span class="en">${esc(titleSub)}</span></h3><p>${esc(pick(s.blurb,s.blurb_en))}</p>
+      <div class="goal"><b>${pick('จะทำได้:','You will be able to:')}</b> ${esc(pick(s.outcome,s.outcome_en))}</div>
+      <div class="topics">${esc(pick(s.book,s.book_en))}</div>
+      <div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></a></div>`;
+  }
+  road.innerHTML=html;
+  const nodes=[...road.querySelectorAll('.node[data-page]')]; document.getElementById('mLive').textContent=nodes.length;
+  function paint(){ const v=MC.visited(); let n=0; nodes.forEach(el=>{ const d=!!v[el.dataset.page]; el.classList.toggle('visited',d); if(d) n++; });
+    document.getElementById('pCount').textContent=`${n} / ${nodes.length}`; document.getElementById('pFill').style.width=Math.round(100*n/nodes.length)+'%';
+    const next=nodes.find(el=>!v[el.dataset.page]); const nx=document.getElementById('pNext');
+    if(next){ nx.innerHTML=pick('หน้าต่อไป: ','Next up: ')+'<b>'+next.querySelector('h3').childNodes[0].textContent+'</b>'; nx.href=next.querySelector('a.stop').getAttribute('href'); } else { nx.innerHTML='<b>'+pick('ทำครบทุกหน้าที่พร้อมแล้ว','All ready pages done')+'</b>'; nx.removeAttribute('href'); } }
+  nodes.forEach(el=>el.querySelector('a.stop').addEventListener('click',()=>MC.markVisited(el.dataset.page)));
+  document.getElementById('pReset').addEventListener('click',()=>{ MC.resetVisited(); paint(); });
+  paint();
+
+  /* ---------- hero: drag the target of a two-link arm (inverse kinematics, as in problem 1.3) ---------- */
+  const cv=document.getElementById('hero'), H={ l1:0.5, l2:0.4, x:0.55, y:0.5, elbow:-1, ctr:[0.1,0.25], dist:4.3, ax:[0.98,0.98], win:[-0.95,0.95,-0.25,0.95] };
+  const btn=document.getElementById('heroElbow'), lab=()=>{ btn.textContent=H.elbow<0?pick('ศอกขึ้น ↔ สลับเป็นศอกลง','elbow up ↔ switch to elbow down'):pick('ศอกลง ↔ สลับเป็นศอกขึ้น','elbow down ↔ switch to elbow up'); }; lab();
+  btn.addEventListener('click',()=>{ H.elbow=-H.elbow; lab(); });
+  RB.stage(cv, 0.78, (c,W,Hh,dt,P)=>CH1.view.ik2(c,W,Hh,H,P), { maxH: 460 });
+  RB.drag(cv, null, p=>{ if(!p) return; const w=CH1.pick(H,p); if(w){ H.x=NUM.clamp(w[0],-0.95,0.95); H.y=NUM.clamp(w[1],-0.5,0.95); } });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="1.2 — Mathematical modelling of robots">1.2 — แบบจำลองทางคณิตศาสตร์ของหุ่นยนต์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=11">
+<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
+<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">แบบจำลองทางคณิตศาสตร์ของหุ่นยนต์ <span class="en">Mathematical modelling — links, joints, degrees of freedom and the workspace</span></h1>
+<h1 data-l="en">Mathematical modelling of robots <span class="en">Links, joints, degrees of freedom and the workspace</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s11.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 11: links and joints form a kinematic chain; link 0 is the base; joint i connects link i−1 to link i">
+    <figcaption data-l="th">สไลด์บทที่ 1 หน้า 11 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 1 slides, p. 11 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">ก่อนจะคำนวณอะไรได้ ต้องบรรยายหุ่นยนต์ด้วยภาษาเดียวกันก่อน: <b>ก้านต่อ ข้อต่อ ตัวแปรข้อต่อ องศาอิสระ และปริภูมิทำงาน</b> หน้านี้ครอบคลุมสไลด์หน้า 10–22 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>5 โจทย์</b> การนับก้านและข้อต่อใช้แบบของ Craig ซึ่งเป็นตำราหลักของวิชา</p>
+    <p class="sub" data-l="en">Before anything can be computed, the robot has to be described in one language: <b>links, joints, joint variables, degrees of freedom and the workspace</b>. This page covers slides pp. 10–22. It has <b>one tool (A)</b> and <b>5 problems</b>. Links and joints are numbered as in Craig, the course's main textbook.</p>
+    <div class="equation-box eqwrap" style="margin:10px 0 0">$$ q = (q_1, \dots, q_n),\quad q_i = \begin{cases}\theta_i & \text{R}\\ d_i & \text{P}\end{cases} $$ $$ x = \begin{pmatrix} q \\ \dot q\end{pmatrix} $$</div>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>ก้านต่อ 0 คือฐาน</b> ข้อต่อ i ต่อก้าน i−1 กับก้าน i (Craig) แกนของข้อต่อ i คือ \(Z_i\)</li><li><b>ข้อต่อหมุน R ใช้ตัวแปร \(\theta_i\) ข้อต่อเลื่อน P ใช้ \(d_i\)</b> ตั้งชื่อแขนจากฐานไปปลาย</li><li><b>องศาอิสระของแขนแบบอนุกรม = จำนวนข้อต่อ</b> วัตถุแข็งเกร็งในปริภูมิมี 6</li><li><b>ปริภูมิสถานะ</b> มีมิติ \(2n\) เพราะต้องรู้ทั้งตำแหน่งและความเร็วของข้อต่อ</li><li><b>ปริภูมิทำงานแบบคล่องแคล่ว</b> (ไปถึงได้ทุกทิศ) เป็นส่วนหนึ่งของ <b>ปริภูมิทำงานแบบไปถึงได้</b> (ไปถึงได้อย่างน้อยหนึ่งทิศ)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Link 0 is the base</b>; joint i connects link i−1 to link i (Craig); the axis of joint i is \(Z_i\).</li><li><b>A revolute joint R has variable \(\theta_i\), a prismatic joint P has \(d_i\)</b>; name the arm from base to tip.</li><li><b>DOF of a serial arm = number of joints</b>; a rigid body in space has 6.</li><li><b>The state space</b> has dimension \(2n\): joint positions and joint velocities.</li><li><b>The dexterous workspace</b> (every orientation) is part of the <b>reachable workspace</b> (at least one orientation).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>ประกอบแขนกล</a><a href="#ex1"><b>1</b>ตั้งชื่อแขน</a><a href="#ex2"><b>2</b>ปริภูมิสถานะ</a><a href="#ex3"><b>3</b>ตัวอย่างที่ 1</a><a href="#ex4"><b>4</b>ตัวอย่างที่ 2</a><a href="#ex5"><b>5</b>แบบฝึก</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Build an arm</a><a href="#ex1"><b>1</b>Name the arms</a><a href="#ex2"><b>2</b>State space</a><a href="#ex3"><b>3</b>Example 1</a><a href="#ex4"><b>4</b>Example 2</a><a href="#ex5"><b>5</b>Practice</a></nav>
+
+<div class="group-head"><h2 data-l="th">ข้อต่อสองชนิดและโครงแบบ (สไลด์หน้า 12, 14)</h2><h2 data-l="en">Two kinds of joint and the configuration (slides pp. 12, 14)</h2></div>
+<div class="slides">
+  <figure class="slide"><img src="slides/ch1/s12.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 12: revolute joint with angle theta i, prismatic joint with distance d i; notation note: Craig puts the axis of joint i on Z i"><figcaption data-l="th">สไลด์หน้า 12 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 12 · tap to enlarge</figcaption></figure>
+  <figure class="slide"><img src="slides/ch1/s14.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 14: configuration q = (q1, ..., qn); configuration space is the set of every possible q"><figcaption data-l="th">สไลด์หน้า 14</figcaption><figcaption data-l="en">Slide p. 14</figcaption></figure>
+</div>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: ประกอบแขนกลจากข้อต่อ R และ P</h2><h2 data-l="en">Tool: build an arm from R and P joints</h2>
+    <div class="src" data-l="th">เลือกชนิดของข้อต่อทีละตัวจากฐาน แล้วเลื่อนตัวแปรข้อต่อ ชื่อแขน องศาอิสระ และโครงแบบ \(q\) เปลี่ยนตาม</div><div class="src" data-l="en">Choose each joint from the base, then move the joint variables; the arm's name, its DOF and the configuration \(q\) follow</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div></div>
+    <div class="card solve"><h3 data-l="th">ชนิดของข้อต่อ (จากฐาน)</h3><h3 data-l="en">Joint types (from the base)</h3><div id="typA"></div>
+      <h3 data-l="th" style="margin-top:12px">อ่านค่า</h3><h3 data-l="en" style="margin-top:12px">Readings</h3><div class="metrics" id="roA"></div>
+      <p class="lead" data-l="th" style="margin-top:8px">ข้อต่อเลื่อน (กล่อง) เลื่อนไปตามแนวของก้านก่อนหน้า ลองสร้าง RR, RP และ PR แล้วเทียบว่าปลายแขนเคลื่อนที่ต่างกันอย่างไร</p>
+      <p class="lead" data-l="en" style="margin-top:8px">A prismatic joint (box) slides along the previous link. Build RR, RP and PR and compare how the tip can move.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">ตั้งชื่อแขนกลจากชนิดข้อต่อ</h2><h2 data-l="en">Name each arm by its joints</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 13 · แบบฝึกในห้อง</div><div class="src" data-l="en">Chapter 1 slides, p. 13 · in-class practice</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s13.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 13: four planar arms (a) to (d) to be named by their joint types">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 13 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 13 · tap to enlarge</figcaption></figure>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv1"></canvas><div id="ctl1" style="padding:0 8px"></div>
+      <div class="simnote" data-l="th">ข้อต่อของแขนที่เลือกขยับไปมาช้า ๆ ทีละตัว ดูว่าข้อต่อไหน <b>หมุน</b> ข้อต่อไหน <b>เลื่อน</b></div><div class="simnote" data-l="en">The joints of the chosen arm move slowly one at a time: watch which joints <b>turn</b> and which <b>slide</b>.</div></div>
+    <div class="card solve"><table class="pick" id="pick1"></table><div class="pickbar"><button type="button" class="btn on" id="chk1"></button><span id="res1"></span></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">องศาอิสระและปริภูมิสถานะ (สไลด์หน้า 15–16)</h2><h2 data-l="en">Degrees of freedom and the state space (slides pp. 15–16)</h2></div>
+<div class="slides">
+  <figure class="slide"><img src="slides/ch1/s15.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 15: degrees of freedom; a rigid body has 3 DOF in a plane and 6 in space"><figcaption data-l="th">สไลด์หน้า 15 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 15 · tap to enlarge</figcaption></figure>
+</div>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">มิติของปริภูมิโครงแบบและปริภูมิสถานะ</h2><h2 data-l="en">Dimensions of the configuration and state spaces</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 16 · คำถามตรวจความเข้าใจ</div><div class="src" data-l="en">Chapter 1 slides, p. 16 · quick check</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s16.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 16: state x = (q, q dot), dimension 2n; quick check table for a SCARA (4 joints), a 6-axis arm and a planar RRP arm">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 16 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 16 · tap to enlarge</figcaption></figure>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv2"></canvas><div id="ctl2" style="padding:0 8px"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">ปริภูมิทำงาน (สไลด์หน้า 17)</h2><h2 data-l="en">The workspace (slide p. 17)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s17.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 17: workspace of a two-link arm with free joints (a ring) and with joint limits (part of the ring)"><figcaption data-l="th">สไลด์หน้า 17 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 17 · tap to enlarge</figcaption></figure>
+  <p class="sub" data-l="th"><b>ปริภูมิทำงาน</b> คือทุกจุดที่ปลายแขนไปถึงได้เมื่อข้อต่อเคลื่อนที่ครบทุกค่า ขึ้นกับสองอย่าง: <b>ความยาวก้านต่อ</b> และ <b>ขีดจำกัดของข้อต่อ</b> ในโจทย์ข้อ 3 ลองกด "กวาด" ให้แขนวาดปริภูมิทำงานของตัวเอง แล้วเลื่อนขีดจำกัดของ \(\theta_1\) และ \(\theta_2\) ดูพื้นที่ที่หายไป</p>
+  <p class="sub" data-l="en">The <b>workspace</b> is every point the tool can reach as the joints go through all their values. It depends on two things: the <b>link lengths</b> and the <b>joint limits</b>. In problem 3 press "Sweep" to let the arm draw its own workspace, then move the limits of \(\theta_1\) and \(\theta_2\) and watch the area that disappears.</p>
+</div>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">ตัวอย่างที่ 1: ปริภูมิทำงานของแขนสองก้าน</h2><h2 data-l="en">Worked example 1: workspace of a two-link arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 18 · Craig 4.2 (แขนสองก้าน)</div><div class="src" data-l="en">Chapter 1 slides, p. 18 · Craig 4.2 (two-link arm)</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s18.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 18: a planar two-link arm with l1 = 0.4 m and l2 = 0.3 m, joints turn through 360 degrees; find r max, r min and the area">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 18 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 18 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>$$ l_1 = 0.4\ \text{m},\qquad l_2 = 0.3\ \text{m} $$<div data-l="th">ข้อต่อทั้งสองหมุนได้รอบตัว (360°)</div><div data-l="en">both joints turn through 360°</div></div><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<div class="group-head"><h2 data-l="th">ปริภูมิทำงานแบบไปถึงได้และแบบคล่องแคล่ว (สไลด์หน้า 19)</h2><h2 data-l="en">Reachable and dexterous workspace (slide p. 19)</h2></div>
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch1/s19.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 19: reachable workspace, at least one orientation; dexterous workspace, every orientation; correction note"><figcaption data-l="th">สไลด์หน้า 19 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 19 · tap to enlarge</figcaption></figure>
+  <div><p class="sub" data-l="th">นิยามตาม Craig หัวข้อ 4.2: <b>ไปถึงได้ (reachable)</b> = จุดที่ปลายแขนไปถึงได้ <b>อย่างน้อยหนึ่งทิศ</b> · <b>คล่องแคล่ว (dexterous)</b> = จุดที่ไปถึงได้ <b>ทุกทิศ</b> ดังนั้นแบบคล่องแคล่วอยู่ในแบบไปถึงได้เสมอ</p>
+    <p class="sub" data-l="en">Definitions from Craig §4.2: <b>reachable</b> = points the tool can reach in <b>at least one</b> orientation · <b>dexterous</b> = points it can reach in <b>every</b> orientation. So the dexterous workspace always lies inside the reachable one.</p>
+    <div class="warnbox" data-l="th"><b>แก้ไขจากสไลด์เดิม:</b> สไลด์ฉบับก่อน (หน้า 21) สลับนิยามสองคำนี้ ฉบับปัจจุบันแก้แล้วตาม Craig</div><div class="warnbox" data-l="en"><b>Correction:</b> the earlier slides (p. 21) had these two definitions swapped; the current slides follow Craig.</div></div>
+</div>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">ตัวอย่างที่ 2: วงแหวนไปถึงได้และวงแหวนคล่องแคล่ว</h2><h2 data-l="en">Worked example 2: the reachable and dexterous rings</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 20 · แขนสามก้านในระนาบ</div><div class="src" data-l="en">Chapter 1 slides, p. 20 · a planar three-link arm</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s20.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 20: a planar three-link arm with l1 = 0.4, l2 = 0.3, l3 = 0.1 m; find its reachable and dexterous workspaces">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 20 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 20 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4" class="grab"></canvas><div class="ctl" id="ctl4"></div>
+      <div class="simnote" data-l="th"><b>ลากจุดปลายแขน</b> วงแหวนเล็กรอบจุดบอกทิศของเครื่องมือที่ทำได้ (เขียว) และทำไม่ได้ (แดง) เลื่อน φ เพื่อหมุนเครื่องมือ</div><div class="simnote" data-l="en"><b>Drag the tool point.</b> The small ring round it shows the tool directions that work (green) and those that do not (red). Move φ to turn the tool.</div></div>
+    <div class="card solve"><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex5">
+  <div class="prob-head"><span class="prob-no">5</span><div><h2 data-l="th">แบบฝึก 5 นาที: l₁ = l₂ = 0.5 m, l₃ = 0.2 m</h2><h2 data-l="en">5-minute practice: l₁ = l₂ = 0.5 m, l₃ = 0.2 m</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 1 หน้า 21</div><div class="src" data-l="en">Chapter 1 slides, p. 21</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch1/s21.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 21: a planar 3R arm with l1 = 0.5, l2 = 0.5, l3 = 0.2 m; (a) reachable workspace (b) dexterous workspace (c) is r = 1.0 m dexterous?">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 21 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 21 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv5" class="grab"></canvas><div class="ctl" id="ctl5"></div></div>
+    <div class="card solve"><div id="ask5"></div><div id="st5"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — เมื่อ l₁ = l₂</h3>
+    <ol><li>ในโจทย์ข้อ 3 ตั้ง \(l_1 = l_2\): วงกลมใน (\(r_{min}\)) หายไป ปลายแขนพับกลับมาถึงฐานได้ ปริภูมิทำงานเป็นวงกลมเต็ม</li><li>นี่คือเหตุผลที่ข้อ 5 มีปริภูมิไปถึงได้เริ่มจาก 0</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ขีดจำกัดข้อต่อ</h3>
+    <ol><li>ในข้อ 3 ลดช่วงของ \(\theta_2\) ให้เหลือ 0° ถึง 140°: ส่วนที่ปลายแขนพับเข้าหาฐานหายไป พื้นที่ลดลงเกินครึ่ง</li><li>แขนจริงแทบทุกตัวมีขีดจำกัดข้อต่อ (สายไฟ ตัวหยุด โครงสร้าง) ปริภูมิทำงานในเอกสารของผู้ผลิตจึงไม่ใช่วงแหวนสมบูรณ์</li></ol></div>
+  <div class="card"><h3>ลองทำดู 3 — ขอบของปริภูมิคล่องแคล่ว</h3>
+    <ol><li>ในข้อ 4 ลากปลายแขนออกจากฐานช้า ๆ: วงแหวนสีเขียวเริ่มมีส่วนสีแดงตรงที่ \(r = 0.6\) m พอดี</li><li>ที่ \(r = 0.8\) m เหลือทิศเดียว (ยืดแขนตรงทั้งสามก้าน)</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 1 หน้า 10–22 (ภาพอยู่ในหน้านี้แล้ว) · Spong 1.1 · Craig 1.2 และ 4.2</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — when l₁ = l₂</h3>
+    <ol><li>In problem 3 set \(l_1 = l_2\): the inner circle (\(r_{min}\)) disappears; the tip can fold back to the base and the workspace is a full disc.</li><li>That is why the reachable workspace in problem 5 starts at 0.</li></ol></div>
+  <div class="card"><h3>Try this 2 — joint limits</h3>
+    <ol><li>In problem 3 narrow \(\theta_2\) to 0° … 140°: the part where the tip folds towards the base disappears and more than half the area is lost.</li><li>Almost every real arm has joint limits (cables, stops, its own structure), so the workspace in a maker's datasheet is never a perfect ring.</li></ol></div>
+  <div class="card"><h3>Try this 3 — the edge of the dexterous workspace</h3>
+    <ol><li>In problem 4 drag the tool slowly away from the base: the green ring gets a red part at exactly \(r = 0.6\) m.</li><li>At \(r = 0.8\) m only one direction is left (all three links stretched out).</li></ol>
+    <div class="book">Source: chapter 1 slides, pp. 10–22 (the pictures are on this page) · Spong 1.1 · Craig 1.2 and 4.2</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, G = RB.G, tx = (s, d) => MC.tex(s, d), u = RB.u, deg = RB.deg, rad = RB.rad;
+/* drag on a 3-D picture to turn the camera (az, el in degrees) */
+const orbit = (cv, st) => { let last = null; RB.drag(cv, null, p => { if (!p) { last = null; return; } if (last) { st.az -= (p.x - last.x) * 0.4; st.el = NUM.clamp(st.el + (p.y - last.y) * 0.3, 3, 80); } last = p; }); };
+const al = rows => `\\begin{aligned} ${rows.join(' \\\\ ')} \\end{aligned}`;
+
+/* ---------- A: build an arm ---------- */
+const A = { types: ['R', 'R', 'R'], q: [rad(50), rad(-40), rad(-30)], win: [-1.15, 1.15, -0.55, 1.15], vars: true, noShadow: true, cam: [0, 0.48, 3.4], w: 1000, h: 800, ls: 34, xyz: true };
+const typA = document.getElementById('typA'), ctlA = document.getElementById('ctlA'), roA = document.getElementById('roA');
+const opts = [['R', 'R'], ['P', 'P'], ['', t('ไม่มี', 'none')]];
+typA.innerHTML = [0, 1, 2].map(i => `<label style="margin-right:12px">${t('ข้อต่อ', 'joint')} ${i + 1} <select class="mi" style="width:auto" data-i="${i}">${opts.filter(o => i || o[0]).map(o => `<option value="${o[0]}"${o[0] === A.types[i] ? ' selected' : ''}>${o[1]}</option>`).join('')}</select></label>`).join('');
+let sl = [];
+const buildA = () => { ctlA.innerHTML = ''; sl = A.types.map((ty, i) => ty === 'R' ? ui.slider(ctlA, { id: 'qa' + i, label: `θ${'₁₂₃'[i]}`, min: -150, max: 150, step: 1, value: Math.round(deg(A.q[i])), fmt: v => `${v}°`, oninput: v => { A.q[i] = rad(v); readA(); } })
+  : ui.slider(ctlA, { id: 'qa' + i, label: `d${'₁₂₃'[i]}`, min: 0, max: 0.25, step: 0.005, value: Math.min(0.25, Math.max(0, A.q[i])), fmt: v => `${v.toFixed(3)} m`, oninput: v => { A.q[i] = v; readA(); } })); readA(); };
+const readA = () => { const spec = CH1.chainSpec(A.types), k = RB.chain(spec, A.q), n = A.types.length;
+  roA.innerHTML = ui.kv([[t('ชื่อ', 'name'), A.types.join('')], [t('องศาอิสระ', 'DOF'), String(n)], ['q', '(' + A.types.map((ty, i) => ty === 'R' ? `${Math.round(deg(A.q[i]))}°` : `${A.q[i].toFixed(3)} m`).join(', ') + ')'],
+    [t('ปลายแขน (x, y)', 'tool (x, y)'), `(${u(k.tip[0], 3)}, ${u(k.tip[1], 3)}) m`], [t('ทิศปลายแขน', 'tool heading'), `${u(deg(RB.wrap(k.th)), 1)}°`], [t('ปริภูมิสถานะ', 'state space'), `${2 * n} ${t('มิติ', 'dimensions')}`]]); };
+typA.querySelectorAll('select').forEach(s => s.addEventListener('change', () => { const ty = []; typA.querySelectorAll('select').forEach(x => ty.push(x.value)); const cut = ty.indexOf(''); A.types = (cut < 0 ? ty : ty.slice(0, cut)).filter(Boolean);
+  A.q = A.types.map((tp, i) => tp === 'R' ? rad([50, -40, -30][i]) : 0.12); buildA(); }));
+buildA();
+RB.stage(document.getElementById('cvA'), 0.8, (c, W, H, dt, P) => CH1.view.chain(c, W, H, A, P), { maxH: 500 });
+
+/* ---------- 1: name the arms ---------- */
+const ARMS = [{ types: ['R', 'R'], q0: [70, -75], win: [-0.25, 0.75, -0.25, 0.62] }, { types: ['R', 'P'], q0: [40, 0.18], win: [-0.25, 0.75, -0.25, 0.62] }, { types: ['P', 'R'], q0: [0.16, 55], win: [-0.25, 0.75, -0.25, 0.62] }, { types: ['R', 'R', 'P'], q0: [75, -70, 0.12], win: [-0.25, 0.95, -0.25, 0.72] }];
+const B = { k: 0, tm: 0 }; ui.radio(document.getElementById('ctl1'), ARMS.map((a, i) => ({ id: 'a' + i, label: `(${'abcd'[i]})`, on: !i })), id => { B.k = +id.slice(1); B.tm = 0; });
+RB.stage(document.getElementById('cv1'), 0.7, (c, W, H, dt, P) => { B.tm += dt; const a = ARMS[B.k], n = a.types.length, j = Math.floor(B.tm / 2.2) % n, w = Math.sin((B.tm % 2.2) / 2.2 * 2 * Math.PI);
+  const q = a.types.map((ty, i) => ty === 'R' ? rad(a.q0[i] + (i === j ? 20 * w : 0)) : a.q0[i] + (i === j ? 0.07 * w : 0)); CH1.view.chain(c, W, H, Object.assign(B.v || (B.v = {}), { types: a.types, q, win: a.win, title: false, cam: a.types.length > 2 ? [0.36, 0.44, 2.7] : [0.3, 0.42, 2.25], xyz: true }), P);
+  G.pill(c, `(${'abcd'[B.k]}) · ${t('ขยับข้อต่อ', 'moving joint')} ${j + 1}`, 10, 18, { fill: RB.rgba(P.warn, 0.16), stroke: P.warn, color: P.warn, size: 12.5 }); }, { maxH: 380 });
+const NM = ['RR', 'RP', 'PR', 'RRP', 'PP', 'RPR', 'PRR'], pk = document.getElementById('pick1');
+pk.innerHTML = `<tr><th>${t('แขน', 'arm')}</th><th>${t('ชื่อ', 'name')}</th><th></th></tr>` + ARMS.map((a, i) => `<tr data-i="${i}"><td>(${'abcd'[i]})</td><td><select aria-label="name"><option value="">—</option>${NM.map(n => `<option>${n}</option>`).join('')}</select></td><td class="res"></td></tr>`).join('');
+const chk1 = document.getElementById('chk1'); chk1.textContent = t('ตรวจ', 'Check');
+chk1.addEventListener('click', () => { let ok = 0; pk.querySelectorAll('tr[data-i]').forEach(tr => { const a = ARMS[+tr.dataset.i], s = tr.querySelector('select'), g = s.value === a.types.join(''); if (g) ok++; s.classList.toggle('ok', g); s.classList.toggle('no', !g); tr.querySelector('.res').textContent = g ? '✓' : '✗'; });
+  document.getElementById('res1').innerHTML = ok === 4 ? `<span class="pill good">✓</span> ${t('ถูกทั้งหมด!', 'All correct!')}` : `<span class="pill bad">${ok} / 4</span>`; });
+const showArm = i => { B.k = i; B.tm = 0; document.querySelectorAll('#ctl1 .btn').forEach((b, j) => b.classList.toggle('on', j === i)); };
+LS.stepper(document.getElementById('st1'), {
+  steps: [{ why: t('<b>(a)</b> ข้อต่อทั้งสองเป็นวงกลม (หมุน) ไล่จากฐาน: <b>RR</b>', '<b>(a)</b> both joints are circles (they turn), from the base: <b>RR</b>'), onShow: () => showArm(0) },
+    { why: t('<b>(b)</b> ข้อต่อแรกหมุน ข้อต่อที่สองเป็นกล่อง ก้านที่สองเลื่อนเข้าออกในแนวของก้านแรก: <b>RP</b>', '<b>(b)</b> the first joint turns; the second is a box, so link 2 slides in and out along link 1: <b>RP</b>'), onShow: () => showArm(1) },
+    { why: t('<b>(c)</b> ข้อต่อแรกเลื่อนบนฐาน แล้วจึงหมุน: <b>PR</b> ไม่ใช่ RP เพราะลำดับนับจากฐาน', '<b>(c)</b> the first joint slides on the base, then the arm turns: <b>PR</b>, not RP, because the order starts at the base'), onShow: () => showArm(2) },
+    { why: t('<b>(d)</b> หมุน หมุน แล้วเลื่อนที่ปลาย: <b>RRP</b> (สามข้อต่อ สามองศาอิสระ)', '<b>(d)</b> turn, turn, then slide at the end: <b>RRP</b> (three joints, three DOF)'), onShow: () => showArm(3) }],
+  answer: t('(a) <b>RR</b> · (b) <b>RP</b> · (c) <b>PR</b> · (d) <b>RRP</b>', '(a) <b>RR</b> · (b) <b>RP</b> · (c) <b>PR</b> · (d) <b>RRP</b>') });
+
+/* ---------- 2: state space ---------- */
+const D2 = { mode: 'both', az: -68, el: 20 }, cvD = document.getElementById('cv2'); cvD.classList.add('grab'); ui.html(document.getElementById('ctl2'), t('ลากในภาพเพื่อหมุนมุมมอง', 'Drag in the picture to turn the view'), 'simnote');
+RB.stage(cvD, 0.475, (c, W, H, dt, P) => CH1.view.dof(c, W, H, D2, P), { maxH: 400 }); orbit(cvD, D2);
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('SCARA: โครงแบบ', 'SCARA: configuration'), ok: x => x === 4, w: 3.5 }, { label: t('สถานะ', 'state'), ok: x => x === 8, w: 3.5 }, { label: t('แขน 6 แกน: สถานะ', '6-axis arm: state'), ok: x => x === 12, w: 3.5 }],
+  check: v => v[1] === 4 ? t('ปริภูมิสถานะต้องนับความเร็วของข้อต่อด้วย', 'the state space also counts the joint velocities') : '' });
+LS.stepper(document.getElementById('st2'), {
+  steps: [{ why: t('<b>ปริภูมิโครงแบบ</b> มีมิติเท่ากับจำนวนตัวแปรข้อต่อ = จำนวนองศาอิสระ \\(n\\)', '<b>The configuration space</b> has one dimension per joint variable: \\(n\\), the number of DOF'), tex: 'q = (q_1, q_2, \\dots, q_n) \\;\\Rightarrow\\; \\dim = n' },
+    { why: t('<b>สถานะ</b> = ตำแหน่ง <b>และ</b> ความเร็วของข้อต่อ จึงมีมิติเป็นสองเท่า', '<b>The state</b> = joint positions <b>and</b> joint velocities, so twice as many dimensions'), tex: 'x = \\begin{pmatrix} q \\\\ \\dot q \\end{pmatrix} \\;\\Rightarrow\\; \\dim = 2n' },
+    { why: t('<b>แทนค่า</b>: SCARA มี 4 ข้อต่อ แขนอุตสาหกรรม 6 แกนมี 6 ข้อต่อ แขน RRP ในระนาบมี 3 ข้อต่อ', '<b>Put in the numbers</b>: a SCARA has 4 joints, a 6-axis industrial arm 6, a planar RRP arm 3'), tex: al(['\\text{SCARA: } & n = 4,\\; 2n = 8', '\\text{6-axis: } & n = 6,\\; 2n = 12', '\\text{RRP: } & n = 3,\\; 2n = 6']) }],
+  answer: t('SCARA <b>4 และ 8</b> · แขน 6 แกน <b>6 และ 12</b> · RRP ในระนาบ <b>3 และ 6</b>', 'SCARA <b>4 and 8</b> · 6-axis arm <b>6 and 12</b> · planar RRP <b>3 and 6</b>') });
+
+/* ---------- 3: workspace of a two-link arm ---------- */
+const W3 = { xyz: true, l1: 0.4, l2: 0.3, t1: rad(55), t2: rad(70), R: 0.78, k: 0, lim: { a1: -Math.PI, b1: Math.PI, a2: -Math.PI, b2: Math.PI }, trace: [], sweep: null };
+const ctl3 = document.getElementById('ctl3'), ro3 = document.getElementById('ro3');
+const s3 = {}; const mk3 = (id, label, min, max, step, value, fmt, on) => { s3[id] = ui.slider(ctl3, { id, label, min, max, step, value, fmt, oninput: v => { on(v); W3.trace = []; read3(); } }); };
+mk3('l1', 'l₁', 0.1, 0.5, 0.01, 0.4, v => `${v.toFixed(2)} m`, v => { W3.l1 = v; }); mk3('l2', 'l₂', 0.1, 0.5, 0.01, 0.3, v => `${v.toFixed(2)} m`, v => { W3.l2 = v; });
+mk3('a1', 'θ₁ min', -180, 0, 5, -180, v => `${v}°`, v => { W3.lim.a1 = rad(v); }); mk3('b1', 'θ₁ max', 0, 180, 5, 180, v => `${v}°`, v => { W3.lim.b1 = rad(v); });
+mk3('a2', 'θ₂ min', -180, 0, 5, -180, v => `${v}°`, v => { W3.lim.a2 = rad(v); }); mk3('b2', 'θ₂ max', 0, 180, 5, 180, v => `${v}°`, v => { W3.lim.b2 = rad(v); });
+ui.buttons(ctl3, [{ label: t('▶ กวาด', '▶ Sweep'), onclick: () => { W3.trace = []; W3.sweep = 0; } }, { label: t('↺ ค่าของโจทย์', '↺ Problem values'), onclick: () => { W3.l1 = 0.4; W3.l2 = 0.3; W3.lim = { a1: -Math.PI, b1: Math.PI, a2: -Math.PI, b2: Math.PI };
+  [['l1', 0.4], ['l2', 0.3], ['a1', -180], ['b1', 180], ['a2', -180], ['b2', 180]].forEach(([k, v]) => s3[k].set(v)); W3.trace = []; read3(); } }]);
+let area3 = null, key3 = '';
+const read3 = () => { const L = W3.lim, full = L.b1 - L.a1 >= 2 * Math.PI - 1e-6 && L.b2 - L.a2 >= 2 * Math.PI - 1e-6, rg = RB.ring2(W3.l1, W3.l2), key = [W3.l1, W3.l2, L.a1, L.b1, L.a2, L.b2].join();
+  if (key !== key3) { key3 = key; area3 = full ? rg.area : RB.ws2Area(W3.l1, W3.l2, L, 160); }
+  ro3.innerHTML = `r<sub>max</sub> = <code>${u(rg.rmax, 2)} m</code> · r<sub>min</sub> = <code>${u(rg.rmin, 2)} m</code> · ${t('พื้นที่', 'area')} = <code>${u(area3, 3)} m²</code>${full ? '' : ' <span class="term">' + t('(นับช่องกริด ประมาณ)', '(grid count, approximate)') + '</span>'}`; };
+read3();
+RB.stage(document.getElementById('cv3'), 0.875, (c, W, H, dt, P) => {
+  if (W3.sweep !== null) { const L = W3.lim, n2 = 9; for (let rep = 0; rep < 6; rep++) { W3.sweep += 0.004; if (W3.sweep >= 1) { W3.sweep = null; break; } const j = Math.floor(W3.sweep * n2), f = W3.sweep * n2 - j;
+      W3.t2 = L.a2 + (L.b2 - L.a2) * (j + 0.5) / n2; W3.t1 = L.a1 + (L.b1 - L.a1) * (j % 2 ? 1 - f : f); const p = RB.fk2(W3.l1, W3.l2, W3.t1, W3.t2); W3.trace.push([p.x, p.y]); } }
+  W3.R = Math.max(0.78, (W3.l1 + W3.l2) * 1.12); CH1.view.ws2(c, W, H, W3, P); }, { maxH: 540 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: 'r<sub>max</sub> (m) =', ok: x => Math.abs(x - 0.7) < 0.005, w: 4 }, { label: 'r<sub>min</sub> (m) =', ok: x => Math.abs(x - 0.1) < 0.005, w: 4 }, { label: t('พื้นที่ (m²) =', 'area (m²) ='), ok: x => Math.abs(x - 1.508) < 0.01, w: 4.5 }],
+  check: v => Math.abs(v[2] - 1.539) < 0.01 ? t('π(0.7)² คือวงกลมเต็ม ต้องหักวงกลมในรัศมี 0.1 m ออก', 'π(0.7)² is the full disc; take away the inner circle of radius 0.1 m') : '' });
+LS.stepper(document.getElementById('st3'), {
+  steps: [{ why: t('<b>ยืดแขนตรง</b>: ไกลที่สุดที่ปลายแขนไปได้ (วงกลมสีฟ้าบนภาพ)', '<b>Stretch the arm straight</b>: the farthest the tool can go (blue circle)'), tex: 'r_{max} = l_1 + l_2 = 0.4 + 0.3 = 0.7\\ \\text{m}' },
+    { why: t('<b>พับก้านที่ 2 กลับทับก้านที่ 1</b>: ใกล้ฐานที่สุดที่ไปได้ (วงกลมสีชมพู)', '<b>Fold link 2 back over link 1</b>: the closest the tool can come (pink circle)'), tex: 'r_{min} = |l_1 - l_2| = |0.4 - 0.3| = 0.1\\ \\text{m}' },
+    { why: t('<b>พื้นที่วงแหวน</b> ระหว่างสองวง (บริเวณที่ระบายบนภาพ)', '<b>Area of the ring</b> between the two circles (shaded)'), tex: al(['A &= \\pi\\left(r_{max}^2 - r_{min}^2\\right) = \\pi\\left(0.49 - 0.01\\right)', '&= 0.48\\pi = 1.508\\ \\text{m}^2']) }],
+  answer: t('<b>r<sub>max</sub> = 0.7 m, r<sub>min</sub> = 0.1 m, พื้นที่ = 1.508 m²</b> · ถ้า l₁ = l₂ วงในหายไป', '<b>r<sub>max</sub> = 0.7 m, r<sub>min</sub> = 0.1 m, area = 1.508 m²</b> · if l₁ = l₂ the inner circle disappears'), onStep: k => { W3.k = k; } });
+
+/* ---------- 4 and 5: reachable and dexterous (drag the tool) ---------- */
+const dexScene = (cvId, ctlId, st0) => { const S = { ...st0, R: 0.86, elbow: 1, xyz: true }, ctl = document.getElementById(ctlId), cv = document.getElementById(cvId); let geo = { W: 1, H: 1 };
+  const sl = {}; [['l1', 'l₁'], ['l2', 'l₂'], ['l3', 'l₃']].forEach(([k, lab]) => { sl[k] = ui.slider(ctl, { id: cvId + k, label: lab, min: 0.05, max: 0.6, step: 0.01, value: S[k], fmt: v => `${v.toFixed(2)} m`, oninput: v => { S[k] = v; S.R = Math.max(0.5, (S.l1 + S.l2 + S.l3) * 1.08); } }); });
+  sl.phi = ui.slider(ctl, { id: cvId + 'phi', label: 'φ', min: -180, max: 180, step: 1, value: Math.round(deg(S.phi)), fmt: v => `${v}°`, oninput: v => { S.phi = rad(v); } });
+  ui.buttons(ctl, [{ label: t('สลับศอก', 'flip elbow'), onclick: () => { S.elbow = -S.elbow; } }]);
+  S.R = Math.max(0.5, (S.l1 + S.l2 + S.l3) * 1.08);
+  RB.stage(cv, 0.875, (c, W, H, dt, P) => { geo = { W, H }; CH1.view.dex(c, W, H, S, P); const r = Math.hypot(S.x, S.y); G.text(c, `r = ${u(r, 3)} m`, W - 10, H - 12, { color: P.ink, size: 13, weight: 700, align: 'right', mono: true, halo: P.bg }); }, { maxH: 520 });
+  RB.drag(cv, null, (p, ph) => { if (!p) return; const w = CH1.pick(S, p) || RB.fitWorld(geo.W, geo.H, -S.R * 1.06, S.R * 1.06, -S.R * 1.06, S.R * 1.06, 4).inv(p.x, p.y); S.x = w[0]; S.y = w[1]; });
+  return S; };
+dexScene('cv4', 'ctl4', { l1: 0.4, l2: 0.3, l3: 0.1, x: 0.36, y: 0.3, phi: rad(20) });
+LS.stepper(document.getElementById('st4'), {
+  steps: [{ why: t('<b>จุดข้อมือ</b> (ปลายก้านที่ 2) เคลื่อนที่ในวงแหวนของแขนสองก้าน', '<b>The wrist</b> (end of link 2) moves in the ring of the two-link arm'), tex: '|l_1 - l_2| \\le r_w \\le l_1 + l_2 \\;\\Rightarrow\\; 0.1 \\le r_w \\le 0.7\\ \\text{m}' },
+    { why: t('<b>ไปถึงได้</b>: ก้านที่ 3 ยาว \\(l_3\\) ชี้ไปทางไหนก็ได้ จุดเครื่องมืออยู่ห่างจากวงแหวนข้อมือไม่เกิน \\(l_3\\)', '<b>Reachable</b>: link 3 (length \\(l_3\\)) may point anywhere, so the tool is within \\(l_3\\) of the wrist ring'), tex: al(['\\max(0,\\, 0.1 - 0.1) \\le r &\\le 0.7 + 0.1', '0 \\le r &\\le 0.8\\ \\text{m}']) },
+    { why: t('<b>คล่องแคล่ว</b>: ให้เครื่องมือชี้ได้ทุกทิศ ข้อมือต้องอยู่ได้ทุกจุดบนวงกลมรัศมี \\(l_3\\) รอบเครื่องมือ วงกลมนี้จึงต้องอยู่ในวงแหวนข้อมือทั้งวง', '<b>Dexterous</b>: for every tool direction, the wrist must be able to sit anywhere on the circle of radius \\(l_3\\) round the tool, so that whole circle must lie inside the wrist ring'), tex: al(['0.1 + 0.1 \\le r &\\le 0.7 - 0.1', '0.2 \\le r &\\le 0.6\\ \\text{m}']) }],
+  answer: t('ไปถึงได้ <b>0 ≤ r ≤ 0.8 m</b> · คล่องแคล่ว <b>0.2 m ≤ r ≤ 0.6 m</b> (วงสีเขียวบนภาพ)', 'Reachable <b>0 ≤ r ≤ 0.8 m</b> · dexterous <b>0.2 m ≤ r ≤ 0.6 m</b> (the green ring)') });
+
+dexScene('cv5', 'ctl5', { l1: 0.5, l2: 0.5, l3: 0.2, x: 1.0, y: 0.0, phi: 0 });
+LS.ask(document.getElementById('ask5'), { fields: [{ label: t('(a) ไปถึงได้ r ≤', '(a) reachable r ≤'), ok: x => Math.abs(x - 1.2) < 0.005, w: 4 }, { label: t('(b) คล่องแคล่ว', '(b) dexterous'), ok: x => Math.abs(x - 0.2) < 0.005, w: 4 }, { label: '≤ r ≤', ok: x => Math.abs(x - 0.8) < 0.005, w: 4 }],
+  check: v => Math.abs(v[1]) < 0.005 ? t('จุดที่ r ใกล้ 0: เครื่องมือชี้ได้ทุกทิศไหม ข้อมือต้องอยู่บนวงกลมรัศมี 0.2 m รอบฐาน แต่ข้อมือไปได้ทุกจุดตั้งแต่ r_w = 0 … ลองคิดเรื่องวงกลมทั้งวงอีกครั้ง', 'near r = 0: the wrist would have to sit on a circle of radius 0.2 m around the tool; check the whole circle again') : '' });
+LS.stepper(document.getElementById('st5'), {
+  steps: [{ why: t('<b>วงแหวนข้อมือ</b>: \\(l_1 = l_2\\) วงในจึงหายไป', '<b>The wrist ring</b>: \\(l_1 = l_2\\), so there is no inner circle'), tex: '0 \\le r_w \\le 1.0\\ \\text{m}' },
+    { why: t('<b>(a) ไปถึงได้</b>', '<b>(a) Reachable</b>'), tex: '0 \\le r \\le 1.0 + 0.2 = 1.2\\ \\text{m}' },
+    { why: t('<b>(b) คล่องแคล่ว</b>: วงกลมรัศมี 0.2 m รอบเครื่องมือต้องอยู่ในวงแหวนข้อมือ', '<b>(b) Dexterous</b>: the 0.2 m circle round the tool must fit in the wrist ring'), tex: '0 + 0.2 \\le r \\le 1.0 - 0.2 \\;\\Rightarrow\\; 0.2 \\le r \\le 0.8\\ \\text{m}' },
+    { why: t('<b>(c)</b> r = 1.0 m อยู่ในช่วง (a) แต่เกิน 0.8 m ของ (b): ภาพจำลองเริ่มที่จุดนี้ วงรอบจุดมีทั้งเขียวและแดง', '<b>(c)</b> r = 1.0 m is inside (a) but beyond the 0.8 m of (b); the simulation starts at this point and its ring is part green, part red') }],
+  answer: t('(a) <b>0 ≤ r ≤ 1.2 m</b> · (b) <b>0.2 ≤ r ≤ 0.8 m</b> · (c) <b>ไม่ใช่</b>: ไปถึงได้แต่ไม่คล่องแคล่ว', '(a) <b>0 ≤ r ≤ 1.2 m</b> · (b) <b>0.2 ≤ r ≤ 0.8 m</b> · (c) <b>no</b>: reachable but not dexterous') });
+});
+</script>
+</body>
+</html>
