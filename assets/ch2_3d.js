@@ -259,15 +259,20 @@ const label = (c, L, x0, y, size, col, bg) => { const f = fonts(size); c.save();
   const W = (t, ff) => { if (!t) return 0; c.font = ff; return c.measureText(t).width; }, wp = W(L.pre, f.fP) + (L.pre ? 1 : 0), wm = W(L.t, f.fM), ws = W(L.sub, f.fS) + (L.sub ? 1 : 0);
   if (L.pre) put(L.pre, f.fP, x0, y - size * 0.4); put(L.t, f.fM, x0 + wp, y); if (L.sub) put(L.sub, f.fS, x0 + wp + wm + 0.5, y + size * 0.24); if (L.post) put(L.post, f.fM, x0 + wp + wm + ws, y); c.restore(); };
 /* the picture, then its labels: each label is moved off the picture and off the other labels when it has to be (S3.place), with a leader line back */
-const paint = CH2.paint = (c, W, H, s, P, st) => { if (global.R3 && global.R3.ok()) global.R3.draw(c, W, H, s); else if (global.R3) global.R3.flat(c, W, H, s);
+const paint = CH2.paint = (c, W, H, s, P, st, res) => { if (global.R3 && global.R3.ok()) global.R3.draw(c, W, H, s); else if (global.R3) global.R3.flat(c, W, H, s);
   const k = W / s.ow, items = s.labels.map(L => { const q = S3.proj(s.cam, W, H, L.p), size = max(11, L.s * 1.3 * k), w = lw(c, L, size), x = q[0] + L.dx * k;
     return { L, size, w, x: L.a === 'c' ? x - w / 2 : L.a === 'r' ? x - w : x, y: q[1] + L.dy * k, ax: q[0], ay: q[1] }; });
-  S3.place(c, W, H, items, P.bg, st ? (st._lm || (st._lm = [])) : null);
+  S3.place(c, W, H, items, P.bg, st ? (st._lm || (st._lm = [])) : null, res);
   items.forEach(it => { if (it.lead) S3.leader(c, it, P.muted); }); items.forEach(it => label(c, it.L, it.X, it.Y, it.size, P[KEY[it.L.c]] || P.ink, P.bg)); };
 /* scenes of any chapter: CH2.S3, then CH3.S3, CH4.S3 … */
 const sceneFn = name => SC[name] || ['CH3', 'CH4', 'CH5', 'CH6', 'CH7', 'CH8', 'CH9'].map(k => global[k] && global[k].S3 && global[k].S3[name]).find(Boolean);
+/* the faint 0.1 m grid (S3.floorGrid) goes into every scene measured in metres: the arms of chapters 3 and 4 and the bolt; chapter 2's other
+   pictures are drawn to no scale (or carry their own numbered grid). A planar arm (every frame at one height) gets it in its own plane */
+const gridOn = (name, s) => { if (SC[name] && name !== 'bolt') return false; if (s.F && s.gridZ === undefined) { const z = s.F.map(T => T[2][3]); if (z.every(x => Math.abs(x - z[0]) < 1e-6) && s.F.every(T => Math.abs(T[2][2]) > 0.999)) s.gridZ = z[0]; } return true; };
+CH2.gridNote = (c, W, P) => G.text(c, T('ตาราง 0.1 m', 'grid 0.1 m'), W - 10, 17, { color: P.muted, size: 11.5, align: 'right', halo: P.bg });
 CH2.view = (name, c, W, H, st, P) => { const s = sceneFn(name)(st, { dark: P === RB.DARK }); if (st.ov) st.ov(s, st);   // the open step of the page's solution (S3.OV)
-  st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st); return s; };
+  const g = gridOn(name, s); if (g) S3.floorGrid(s);
+  st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st, g ? [[W - 120, 0, W, 26]] : null); if (g) CH2.gridNote(c, W, P); return s; };
 /* the point of the horizontal plane z = z0 under the pointer */
 CH2.pick = (st, p, z0 = 0) => st._v ? S3.unproject(st._v.cam, st._v.W, st._v.H, p.x, p.y, z0) : null;
 /* drag in a canvas to turn the view (st.az, st.el); o.grab(p) may take the drag for something else (return true) */

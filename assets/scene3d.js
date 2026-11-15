@@ -93,8 +93,17 @@ S3.OV = {
   /* a name at a point, nothing drawn */
   name: (s, p, key, t, o = {}) => S3.lab(s, p, t, ovl(o, key)),
   sub: vsub, v };
+/* ---- a faint grid for the live views (never the slides): 0.1 m squares with a stronger line every 0.5 m, on the plane z = s.gridZ (set by planar arms:
+   the plane they move in, so readings do not shift with the viewing angle) or on the floor, centred under the camera's target. The lines stay
+   under S3.place's ink threshold, so labels may sit on them. Built once per size and place (S3.cached) ---- */
+S3.floorGrid = s => { const z = (s.gridZ === undefined ? 0 : s.gridZ) + 0.002, t = s.cam.tgt, R = Math.min(2, Math.max(0.5, Math.round(s.cam.dist * 0.7) / 2)), cx = Math.round(t[0] * 2) / 2, cy = Math.round(t[1] * 2) / 2;
+  s.grid = 0.1;
+  S3.cached(s, ['fgrid', cx, cy, R, z.toFixed(3)].join(), g => { const minor = [], major = [], i0 = Math.round((cx - R) * 10), i1 = Math.round((cx + R) * 10), j0 = Math.round((cy - R) * 10), j1 = Math.round((cy + R) * 10);
+    for (let i = i0; i <= i1; i++) { const x = i / 10, m = i % 5 === 0, w = m ? 0.0028 : 0.0015; (m ? major : minor).push([[x - w, j0 / 10, z], [x + w, j0 / 10, z], [x + w, j1 / 10, z], [x - w, j1 / 10, z]]); }
+    for (let j = j0; j <= j1; j++) { const y = j / 10, m = j % 5 === 0, w = m ? 0.0028 : 0.0015; (m ? major : minor).push([[i0 / 10, y - w, z], [i1 / 10, y - w, z], [i1 / 10, y + w, z], [i0 / 10, y + w, z]]); }
+    mesh(g, minor, g.dark ? [0.16, 0.19, 0.29] : [0.88, 0.9, 0.93]); mesh(g, major, g.dark ? [0.23, 0.27, 0.39] : [0.79, 0.82, 0.88]); }); };
 /* a revolute arm lying in a horizontal plane at height z0 (the two- and three-link arm of the chapter) */
-S3.harm = (s, L, q, o = {}) => { const z0 = o.z0 || 0.11, al = o.al, cols = o.cols || s.L.slice(1), pts = [[0, 0, z0]]; let th = 0; L.forEach((l, i) => { th += q[i]; const p = pts[i]; pts.push([p[0] + l * cos(th), p[1] + l * sin(th), z0]); });
+S3.harm = (s, L, q, o = {}) => { const z0 = o.z0 || 0.11, al = o.al; if (s.gridZ === undefined) s.gridZ = z0; const cols = o.cols || s.L.slice(1), pts = [[0, 0, z0]]; let th = 0; L.forEach((l, i) => { th += q[i]; const p = pts[i]; pts.push([p[0] + l * cos(th), p[1] + l * sin(th), z0]); });
   if (!al) pedestal(s, [0, 0], z0 - 0.02);
   L.forEach((l, i) => bar(s, pts[i], pts[i + 1], 0.027 - i * 0.003, cols[i], al)); L.forEach((l, i) => rj(s, pts[i], [0, 0, 1], { r: 0.046 - i * 0.004, h: 0.05, al }));
   const d = [cos(th), sin(th), 0], sd = [-sin(th), cos(th), 0]; if (o.grip !== false) grip(s, pts[L.length], d, sd, { al, w: 0.014 + 0.022 * (o.open === undefined ? 1 : o.open), L: 0.065 }); else sph(s, pts[L.length], 0.022, s.pal.ink, al); return { pts, th }; };
