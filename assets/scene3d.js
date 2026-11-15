@@ -14,6 +14,14 @@ S3.PAL = { light: { ink: C.k, joint: [0.2, 0.25, 0.33], sleeve: [0.27, 0.33, 0.4
   dark: { ink: [0.91, 0.93, 0.97], joint: [0.62, 0.67, 0.77], sleeve: [0.52, 0.58, 0.69], base: [0.42, 0.47, 0.58], dash: [0.62, 0.66, 0.8], cap: [0.92, 0.94, 0.97], shadow: 0.5, bg: [0.059, 0.071, 0.125], floor: [0.1, 0.12, 0.2], z: [0.42, 0.66, 1], link: [[0.42, 0.47, 0.58], [1, 0.6, 0.25], [0.3, 0.72, 0.95], [0.72, 0.52, 0.92]] } };
 const v = S3.v = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
 S3.camAt = (tgt, dist, az, el, fov = 28) => ({ tgt, fov, dist, az, el, eye: [tgt[0] + dist * cos(rad(el)) * cos(rad(az)), tgt[1] + dist * cos(rad(el)) * sin(rad(az)), tgt[2] + dist * sin(rad(el))] });
+/* a camera that keeps every point of pts in a W × H picture (seen from az, el), with a margin m in metres, for arms whose joints the
+   reader can move anywhere: centred on what is there, as close as it fits. st (the page state) keeps the last framing in st._fit and
+   eases towards the new one: out quickly (nothing may leave the picture), in slowly and only for a clear gain (no breathing while dragging) */
+S3.fitCam = (st, pts, az, el, fov, W, H, o = {}) => { const e = [cos(rad(el)) * cos(rad(az)), cos(rad(el)) * sin(rad(az)), sin(rad(el))], z = [-e[0], -e[1], -e[2]], x = un(cr([0, 0, 1], z)), y = cr(z, x), m = o.m === undefined ? 0.2 : o.m;
+  const P = pts.map(p => [dot(p, x), dot(p, y), dot(p, z)]), lo = k => Math.min(...P.map(q => q[k])), hi = k => max(...P.map(q => q[k])), hu = (hi(0) - lo(0)) / 2 + m, hv = (hi(1) - lo(1)) / 2 + m, cu = (hi(0) + lo(0)) / 2, cv = (hi(1) + lo(1)) / 2, cz = (hi(2) + lo(2)) / 2;
+  const tn = tan(rad(fov) / 2), d1 = max(o.minD || 0, (W >= H ? max(hu, hv * W / H) : max(hu * H / W, hv)) / tn + (hi(2) - lo(2)) / 2), t1 = [0, 1, 2].map(k => cu * x[k] + cv * y[k] + cz * z[k]);
+  let f = st && st._fit; if (!f || o.snap) f = { t: t1, d: d1 }; else { const kd = d1 > f.d ? 0.35 : d1 < 0.8 * f.d ? 0.08 : 0; f = { t: f.t.map((a, k) => a + (t1[k] - a) * 0.2), d: f.d + (d1 - f.d) * kd }; if (d1 > f.d) f.d = max(f.d, d1 * 0.97); }
+  if (st) st._fit = f; return S3.camAt(f.t, f.d, az, el, fov); };
 S3.scene = (name, w, h, cam, o = {}) => { const pal = S3.PAL[o.dark ? 'dark' : 'light']; return { name, ow: w, oh: h, cam, items: [], labels: [], pal, dark: !!o.dark, noShadow: !!o.noShadow, L: pal.link }; };
 /* camera axes: z looks at the target, x points to the left of the picture, y up */
 S3.axes = cam => { const z = un([cam.tgt[0] - cam.eye[0], cam.tgt[1] - cam.eye[1], cam.tgt[2] - cam.eye[2]]), x = un(cr([0, 0, 1], z)); return { x, y: cr(z, x), z }; };
@@ -70,31 +78,32 @@ S3.harm = (s, L, q, o = {}) => { const z0 = o.z0 || 0.11, al = o.al, cols = o.co
 /* ---- where the end of an arm is: tip (a world point) in the frame with origin O and axes A = [X, Y, Z] (unit world vectors, default the world axes).
    Marks the tip, draws the dashed path x along X, then y along Y, then z along Z that adds up to it, and writes x, y, z beside the tip under
    the heading o.head (one block of labels: they share the anchor, so the placement moves them together). o.axes: also draw the frame's
-   axes that long, named x, y, z (chapter 1, where no frame is drawn yet), o.axN = 2 only x and y (z would hide inside the robot's column); o.path false: no dashed path; o.dx, o.dy move the block.
+   axes that long, named x, y, z (chapter 1, where no frame is drawn yet), o.axIdx which of them (default all three; [0, 1] where z would point at the camera or hide in the robot's column); o.path false: no dashed path; o.dx, o.dy move the block.
    Returns the coordinates [x, y, z]. ---- */
 S3.xyz = (s, O, tip, o = {}) => { const A = o.A || [[1, 0, 0], [0, 1, 0], [0, 0, 1]], w = [tip[0] - O[0], tip[1] - O[1], tip[2] - O[2]], p = A.map(e => e[0] * w[0] + e[1] * w[1] + e[2] * w[2]), col = [C.x, C.y, s.pal.z];
-  if (o.axes) A.slice(0, o.axN || 3).forEach((e, j) => { S3.arrow(s, O, v(O, e, o.axes), col[j], 0.0045); S3.lab(s, v(O, e, o.axes + 0.035), 'xyz'[j], { m: 1, c: 'xyz'[j], s: 28, a: 'c', dy: 10 }); });
+  if (o.axes) (o.axIdx || [0, 1, 2]).forEach(j => { const e = A[j]; S3.arrow(s, O, v(O, e, o.axes), col[j], 0.0045); S3.lab(s, v(O, e, o.axes + 0.035), 'xyz'[j], { m: 1, c: 'xyz'[j], s: 28, a: 'c', dy: 10 }); });
   if (o.path !== false) { let a = O; A.forEach((e, j) => { const b = v(a, e, p[j]), d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = hypot(d[0], d[1], d[2]), n = Math.max(3, 2 * Math.round(L / 0.05) + 1);
       if (L > 0.012) for (let i = 0; i < n; i += 2) cyl(s, v(a, d, i / n), v(a, d, (i + 1) / n), 0.0032, col[j], 0.85); a = b; }); }
   /* sizes are for a scene 1300 px wide: scaled with the scene, the block takes the same share of every picture */
-  sph(s, tip, o.r || 0.018, C.pk); const k = s.ow / 1300, dx = (o.dx === undefined ? 36 : o.dx) * k, dy = (o.dy === undefined ? -78 : o.dy) * k, f3 = x => (x < -5e-4 ? '−' : '') + Math.abs(x).toFixed(3);   // fixed decimals: the numbers do not jump about while a slider moves
-  if (o.head) S3.lab(s, tip, o.head, { c: 'mut', s: 22 * k, b: false, a: 'l', dx, dy });
-  ['x', 'y', 'z'].forEach((n, j) => S3.lab(s, tip, `${n} = ${f3(p[j])} m`, { c: 'xyz'[j], s: 27 * k, a: 'l', dx, dy: dy + (40 + 40 * j) * k }));
+  sph(s, tip, o.r || 0.018, C.pk); const k = s.ow / 1300, dx = (o.dx === undefined ? 30 : o.dx) * k, dy = (o.dy === undefined ? -64 : o.dy) * k, f3 = x => (x < -5e-4 ? '−' : '') + Math.abs(x).toFixed(3);   // fixed decimals: the numbers do not jump about while a slider moves
+  if (o.head) S3.lab(s, tip, o.head, { c: 'mut', s: 19 * k, b: false, a: 'l', dx, dy });
+  ['x', 'y', 'z'].forEach((n, j) => S3.lab(s, tip, `${n} = ${f3(p[j])} m`, { c: 'xyz'[j], s: 23 * k, a: 'l', dx, dy: dy + (33 + 33 * j) * k }));
   return p; };
 /* ---- label placement for the live views (the slide figures do the same in IRE_Slides/build/coppelia/compose.py) ----
    items: [{x, y, w, size, ax, ay}] — x, y the left end of the baseline the scene asked for, w the width, (ax, ay) the point the label names.
    Each label stays put unless its box covers the picture (pixels that differ from the background) or an earlier label; then the clearest
    nearby spot wins, with a small cost for moving. memo (an array kept by the page state) holds the last offsets so labels do not jump
-   from frame to frame. Sets X, Y (where to draw) and lead (moved far: draw a leader line). Browser only. */
+   from frame to frame. reserved: boxes [x0, y0, x1, y1] the page draws over the picture afterwards (buttons, notes), kept free like placed labels.
+   Sets X, Y (where to draw) and lead (moved far: draw a leader line). Browser only. */
 let probe = null;
-S3.place = (ctx, W, H, items, bg, memo) => { if (typeof document === 'undefined') return items;
+S3.place = (ctx, W, H, items, bg, memo, reserved) => { if (typeof document === 'undefined') return items;
   const k = 3, pw = Math.max(1, Math.ceil(W / k)), ph = Math.max(1, Math.ceil(H / k)); if (!probe) probe = document.createElement('canvas'); probe.width = pw; probe.height = ph;
   const pc = probe.getContext('2d', { willReadFrequently: true }); pc.drawImage(ctx.canvas, 0, 0, pw, ph); const d = pc.getImageData(0, 0, pw, ph).data, B = bg.match ? [parseInt(bg.slice(1, 3), 16), parseInt(bg.slice(3, 5), 16), parseInt(bg.slice(5, 7), 16)] : bg;
   const S = new Float32Array((pw + 1) * (ph + 1));   // summed-area table of the "ink"
   for (let y = 0; y < ph; y++) { let row = 0; for (let x = 0; x < pw; x++) { const i = 4 * (y * pw + x); row += (Math.abs(d[i] - B[0]) + Math.abs(d[i + 1] - B[1]) + Math.abs(d[i + 2] - B[2]) > 70) ? 1 : 0; S[(y + 1) * (pw + 1) + x + 1] = S[y * (pw + 1) + x + 1] + row; } }
   const frac = (x0, y0, x1, y1) => { const a = Math.max(0, Math.floor(x0 / k)), b = Math.max(0, Math.floor(y0 / k)), c = Math.min(pw, Math.ceil(x1 / k)), e = Math.min(ph, Math.ceil(y1 / k)), area = Math.max(1, Math.ceil((x1 - x0) / k) * Math.ceil((y1 - y0) / k));
     const ins = c <= a || e <= b ? 0 : S[e * (pw + 1) + c] - S[b * (pw + 1) + c] - S[e * (pw + 1) + a] + S[b * (pw + 1) + a], cover = Math.max(0, c - a) * Math.max(0, e - b); return (ins + Math.max(0, area - cover)) / area; };
-  const placed = [], ov = (p, q) => Math.max(0, Math.min(p[2], q[2]) - Math.max(p[0], q[0])) * Math.max(0, Math.min(p[3], q[3]) - Math.max(p[1], q[1]));
+  const placed = (reserved || []).map(b => b.slice()), ov = (p, q) => Math.max(0, Math.min(p[2], q[2]) - Math.max(p[0], q[0])) * Math.max(0, Math.min(p[3], q[3]) - Math.max(p[1], q[1]));
   /* labels that name the same point (consecutive, same anchor) move together as one block */
   const groups = []; items.forEach(it => { const pad = Math.max(2, it.size / 7); it.box0 = [it.x - pad, it.y - it.size * 0.82 - pad, it.x + it.w + pad, it.y + it.size * 0.3 + pad];
     const g = groups[groups.length - 1]; if (g && it.ax !== undefined && Math.abs(g[0].ax - it.ax) < 0.5 && Math.abs(g[0].ay - it.ay) < 0.5) g.push(it); else groups.push([it]); });

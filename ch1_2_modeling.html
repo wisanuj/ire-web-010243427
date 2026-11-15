@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=11">
-<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
-<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch1.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch1_3d.js?v=11"></script>
+<link rel="stylesheet" href="assets/ire.css?v=12">
+<script src="assets/stops.js?v=12"></script><script src="assets/shell.js?v=12"></script>
+<script src="assets/robot.js?v=12"></script><script src="assets/lesson.js?v=12"></script><script src="assets/ch1.js?v=12"></script><script src="assets/scene3d.js?v=12"></script><script src="assets/gl3d.js?v=12"></script><script src="assets/ch1_3d.js?v=12"></script>
 </head>
 <body>
 <div class="wrap">
@@ -160,7 +160,7 @@ const orbit = (cv, st) => { let last = null; RB.drag(cv, null, p => { if (!p) { 
 const al = rows => `\\begin{aligned} ${rows.join(' \\\\ ')} \\end{aligned}`;
 
 /* ---------- A: build an arm ---------- */
-const A = { types: ['R', 'R', 'R'], q: [rad(50), rad(-40), rad(-30)], win: [-1.15, 1.15, -0.55, 1.15], vars: true, noShadow: true, cam: [0, 0.48, 3.4], w: 1000, h: 800, ls: 34, xyz: true };
+const A = { types: ['R', 'R', 'R'], q: [rad(50), rad(-40), rad(-30)], win: [-1.15, 1.15, -0.55, 1.15], vars: true, noShadow: true, cam: [0, 0.48, 3.4], w: 1000, h: 800, ls: 34, xyz: true, fit: true };
 const typA = document.getElementById('typA'), ctlA = document.getElementById('ctlA'), roA = document.getElementById('roA');
 const opts = [['R', 'R'], ['P', 'P'], ['', t('ไม่มี', 'none')]];
 typA.innerHTML = [0, 1, 2].map(i => `<label style="margin-right:12px">${t('ข้อต่อ', 'joint')} ${i + 1} <select class="mi" style="width:auto" data-i="${i}">${opts.filter(o => i || o[0]).map(o => `<option value="${o[0]}"${o[0] === A.types[i] ? ' selected' : ''}>${o[1]}</option>`).join('')}</select></label>`).join('');

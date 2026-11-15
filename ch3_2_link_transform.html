@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=11">
-<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
-<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+<link rel="stylesheet" href="assets/ire.css?v=12">
+<script src="assets/stops.js?v=12"></script><script src="assets/shell.js?v=12"></script>
+<script src="assets/robot.js?v=12"></script><script src="assets/lesson.js?v=12"></script><script src="assets/ch2.js?v=12"></script><script src="assets/ch3.js?v=12"></script><script src="assets/scene3d.js?v=12"></script><script src="assets/gl3d.js?v=12"></script><script src="assets/ch2_3d.js?v=12"></script><script src="assets/ch3_3d.js?v=12"></script>
 </head>
 <body>
 <div class="wrap">
@@ -139,7 +139,7 @@ LS.stepper(document.getElementById('st1'), { steps: [
   answer: t('ตำแหน่ง (0, −0.3, 0) m และ r₂₃ = −1 ตรงกับ ¹₂T ของแขน RPR เมื่อ d₂ = 0.3', 'Position (0, −0.3, 0) m and r₂₃ = −1: the ¹₂T of the RPR arm with d₂ = 0.3') });
 
 /* ---------- 2: the planar three-link arm ---------- */
-const P3 = E.p3r, S2 = { ex: 'p3r', q: P3.q.slice(), show: 0, xyz: true }, ro2 = document.getElementById('ro2'), ctl2 = document.getElementById('ctl2');
+const P3 = E.p3r, S2 = { ex: 'p3r', q: P3.q.slice(), show: 0, xyz: true, fit: true }, ro2 = document.getElementById('ro2'), ctl2 = document.getElementById('ctl2');
 const read2 = () => { const T = P3.T03(P3.L, S2.q); ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(T)}</div><div class="term">θ₁ + θ₂ + θ₃ = ${Math.round(deg(S2.q[0] + S2.q[1] + S2.q[2]))}° · ${t('ตำแหน่ง', 'position')} (${u(T[0][3], 3)}, ${u(T[1][3], 3)}) m</div>`; };
 ['θ₁', 'θ₂', 'θ₃'].forEach((n, i) => ui.slider(ctl2, { id: 'b' + i, label: n, min: -150, max: 150, step: 1, value: Math.round(deg(S2.q[i])), fmt: v => `${v}°`, oninput: v => { S2.q[i] = rad(v); read2(); } })); read2();
 CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
@@ -158,7 +158,7 @@ const PRE = { p3r: { lab: t('3R ระนาบ', 'planar 3R'), rows: [[0, 0, 0,
   rpr: { lab: 'RPR', rows: [[0, 0, 0, 0, 'R'], [90, 0, 0.35, 0, 'P'], [0, 0, 0.15, 0, 'R']], h0: 0.45, tool: 'z' },
   twist: { lab: t('บิด 90°', '90° twist'), rows: [[0, 0, 0, 0, 'R'], [90, 0.25, 0, 0, 'R'], [0, 0.5, 0, 0, 'R']], h0: 0.35, tool: 'x' },
   scara: { lab: 'SCARA', rows: [[0, 0, 0, 0, 'R'], [0, 0.45, 0, 0, 'R'], [180, 0.35, 0.15, 0, 'P'], [0, 0, 0.05, 0, 'R']], h0: 0.6, tool: 'z' } };
-const SB = { rows: [], q: [], h0: 0.12, toolDir: 'x', xyz: true }, tabB = document.getElementById('tabB'), ctlB = document.getElementById('ctlB'), roB = document.getElementById('roB'); let rowsB = [];
+const SB = { rows: [], q: [], h0: 0.12, toolDir: 'x', xyz: true, fit: true }, tabB = document.getElementById('tabB'), ctlB = document.getElementById('ctlB'), roB = document.getElementById('roB'); let rowsB = [];
 const sync = () => { SB.rows = rowsB.map(r => ({ al: rad(r[0]), a: r[1], d: r[2], th: rad(r[3]), j: r[4] })); const F = RB.fkDH(SB.rows, SB.q); roB.innerHTML = `<div class="live"><span class="eq">⁰<sub>N</sub>T =</span>${T4(F[F.length - 1])}</div>`; };
 const sliders = () => { ctlB.innerHTML = ''; SB.q = rowsB.map(() => 0); rowsB.forEach((r, i) => ui.slider(ctlB, { id: 'qb' + i, label: (r[4] === 'R' ? 'θ' : 'd') + '₁₂₃₄₅₆'[i] + (r[4] === 'R' ? '' : t(' (เพิ่ม)', ' (added)')), min: r[4] === 'R' ? -180 : -0.2, max: r[4] === 'R' ? 180 : 0.3, step: r[4] === 'R' ? 1 : 0.01, value: 0, fmt: v => r[4] === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { SB.q[i] = r[4] === 'R' ? rad(v) : v; sync(); } })); };
 const table = () => { tabB.innerHTML = `<table class="dhtab"><tr><th>i</th><th>α<sub>i−1</sub> (°)</th><th>a<sub>i−1</sub> (m)</th><th>d<sub>i</sub> (m)</th><th>θ<sub>i</sub> (°)</th><th>${t('ข้อต่อ', 'joint')}</th></tr>` + rowsB.map((r, i) => `<tr><td>${i + 1}</td>${[0, 1, 2, 3].map(j => `<td><input data-i="${i}" data-j="${j}" value="${r[j]}" inputmode="decimal"></td>`).join('')}<td><select data-i="${i}"><option${r[4] === 'R' ? ' selected' : ''}>R</option><option${r[4] === 'P' ? ' selected' : ''}>P</option></select></td></tr>`).join('') + '</table>' +

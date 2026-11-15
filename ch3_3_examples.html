@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=11">
-<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
-<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+<link rel="stylesheet" href="assets/ire.css?v=12">
+<script src="assets/stops.js?v=12"></script><script src="assets/shell.js?v=12"></script>
+<script src="assets/robot.js?v=12"></script><script src="assets/lesson.js?v=12"></script><script src="assets/ch2.js?v=12"></script><script src="assets/ch3.js?v=12"></script><script src="assets/scene3d.js?v=12"></script><script src="assets/gl3d.js?v=12"></script><script src="assets/ch2_3d.js?v=12"></script><script src="assets/ch3_3d.js?v=12"></script>
 </head>
 <body>
 <div class="wrap">
@@ -131,7 +131,7 @@ const Tx = rows => `\\begin{bmatrix} ${rows.map(r => r.join(' & ')).join(' \\\\ 
 const jsl = (el, S, names, kinds, onch, ranges) => names.forEach((n, i) => ui.slider(el, { id: el.id + i, label: n, min: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][0] : -150) : 0.1, max: kinds[i] === 'R' ? (ranges && ranges[i] ? ranges[i][1] : 150) : 0.6, step: kinds[i] === 'R' ? 1 : 0.01, value: kinds[i] === 'R' ? Math.round(deg(S.q[i])) : S.q[i], fmt: v => kinds[i] === 'R' ? `${v}°` : `${v.toFixed(2)} m`, oninput: v => { S.q[i] = kinds[i] === 'R' ? rad(v) : v; onch(); } }));
 
 /* ---------- 1: RPR ---------- */
-const R3 = E.rpr, S1 = { ex: 'rpr', q: R3.q.slice(), xyz: true }, ro1 = document.getElementById('ro1');
+const R3 = E.rpr, S1 = { ex: 'rpr', q: R3.q.slice(), xyz: true, fit: true }, ro1 = document.getElementById('ro1');
 const read1 = () => { ro1.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(R3.T03(R3.L, S1.q))}</div>`; };
 jsl(document.getElementById('ctl1'), S1, ['θ₁', 'd₂', 'θ₃'], ['R', 'P', 'R'], read1); read1(); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 460 });
 CH3.dhAsk(document.getElementById('tab1'), { ans: R3.sym, opts: ['0', '90°', 'L₂', 'd₂', 'θ₁', 'θ₂', 'θ₃'], check: v => v[7] === 'θ₂' ? t('ข้อต่อ 2 เป็นข้อต่อเลื่อน: ตัวแปรคือ d₂ ส่วน θ₂ คงที่ (= 0)', 'Joint 2 slides: its variable is d₂; θ₂ is fixed (= 0)') : '' });
@@ -145,7 +145,7 @@ LS.stepper(document.getElementById('st1'), { steps: [
   answer: t('ปลายแขนอยู่ห่างแกน 1 เป็นระยะ d₂ + L₂ ในทิศ (s₁, −c₁, 0)', 'The end of the arm is d₂ + L₂ from axis 1, in the direction (s₁, −c₁, 0)') });
 
 /* ---------- 2: 90° twist ---------- */
-const TW = E.twist, S2 = { ex: 'twist', q: TW.q.slice(), xyz: true }, ro2 = document.getElementById('ro2');
+const TW = E.twist, S2 = { ex: 'twist', q: TW.q.slice(), xyz: true, fit: true }, ro2 = document.getElementById('ro2');
 const read2 = () => { ro2.innerHTML = `<div class="live"><span class="eq">⁰<sub>3</sub>T =</span>${T4(TW.T03(TW.L, S2.q))}</div>`; };
 jsl(document.getElementById('ctl2'), S2, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read2); read2(); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 460 });
 CH3.dhAsk(document.getElementById('tab2'), { ans: TW.sym, opts: ['0', '90°', 'L₁', 'L₂', 'θ₁', 'θ₂', 'θ₃'], check: v => v[5] === '0' ? t('แกน 1 กับแกน 2 อยู่ห่างกัน L₁ ตามเส้นตั้งฉากร่วม: a₁ = L₁', 'Axes 1 and 2 are L₁ apart along their common perpendicular: a₁ = L₁') : '' });
@@ -156,7 +156,7 @@ LS.stepper(document.getElementById('st2'), { steps: [
   answer: t('ตารางตรงกับลายมือในฉบับผู้สอนเดิม ตรวจสูตรกับภาพจำลองได้: เลื่อนแถบแล้วเทียบตัวเลข', 'The table matches the old teacher slides; check the formula against the simulation by moving the sliders') });
 
 /* ---------- 3: four-frame arm ---------- */
-const A4 = E.arm4, S3s = { ex: 'arm4', q: A4.q.slice(), xyz: true }, ro3 = document.getElementById('ro3');
+const A4 = E.arm4, S3s = { ex: 'arm4', q: A4.q.slice(), xyz: true, fit: true }, ro3 = document.getElementById('ro3');
 const read3 = () => { ro3.innerHTML = `<div class="live"><span class="eq">⁰<sub>4</sub>T =</span>${T4(A4.T04(A4.L, S3s.q))}</div>`; };
 jsl(document.getElementById('ctl3'), S3s, ['θ₁', 'θ₂', 'θ₃'], ['R', 'R', 'R'], read3); read3(); CH2.sim('cv3', S3s, 'dh', { aspect: 0.8, maxH: 460 });
 CH3.dhAsk(document.getElementById('tab3'), { ans: A4.sym, opts: ['0', '90°', 'L₁ + L₂', 'L₃', 'L₄', 'θ₁', 'θ₂', 'θ₃'], check: v => v[15] !== '0' ? t('เฟรม {4} ไม่มีข้อต่อ: θ₄ = 0 คงที่', 'Frame {4} has no joint: θ₄ = 0, fixed') : '' });
@@ -169,7 +169,7 @@ LS.stepper(document.getElementById('st3'), { steps: [
   answer: t(`ความสูงของเครื่องมือ ${RB.u(p3[2][3], 3)} m`, `Tool height ${RB.u(p3[2][3], 3)} m`) });
 
 /* ---------- 4: six-axis arm ---------- */
-const IR = E.irb, S4 = { ex: 'irb', q: IR.zero.slice(), xyz: true }, ro4 = document.getElementById('ro4');
+const IR = E.irb, S4 = { ex: 'irb', q: IR.zero.slice(), xyz: true, fit: true }, ro4 = document.getElementById('ro4');
 const read4 = () => { const T = IR.T06(S4.q, IR.a1, IR.a2, IR.d4); ro4.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(T)}</div><div class="term">${t('ตำแหน่ง (คอลัมน์ 4) คือจุดศูนย์กลางข้อมือ เทียบเฟรม {0} ที่ความสูงไหล่ 0.352 m', 'the position (column 4) is the wrist centre, relative to {0} at the shoulder height 0.352 m')}</div>`; };
 jsl(document.getElementById('ctl4'), S4, ['θ₁', 'θ₂', 'θ₃', 'θ₄', 'θ₅', 'θ₆'], ['R', 'R', 'R', 'R', 'R', 'R'], read4, [[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]]); read4();
 CH2.sim('cv4', S4, 'dh', { aspect: 0.8, maxH: 500 });

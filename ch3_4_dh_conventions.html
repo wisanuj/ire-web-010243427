@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=11">
-<script src="assets/stops.js?v=11"></script><script src="assets/shell.js?v=11"></script>
-<script src="assets/robot.js?v=11"></script><script src="assets/lesson.js?v=11"></script><script src="assets/ch2.js?v=11"></script><script src="assets/ch3.js?v=11"></script><script src="assets/scene3d.js?v=11"></script><script src="assets/gl3d.js?v=11"></script><script src="assets/ch2_3d.js?v=11"></script><script src="assets/ch3_3d.js?v=11"></script>
+<link rel="stylesheet" href="assets/ire.css?v=12">
+<script src="assets/stops.js?v=12"></script><script src="assets/shell.js?v=12"></script>
+<script src="assets/robot.js?v=12"></script><script src="assets/lesson.js?v=12"></script><script src="assets/ch2.js?v=12"></script><script src="assets/ch3.js?v=12"></script><script src="assets/scene3d.js?v=12"></script><script src="assets/gl3d.js?v=12"></script><script src="assets/ch2_3d.js?v=12"></script><script src="assets/ch3_3d.js?v=12"></script>
 </head>
 <body>
 <div class="wrap">
@@ -119,7 +119,7 @@ scSliders(document.getElementById('ctlA'), SA, readA); readA();
 CH2.sim('cvA', SA, 'convs', { aspect: 0.48, maxH: 460, orbit: false });
 
 /* ---------- 1: Craig's table ---------- */
-const S1 = { ex: 'scara', q: S.q.slice(), xyz: true }; scSliders(document.getElementById('ctl1'), S1); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
+const S1 = { ex: 'scara', q: S.q.slice(), xyz: true, fit: true }; scSliders(document.getElementById('ctl1'), S1); CH2.sim('cv1', S1, 'dh', { aspect: 0.8, maxH: 480 });
 const OPT = ['0', '90°', '180°', 'L₁', 'L₂', 'd₃', 'd₄', 'θ₁', 'θ₂', 'θ₄'];
 CH3.dhAsk(document.getElementById('tab1'), { ans: S.sym, opts: OPT, check: v => v[5] === 'L₂' ? t('a<sub>i−1</sub> อยู่แถวเดียวกับข้อต่อ i: L₁ เป็น a₁ ในแถว 2 และ L₂ เป็น a₂ ในแถว 3', 'a<sub>i−1</sub> sits in the row of joint i: L₁ is a₁ in row 2 and L₂ is a₂ in row 3') : '' });
 LS.stepper(document.getElementById('st1'), { steps: [
@@ -129,7 +129,7 @@ LS.stepper(document.getElementById('st1'), { steps: [
   answer: t('ตัวแปร θ₁, θ₂, d₃, θ₄ · สไลด์เดิมให้เติมเองในห้อง ตารางนี้ตรวจกับตารางแบบดั้งเดิมด้วยโปรแกรมแล้ว', 'Variables θ₁, θ₂, d₃, θ₄ · the old slide left this to fill in class; this table is checked against the classical one in tests.js') });
 
 /* ---------- 2: classical table ---------- */
-const S2 = { ex: 'scara', q: S.q.slice(), conv: 'c', xyz: true }; scSliders(document.getElementById('ctl2'), S2); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
+const S2 = { ex: 'scara', q: S.q.slice(), conv: 'c', xyz: true, fit: true }; scSliders(document.getElementById('ctl2'), S2); CH2.sim('cv2', S2, 'dh', { aspect: 0.8, maxH: 480 });
 CH3.dhAsk(document.getElementById('tab2'), { ans: S.symC, cols: CH3.COLS_C, opts: OPT, check: v => v[2] === '0' && v[6] === 'L₁' ? t('แบบดั้งเดิม เฟรม {1} อยู่ที่ข้อศอก: a₁ = L₁ อยู่แถว 1', 'In the classical form frame {1} sits at the elbow: a₁ = L₁ is in row 1') : '' });
 LS.stepper(document.getElementById('st2'), { steps: [
   { why: t('<b>แถว 1</b>: θ₁ หมุนรอบ z₀ แล้วเลื่อน a₁ = L₁ ตาม x₁ ถึงข้อศอก', '<b>Row 1</b>: θ₁ about z₀, then a₁ = L₁ along x₁ to the elbow'), body: CH3.dhTable(S.symC.slice(0, 1), { cols: CH3.COLS_C }) },

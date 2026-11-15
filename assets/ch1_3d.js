@@ -13,11 +13,14 @@ function vchain(s, types, q, o = {}) { const h0 = o.h0 || 0.2, spec = CH1.chainS
   pedestal(s, [0, 0], h0 - 0.03); spec.forEach((j, i) => bar(s, P[i], P[i + 1], j.type === 'R' ? 0.03 : 0.017, s.L[i + 1]));
   spec.forEach((j, i) => { const a = k.ang[i], d = [cos(a), 0, sin(a)]; if (j.type === 'R') rj(s, P[i], Y, { r: 0.052, h: 0.06 }); else pj(s, v(P[i], d, 0.085), d, { up: [0, 1, 0] }); });
   const a = k.th; grip(s, P[P.length - 1], [cos(a), 0, sin(a)], [-sin(a), 0, cos(a)]); return { P, k }; }
+/* the points the picture of a chain must hold: the base, every joint, the end of the gripper */
+CH1.chainPts = (types, q, h0 = 0.2) => { const k = RB.chain(CH1.chainSpec(types), q), P = k.pts.map(p => [p[0], 0, p[1] + h0]), e = P[P.length - 1]; return [[0, 0, 0], [0.15, 0, 0], [-0.15, 0, 0], ...P, [e[0] + 0.1 * cos(k.th), 0, e[2] + 0.1 * sin(k.th)]]; };
 /* st.xyz (the pages turn it on; the slide figures leave it off): x, y, z of the end of the arm from the base, with the base's axes (S3.xyz) */
-const xyz = (s, st, O, tip, o = {}) => { if (st.xyz) s.tip = S3.xyz(s, O, tip, { head: T('ปลายแขน เทียบฐาน', 'end of arm, from the base'), axes: 0.2, ...o }); };
+const xyz = (s, st, O, tip, o = {}) => { if (st.xyz) s.tip = S3.xyz(s, O, tip, { head: T('ปลายแขน เทียบฐาน', 'end of arm, from the base'), axes: 0.24, axIdx: [0, 1], ...o }); };   // the planar arms: only x and y drawn (z points at a camera that looks down)
 
 /* ---- page 1.1 ---- */
-SC.loop = (st, o = {}) => { const s = scene('loop', 1400, 950, o.fig ? camAt([0.45, 0.45, 0.22], 4.1, -100, 38, 28) : camAt([0.4, 0.36, 0.12], 3.2, -98, 47, 28), o),   // the page shows the arm closer, under its sense–think–act boxes
+/* page view: the whole scene (base, every reachable part position, the camera on its post) below the page's sense–think–act boxes */
+SC.loop = (st, o = {}) => { const s = scene('loop', 1400, 950, o.fig ? camAt([0.45, 0.45, 0.22], 4.1, -100, 38, 28) : st.view ? camAt(...st.view, 28) : camAt([0.42, 0.34, 0.3], 4.6, -98, 50, 28), o),
     { l1, l2 } = CH1.LOOP, part = [st.tx, st.ty], aim = st.mx != null ? [st.mx, st.my] : part; floor(s, 1.6, [0.35, 0.35]);
   if (st.qd) harm(s, [l1, l2], st.qd, { al: 0.3, cols: [s.L[3], s.L[3]], grip: false });
   const arm = harm(s, [l1, l2], st.q, { open: st.grip ? 0.2 : 1 }); xyz(s, st, arm.pts[0], arm.pts[2]);
@@ -37,13 +40,15 @@ SC.jobs = (st, o = {}) => { const s = scene('jobs', 1300, 950, camAt([0.02, 0.36
   const arm = harm(s, [l1, l2], st.q, { open: st.open }); xyz(s, st, arm.pts[0], arm.pts[2]); return s; };
 
 /* ---- page 1.2 ---- */
-SC.chain = (st, o = {}) => { const cm = st.cam || [0.3, 0.42, 2.25], s = scene(st.name || 'chain3', st.w || 800, st.h || 700, vcam(cm[0], cm[1], cm[2]), { ...o, noShadow: st.noShadow }); if (!st.noShadow) floor(s, 1.3, [cm[0], 0]);
+/* st.fit (page 1.2, where every joint goes from −150° to 150°): the camera follows the arm so that it never leaves the picture (S3.fitCam) */
+SC.chain = (st, o = {}) => { const cm = st.cam || [0.3, 0.42, 2.25], w = st.w || 800, h = st.h || 700, pts = st.fit ? CH1.chainPts(st.types, st.q) : null;
+  const s = scene(st.name || 'chain3', w, h, pts ? S3.fitCam(st, pts, -76, 10, 26, w, h, { m: 0.26, minD: 2.6 }) : vcam(cm[0], cm[1], cm[2]), { ...o, noShadow: st.noShadow }); if (!st.noShadow) floor(s, 1.3, [cm[0], 0]);
   const r = vchain(s, st.types, st.q), k = r.k, ar = st.ar || 0.17, ls = st.ls || 44;
   if (st.vars) CH1.chainSpec(st.types).forEach((j, i) => { const a0 = i ? k.ang[i - 1] : 0, a1 = k.ang[i], O = v(r.P[i], Y, 0.075), sub = st.sub || String(i + 1);
     if (j.type === 'R') { dashed(s, O, [O[0] + 0.3 * cos(a0), O[1], O[2] + 0.3 * sin(a0)]); if (abs(a1 - a0) > 0.04) arcV(s, O, ar, a0, a1, s.pal.ink); const am = (a0 + a1) / 2; lab(s, [O[0] + (ar + 0.08) * cos(am), O[1], O[2] + (ar + 0.08) * sin(am)], 'θ', { sub, m: 1, s: ls, dy: 14, a: 'c' }); }
     else { const a = r.P[i], b = r.P[i + 1], n = [sin(a1), 0, -cos(a1)], A = [a[0] + n[0] * 0.1, -0.09, a[2] + n[2] * 0.1], B = [b[0] + n[0] * 0.1, -0.09, b[2] + n[2] * 0.1]; arrow(s, A, B, s.pal.ink, 0.005); arrow(s, B, A, s.pal.ink, 0.005);
       lab(s, [(A[0] + B[0]) / 2 + n[0] * 0.08, -0.09, (A[2] + B[2]) / 2 + n[2] * 0.08], 'd', { sub, m: 1, s: ls, dy: 14, a: 'c' }); } });
-  xyz(s, st, r.P[0], r.P[r.P.length - 1], { axes: 0.22 });
+  xyz(s, st, r.P[0], r.P[r.P.length - 1], { axes: 0.22, axIdx: [0, 2] });   // the arm stands in the x–z plane: y points away from the camera
   if (st.axis) { const O = r.P[0]; arrow(s, v(O, [0, 1, 0], 0.22), v(O, Y, 0.36), s.pal.z, 0.005); lab(s, v(O, Y, 0.36), T('แกนของข้อต่อ', 'joint axis'), { c: 'z', dx: 18, dy: 30, s: 28 }); }
   return s; };
 SC.dof = (st = {}, o = {}) => { const s = scene('dof', 1600, 760, camAt([0.05, 0, 0.36], 6.6, st.az === undefined ? -68 : st.az, st.el === undefined ? 20 : st.el, 28), o); floor(s, 2.2);
@@ -108,7 +113,7 @@ SC.arr = (st, o = {}) => { const type = st.type, A = RB.ARR[type], K = A.kin(RB.
   K.pts.slice(0, -1).forEach((p, i) => bar(s, p, K.pts[i + 1], A.seg[i] <= 1 ? 0.036 : 0.03, s.L[A.seg[i]]));
   K.axes.forEach((a, i) => { if (a.t === 'R') rj(s, a.o, a.d); else pj(s, a.o, a.d); arrow(s, v(a.o, a.d, -0.2), v(a.o, a.d, 0.36), s.pal.z, 0.0055); if (a.t === 'R') arc(s, v(a.o, a.d, 0.23), a.d, 0.075, 0.4, 5.7, s.pal.ink, 0.0045);
     lab(s, v(a.o, a.d, 0.36), 'Z', { sub: String(i + 1), m: 1, c: 'z', s: 34, dx: i ? 12 : -12, dy: 4, a: i ? 'l' : 'r' }); lab(s, a.o, a.t === 'R' ? 'θ' : 'd', { sub: String(i + 1), m: 1, s: 34, dx: 40, dy: 44 }); });
-  sph(s, K.pts[K.pts.length - 1], 0.034, C.pk); xyz(s, st, [0, 0, 0], K.pts[K.pts.length - 1], { axes: 0.36, axN: 2, r: 0.036 }); return s; };
+  sph(s, K.pts[K.pts.length - 1], 0.034, C.pk); xyz(s, st, [0, 0, 0], K.pts[K.pts.length - 1], { axes: 0.36, r: 0.036 }); return s; };
 SC.fivebar = (st, o = {}) => { const s = scene('fivebar', 1300, 1000, camAt([0, 0.33, 0.05], 3.7, -90, 54, 28), o), { c, La, Lb } = CH1.FB, z0 = 0.11, F = RB.fivebar(c, La, Lb, st.t1, st.t2), P3 = p => [p[0], p[1], z0]; floor(s, 1.3, [0, 0.3]);
   cached(s, 'fivebar', t => { const g = new Set(), h = 0.012; for (let i = 0; i <= 260; i++) for (let j = 0; j <= 260; j++) { const r = RB.fivebar(c, La, Lb, rad(10 + 160 * i / 260), rad(10 + 160 * j / 260)); if (r.ok && r.P[1] > 0.04) g.add(flr(r.P[0] / h + 1000) + ',' + flr(r.P[1] / h + 1000)); }
     cells(t, (x, y) => g.has(flr(x / h + 1000) + ',' + flr(y / h + 1000)), 0.84, 0.004, C.b, 0.3, 140); });
@@ -135,12 +140,13 @@ const G = RB.G, KEY = { ink: 'ink', mut: 'muted', o: 'l1', b: 'l2', p: 'l3', x: 
 /* the picture, then its labels, moved off the picture and off each other where needed (S3.place, as on the slides), with leader lines */
 const symW = (c, L, size) => { c.save(); c.font = `italic 500 ${size * 1.05}px ${RB.SERIF}`; let w = c.measureText(L.t).width; if (L.sub) { c.font = `500 ${Math.round(size * 1.05 * 0.68)}px ${RB.SERIF}`; w += c.measureText(L.sub).width + 0.5; } c.restore(); return w; };
 const txtW = (c, L, size) => { c.save(); c.font = `${L.b ? 700 : 500} ${size}px ${RB.FONT}`; const w = c.measureText(L.t).width; c.restore(); return w; };
-const paint = (c, W, H, s, P, st) => { global.R3.draw(c, W, H, s); const k = W / s.ow;
+const paint = (c, W, H, s, P, st, res) => { global.R3.draw(c, W, H, s); const k = W / s.ow;
   const items = s.labels.map(L => { const q = S3.proj(s.cam, W, H, L.p), size = max(11, L.s * 1.3 * k), w = L.m ? symW(c, L, size) : txtW(c, L, size), x = q[0] + L.dx * k; return { L, size, w, x: L.a === 'c' ? x - w / 2 : L.a === 'r' ? x - w : x, y: q[1] + L.dy * k, ax: q[0], ay: q[1] }; });
-  S3.place(c, W, H, items, P.bg, st ? (st._lm || (st._lm = [])) : null); items.forEach(it => { if (it.lead) S3.leader(c, it, P.muted); });
+  S3.place(c, W, H, items, P.bg, st ? (st._lm || (st._lm = [])) : null, res); items.forEach(it => { if (it.lead) S3.leader(c, it, P.muted); });
   items.forEach(({ L, X, Y, size }) => { const col = P[KEY[L.c]] || P.ink; if (L.m) G.sym(c, L.t, L.sub, X, Y, { color: col, size: size * 1.05, align: 'left', halo: P.bg }); else G.text(c, L.t, X, Y, { color: col, size, weight: L.b ? 700 : 500, align: 'left', halo: P.bg, haloW: 3.5 }); }); };
-const mk = (name, fb, after) => { V[name] = (c, W, H, st, P) => { if (!global.R3 || !global.R3.ok()) { st._v = null; if (fb) CH1.draw[fb](c, W, H, st, P); return; }
-    const s = SC[name](st, { dark: P === RB.DARK }); st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st); if (after) after(c, W, H, st, P, s); }; };
+/* reserve(W, H): boxes the after-drawing covers (S3.place keeps labels out of them) */
+const mk = (name, fb, after, reserve) => { V[name] = (c, W, H, st, P) => { if (!global.R3 || !global.R3.ok()) { st._v = null; if (fb) CH1.draw[fb](c, W, H, st, P); return; }
+    const s = SC[name](st, { dark: P === RB.DARK }); st._v = { cam: s.cam, W, H }; paint(c, W, H, s, P, st, reserve ? reserve(W, H) : null); if (after) after(c, W, H, st, P, s); }; };
 /* the point of the table (height z0) under a pointer position, for dragging a target */
 CH1.pick = (st, p, z0 = 0.11) => st._v ? S3.unproject(st._v.cam, st._v.W, st._v.H, p.x, p.y, z0) : null;
 const pillAt = (c, t, col, y = 18) => G.pill(c, t, 10, y, { fill: RB.rgba(col, 0.16), stroke: col, color: col, size: 12.5 });
@@ -148,7 +154,8 @@ mk('loop', 'loop', (c, W, H, s, P) => { const { l1, l2 } = CH1.LOOP, names = [T(
   const on = [s.sense, s.think, s.act], cols = [P.l2, P.l3, P.l1], bw = min(168, W * 0.28), gap = (W - 3 * bw) / 4;
   names.forEach((n, i) => { const x = gap + i * (bw + gap), hot = on[i] && s.stage === i, col = on[i] ? cols[i] : P.muted; c.save(); c.beginPath(); if (c.roundRect) c.roundRect(x, 8, bw, 42, 9); else c.rect(x, 8, bw, 42); c.fillStyle = RB.rgba(P.bg, 0.86); c.fill(); c.fillStyle = RB.rgba(col, hot ? 0.34 : 0.1); c.fill(); c.strokeStyle = col; c.lineWidth = hot ? 2.6 : 1.4; if (!on[i]) c.setLineDash([5, 4]); c.stroke(); c.restore();
     G.text(c, n, x + bw / 2, 26, { color: on[i] ? P.ink : P.muted, size: 15, weight: 700, align: 'center' }); G.text(c, on[i] ? subs[i] : T('ปิดอยู่', 'switched off'), x + bw / 2, 42, { color: P.muted, size: 11.5, align: 'center' }); if (i < 2) G.arrow(c, x + bw + 5, 29, x + bw + gap - 5, 29, on[i] ? P.muted : P.faint, 2, 8); });
-  const f = RB.fk2(l1, l2, s.q[0], s.q[1]), e = Math.hypot(f.x - s.tx, f.y - s.ty), hit = e < 0.025; G.pill(c, hit ? T('ปลายแขนถึงชิ้นงาน ✓', 'the tool is on the part ✓') : T(`ปลายแขนห่างชิ้นงาน ${round(e * 100)} cm`, `the tool is ${round(e * 100)} cm from the part`), 10, H - 18, { fill: RB.rgba(hit ? P.good : P.warn, 0.16), stroke: hit ? P.good : P.warn, color: hit ? P.good : P.warn, size: 12.5 }); });
+  const f = RB.fk2(l1, l2, s.q[0], s.q[1]), e = Math.hypot(f.x - s.tx, f.y - s.ty), hit = e < 0.025; G.pill(c, hit ? T('ปลายแขนถึงชิ้นงาน ✓', 'the tool is on the part ✓') : T(`ปลายแขนห่างชิ้นงาน ${round(e * 100)} cm`, `the tool is ${round(e * 100)} cm from the part`), 10, H - 18, { fill: RB.rgba(hit ? P.good : P.warn, 0.16), stroke: hit ? P.good : P.warn, color: hit ? P.good : P.warn, size: 12.5 }); },
+  (W, H) => [[0, 0, W, 58], [0, H - 36, Math.min(W, 260), H]]);   // the three boxes on top and the note at the bottom left
 mk('jobs', null, (c, W, H, s, P) => G.text(c, T('โปรแกรม = รายการจุดที่สอน', 'program = list of taught points'), 10, 20, { color: P.muted, size: 12.5, weight: 600 }));
 mk('chain', 'chain', (c, W, H, s, P) => { if (s.title) G.text(c, s.types.join(''), 14, 30, { color: P.ink, size: 24, weight: 800, mono: true }); });
 mk('dof', 'dof'); mk('ws2', 'ws2'); mk('wristS', 'wrist');

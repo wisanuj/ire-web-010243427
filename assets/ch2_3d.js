@@ -12,6 +12,8 @@ const SC = CH2.S3 = {}, I = RB.I3(), O0 = [0, 0, 0], AX = ['X', 'Y', 'Z'], AK = 
 const view = (tgt, dist, az, el, fov = 28) => camAt(tgt, dist, az, el, fov);
 /* the camera of an orbitable scene: st.az / st.el when the page has turned the view, else the scene's own; the angles used are kept in st._az, st._el */
 const cam = (st, tgt, dist, az, el) => { const a = st.az === undefined ? az : st.az, e = st.el === undefined ? el : st.el; st._az = a; st._el = e; return view(st.tgt || tgt, st.dist || dist, a, e); };
+/* the same, but framed on the points pts (S3.fitCam): for arms the reader moves anywhere with sliders */
+const camFit = (st, pts, az, el, w, h, o) => { const a = st.az === undefined ? az : st.az, e = st.el === undefined ? el : st.el; st._az = a; st._el = e; return S3.fitCam(st, pts, a, e, 28, w, h, o); };
 const grey = s => s.dark ? [0.66, 0.7, 0.8] : [0.4, 0.45, 0.54];
 const axc = (s, j) => [C.x, C.y, s.pal.z][j];
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -47,7 +49,7 @@ const grid = (s, k, x0, x1, y0, y1, step = 1, nums) => { const c = s.dark ? [0.3
   if (nums) { nums.x.forEach(x => lab(s, [x * k, 0, 0], String(x), { c: 'mut', s: 24, a: 'c', dy: 30, b: false })); nums.y.forEach(y => lab(s, [0, y * k, 0], String(y), { c: 'mut', s: 24, a: 'r', dx: -12, dy: 8, b: false })); } };
 const fmtP = (p, d = 3) => `(${RB.u(p[0], d)}, ${RB.u(p[1], d)}${p.length > 2 && abs(p[2]) > 1e-9 ? ', ' + RB.u(p[2], d) : ''})`;
 
-CH2.H = { frame, vec, dvec, angArc, turn, part, grid, view, cam, grey, axc };   // shared with the scenes of later chapters (ch3_3d.js …)
+CH2.H = { frame, vec, dvec, angArc, turn, part, grid, view, cam, camFit, grey, axc };   // shared with the scenes of later chapters (ch3_3d.js …)
 
 /* ================= page 2.1: positions, orientations, frames ================= */
 /* a point and its position vector ᴬP = (p_x, p_y, p_z) */

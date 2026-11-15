@@ -8,7 +8,7 @@
 const RB = global.RB, S3 = global.S3, CH2 = global.CH2, CH3 = global.CH3, NUM = global.NUM, C = S3.C, { sin, cos, PI, abs, max, min, hypot } = Math, rad = RB.rad, v = S3.v;
 const T = (th, en) => (global.MC && global.MC.t) ? global.MC.t(th, en) : en;
 const { bar, cyl, sph, box, arrow, tube, dashed, floor, lab, scene, shadow, rj, pedestal, grip } = S3;
-const { frame, vec, angArc, turn, view, cam, axc } = CH2.H;
+const { frame, vec, angArc, turn, view, cam, camFit, axc } = CH2.H;
 const SC = CH3.S3 = {}, I = RB.I3(), O0 = [0, 0, 0];
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], P = T4 => RB.Tp(T4), col = (T4, j) => RB.col(RB.TR(T4), j), len = a => hypot(a[0], a[1], a[2]);
 const SUB = ['₀', '₁', '₂', '₃', '₄', '₅', '₆'];
@@ -55,17 +55,20 @@ CH3.exFrames = (ex, q, conv) => { const E = CH3.EX[ex === 'rprHW' ? 'rpr' : ex],
   const full = ex === 'p3r' && q.length > 3 ? [...rows, E.tool(L)] : rows; return { rows: full, F: CH3.frames(full, q, conv, RB.trans(...V.T0)) }; };
 
 /* ---- one example arm: st.ex, st.q (joint values), st.tool (3R: add the tool frame {4}), st.show, st.frames, st.conv ---- */
-SC.dh = (st = {}, o = {}) => { const ex = st.ex || 'p3r', V = EXV[ex], q = st.q || CH3.EX[ex === 'rprHW' ? 'rpr' : ex].q, c0 = V.cam, s = scene(st.name || 'dh_' + ex, st.w || 1300, st.h || 1000, cam(st, c0[0], c0[1], c0[2], c0[3]), o);
-  const { rows, F } = CH3.exFrames(ex, st.tool ? [...q, 0] : q, st.conv); floor(s, 1.3, [c0[0][0], c0[0][1]]); if (V.base) pedestal(s, [V.T0[0], V.T0[1]], V.T0[2] - 0.02, 0.09);
+/* the points a picture of the arm must hold: the base, every frame origin and the tips of its axes, the end of the tool (for st.fit, S3.fitCam) */
+const armPts = (F, T0, grip) => { const E = F[F.length - 1], g = grip ? v(P(E), col(E, grip === 'z' ? 2 : 0), 0.1) : P(E); return [[T0[0] - 0.15, T0[1], 0], [T0[0] + 0.15, T0[1], 0], [T0[0], T0[1] - 0.15, 0], [T0[0], T0[1] + 0.15, 0], ...F.map(P), ...F.flatMap(T4 => [v(P(T4), col(T4, 0), 0.22), v(P(T4), col(T4, 2), 0.22)]), g]; };   // with the X and Z arrows of every frame and their names
+SC.dh = (st = {}, o = {}) => { const ex = st.ex || 'p3r', V = EXV[ex], q = st.q || CH3.EX[ex === 'rprHW' ? 'rpr' : ex].q, c0 = V.cam, w = st.w || 1300, h = st.h || 1000;
+  const { rows, F } = CH3.exFrames(ex, st.tool ? [...q, 0] : q, st.conv);   // st.fit (the pages): the camera follows the arm, which the sliders can swing anywhere
+  const s = scene(st.name || 'dh_' + ex, w, h, st.fit ? camFit(st, armPts(F, V.T0, V.grip), c0[2], c0[3], w, h, { m: 0.16, minD: 2.4 }) : cam(st, c0[0], c0[1], c0[2], c0[3]), o); floor(s, 1.3, [c0[0][0], c0[0][1]]); if (V.base) pedestal(s, [V.T0[0], V.T0[1]], V.T0[2] - 0.02, 0.09);
   drawDH(s, rows, F, { frames: st.frames, lab: st.lab, tags: !!st.tags, show: st.show, grip: st.grip === false ? null : V.grip, axes: st.axes, fl: st.fl, labAt: st.labAt, tagAt: st.tagAt, conv: st.conv, q });
   if (st.fk) { const On = P(F[F.length - 1]), O = P(F[0]); CH2.H.dvec(s, O, On, C.pk, { key: 'pk', t: 'T', pre: '0', sub: 'N', s: 38, at: 0.5, dx: 26, dy: 20, a: 'l', r: 0.0055 }); }
   if (st.xyz) s.tip = tipXYZ(s, F, st.xyzAt);   // the pages turn this on; the slide figures leave it off (the examples' answers are the tip position)
   s.F = F; s.rows = rows; return s; };
 
 /* ---- any DH table (the table explorer of page 3.2): st.rows (Craig's convention), st.q, st.h0 (height of {0}), st.toolDir ---- */
-SC.free = (st = {}, o = {}) => { const rows = st.rows, q = st.q || [], h0 = st.h0 === undefined ? 0.4 : st.h0, F = CH3.frames(rows, q, null, RB.trans(0, 0, h0)), pts = CH3.frames(rows, [], null, RB.trans(0, 0, h0)).map(P);   // framed on the zero pose, so the view holds still while the joints move
+SC.free = (st = {}, o = {}) => { const rows = st.rows, q = st.q || [], h0 = st.h0 === undefined ? 0.4 : st.h0, F = CH3.frames(rows, q, null, RB.trans(0, 0, h0)), pts = CH3.frames(rows, [], null, RB.trans(0, 0, h0)).map(P);   // without st.fit: framed on the zero pose; with st.fit (the page) the camera follows the arm
   const lo = [0, 1].map(k => min(...pts.map(p => p[k]))), hi = [0, 1].map(k => max(...pts.map(p => p[k]))), ctr = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, max(0.25, (max(...pts.map(p => p[2])) + 0) / 2)], span = max(0.6, hi[0] - lo[0], hi[1] - lo[1], max(...pts.map(p => p[2])));
-  const s = scene(st.name || 'free', st.w || 1300, st.h || 1000, cam(st, ctr, 1.5 + span * 2.0, -60, 22), o); floor(s, span * 0.9 + 0.4, [ctr[0], ctr[1]]); if (h0 > 0.05) pedestal(s, [0, 0], h0 - 0.02, 0.08);
+  const s = scene(st.name || 'free', st.w || 1300, st.h || 1000, st.fit && rows.length ? camFit(st, armPts(F, [0, 0, 0], st.toolDir || 'x'), -60, 22, st.w || 1300, st.h || 1000, { m: 0.16, minD: 2.2 }) : cam(st, ctr, 1.5 + span * 2.0, -60, 22), o); floor(s, span * 0.9 + 0.4, [ctr[0], ctr[1]]); if (h0 > 0.05) pedestal(s, [0, 0], h0 - 0.02, 0.08);
   drawDH(s, rows, F, { grip: st.toolDir || 'x', q, fl: 0.14, ls: 26, show: st.show }); if (st.xyz) s.tip = tipXYZ(s, F, st.xyzAt); s.F = F; return s; };
 
 /* ---- the link description (Craig figures 3.4 and 3.5): joint axes i−1, i, i+1 as long lines, links along their common normals.
