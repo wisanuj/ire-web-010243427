@@ -75,15 +75,21 @@ function ch3(T) {
   const S = E.scara, Fm = RB.fkDH(S.rows(S.L), S.q), Fc = RB.fkDH(S.rowsC(S.L), S.q, 'c'), tip = S.tip(S.L, S.q);
   T('SCARA modified: tip', Math.hypot(...RB.Tp(Fm[4]).map((x, i) => x - tip[i])), 0, 1e-12); T('SCARA classical: tip', Math.hypot(...RB.Tp(Fc[4]).map((x, i) => x - tip[i])), 0, 1e-12);
   T('SCARA: both tables give the same tool frame', near(Fm[4], Fc[4]), 0, 1e-12); T('SCARA: the tool points down', Fm[4][2][2], -1, 1e-12);
-  /* ABB IRB 140: the DH frames agree with the joint axes of CoppeliaSim's model at its zero pose */
-  const I = E.irb, F = CH3.frames(I.rows(), I.zero, null, RB.trans(0, 0, I.base)), p = k => RB.Tp(F[k]), z = k => RB.col(RB.TR(F[k]), 2);
-  T('IRB 140: axis 2 passes through (0.07, ·, 0.352)', Math.hypot(p(2)[0] - 0.07, p(2)[2] - 0.352), 0, 1e-12); T('IRB 140: axis 2 is horizontal (along y)', Math.abs(z(2)[1]), 1, 1e-12);
-  T('IRB 140: axis 3 at height 0.712', p(3)[2], 0.712, 1e-12); T('IRB 140: wrist centre at (0.45, 0, 0.712)', Math.hypot(p(4)[0] - 0.45, p(4)[1], p(4)[2] - 0.712), 0, 1e-12);
-  T('IRB 140: axis 4 along x, axis 5 along y', Math.abs(z(4)[0]) + Math.abs(z(5)[1]), 2, 1e-12); T('IRB 140: axis 6 points down at the zero pose', z(6)[2], -1, 1e-12);
-  /* the six-axis kinematic equations (Craig 3.7 method, IRB 140 numbers) against the product of the link transforms */
+  /* Yaskawa GP8: the DH frames at the pose of the pictures (flange down), then the DH chain against the robot description's own chain */
+  const I = E.gp8, F = CH3.frames(I.rows(), I.zero, null, RB.trans(0, 0, I.base)), p = k => RB.Tp(F[k]), z = k => RB.col(RB.TR(F[k]), 2);
+  T('GP8: axis 2 (L) passes through (0.04, ·, 0.330)', Math.hypot(p(2)[0] - 0.04, p(2)[2] - 0.33), 0, 1e-12); T('GP8: axis 2 is horizontal (along y)', Math.abs(z(2)[1]), 1, 1e-12);
+  T('GP8: axis 3 (U) at height 0.675', p(3)[2], 0.675, 1e-12); T('GP8: wrist centre at (0.38, 0, 0.715)', Math.hypot(p(4)[0] - 0.38, p(4)[1], p(4)[2] - 0.715), 0, 1e-12);
+  T('GP8: axis 4 along x, axis 5 along y', Math.abs(z(4)[0]) + Math.abs(z(5)[1]), 2, 1e-12); T('GP8: axis 6 points down at the pose of the pictures', z(6)[2], -1, 1e-12);
+  { let ep = 0, ea = 0, ex = 0, sd = 11; const rn = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; }, T0 = RB.trans(0, 0, I.base);
+    for (let k = 0; k < 100; k++) { const y = [170, 105, 130, 190, 135, 360].map(m => d2r((2 * rn() - 1) * m)), L = I.links(y), G6 = RB.Tm(T0, RB.fkDH(I.rows(), I.fromY(y))[6]), dd = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+      ep = Math.max(ep, dd(RB.Tp(L[4]), RB.Tp(G6))); ea = Math.max(ea, dd(RB.col(RB.TR(L[6]), 0), RB.col(RB.TR(G6), 2))); ex = Math.max(ex, dd(RB.col(RB.TR(L[6]), 2), RB.col(RB.TR(G6), 0))); }
+    T('GP8: DH wrist centre = the robot description\'s, θ = (S, L − 90°, −U, −R, −B, −T)', ep, 0, 1e-12); T('GP8: Z6 = the flange axis of the description', ea, 0, 1e-12); T('GP8: X6 = the description\'s link_6 z axis (no offset on θ6)', ex, 0, 1e-12); }
+  T('GP8: home (pendant all zero) puts the wrist centre at (0.380, 0, 0.385) in {0}', Math.hypot(I.T06(I.home)[0][3] - 0.38, I.T06(I.home)[2][3] - 0.385), 0, 1e-12);
+  T('GP8: reach 0.040 + 0.345 + √(0.340² + 0.040²) = 0.727 m (data sheet)', I.a1 + I.a2 + Math.hypot(I.d4, I.a3), 0.727, 5e-4);
+  /* the six-axis kinematic equations (Craig 3.7 method, GP8 numbers) against the product of the link transforms */
   const Fq = RB.fkDH(I.rows(), I.q), D = (i, j) => RB.Tm(...Fq.slice(1).slice(i, j).map((_, k) => RB.dhT(I.rows()[i + k].al, I.rows()[i + k].a, I.rows()[i + k].th + I.q[i + k], I.rows()[i + k].d)));
   T('six-axis: ^4_6T', near(D(4, 6), I.T46(I.q)), 0, 1e-12); T('six-axis: ^3_6T', near(D(3, 6), I.T36(I.q, I.d4)), 0, 1e-12); T('six-axis: ^1_3T', near(D(1, 3), I.T13(I.q, I.a1, I.a2)), 0, 1e-12);
-  T('six-axis: ^0_6T, all twelve entries', near(Fq[6], I.T06(I.q, I.a1, I.a2, I.d4)), 0, 1e-12); T('six-axis: at the zero pose the wrist centre is 0.45 m out', I.T06(I.zero, I.a1, I.a2, I.d4)[0][3], 0.45, 1e-12);
+  T('six-axis: ^0_6T, all twelve entries', near(Fq[6], I.T06(I.q, I.a1, I.a2, I.d4)), 0, 1e-12); T('six-axis: at the home pose the wrist centre is 0.38 m out', I.T06(I.home)[0][3], 0.38, 1e-12);
   /* the x, y, z written at the end of the arm in the simulations is column 4 of ^0_NT (needs the scene files: run_tests.mjs and tests.html load them) */
   if (!CH3.S3) return;
   const col4 = M => [M[0][3], M[1][3], M[2][3]], dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]), tipOf = st => CH3.S3.dh({ ...st, xyz: true }).tip;
@@ -92,7 +98,7 @@ function ch3(T) {
   T('tip readout: RPR = ^0_3T', dist(tipOf({ ex: 'rpr', q: [d2r(-50), 0.42, d2r(80)] }), col4(Rr.T03(Rr.L, [d2r(-50), 0.42, d2r(80)]))), 0, 1e-12);
   T('tip readout: 90° twist = ^0_3T', dist(tipOf({ ex: 'twist', q: qs }), col4(W.T03(W.L, qs))), 0, 1e-12);
   T('tip readout: four-frame arm = ^0_4T', dist(tipOf({ ex: 'arm4', q: qs }), col4(A4.T04(A4.L, qs))), 0, 1e-12);
-  T('tip readout: IRB 140 = ^0_6T (wrist centre)', dist(tipOf({ ex: 'irb', q: I.q }), col4(I.T06(I.q, I.a1, I.a2, I.d4))), 0, 1e-12);
+  T('tip readout: GP8 = ^0_6T (wrist centre)', dist(tipOf({ ex: 'gp8', q: I.q }), col4(I.T06(I.q, I.a1, I.a2, I.d4))), 0, 1e-12);
   T('tip readout: SCARA, both conventions', dist(tipOf({ ex: 'scara', q: S.q }), tip) + dist(tipOf({ ex: 'scara', q: S.q, conv: 'c' }), tip), 0, 1e-12);
   const rowsF = [{ al: 0, a: 0, d: 0, th: 0, j: 'R' }, { al: H, a: 0.2, d: 0.1, th: 0, j: 'R' }, { al: 0, a: 0.35, d: 0, th: 0, j: 'P' }], qf = [d2r(30), d2r(-20), 0.15], Ff = RB.fkDH(rowsF, qf);
   T('tip readout: the DH table explorer = ^0_NT', dist(CH3.S3.free({ rows: rowsF, q: qf, h0: 0.4, xyz: true }).tip, col4(Ff[Ff.length - 1])), 0, 1e-12);
@@ -158,15 +164,15 @@ function ch4(T) {
   /* tangent half-angle (Craig 4.5, example 4.3) */
   let eh = 0; for (let k = 0; k < 300; k++) { const a = 4 * rnd() - 2, b = 4 * rnd() - 2, c = 4 * rnd() - 2; CH4.half(a, b, c).sols.forEach(t => { eh = Math.max(eh, Math.abs(a * Math.cos(t) + b * Math.sin(t) - c)); }); }
   T('a cos θ + b sin θ = c: every root satisfies the equation', eh, 0, 1e-9); T('c² > a² + b²: no real root', CH4.half(1, 1, 2).sols.length, 0, 0);
-  /* IRB 140: eight solutions, each one reaches the goal frame, the original among them */
-  let ei = 0, found = 0, n8 = 0; for (let k = 0; k < 200; k++) { const q = [d2r(-170 + 340 * rnd()), d2r(-170 * rnd()), d2r(-85 + 170 * rnd()), d2r(-170 + 340 * rnd()), d2r(-110 + 220 * rnd()), d2r(-170 + 340 * rnd())], Tq = CH4.irbFK(q), S = CH4.irbIK(Tq);
-    S.forEach(s => { ei = Math.max(ei, near(CH4.irbFK(s.q), Tq)); }); if (S.some(s => s.q.every((v, i) => Math.abs(w(v - q[i])) < 1e-7))) found++; if (S.length === 8) n8++; }
-  T('IRB 140: every inverse solution gives the goal ^0_6T (200 goals)', ei, 0, 1e-9); T('IRB 140: the joint angles we started from are always among the solutions', found, 200, 0); T('IRB 140: most goals have 8 solutions', n8 > 100 ? 'yes' : 'no', 'yes');
-  const Z = CH4.irbIK(CH4.irbFK(CH3.EX.irb.zero)); T('IRB 140 zero pose: 8 solutions', Z.length, 8, 0);
-  T('IRB 140 zero pose: front, elbow up, no flip = the zero pose', Z.find(s => s.shoulder === 'front' && s.elbow === 'up' && s.wrist === 'no flip').q.every((v, i) => Math.abs(v - CH3.EX.irb.zero[i]) < 1e-9) ? 'yes' : 'no', 'yes');
-  T('IRB 140: a wrist flip is θ4 + 180°, −θ5, θ6 + 180°', (() => { const a = Z[0].q, b = Z[1].q; return Math.abs(w(b[3] - a[3] - Math.PI)) + Math.abs(b[4] + a[4]) + Math.abs(w(b[5] - a[5] - Math.PI)); })(), 0, 1e-9);
+  /* GP8: eight solutions, each one reaches the goal frame, the original among them */
+  let ei = 0, found = 0, n8 = 0; for (let k = 0; k < 200; k++) { const q = [d2r(-170 + 340 * rnd()), d2r(-170 * rnd()), d2r(-85 + 170 * rnd()), d2r(-170 + 340 * rnd()), d2r(-110 + 220 * rnd()), d2r(-170 + 340 * rnd())], Tq = CH4.gp8FK(q), S = CH4.gp8IK(Tq);
+    S.forEach(s => { ei = Math.max(ei, near(CH4.gp8FK(s.q), Tq)); }); if (S.some(s => s.q.every((v, i) => Math.abs(w(v - q[i])) < 1e-7))) found++; if (S.length === 8) n8++; }
+  T('GP8: every inverse solution gives the goal ^0_6T (200 goals)', ei, 0, 1e-9); T('GP8: the joint angles we started from are always among the solutions', found, 200, 0); T('GP8: most goals have 8 solutions', n8 > 100 ? 'yes' : 'no', 'yes');
+  const Z = CH4.gp8IK(CH4.gp8FK(CH3.EX.gp8.zero)); T('GP8 zero pose: 8 solutions', Z.length, 8, 0);
+  T('GP8 zero pose: front, elbow up, no flip = the zero pose', Z.find(s => s.shoulder === 'front' && s.elbow === 'up' && s.wrist === 'no flip').q.every((v, i) => Math.abs(v - CH3.EX.gp8.zero[i]) < 1e-9) ? 'yes' : 'no', 'yes');
+  T('GP8: a wrist flip is θ4 + 180°, −θ5, θ6 + 180°', (() => { const a = Z[0].q, b = Z[1].q; return Math.abs(w(b[3] - a[3] - Math.PI)) + Math.abs(b[4] + a[4]) + Math.abs(w(b[5] - a[5] - Math.PI)); })(), 0, 1e-9);
   /* closest solution and the RPR arm */
-  T('closest solution: from the zero pose it is the zero pose', CH4.nearest(Z, CH3.EX.irb.zero).d, 0, 1e-9);
+  T('closest solution: from the zero pose it is the zero pose', CH4.nearest(Z, CH3.EX.gp8.zero).d, 0, 1e-9);
   const R = CH3.EX.rpr, qr = [d2r(30), 0.35, d2r(45)], sr = CH4.rprIK(R.L.L2, R.T03(R.L, qr)).sols[0]; T('RPR inverse: θ1, d2, θ3 back', Math.abs(sr[0] - qr[0]) + Math.abs(sr[1] - qr[1]) + Math.abs(sr[2] - qr[2]), 0, 1e-12);
   /* the worked examples on the slides */
   const X = CH4.EX, dg = RB.deg, dd = (p, q) => Math.hypot(...p.map((x, i) => x - q[i]));
@@ -177,9 +183,20 @@ function ch4(T) {
   T('ex RRR: elbow-down twin θ2 = −17.66°, θ3 = 60°', Math.abs(dg(X.arm4.sols[0].q[1]) + 17.66) + Math.abs(dg(X.arm4.sols[0].q[2]) - 60), 0, 0.01);
   T('ex SCARA: two solutions reach the goal', Math.max(...X.scara.sols.map(q => { const P = CH4.scaraPose(X.scara.L, q); return dd(P.p, X.scara.p) + Math.abs(RB.wrap(P.phi - X.scara.phi)); })), 0, 1e-9);
   T('ex SCARA: θ4 = θ1 + θ2 − φ', dg(X.scara.sols[1][3]), 30, 1e-9);
-  T('ex IRB 140: 8 solutions, 2 inside the joint ranges', X.irb.sols.length * 10 + X.irb.sols.filter(s => s.ok).length, 82, 0);
+  T('ex GP8: 8 solutions, 4 inside the joint ranges', X.gp8.sols.length * 10 + X.gp8.sols.filter(s => s.ok).length, 84, 0);
+  /* the numbers the slides and pages 4.1 / 4.4 print for the GP8 example (pose 30°, −60°, 20°, 40°, 50°, −30°) */
+  { const G = CH3.EX.gp8, P = RB.Tp(X.gp8.T), u = Math.hypot(P[0], P[1]) - G.a1, K = (u * u + P[2] * P[2] - G.a2 ** 2 - G.a3 ** 2 - G.d4 ** 2) / (2 * G.a2), rt = Math.sqrt(G.a3 ** 2 + G.d4 ** 2 - K * K);
+    const c3 = sg => Math.atan2(G.a3, G.d4) - Math.atan2(K, sg * rt), fd = X.gp8.sols.find(s => s.shoulder === 'front' && s.elbow === 'down' && s.wrist === 'no flip');
+    T('ex GP8: u = 0.4217, K = −0.0787', Math.abs(u - 0.4217) + Math.abs(K + 0.0787), 0, 1e-4);
+    T('ex GP8: Craig\'s θ3 = atan2(a3, d4) − atan2(K, ±√(a3² + d4² − K²)) gives 20° and −186.58°', Math.abs(RB.wrap(c3(1) - d2r(20))) + Math.abs(RB.wrap(c3(-1) - fd.q[2])), 0, 1e-9);
+    T('ex GP8: the elbow-down solution is written inside the θ3 range (−186.58°), θ2 = 42.73°', Math.abs(dg(fd.q[2]) + 186.58) + Math.abs(dg(fd.q[1]) - 42.73), 0, 0.01);
+    T('ex GP8: solutions 1, 2, 7, 8 are inside the joint ranges', X.gp8.sols.map((s, i) => s.ok ? i + 1 : '').join(''), '1278');
+    T('ex GP8: the elbow-down pair in front fails on θ5 only', CH4.outOf(fd.q).join(','), '4');
+    T('fitLim: an angle a full turn outside its range comes back inside (θ3 173.42° → −186.58°, θ4 200° → −160°), one that cannot stays (θ2 144.85°)', (() => { const q = CH4.fitLim([0, d2r(144.85), d2r(173.42), d2r(200), 0, 0]); return Math.abs(dg(q[1]) - 144.85) + Math.abs(dg(q[2]) + 186.58) + Math.abs(dg(q[3]) + 160); })(), 0, 1e-9); }
+  T('ex SOLVE: 4 of the 8 solutions are inside the joint ranges', X.solve.sols.length * 10 + X.solve.sols.filter(s => s.ok).length, 84, 0);
+  T('ex SOLVE: closest to the home pose is (18.43°, −71.54°, 6.51°, 0°, 65.03°, 18.43°)', Math.max(...[18.43, -71.54, 6.51, 0, 65.03, 18.43].map((v, i) => Math.abs(dg(X.solve.best.s.q[i]) - v))), 0, 0.006);
   T('ex SOLVE: wrist frame at (0.45, 0.15, 0.22)', dd(RB.Tp(X.solve.W), [0.45, 0.15, 0.22]), 0, 1e-12); T('ex SOLVE: closest solution θ1 = 18.43°', dg(X.solve.best.s.q[0]), 18.43, 0.005);
-  T('ex SOLVE: tool frame of the chosen solution = {G}', near(RB.Tm(CH4.irbFK(X.solve.best.s.q), RB.trans(0, 0, X.solve.LT)), X.solve.G), 0, 1e-9);
+  T('ex SOLVE: tool frame of the chosen solution = {G}', near(RB.Tm(CH4.gp8FK(X.solve.best.s.q), RB.trans(0, 0, X.solve.LT)), X.solve.G), 0, 1e-9);
   T('HW 4: (x, y, z) = (0.5427, 0.3800, 0.6690)', dd(X.hw.p, [0.5427, 0.3800, 0.6690]), 0, 1e-4); T('HW 4: second solution (−145°, 170.04°, 0.9773)', Math.abs(dg(X.hw.sols[1][0]) + 145) + Math.abs(dg(X.hw.sols[1][1]) - 170.04) + Math.abs(X.hw.sols[1][2] - 0.9773), 0, 0.01);
   T('HW 4: both solutions reach the goal', Math.max(...X.hw.sols.map(q => dd(CH4.rrp.P(X.hw.L, q), X.hw.p))), 0, 1e-12); T('HW 4: closed form = product of the link transforms', dd(RB.Tp(CH4.rrp.T03(X.hw.L, X.hw.q)), X.hw.p), 0, 1e-12);
 }

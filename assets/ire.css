@@ -476,6 +476,10 @@ table.dhtab{border-collapse:collapse;margin:6px 0;font-size:15.5px;font-variant-
 table.dhtab th,table.dhtab td{border:1px solid var(--line);padding:4px 8px;text-align:center;min-width:3.2em}
 table.dhtab th{background:var(--panel2);font-weight:600}
 table.dhtab tr.hl td{background:color-mix(in srgb,var(--warn) 20%,transparent)}
+/* a table of many joint angles (the eight inverse-kinematics solutions): tighter, and it scrolls sideways inside a narrow card instead of spilling out */
+table.dhtab.sols{font-size:13.5px}
+table.dhtab.sols th,table.dhtab.sols td{padding:3px 5px;min-width:0;white-space:nowrap}
+.tscroll{overflow-x:auto;max-width:100%}
 table.dhtab select,table.dhtab input{font:inherit;font-size:15px;padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
 table.dhtab input{width:4.6em;text-align:right}
 table.dhtab select.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--panel))}

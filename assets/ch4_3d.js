@@ -12,7 +12,7 @@ const { frame, angArc, view, cam, camFit } = CH2.H;
 const SC = CH4.S3 = {}, EXV = CH3.EXV, P = T4 => RB.Tp(T4), col = (T4, j) => RB.col(RB.TR(T4), j), sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const GOAL = () => T('เป้าหมาย', 'goal');
 CH4.OV = S3.OV;   // the step overlays live in scene3d.js (shared by every chapter)
-const ELBOW = { p3r: 2, arm4: 3, scara: 2, irb: 3, rrp: 2 };   // the frame at each arm's elbow: where a solution's number is written
+const ELBOW = { p3r: 2, arm4: 3, scara: 2, gp8: 3, rrp: 2 };   // the frame at each arm's elbow: where a solution's number is written
 
 /* ---- an arm of chapter 3 (or the homework RRP arm) at joint values q: its frames and how it is seen ---- */
 const ARM = { rrp: { T0: [0, 0, 0], cam: [[0.3, 0.12, 0.42], 3.3, -58, 16], grip: 'z', base: false } };
@@ -25,7 +25,7 @@ const goalMark = (s, p, o = {}) => { sph(s, p, o.r || 0.034, C.pk, 0.35); lab(s,
 
 /* ---- one inverse solution drawn solid, the others of the same goal as ghosts. st: ex, q (the solution shown), ghost [q…], goal (true: mark it),
    frames (indices of the solid arm's frames to draw, default the base and the last), tags ([text for the solid arm, text for each ghost]) ---- */
-SC.sol = (st = {}, o = {}) => { const ex = st.ex || 'p3r', q = st.q || CH4.EX[ex === 'irb' ? 'irb' : ex].q, { F, V } = armOf(ex, q), n = F.length - 1, w = st.w || 1300, h = st.h || 1000, c0 = st.cam || V.cam;
+SC.sol = (st = {}, o = {}) => { const ex = st.ex || 'p3r', q = st.q || CH4.EX[ex === 'gp8' ? 'gp8' : ex].q, { F, V } = armOf(ex, q), n = F.length - 1, w = st.w || 1300, h = st.h || 1000, c0 = st.cam || V.cam;
   const pts = st.fit ? [F, ...(st.ghost || []).map(g => armOf(ex, g).F)].flatMap(G => G.map(P)).concat([[V.T0[0] - 0.15, V.T0[1], 0], [V.T0[0] + 0.15, V.T0[1], 0]]) : null;
   const s = scene(st.name || 'sol_' + ex, w, h, pts ? camFit(st, pts, c0[2], c0[3], w, h, { m: 0.2, minD: 2.4 }) : cam(st, c0[0], c0[1], c0[2], c0[3]), o); floor(s, 1.4, [c0[0][0], c0[0][1]]);
   (st.ghost || []).forEach((g, k) => { const G = drawArm(s, ex, g, { al: 0.3 }); if (st.tags && st.tags[k + 1]) lab(s, P(G[ELBOW[ex]]), st.tags[k + 1], { c: 'mut', s: 24, dx: 18, dy: -18, b: true }); });
@@ -96,10 +96,10 @@ SC.hw = (st = {}, o = {}) => { const q = st.q || CH4.rrp.q, L = CH4.rrp.L, { F }
   const hz = sub(O2, O1); const m2 = angArc(s, O2, hz, sub(O3, O2), 0.16, C.pk, 0.004); dashed(s, O2, v(O2, hz, 0.3 / Math.hypot(...hz)), C.pk, 0.003, 9); if (m2) lab(s, m2, 'θ', { sub: '2', m: 1, c: 'pk', s: 34, dx: 14, dy: 6 });
   sph(s, O3, 0.024, C.pk); lab(s, O3, '(x, y, z)', { c: 'pk', s: 28, dx: 24, dy: -12 }); return s; };
 
-/* ---- decoupling (Craig 4.6; old part 2): axes 4, 5, 6 of the IRB 140 meet at the wrist centre. With a tool L_T long, the wrist centre is the goal
+/* ---- decoupling (Craig 4.6; old part 2): axes 4, 5, 6 of the GP8 meet at the wrist centre. With a tool L_T long, the wrist centre is the goal
    moved back L_T along its own Z: the first three joints place it, the last three turn the tool ---- */
-SC.wc = (st = {}, o = {}) => { const X0 = CH4.EX.solve, LT = st.LT === undefined ? X0.LT : st.LT, X = { ...X0, LT }, sw = CH4.irbIK(RB.Tm(X0.G, RB.trans(0, 0, -LT))), ok = sw.filter(x => CH4.inLim(x.q)), pick = CH4.nearest(ok.length ? ok : sw, CH3.EX.irb.zero), q = st.q || (pick ? pick.s.q : X0.best.s.q), { F, V } = armOf('irb', q), T0 = RB.trans(...V.T0), G = RB.Tm(T0, X.G), s = scene(st.name || 'wc', 1300, 1050, cam(st, [0.3, 0.06, 0.5], 2.5, -50, 14), o); floor(s, 1.4, [0.25, 0]);
-  drawArm(s, 'irb', q, { frames: [0], grip: false }); const W = P(F[6]), Z6 = col(F[6], 2), Tt = v(W, Z6, X.LT); bar(s, W, Tt, 0.012, s.pal.joint); grip(s, Tt, Z6, col(F[6], 1), { w: 0.03, L: 0.05 });
+SC.wc = (st = {}, o = {}) => { const X0 = CH4.EX.solve, LT = st.LT === undefined ? X0.LT : st.LT, X = { ...X0, LT }, sw = CH4.gp8IK(RB.Tm(X0.G, RB.trans(0, 0, -LT))), ok = sw.filter(x => CH4.inLim(x.q)), pick = CH4.nearest(ok.length ? ok : sw, CH3.EX.gp8.home), q = st.q || (pick ? pick.s.q : X0.best.s.q), { F, V } = armOf('gp8', q), T0 = RB.trans(...V.T0), G = RB.Tm(T0, X.G), s = scene(st.name || 'wc', 1300, 1050, cam(st, [0.3, 0.06, 0.5], 2.5, -50, 14), o); floor(s, 1.4, [0.25, 0]);
+  drawArm(s, 'gp8', q, { frames: [0], grip: false }); const W = P(F[6]), Z6 = col(F[6], 2), Tt = v(W, Z6, X.LT); bar(s, W, Tt, 0.012, s.pal.joint); grip(s, Tt, Z6, col(F[6], 1), { w: 0.03, L: 0.05 });
   frame(s, RB.TR(G), P(G), { name: 'G', L: 0.16, r: 0.0045, ls: 28, lab: [{ dx: 14 }, {}, { dx: 16, dy: 30 }] }); sph(s, W, 0.03, C.pk, 0.55);
   lab(s, W, T('จุดศูนย์กลางข้อมือ', 'wrist centre'), { c: 'pk', s: 26, dx: -36, dy: -36, a: 'r' }); lab(s, v(W, Z6, X.LT / 2), 'L', { sub: 'T', m: 1, s: 28, dx: 22, dy: 6 });
   lab(s, P(F[3]), T('ข้อต่อ 1–3 วางจุดศูนย์กลางข้อมือ', 'joints 1–3 place the wrist centre'), { c: 'b', s: 24, dx: 20, dy: 70, a: 'l' }); lab(s, W, T('ข้อต่อ 4–6 หมุนเครื่องมือ', 'joints 4–6 turn the tool'), { c: 'p', s: 24, dx: 40, dy: -64 });

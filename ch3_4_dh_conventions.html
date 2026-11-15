@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=16">
-<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
-<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch2.js?v=16"></script><script src="assets/ch3.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch2_3d.js?v=16"></script><script src="assets/ch3_3d.js?v=16"></script>
+<link rel="stylesheet" href="assets/ire.css?v=17">
+<script src="assets/stops.js?v=17"></script><script src="assets/shell.js?v=17"></script>
+<script src="assets/robot.js?v=17"></script><script src="assets/lesson.js?v=17"></script><script src="assets/ch2.js?v=17"></script><script src="assets/ch3.js?v=17"></script><script src="assets/scene3d.js?v=17"></script><script src="assets/gl3d.js?v=17"></script><script src="assets/ch2_3d.js?v=17"></script><script src="assets/ch3_3d.js?v=17"></script>
 </head>
 <body>
 <div class="wrap">
@@ -74,7 +74,7 @@
     <div class="src" data-l="th">แบบฝึกใหม่ประกอบสไลด์หน้า 37</div><div class="src" data-l="en">New practice for slide p. 37</div></div></div>
   <div class="duo">
     <div class="card"><div class="given"><div class="gl" data-l="th">ก. ตารางจากเอกสารของผู้ผลิตรายหนึ่ง</div><div class="gl" data-l="en">(a) A table from a maker's manual</div>
-      <table class="dhtab"><tr><th>i</th><th>θ<sub>i</sub></th><th>d<sub>i</sub></th><th>a<sub>i</sub></th><th>α<sub>i</sub></th></tr><tr><td>1</td><td>θ₁</td><td>0.352</td><td>0.070</td><td>−90°</td></tr><tr><td>2</td><td>θ₂</td><td>0</td><td>0.360</td><td>0</td></tr></table></div>
+      <table class="dhtab"><tr><th>i</th><th>θ<sub>i</sub></th><th>d<sub>i</sub></th><th>a<sub>i</sub></th><th>α<sub>i</sub></th></tr><tr><td>1</td><td>θ₁</td><td>0.330</td><td>0.040</td><td>−90°</td></tr><tr><td>2</td><td>θ₂</td><td>0</td><td>0.345</td><td>0</td></tr></table></div>
       <div id="ask3a"></div>
       <div class="given"><div class="gl" data-l="th">ข. สูตรเมทริกซ์ของก้านต่อในหนังสือเล่มหนึ่ง</div><div class="gl" data-l="en">(b) The link transform in a book</div>
       $$ \begin{bmatrix} c\theta_i & -s\theta_i & 0 & a_{i-1} \\ s\theta_i c\alpha_{i-1} & c\theta_i c\alpha_{i-1} & -s\alpha_{i-1} & -s\alpha_{i-1} d_i \\ \cdots & & & \end{bmatrix} $$</div>
@@ -89,7 +89,7 @@
   <div class="card"><h3>ลองทำดู 2 — ทิศของ Z₃</h3>
     <ol><li>ข้อ 1 เลือกให้ Z₃ ชี้ลง (α₂ = 180°) ถ้าเลือกให้ชี้ขึ้น α₂ = 0 แต่ d₃ จะติดลบเมื่อแกนเลื่อนลง ตารางต่างแต่ถูกทั้งคู่</li></ol></div>
   <div class="card"><h3>ลองทำดู 3 — ตารางจากผู้ผลิต</h3>
-    <ol><li>ก่อนใช้ตาราง DH จากคู่มือหรือโปรแกรม ให้ดูดัชนีของ a และ α ก่อนเสมอ ตารางในข้อ 3(ก) คือแขน IRB 140 แบบดั้งเดิม เทียบกับตารางแบบ Craig ในหน้า 3.3</li></ol>
+    <ol><li>ก่อนใช้ตาราง DH จากคู่มือหรือโปรแกรม ให้ดูดัชนีของ a และ α ก่อนเสมอ ตารางในข้อ 3(ก) คือแขน GP8 แบบดั้งเดิม เทียบกับตารางแบบ Craig ในหน้า 3.3</li></ol>
     <div class="book">ที่มา: สไลด์บทที่ 3 หน้า 32–37 (ภาพอยู่ในหน้านี้แล้ว) · Craig 3.4 · Spong 3.2 · สไลด์เดิม Part II หน้า 2–10</div></div>
 </section>
 <section class="notes" data-l="en">
@@ -98,7 +98,7 @@
   <div class="card"><h3>Try this 2 — the direction of Z₃</h3>
     <ol><li>Problem 1 points Z₃ down (α₂ = 180°). Pointing it up gives α₂ = 0, but d₃ then turns negative as the quill moves down. Different tables, both right.</li></ol></div>
   <div class="card"><h3>Try this 3 — a maker's table</h3>
-    <ol><li>Before using a DH table from a manual or a program, always look at the indices of a and α. The table of problem 3(a) is the IRB 140 in the classical form; compare it with Craig's table on page 3.3.</li></ol>
+    <ol><li>Before using a DH table from a manual or a program, always look at the indices of a and α. The table of problem 3(a) is the GP8 in the classical form; compare it with Craig's table on page 3.3.</li></ol>
     <div class="book">Source: chapter 3 slides, pp. 32–37 (the pictures are on this page) · Craig 3.4 · Spong 3.2 · old Part II slides pp. 2–10</div></div>
 </section>
 
@@ -165,7 +165,7 @@ LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; if (k) 
 const OP = [t('แบบดัดแปลง (Craig)', 'modified (Craig)'), t('แบบดั้งเดิม (Spong)', 'classical (Spong)')];
 LS.choose(document.getElementById('ask3a'), { options: OP, answer: 1, labels: ['', ''] }); LS.choose(document.getElementById('ask3b'), { options: OP, answer: 0, labels: ['', ''] });
 LS.stepper(document.getElementById('st3'), { steps: [
-  { why: t('<b>ก.</b> หัวตารางเขียน a<sub>i</sub>, α<sub>i</sub> (ดัชนีเดียวกับ θ<sub>i</sub>) และเรียง θ, d, a, α: <b>แบบดั้งเดิม</b> ค่า d₁ = 0.352 ยังบอกว่าเฟรม {0} อยู่บนพื้น ซึ่ง Craig ไม่ทำ', '<b>(a)</b> The header has a<sub>i</sub>, α<sub>i</sub> (the same index as θ<sub>i</sub>) in the order θ, d, a, α: <b>classical</b>. d₁ = 0.352 also puts {0} on the floor, which Craig avoids') },
+  { why: t('<b>ก.</b> หัวตารางเขียน a<sub>i</sub>, α<sub>i</sub> (ดัชนีเดียวกับ θ<sub>i</sub>) และเรียง θ, d, a, α: <b>แบบดั้งเดิม</b> ค่า d₁ = 0.330 ยังบอกว่าเฟรม {0} อยู่บนพื้น ซึ่ง Craig ไม่ทำ', '<b>(a)</b> The header has a<sub>i</sub>, α<sub>i</sub> (the same index as θ<sub>i</sub>) in the order θ, d, a, α: <b>classical</b>. d₁ = 0.330 also puts {0} on the floor, which Craig avoids') },
   { why: t('<b>ข.</b> มุมขวาบนเป็น a<sub>i−1</sub> ตรง ๆ และมี α<sub>i−1</sub>: <b>แบบดัดแปลง</b> (สูตร Craig 3.6)', '<b>(b)</b> The top-right entry is a plain a<sub>i−1</sub> and α carries i−1: <b>modified</b> (Craig 3.6)') }],
   answer: t('ก. ดั้งเดิม · ข. ดัดแปลง', '(a) classical · (b) modified') });
 });

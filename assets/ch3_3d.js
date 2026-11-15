@@ -49,7 +49,7 @@ const EXV = { p3r: { T0: [0, 0, 0.11], cam: [[0.35, 0.3, 0.05], 3.0, -90, 58], g
   twist: { T0: [0, 0, 0.35], cam: [[0.3, 0.1, 0.4], 3.2, -62, 20], grip: 'x', base: true },
   arm4: { T0: [0, 0, 0], cam: [[0.35, 0.1, 0.45], 3.6, -62, 18], grip: 'x', base: false },
   scara: { T0: [0, 0, 0.6], cam: [[0.3, 0.15, 0.35], 3.4, -60, 22], grip: 'z', base: true },
-  irb: { T0: [0, 0, 0.352], cam: [[0.22, 0, 0.5], 4.0, -60, 16], grip: 'z', base: true } };
+  gp8: { T0: [0, 0, 0.33], cam: [[0.22, 0, 0.5], 4.0, -60, 16], grip: 'z', base: true } };
 CH3.EXV = EXV;   // chapter 4 shows the same arms
 /* the frames of example `ex` (CH3.EX) at joint values q, in world coordinates */
 CH3.exFrames = (ex, q, conv) => { const E = CH3.EX[ex === 'rprHW' ? 'rpr' : ex], L = E.L, rows = ex === 'rprHW' ? E.hwRows(L) : conv === 'c' ? E.rowsC(L) : E.rows(L), V = EXV[ex];

@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=16">
-<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
-<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch2.js?v=16"></script><script src="assets/ch3.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch2_3d.js?v=16"></script><script src="assets/ch3_3d.js?v=16"></script>
+<link rel="stylesheet" href="assets/ire.css?v=17">
+<script src="assets/stops.js?v=17"></script><script src="assets/shell.js?v=17"></script>
+<script src="assets/robot.js?v=17"></script><script src="assets/lesson.js?v=17"></script><script src="assets/ch2.js?v=17"></script><script src="assets/ch3.js?v=17"></script><script src="assets/scene3d.js?v=17"></script><script src="assets/gl3d.js?v=17"></script><script src="assets/ch2_3d.js?v=17"></script><script src="assets/ch3_3d.js?v=17"></script>
 </head>
 <body>
 <div class="wrap">
@@ -19,7 +19,7 @@
 <h1 data-l="en">Forward kinematics of industrial arms <span class="en">From the picture to the table to ⁰ₙT</span></h1>
 
 <div class="intro-duo">
-  <figure class="slide"><img src="slides/ch3/s26.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 26: an ABB IRB 140 with its DH frames and table">
+  <figure class="slide"><img src="slides/ch3/s26.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 26: a Yaskawa GP8 with its DH frames and table">
     <figcaption data-l="th">สไลด์บทที่ 3 หน้า 26 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 3 slides, p. 26 · tap to enlarge</figcaption></figure>
   <div>
     <p class="sub" data-l="th">ทุกข้อในหน้านี้ทำสามขั้นเหมือนกัน: <b>ติดเฟรม</b> → <b>เขียนตาราง DH</b> → <b>คูณเมทริกซ์ก้านต่อ</b> เริ่มจากแขน 3 ข้อต่อสามแบบในสไลด์เดิม แล้วทำแขน 6 แกนจริงครบทุกขั้น (เพิ่มจากตำรา Craig 3.7) ต่อด้วยเฟรมมาตรฐาน (Craig 3.8) และช่องตรวจการบ้านชุดที่ 3 ครอบคลุมสไลด์หน้า 22–30 และ 38 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>5 โจทย์</b></p>
@@ -67,8 +67,8 @@
 </section>
 
 <section class="prob" id="ex4">
-  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">แขน 6 แกนครบทุกขั้น (ABB IRB 140)</h2><h2 data-l="en">A six-axis arm in full (ABB IRB 140)</h2>
-    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 26–29 · เพิ่มจากตำรา: วิธีของ Craig 3.7 (ที่ทำกับ PUMA 560) ใช้กับตารางของ IRB 140 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, pp. 26–29 · added from the textbook: Craig's method of §3.7 (worked there on the PUMA 560) applied to the IRB 140 table · drag to turn the view</div></div></div>
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">แขน 6 แกนครบทุกขั้น (Yaskawa GP8)</h2><h2 data-l="en">A six-axis arm in full (Yaskawa GP8)</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 3 หน้า 26–29 · เพิ่มจากตำรา: วิธีของ Craig 3.7 (ที่ทำกับ PUMA 560) ใช้กับตารางของ GP8 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 3 slides, pp. 26–29 · added from the textbook: Craig's method of §3.7 (worked there on the PUMA 560) applied to the GP8 table · drag to turn the view</div></div></div>
   <figure class="slide q wide"><img src="slides/ch3/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: the kinematic equations of the six-axis arm and a numeric check">
     <figcaption data-l="th">สไลด์หน้า 29 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 29 · tap to enlarge</figcaption></figure>
   <div class="duo wide-sim">
@@ -207,32 +207,36 @@ LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; if (k)
   answer: t(`ความสูงของเครื่องมือ ${RB.u(p3[2][3], 3)} m`, `Tool height ${RB.u(p3[2][3], 3)} m`) });
 
 /* ---------- 4: six-axis arm ---------- */
-const IR = E.irb, S4 = { ex: 'irb', q: IR.zero.slice(), xyz: true, fit: true }, ro4 = document.getElementById('ro4');
-const read4 = () => { const T = IR.T06(S4.q, IR.a1, IR.a2, IR.d4); ro4.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(T)}</div><div class="term">${t('ตำแหน่ง (คอลัมน์ 4) คือจุดศูนย์กลางข้อมือ เทียบเฟรม {0} ที่ความสูงไหล่ 0.352 m', 'the position (column 4) is the wrist centre, relative to {0} at the shoulder height 0.352 m')}</div>`; };
-const K6 = ['R', 'R', 'R', 'R', 'R', 'R'], sl4 = jsl(document.getElementById('ctl4'), S4, ['θ₁', 'θ₂', 'θ₃', 'θ₄', 'θ₅', 'θ₆'], K6, read4, [[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]]); read4();
+const IR = E.gp8, S4 = { ex: 'gp8', q: IR.zero.slice(), xyz: true, fit: true }, ro4 = document.getElementById('ro4');
+/* under the picture: ⁰₆T and the same pose as the teach pendant shows it (S, L, U, R, B, T), from the mapping of CH3.EX.gp8.toY */
+const read4 = () => { const T = IR.T06(S4.q), Y = IR.toY(S4.q).map(x => RB.u(deg(x), 0) + '°'); ro4.innerHTML = `<div class="live"><span class="eq">⁰<sub>6</sub>T =</span>${T4(T)}</div><div class="term">${t('ตำแหน่ง (คอลัมน์ 4) คือจุดศูนย์กลางข้อมือ เทียบเฟรม {0} ที่ความสูงไหล่ 0.330 m', 'the position (column 4) is the wrist centre, relative to {0} at the shoulder height 0.330 m')}</div>
+  <div class="term">${t('บนแป้นสอน (teach pendant)', 'on the teach pendant')}: S ${Y[0]} · L ${Y[1]} · U ${Y[2]} · R ${Y[3]} · B ${Y[4]} · T ${Y[5]}</div>`; };
+const K6 = ['R', 'R', 'R', 'R', 'R', 'R'], sl4 = jsl(document.getElementById('ctl4'), S4, ['θ₁', 'θ₂', 'θ₃', 'θ₄', 'θ₅', 'θ₆'], K6, read4, IR.lim); read4();   // the sliders stop at the GP8's own joint ranges
 CH2.sim('cv4', S4, 'dh', { aspect: 0.8, maxH: 500 });
-/* the open step: the wrist centre d₄ along Y₃ (1), the arm part ¹₃T in {1} (2), the reach and height of the wrist centre (3), the numbers at the example's pose (4).
+/* the open step: the wrist centre a₃ along X₃ and d₄ along Y₃ (1), the arm part ¹₃T in {1} (2), the reach and height of the wrist centre (3), the numbers at the example's pose (4).
    Dimensions are set off along Z₂ (the shoulder axis, normal to the plane of the arm) so they do not hide in the links */
 const Q4 = [rad(90), -Math.PI / 2, 0, 0, Math.PI / 2, 0];   // the pose of the "try first" question and of step 4
 S4.ov = (s, st) => { const k = st.step, F = s.F, OV = window.S3.OV; if (!k || !F) return; const O = i => Pt(F[i]), X = i => dir(F[i], 0), Z = i => dir(F[i], 2), q = st.q, n = RB.sc(Z(2), -0.08);
-  const reach = IR.a1 + IR.a2 * Math.cos(q[1]) - IR.d4 * Math.sin(q[1] + q[2]), K = OV.v(O(1), X(1), reach), top1 = OV.v(O(1), UP, 0.08);
-  if (k === 1) { dim(s, O(3), O(4), RB.sc(upish(X(3)), 0.07), 'p', t('d₄ ตาม Y₃', 'd₄ along Y₃'), { ...lb, s: 26, dy: -18 }); OV.pt(s, O(4), 'pk', t('จุดศูนย์กลางข้อมือ', 'wrist centre'), { ...lb, s: 22, r: 0.022, dy: 46 }); }
+  const reach = IR.a1 + IR.a2 * Math.cos(q[1]) + IR.a3 * Math.cos(q[1] + q[2]) - IR.d4 * Math.sin(q[1] + q[2]), K = OV.v(O(1), X(1), reach), top1 = OV.v(O(1), UP, 0.08), E3 = OV.v(O(3), X(3), IR.a3);   // E3: the corner of the forearm's offset
+  if (k === 1) { OV.vec(s, O(3), E3, 'am', t('a₃ ตาม X₃', 'a₃ along X₃'), { ...lb, s: 24, a: 'r', dx: -14 }); OV.vec(s, E3, O(4), 'p', t('d₄ ตาม Y₃', 'd₄ along Y₃'), { ...lb, s: 26, dy: -18 }); OV.pt(s, O(4), 'pk', t('จุดศูนย์กลางข้อมือ', 'wrist centre'), { ...lb, s: 22, r: 0.022, dy: 46 }); }
   if (k === 2) { const K2 = OV.v(O(1), X(1), IR.a1 + IR.a2 * Math.cos(q[1]));   // ¹₃T column 4: a₁ + a₂c₂ along X₁, −a₂s₂ along Z₁
     OV.vec(s, OV.v(O(1), n), OV.v(K2, n), 'am', 'a₁ + a₂c₂', { ...lb, dy: 30 }); OV.vec(s, OV.v(K2, n), OV.v(O(3), n), 'p', '−a₂s₂', { ...lb, a: 'l', dx: 14 });
     turn(s, O(2), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', dx: 16, dy: 8 }); }
   if (k === 3) { turn(s, top1, X(0), X(1), 0.18, 'pk', 'θ', { sub: '1', dx: 16, dy: -10 });   // p_x, p_y = c₁, s₁ times the reach; p_z the height of the wrist centre over {0}
-    OV.vec(s, O(1), K, 'am', 'a₁ + a₂c₂ − d₄s₂₃', { ...lb, s: 22, dy: 30 }); OV.vec(s, K, O(4), 'p', '−a₂s₂ − d₄c₂₃', { ...lb, s: 22, a: 'l', dx: 14 }); }
+    OV.vec(s, O(1), K, 'am', 'a₁ + a₂c₂ + a₃c₂₃ − d₄s₂₃', { ...lb, s: 22, dy: 30 }); OV.vec(s, K, O(4), 'p', '−a₂s₂ − a₃s₂₃ − d₄c₂₃', { ...lb, s: 22, a: 'l', dx: 14 }); }
   if (k === 4) { turn(s, top1, X(0), X(1), 0.18, 'pk', 'θ', { sub: '1', post: ` = ${dg(q[0])}`, dx: 16, dy: -10 }); turn(s, O(2), X(1), X(2), 0.14, 'pk', 'θ', { sub: '2', post: ` = ${dg(q[1])}`, dx: 16, dy: 8 });
-    dim(s, O(1), O(2), n, 'am', 'a₁ = 0.07', { ...lb, s: 26, dy: 30 }); dim(s, O(2), O(3), n, 'am', 'a₂ = 0.36', { ...lb, s: 26, a: 'r', dx: -14 }); dim(s, O(3), O(4), n, 'p', 'd₄ = 0.38', { ...lb, s: 26, dy: -18 }); } };
-document.getElementById('tab4').innerHTML = CH3.dhTable(IR.symL) + `<div class="term">a₁ = 0.07 m, a₂ = 0.36 m, d₄ = 0.38 m</div>`;
-LS.ask(document.getElementById('ask4'), { fields: [{ label: t('ที่ θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> =', 'at θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> ='), ok: x => Math.abs(x) < 0.006, w: 4 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x - 0.45) < 0.006, w: 4 }, { label: 'p<sub>z</sub> =', ok: x => Math.abs(x - 0.36) < 0.006, w: 4 }],
-  check: v => Math.abs(v[2] - 0.712) < 0.01 ? t('0.712 m คือความสูงจากพื้น แต่ ⁰₆T วัดจากเฟรม {0} ที่ความสูงไหล่ 0.352 m', '0.712 m is the height above the floor; ⁰₆T is measured from {0} at the shoulder height 0.352 m') : '' });
+    dim(s, O(1), O(2), n, 'am', 'a₁ = 0.04', { ...lb, s: 26, dy: 30 }); dim(s, O(2), O(3), n, 'am', 'a₂ = 0.345', { ...lb, s: 26, a: 'r', dx: -14 });
+    dim(s, O(3), E3, n, 'am', 'a₃ = 0.04', { ...lb, s: 24, a: 'r', dx: -14 }); dim(s, E3, O(4), n, 'p', 'd₄ = 0.34', { ...lb, s: 26, dy: -18 }); } };
+document.getElementById('tab4').innerHTML = CH3.dhTable(IR.symL) + `<div class="term">a₁ = 0.040 m, a₂ = 0.345 m, a₃ = 0.040 m, d₄ = 0.340 m · ${t('ฐานถึงไหล่ 0.330 m หน้าแปลนเลยจุดศูนย์กลางข้อมือ 0.080 m', 'base to shoulder 0.330 m, flange 0.080 m beyond the wrist centre')}</div>
+  <div class="term">${t('มุมบนแป้นสอนของ GP8 (S, L, U, R, B, T) ต่างจาก θ ของตารางนี้: θ₁ = S, θ₂ = L − 90°, θ₃ = −U, θ₄ = −R, θ₅ = −B, θ₆ = −T (ทิศบวกตามแบบจำลองของ ROS-Industrial ควรลองขยับหุ่นจริงทีละแกนเพื่อยืนยัน)', 'The GP8 teach-pendant angles (S, L, U, R, B, T) differ from this table\'s θ: θ₁ = S, θ₂ = L − 90°, θ₃ = −U, θ₄ = −R, θ₅ = −B, θ₆ = −T (positive directions as in the ROS-Industrial model: jog the real robot one axis at a time to confirm)')}</div>`;
+LS.ask(document.getElementById('ask4'), { fields: [{ label: t('ที่ θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> =', 'at θ = (90°, −90°, 0, 0, 90°, 0): p<sub>x</sub> ='), ok: x => Math.abs(x) < 0.006, w: 4 }, { label: 'p<sub>y</sub> =', ok: x => Math.abs(x - 0.38) < 0.006, w: 4 }, { label: 'p<sub>z</sub> =', ok: x => Math.abs(x - 0.385) < 0.006, w: 4 }],
+  check: v => Math.abs(v[2] - 0.715) < 0.006 ? t('0.715 m คือความสูงจากพื้น แต่ ⁰₆T วัดจากเฟรม {0} ที่ความสูงไหล่ 0.330 m', '0.715 m is the height above the floor; ⁰₆T is measured from {0} at the shoulder height 0.330 m') : '' });
 LS.stepper(document.getElementById('st4'), { onStep: k => { S4.step = k; if (k) put(S4, sl4, K6, Q4, read4, 30); }, steps: [
-  { why: t('<b>ข้อมือก่อน</b>: ⁴₆T = ⁴₅T ⁵₆T แล้ว ³₆T = ³₄T ⁴₆T (เมทริกซ์ของข้อมือมีศูนย์มาก คูณง่าย)', '<b>The wrist first</b>: ⁴₆T = ⁴₅T ⁵₆T, then ³₆T = ³₄T ⁴₆T (the wrist matrices are full of zeros)'), tex: `\\begin{aligned} {}^{3}_{6}T &= ${Tx([['r_{11}', 'r_{12}', '-c_4s_5', 0], ['s_5c_6', '-s_5s_6', 'c_5', 'd_4'], ['r_{31}', 'r_{32}', 's_4s_5', 0], [0, 0, 0, 1]])} \\\\ r_{11} &= c_4c_5c_6 - s_4s_6 \\\\ r_{12} &= -c_4c_5s_6 - s_4c_6 \\\\ r_{31} &= -s_4c_5c_6 - c_4s_6 \\\\ r_{32} &= s_4c_5s_6 - c_4c_6 \\end{aligned}` },
+  { why: t('<b>ข้อมือก่อน</b>: ⁴₆T = ⁴₅T ⁵₆T แล้ว ³₆T = ³₄T ⁴₆T (เมทริกซ์ของข้อมือมีศูนย์มาก คูณง่าย)', '<b>The wrist first</b>: ⁴₆T = ⁴₅T ⁵₆T, then ³₆T = ³₄T ⁴₆T (the wrist matrices are full of zeros)'), tex: `\\begin{aligned} {}^{3}_{6}T &= ${Tx([['r_{11}', 'r_{12}', '-c_4s_5', 'a_3'], ['s_5c_6', '-s_5s_6', 'c_5', 'd_4'], ['r_{31}', 'r_{32}', 's_4s_5', 0], [0, 0, 0, 1]])} \\\\ r_{11} &= c_4c_5c_6 - s_4s_6 \\\\ r_{12} &= -c_4c_5s_6 - s_4c_6 \\\\ r_{31} &= -s_4c_5c_6 - c_4s_6 \\\\ r_{32} &= s_4c_5s_6 - c_4c_6 \\end{aligned}` },
   { why: t('<b>ส่วนแขน</b>: ¹₃T = ¹₂T ²₃T', '<b>The arm part</b>: ¹₃T = ¹₂T ²₃T'), tex: `{}^{1}_{3}T = ${Tx([['c_{23}', '-s_{23}', 0, 'a_1 + a_2c_2'], [0, 0, 1, 0], ['-s_{23}', '-c_{23}', 0, '-a_2s_2'], [0, 0, 0, 1]])}` },
-  { why: t('<b>ตำแหน่ง</b> จาก ¹₆T = ¹₃T ³₆T แล้วหมุนด้วย θ₁ (คอลัมน์ 4 ของ ³₆T คือ (0, d₄, 0))', '<b>The position</b> from ¹₆T = ¹₃T ³₆T, then turned by θ₁ (column 4 of ³₆T is (0, d₄, 0))'), tex: '\\begin{aligned} p_x &= c_1(a_1 + a_2c_2 - d_4s_{23}) \\\\ p_y &= s_1(a_1 + a_2c_2 - d_4s_{23}) \\\\ p_z &= -a_2s_2 - d_4c_{23} \\end{aligned}' },
-  { why: t('<b>แทนค่า</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0', '<b>Put in</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0'), tex: '\\begin{aligned} p_x &= 0 \\\\ p_y &= 0.07 + 0 + 0.38 = 0.45 \\\\ p_z &= 0.36 - 0 = 0.36 \\end{aligned}' }],
-  answer: t('(0, 0.45, 0.36) m: แขนหันไปทาง Y แต่ความสูงเท่าเดิม ทิศของเครื่องมือขึ้นกับ θ₄–θ₆ ด้วย ดูเมทริกซ์ใต้ภาพ', '(0, 0.45, 0.36) m: the arm faces Y at the same height. The tool orientation also depends on θ₄–θ₆: see the matrix under the picture') });
+  { why: t('<b>ตำแหน่ง</b> จาก ¹₆T = ¹₃T ³₆T แล้วหมุนด้วย θ₁ (คอลัมน์ 4 ของ ³₆T คือ (a₃, d₄, 0))', '<b>The position</b> from ¹₆T = ¹₃T ³₆T, then turned by θ₁ (column 4 of ³₆T is (a₃, d₄, 0))'), tex: '\\begin{aligned} p_x &= c_1(a_1 + a_2c_2 + a_3c_{23} - d_4s_{23}) \\\\ p_y &= s_1(a_1 + a_2c_2 + a_3c_{23} - d_4s_{23}) \\\\ p_z &= -a_2s_2 - a_3s_{23} - d_4c_{23} \\end{aligned}' },
+  { why: t('<b>แทนค่า</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0', '<b>Put in</b> θ₁ = 90°, θ₂ = −90°, θ₃ = 0: c₂ = 0, s₂₃ = −1, c₂₃ = 0'), tex: '\\begin{aligned} p_x &= 0 \\\\ p_y &= 0.04 + 0 + 0 + 0.34 = 0.38 \\\\ p_z &= 0.345 + 0.04 - 0 = 0.385 \\end{aligned}' }],
+  answer: t('(0, 0.38, 0.385) m: แขนหันไปทาง Y แต่ความสูงเท่าเดิม ทิศของเครื่องมือขึ้นกับ θ₄–θ₆ ด้วย ดูเมทริกซ์ใต้ภาพ', '(0, 0.38, 0.385) m: the arm faces Y at the same height. The tool orientation also depends on θ₄–θ₆: see the matrix under the picture') });
 
 /* ---------- A: standard frames ---------- */
 const BO = CH2.EX.bolt, SA = { std: true, p: RB.Tp(BO.BT).slice(), yaw: 0 }, roA = document.getElementById('roA'), ctlA = document.getElementById('ctlA');

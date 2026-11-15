@@ -27,38 +27,42 @@ CH4.half = (a, b, c) => { const D = b * b + a * a - c * c; if (D < -1e-12) retur
   if (abs(a + c) < 1e-12) { const u = abs(b) < 1e-12 ? [] : [(c - a) / (2 * b)]; return { ok: true, D, u, sols: [PI, ...u.map(x => 2 * Math.atan(x))] }; }
   const u = [(b + sq) / (a + c), (b - sq) / (a + c)]; return { ok: true, D, u, sols: u.map(x => 2 * Math.atan(x)) }; };
 
-/* ---- the ABB IRB 140 (the six-axis arm of chapter 3, CH3.EX.irb): axes 4, 5, 6 meet at the wrist centre, so the position of the wrist
-   centre fixes θ1, θ2, θ3 and the orientation then fixes θ4, θ5, θ6 (Pieper, Craig 4.6; worked as Craig 4.7 works the PUMA 560).
-   From ^0_6T (chapter 3): p_x = c1 (a1 + a2 c2 − d4 s23), p_y = s1 (…), p_z = −a2 s2 − d4 c23.
+/* ---- the Yaskawa GP8 (the six-axis arm of chapter 3, CH3.EX.gp8): axes 4, 5, 6 meet at the wrist centre, so the position of the wrist
+   centre fixes θ1, θ2, θ3 and the orientation then fixes θ4, θ5, θ6 (Pieper, Craig 4.6; worked as Craig 4.7 works the PUMA 560, which also has a3 ≠ 0).
+   From ^0_6T (chapter 3): p_x = c1 (a1 + a2 c2 + a3 c23 − d4 s23), p_y = s1 (…), p_z = −a2 s2 − a3 s23 − d4 c23.
    θ1 = atan2(p_y, p_x) (arm in front) or that + 180° (arm reaching over its back);  r = c1 p_x + s1 p_y, u = r − a1;
-   u² + p_z² = a2² + d4² − 2 a2 d4 s3  ⟹  s3 = (a2² + d4² − u² − p_z²) / (2 a2 d4), θ3 = atan2(s3, ±√(1 − s3²)) (elbow up or down);
-   (u, −p_z) is (a2 − d4 s3, d4 c3) turned by θ2  ⟹  θ2 = atan2(−p_z, u) − atan2(d4 c3, a2 − d4 s3);
+   u² + p_z² = a2² + a3² + d4² + 2 a2 (a3 c3 − d4 s3)  ⟹  a3 c3 − d4 s3 = K, K = (u² + p_z² − a2² − a3² − d4²) / (2 a2): the equation
+   a cos θ + b sin θ = c of Craig 4.5 (CH4.half), two roots (elbow up or down);
+   (u, −p_z) is (a2 + K, a3 s3 + d4 c3) turned by θ2  ⟹  θ2 = atan2(−p_z, u) − atan2(a3 s3 + d4 c3, a2 + K);
    ^3_6R = (^0_3R)ᵀ ^0_6R holds c5 = r23, −c4 s5 = r13, s4 s5 = r33, s5 c6 = r21, −s5 s6 = r22  ⟹  θ5 = atan2(±√(r13² + r33²), r23), θ4, θ6 from s5;
-   the other wrist: θ4 + 180°, −θ5, θ6 + 180°. Up to 8 solutions. Each: { q, shoulder: 'front'|'back', elbow: 'up'|'down', wrist: 'no flip'|'flip', sing } ---- */
-const IRB = () => CH3.EX.irb;
-CH4.R03 = q => { const E = IRB(), F = RB.fkDH(E.rows().slice(0, 3), q.slice(0, 3)); return RB.TR(F[3]); };
+   the other wrist: θ4 + 180°, −θ5, θ6 + 180°. Up to 8 solutions. Each: { q, shoulder: 'front'|'back', elbow: 'up'|'down', wrist: 'no flip'|'flip', sing, K } ---- */
+const GP8 = () => CH3.EX.gp8;
+CH4.R03 = q => { const E = GP8(), F = RB.fkDH(E.rows().slice(0, 3), q.slice(0, 3)); return RB.TR(F[3]); };
 /* elbow up or down, as one sees it: is the elbow (origin of {3}) above the straight line from the shoulder (origin of {2}) to the wrist centre p? */
-CH4.elbowUp = (q3, p) => { const F = RB.fkDH(IRB().rows().slice(0, 3), q3), S = RB.Tp(F[2]), E = RB.Tp(F[3]), d = p.map((x, i) => x - S[i]), e = E.map((x, i) => x - S[i]), dd = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+CH4.elbowUp = (q3, p) => { const F = RB.fkDH(GP8().rows().slice(0, 3), q3), S = RB.Tp(F[2]), E = RB.Tp(F[3]), d = p.map((x, i) => x - S[i]), e = E.map((x, i) => x - S[i]), dd = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
   const t = dd < 1e-12 ? 0 : (e[0] * d[0] + e[1] * d[1] + e[2] * d[2]) / dd; return E[2] > S[2] + t * d[2] + 1e-12; };
-CH4.irbIK = (T, o = {}) => { const E = IRB(), a1 = o.a1 || E.a1, a2 = o.a2 || E.a2, d4 = o.d4 || E.d4, [px, py, pz] = [T[0][3], T[1][3], T[2][3]], out = [];
+CH4.gp8IK = T => { const E = GP8(), { a1, a2, a3, d4 } = E, [px, py, pz] = [T[0][3], T[1][3], T[2][3]], out = [];
   const R06 = RB.TR(T), base = hypot(px, py) < 1e-9 ? 0 : atan2(py, px);
-  [['front', base], ['back', base + PI]].forEach(([sh, t1]) => { const r = cos(t1) * px + sin(t1) * py, u = r - a1, s3 = (a2 * a2 + d4 * d4 - u * u - pz * pz) / (2 * a2 * d4);
-    if (abs(s3) > 1 + 1e-9) return; const cc = sqrt(Math.max(0, 1 - s3 * s3));
-    [cc, -cc].forEach((c3, k) => { if (k && cc < 1e-12) return; const t3 = atan2(s3, c3), t2 = atan2(-pz, u) - atan2(d4 * c3, a2 - d4 * s3), q3 = [wrap(t1), wrap(t2), t3], el = CH4.elbowUp(q3, [px, py, pz]) ? 'up' : 'down';
+  [['front', base], ['back', base + PI]].forEach(([sh, t1]) => { const r = cos(t1) * px + sin(t1) * py, u = r - a1, K = (u * u + pz * pz - a2 * a2 - a3 * a3 - d4 * d4) / (2 * a2), H3 = CH4.half(a3, -d4, K);
+    if (!H3.ok) return; const roots = Math.abs(H3.D) < 1e-12 ? H3.sols.slice(0, 1) : H3.sols;
+    roots.forEach(t3r => { const t3 = wrap(t3r), t2 = atan2(-pz, u) - atan2(a3 * sin(t3) + d4 * cos(t3), a2 + K), q3 = [wrap(t1), wrap(t2), t3], el = CH4.elbowUp(q3, [px, py, pz]) ? 'up' : 'down';
       const R = RB.mm(RB.tr(CH4.R03(q3)), R06), r13 = R[0][2], r23 = R[1][2], r33 = R[2][2], r21 = R[1][0], r22 = R[1][1], s5 = hypot(r13, r33);
       if (s5 < 1e-9) { /* θ5 = 0 (or 180°): axes 4 and 6 line up, only θ4 + θ6 is fixed; choose θ4 = 0 (Craig: the wrist singularity) */
-        const t5 = r23 > 0 ? 0 : PI, t46 = atan2(-R[0][1], R[0][0]); out.push({ q: [...q3, 0, t5, wrap(r23 > 0 ? t46 : -t46)], shoulder: sh, elbow: el, wrist: 'no flip', sing: true }); return; }
+        const t5 = r23 > 0 ? 0 : PI, t46 = atan2(-R[0][1], R[0][0]); out.push({ q: [...q3, 0, t5, wrap(r23 > 0 ? t46 : -t46)], shoulder: sh, elbow: el, wrist: 'no flip', sing: true, K }); return; }
       [['no flip', 1], ['flip', -1]].forEach(([wr, sg]) => { const s5s = sg * s5, t5 = atan2(s5s, r23), t4 = atan2(r33 / s5s, -r13 / s5s), t6 = atan2(-r22 / s5s, r21 / s5s);
-        out.push({ q: [...q3, wrap(t4), wrap(t5), wrap(t6)], shoulder: sh, elbow: el, wrist: wr, sing: false }); }); }); });
-  return out; };
-/* the forward kinematics the solutions are checked with: ^0_6T of CH3.EX.irb (ch3.js, checked there against the six link transforms) */
-CH4.irbFK = q => { const E = IRB(); return E.T06(q, E.a1, E.a2, E.d4); };
-/* CoppeliaSim's model of the IRB 140 turns joints 2 and 3 the other way round: model angle = MODEL_SIGN[i] · (θ_i − zero_i)
-   (found by drawing the DH frames over the posed model, IRE_Slides/build/coppelia/gen_scenes_ch4.mjs scenes calib…) */
-CH4.MODEL_SIGN = [1, -1, -1, 1, 1, 1];
-/* is every joint inside its range (degrees, as the page sliders and the slides give them)? */
-CH4.IRB_LIM = [[-180, 180], [-180, 0], [-90, 90], [-180, 180], [-120, 120], [-180, 180]];
-CH4.inLim = (q, lim = CH4.IRB_LIM) => q.every((x, i) => { const d = RB.deg(x); return d >= lim[i][0] - 1e-6 && d <= lim[i][1] + 1e-6; });
+        out.push({ q: [...q3, wrap(t4), wrap(t5), wrap(t6)], shoulder: sh, elbow: el, wrist: wr, sing: false, K }); }); }); });
+  return out.map(s => ({ ...s, q: CH4.fitLim(s.q) })); };
+/* the forward kinematics the solutions are checked with: ^0_6T of CH3.EX.gp8 (ch3.js, checked there against the six link transforms) */
+CH4.gp8FK = q => GP8().T06(q);
+/* is every joint inside the robot's range? The ranges are the GP8's own (data sheet), in DH degrees (CH3.EX.gp8.lim); an angle may also be
+   reached a full turn away (θ6: ±360°) */
+const in1 = (x, r) => { const d = RB.deg(x); return d >= r[0] - 1e-6 && d <= r[1] + 1e-6; };
+CH4.inLim = (q, lim = GP8().lim) => q.every((x, i) => [0, 2 * PI, -2 * PI].some(k => in1(x + k, lim[i])));
+/* the joints that are outside their range (indices), for the pages to name */
+CH4.outOf = (q, lim = GP8().lim) => q.map((x, i) => i).filter(i => ![0, 2 * PI, -2 * PI].some(k => in1(q[i] + k, lim[i])));
+/* the same pose written inside the ranges where it can be: an angle outside its range is moved a full turn if that brings it inside
+   (the GP8's θ3 runs from −190° to 70°, so 173.4° is written −186.6°) */
+CH4.fitLim = (q, lim = GP8().lim) => q.map((x, i) => { if (in1(x, lim[i])) return x; const k = [2 * PI, -2 * PI].find(k => in1(x + k, lim[i])); return k === undefined ? x : x + k; });
 
 /* ---- the closest solution (Craig 4.2, exercise 4.6): weighted joint-space distance, each difference wrapped into (−180°, 180°];
    w: weights (heavier for the big joints near the base, so the arm prefers to move its wrist) ---- */
@@ -100,17 +104,17 @@ CH4.rrp = { L: { L1: 0.5, L2: 0.3 }, q: [rad(35), rad(25), 0.4],
   IK: (L, p) => { const base = atan2(p[1], p[0]); return [base, base + PI].map(t1 => { const rho = cos(t1) * p[0] + sin(t1) * p[1], u = rho - L.L2, w = p[2] - L.L1; return [wrap(t1), atan2(w, u), hypot(u, w)]; }); } };
 
 /* ---- the numbers of the worked examples (slides and pages show these; tests.js checks them) ---- */
-CH4.EX = (() => { const P = CH3.EX.p3r, A4 = CH3.EX.arm4, SC = CH3.EX.scara, I = CH3.EX.irb, d = RB.deg;
-  const g3 = CH4.p3rFK(P.L.L1, P.L.L2, P.q), p4 = CH4.arm4P(A4.L, A4.q), sp = CH4.scaraPose(SC.L, SC.q), Ti = CH4.irbFK(I.q);
+CH4.EX = (() => { const P = CH3.EX.p3r, A4 = CH3.EX.arm4, SC = CH3.EX.scara, I = CH3.EX.gp8, d = RB.deg;
+  const g3 = CH4.p3rFK(P.L.L1, P.L.L2, P.q), p4 = CH4.arm4P(A4.L, A4.q), sp = CH4.scaraPose(SC.L, SC.q), Ti = CH4.gp8FK(I.q);
   /* SOLVE (Craig 4.9): a tool 0.12 m long on the flange (^6_TT = D_Z(0.12)), goal {G} 0.45 m out, 0.15 m to the side, 0.10 m above {0}, pointing down */
-  const LT = 0.12, G = [[1, 0, 0, 0.45], [0, -1, 0, 0.15], [0, 0, -1, 0.10], [0, 0, 0, 1]], T6T = RB.trans(0, 0, LT), W = RB.Tm(G, RB.Ti(T6T)), SW = CH4.irbIK(W);
+  const LT = 0.12, G = [[1, 0, 0, 0.45], [0, -1, 0, 0.15], [0, 0, -1, 0.10], [0, 0, 0, 1]], T6T = RB.trans(0, 0, LT), W = RB.Tm(G, RB.Ti(T6T)), SW = CH4.gp8IK(W);
   return {
     p3r: { L: P.L, q: P.q, goal: g3, sol: CH4.p3r(P.L.L1, P.L.L2, g3[0], g3[1], g3[2]) },
     half: { a: 3, b: 4, c: 2, sol: CH4.half(3, 4, 2) },
     arm4: { L: A4.L, q: A4.q, p: p4, sols: CH4.arm4IK(A4.L, p4) },
     scara: { L: SC.L, q: SC.q, p: sp.p, phi: sp.phi, sols: CH4.scaraIK(SC.L, sp.p[0], sp.p[1], sp.p[2], sp.phi) },
-    irb: { q: I.q, T: Ti, sols: CH4.irbIK(Ti).map(s => ({ ...s, ok: CH4.inLim(s.q) })) },
-    solve: { LT, G, W, sols: SW.map(s => ({ ...s, ok: CH4.inLim(s.q) })), best: CH4.nearest(SW.filter(s => CH4.inLim(s.q)), I.zero) },
+    gp8: { q: I.q, T: Ti, sols: CH4.gp8IK(Ti).map(s => ({ ...s, ok: CH4.inLim(s.q) })) },
+    solve: { LT, G, W, sols: SW.map(s => ({ ...s, ok: CH4.inLim(s.q) })), best: CH4.nearest(SW.filter(s => CH4.inLim(s.q)), I.home) },   // the present pose is the GP8's home position (every pendant angle 0)
     hw: { L: CH4.rrp.L, q: CH4.rrp.q, p: CH4.rrp.P(CH4.rrp.L, CH4.rrp.q), sols: CH4.rrp.IK(CH4.rrp.L, CH4.rrp.P(CH4.rrp.L, CH4.rrp.q)) } }; })();
 
 global.CH4 = CH4;

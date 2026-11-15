@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
-<link rel="stylesheet" href="assets/ire.css?v=16">
-<script src="assets/stops.js?v=16"></script><script src="assets/shell.js?v=16"></script>
-<script src="assets/robot.js?v=16"></script><script src="assets/lesson.js?v=16"></script><script src="assets/ch2.js?v=16"></script><script src="assets/ch3.js?v=16"></script><script src="assets/ch4.js?v=16"></script><script src="assets/scene3d.js?v=16"></script><script src="assets/gl3d.js?v=16"></script><script src="assets/ch2_3d.js?v=16"></script><script src="assets/ch3_3d.js?v=16"></script><script src="assets/ch4_3d.js?v=16"></script>
+<link rel="stylesheet" href="assets/ire.css?v=17">
+<script src="assets/stops.js?v=17"></script><script src="assets/shell.js?v=17"></script>
+<script src="assets/robot.js?v=17"></script><script src="assets/lesson.js?v=17"></script><script src="assets/ch2.js?v=17"></script><script src="assets/ch3.js?v=17"></script><script src="assets/ch4.js?v=17"></script><script src="assets/scene3d.js?v=17"></script><script src="assets/gl3d.js?v=17"></script><script src="assets/ch2_3d.js?v=17"></script><script src="assets/ch3_3d.js?v=17"></script><script src="assets/ch4_3d.js?v=17"></script>
 </head>
 <body>
 <div class="wrap">
@@ -66,14 +66,14 @@
 
 <section class="notes" data-l="th">
   <div class="card"><h3>ลองทำดู 1 — คำตอบที่ทับกัน</h3>
-    <ol><li>ในข้อ 2 กดคำตอบ 1 แล้ว 3: ก้านทุกก้านอยู่ที่เดิม แต่มุมข้อต่อต่างกัน (θ₁ ต่าง 180°) เพราะแขนนี้ไม่มีระยะเยื้องที่ไหล่ แขน IRB 140 มีระยะเยื้อง a₁ จึงไม่เป็นแบบนี้ (หน้า 4.4)</li></ol></div>
+    <ol><li>ในข้อ 2 กดคำตอบ 1 แล้ว 3: ก้านทุกก้านอยู่ที่เดิม แต่มุมข้อต่อต่างกัน (θ₁ ต่าง 180°) เพราะแขนนี้ไม่มีระยะเยื้องที่ไหล่ แขน GP8 มีระยะเยื้อง a₁ จึงไม่เป็นแบบนี้ (หน้า 4.4)</li></ol></div>
   <div class="card"><h3>ลองทำดู 2 — ข้อผิดพลาดของสูตรเดิม</h3>
     <ol><li>สไลด์เดิมเขียน θ₂ = α + β แล้วเลือก ± ของ β กับของ θ₃ แยกกัน ถ้าจับคู่ผิด ใส่กลับแล้วไม่ถึงเป้าหมาย รูป atan2(L₄s₃, L₃ + L₄c₃) ในหน้านี้จับคู่ให้เอง</li></ol>
     <div class="book">ที่มา: สไลด์บทที่ 4 หน้า 25–29 (ภาพอยู่ในหน้านี้แล้ว) · Craig 4.4 · Spong 3.3 · สไลด์เดิม Part 2 หน้า 2–16</div></div>
 </section>
 <section class="notes" data-l="en">
   <div class="card"><h3>Try this 1 — solutions on top of each other</h3>
-    <ol><li>In problem 2 press solution 1, then 3: every link stays put but the joint angles differ (θ₁ by 180°), because this arm has no shoulder offset. The IRB 140 has an offset a₁, so it does not do this (page 4.4).</li></ol></div>
+    <ol><li>In problem 2 press solution 1, then 3: every link stays put but the joint angles differ (θ₁ by 180°), because this arm has no shoulder offset. The GP8 has an offset a₁, so it does not do this (page 4.4).</li></ol></div>
   <div class="card"><h3>Try this 2 — the old formula's pitfall</h3>
     <ol><li>The old slides wrote θ₂ = α + β and chose the ± of β and of θ₃ separately; a wrong pairing misses the goal. The form atan2(L₄s₃, L₃ + L₄c₃) used here pairs them by itself.</li></ol>
     <div class="book">Source: chapter 4 slides, pp. 25–29 (the pictures are on this page) · Craig 4.4 · Spong 3.3 · old part 2 slides pp. 2–16</div></div>

@@ -52,23 +52,34 @@ CH3.EX = {
     rowsC: L => [row(0, L.L1, 0, 0, 'R'), row(PI, L.L2, 0, 0, 'R'), row(0, 0, 0, 0, 'P'), row(0, 0, L.d4, 0, 'R')],
     symC: [['θ₁', '0', 'L₁', '0'], ['θ₂', '0', 'L₂', '180°'], ['0', 'd₃', '0', '0'], ['θ₄', 'd₄', '0', '0']],
     tip: (L, q) => [L.L1 * c(q[0]) + L.L2 * c(q[0] + q[1]), L.L1 * s(q[0]) + L.L2 * s(q[0] + q[1]), -q[2] - L.d4] },
-  /* the ABB IRB 140 (CoppeliaSim's model), in Craig's convention; frame {0} = {1} at the shoulder height 0.352 m. At the model's
-     zero pose (upper arm vertical, forearm horizontal, flange pointing down) the DH angles are θ = (0, −90°, 0, 0, 90°, 0) */
-  irb: { name: 'IRB 140', base: 0.352, zero: [0, -H, 0, 0, H, 0], flange: 0.065,
-    rows: () => [row(0, 0, 0, 0, 'R'), row(-H, 0.07, 0, 0, 'R'), row(0, 0.36, 0, 0, 'R'), row(-H, 0, 0.38, 0, 'R'), row(H, 0, 0, 0, 'R'), row(-H, 0, 0, 0, 'R')],
-    sym: [['0', '0', '0', 'θ₁'], ['−90°', '0.070', '0', 'θ₂'], ['0', '0.360', '0', 'θ₃'], ['−90°', '0', '0.380', 'θ₄'], ['90°', '0', '0', 'θ₅'], ['−90°', '0', '0', 'θ₆']],
-    symL: [['0', '0', '0', 'θ₁'], ['−90°', 'a₁', '0', 'θ₂'], ['0', 'a₂', '0', 'θ₃'], ['−90°', '0', 'd₄', 'θ₄'], ['90°', '0', '0', 'θ₅'], ['−90°', '0', '0', 'θ₆']],
-    a1: 0.07, a2: 0.36, d4: 0.38, q: [rad(30), rad(-60), rad(20), rad(40), rad(50), rad(-30)],
+  /* the Yaskawa Motoman GP8 (the department's own robot), in Craig's convention; frame {0} = {1} on the S axis at the height of the L axis, 0.330 m.
+     Link sizes and axis directions are those of ROS-Industrial's robot description (motoman_gp8_support, BSD licence): S–L offset 0.040, L–U 0.345,
+     U–R offset 0.040, U–B 0.340, B–flange 0.080 m; reach 0.040 + 0.345 + √(0.340² + 0.040²) = 0.727 m, as the data sheet says.
+     The pendant shows (S, L, U, R, B, T); the DH angles are θ = (S, L − 90°, −U, −R, −B, −T) (fromY / toY; tests.js checks the DH chain against
+     the description's own chain `links`). Home (pendant all zero): upper arm vertical, forearm horizontal, flange forward = θ (0, −90°, 0, 0, 0, 0),
+     which is a wrist singularity (θ5 = 0); `zero` is the pose of the pictures, B = −90° (flange down, θ5 = 90°). `lim`: the joint ranges in DH degrees */
+  gp8: { name: 'GP8', base: 0.330, zero: [0, -H, 0, 0, H, 0], home: [0, -H, 0, 0, 0, 0], flange: 0.080,
+    rows: () => [row(0, 0, 0, 0, 'R'), row(-H, 0.04, 0, 0, 'R'), row(0, 0.345, 0, 0, 'R'), row(-H, 0.04, 0.34, 0, 'R'), row(H, 0, 0, 0, 'R'), row(-H, 0, 0, 0, 'R')],
+    sym: [['0', '0', '0', 'θ₁'], ['−90°', '0.040', '0', 'θ₂'], ['0', '0.345', '0', 'θ₃'], ['−90°', '0.040', '0.340', 'θ₄'], ['90°', '0', '0', 'θ₅'], ['−90°', '0', '0', 'θ₆']],
+    symL: [['0', '0', '0', 'θ₁'], ['−90°', 'a₁', '0', 'θ₂'], ['0', 'a₂', '0', 'θ₃'], ['−90°', 'a₃', 'd₄', 'θ₄'], ['90°', '0', '0', 'θ₅'], ['−90°', '0', '0', 'θ₆']],
+    a1: 0.04, a2: 0.345, a3: 0.04, d4: 0.34, q: [rad(30), rad(-60), rad(20), rad(40), rad(50), rad(-30)],
+    lim: [[-170, 170], [-155, 55], [-190, 70], [-190, 190], [-135, 135], [-360, 360]],
+    fromY: y => [y[0], y[1] - H, -y[2], -y[3], -y[4], -y[5]], toY: q => [q[0], q[1] + H, -q[2], -q[3], -q[4], -q[5]],
+    /* the description's own chain: the frame of each link (base_link, link_1_s … link_6_t) in the world for pendant angles y: the meshes of the
+       real robot are drawn in these frames (IRE_Slides/build/coppelia), and the DH table is tested against them */
+    links: y => { const Tr = (x, yy, z) => RB.trans(x, yy, z), R = (ax, a) => RB.T(ax === 'x' ? RB.Rx(a) : ax === 'y' ? RB.Ry(a) : RB.Rz(a)), L = [RB.trans(0, 0, 0)];
+      L.push(RB.Tm(L[0], Tr(0, 0, 0.33), R('z', y[0]))); L.push(RB.Tm(L[1], Tr(0.04, 0, 0), R('y', y[1]))); L.push(RB.Tm(L[2], Tr(0, 0, 0.345), R('y', -y[2])));
+      L.push(RB.Tm(L[3], Tr(0.34, 0, 0.04), R('x', -y[3]))); L.push(RB.Tm(L[4], R('y', -y[4]))); L.push(RB.Tm(L[5], R('x', -y[5]))); return L; },
     /* the kinematic equations of the six-axis arm, worked the way Craig 3.7 works the PUMA 560: ^4_6T, ^3_6T, ^1_3T, ^1_6T, then ^0_6T.
        Every entry below is written out on the slides; tests.js checks it against the product of the six link transforms */
     T46: q => { const [, , , , t5, t6] = q, c5 = c(t5), s5 = s(t5), c6 = c(t6), s6 = s(t6); return [[c5 * c6, -c5 * s6, -s5, 0], [s6, c6, 0, 0], [s5 * c6, -s5 * s6, c5, 0], [0, 0, 0, 1]]; },
-    T36: (q, d4) => { const [, , , t4, t5, t6] = q, c4 = c(t4), s4 = s(t4), c5 = c(t5), s5 = s(t5), c6 = c(t6), s6 = s(t6);
-      return [[c4 * c5 * c6 - s4 * s6, -c4 * c5 * s6 - s4 * c6, -c4 * s5, 0], [s5 * c6, -s5 * s6, c5, d4], [-s4 * c5 * c6 - c4 * s6, s4 * c5 * s6 - c4 * c6, s4 * s5, 0], [0, 0, 0, 1]]; },
-    T13: (q, a1, a2) => { const [, t2, t3] = q, c2 = c(t2), s2 = s(t2), c23 = c(t2 + t3), s23 = s(t2 + t3); return [[c23, -s23, 0, a1 + a2 * c2], [0, 0, 1, 0], [-s23, -c23, 0, -a2 * s2], [0, 0, 0, 1]]; },
-    T06: (q, a1, a2, d4) => { const [t1, t2, t3, t4, t5, t6] = q, c1 = c(t1), s1 = s(t1), c2 = c(t2), s2 = s(t2), c23 = c(t2 + t3), s23 = s(t2 + t3), c4 = c(t4), s4 = s(t4), c5 = c(t5), s5 = s(t5), c6 = c(t6), s6 = s(t6);
+    T36: q => { const [, , , t4, t5, t6] = q, c4 = c(t4), s4 = s(t4), c5 = c(t5), s5 = s(t5), c6 = c(t6), s6 = s(t6), G = CH3.EX.gp8;
+      return [[c4 * c5 * c6 - s4 * s6, -c4 * c5 * s6 - s4 * c6, -c4 * s5, G.a3], [s5 * c6, -s5 * s6, c5, G.d4], [-s4 * c5 * c6 - c4 * s6, s4 * c5 * s6 - c4 * c6, s4 * s5, 0], [0, 0, 0, 1]]; },
+    T13: q => { const [, t2, t3] = q, c2 = c(t2), s2 = s(t2), c23 = c(t2 + t3), s23 = s(t2 + t3), G = CH3.EX.gp8; return [[c23, -s23, 0, G.a1 + G.a2 * c2], [0, 0, 1, 0], [-s23, -c23, 0, -G.a2 * s2], [0, 0, 0, 1]]; },
+    T06: q => { const [t1, t2, t3, t4, t5, t6] = q, G = CH3.EX.gp8, c1 = c(t1), s1 = s(t1), c2 = c(t2), s2 = s(t2), c23 = c(t2 + t3), s23 = s(t2 + t3), c4 = c(t4), s4 = s(t4), c5 = c(t5), s5 = s(t5), c6 = c(t6), s6 = s(t6);
       const r11 = c23 * (c4 * c5 * c6 - s4 * s6) - s23 * s5 * c6, r21 = -s4 * c5 * c6 - c4 * s6, r31 = -s23 * (c4 * c5 * c6 - s4 * s6) - c23 * s5 * c6;
       const r12 = -c23 * (c4 * c5 * s6 + s4 * c6) + s23 * s5 * s6, r22 = s4 * c5 * s6 - c4 * c6, r32 = s23 * (c4 * c5 * s6 + s4 * c6) + c23 * s5 * s6;
-      const r13 = -c23 * c4 * s5 - s23 * c5, r23 = s4 * s5, r33 = s23 * c4 * s5 - c23 * c5, px = a1 + a2 * c2 - d4 * s23, pz = -a2 * s2 - d4 * c23;   // ^1_6T: columns of the frame and the position in {1}
+      const r13 = -c23 * c4 * s5 - s23 * c5, r23 = s4 * s5, r33 = s23 * c4 * s5 - c23 * c5, px = G.a1 + G.a2 * c2 + G.a3 * c23 - G.d4 * s23, pz = -G.a2 * s2 - G.a3 * s23 - G.d4 * c23;   // ^1_6T: columns of the frame and the position in {1}
       return [[c1 * r11 - s1 * r21, c1 * r12 - s1 * r22, c1 * r13 - s1 * r23, c1 * px], [s1 * r11 + c1 * r21, s1 * r12 + c1 * r22, s1 * r13 + c1 * r23, s1 * px], [r31, r32, r33, pz], [0, 0, 0, 1]]; } }
 };
 /* the frames of an example in world coordinates: {0} placed by T0 (default: identity) */

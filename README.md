@@ -12,8 +12,9 @@ Interactive Thai/English teaching site for KMUTNB course 010243427 Industrial Ro
 | 1 บทนำ | `ch1_1_what_is_robot` หุ่นยนต์คืออะไร · `ch1_2_modeling` แบบจำลองทางคณิตศาสตร์ · `ch1_3_mechanical` หุ่นยนต์ในฐานะอุปกรณ์เชิงกล · `ch1_4_arrangements` โครงสร้างแขนกลที่พบบ่อย |
 | 2 การบรรยายตำแหน่งและทิศทาง | `ch2_1_frames_rotation` · `ch2_2_mapping` · `ch2_3_transform_arithmetic` · `ch2_4_orientation` |
 | 3 จลนศาสตร์ไปข้างหน้า | `ch3_1_link_parameters` · `ch3_2_link_transform` · `ch3_3_examples` · `ch3_4_dh_conventions` |
+| 4 จลนศาสตร์ผกผัน | `ch4_1_solvability` · `ch4_2_algebraic` · `ch4_3_geometric` · `ch4_4_six_axis` |
 
-บทที่ 4–9 จะเพิ่มทีละบท (แผนที่การเรียนใน `index.html` แสดงเป็น "เร็ว ๆ นี้")
+บทที่ 5–9 จะเพิ่มทีละบท (แผนที่การเรียนใน `index.html` แสดงเป็น "เร็ว ๆ นี้")
 
 ทุกหน้า: ภาพสไลด์อยู่ในเนื้อเรื่อง · ภาพจำลองแยกทีละโจทย์ เรียงตามลำดับ · ลองตอบก่อน แล้วเปิดเฉลยทีละขั้นด้วยปุ่ม · แขนกลในภาพจำลองบอกพิกัด x, y, z ของปลายแขนตลอดเวลา
 
@@ -41,6 +42,9 @@ deno run --allow-read assets/run_tests.mjs
 
 ## ที่มาของภาพ
 
-ภาพทุกภาพวาดหรือเรนเดอร์ขึ้นใหม่ ไม่ได้คัดลอกจากตำรา · ภาพแขนกลจริงในสไลด์ (ABB IRB 140, SCARA, IRB 360, Stewart platform) เรนเดอร์จากโมเดลที่มากับ CoppeliaSim (Coppelia Robotics, BSD licence)
+ภาพทุกภาพวาดหรือเรนเดอร์ขึ้นใหม่ ไม่ได้คัดลอกจากตำรา
+
+- แขน 6 แกนในสไลด์คือ **Yaskawa GP8** ตัวเดียวกับที่ภาควิชามี: เรนเดอร์จากตาข่ายสามมิติของชุด `motoman_gp8_support` ของ ROS-Industrial (BSD licence) ไฟล์ตาข่ายไม่ได้อยู่ในเว็บนี้ มีเฉพาะภาพที่เรนเดอร์แล้ว · ขนาดและช่วงข้อต่อในตาราง Denavit–Hartenberg มาจากแบบจำลองเดียวกันและข้อมูลจำเพาะของ Yaskawa
+- แขน SCARA, IRB 360 (เดลตา), Stewart platform และมือจับ เรนเดอร์จากโมเดลที่มากับ CoppeliaSim (Coppelia Robotics, BSD licence)
 
 ผู้สอน: Asst. Prof. Dr. Amornphun Phunopas และ ผศ.ดร.วิษณุ จิตวิริยะ
