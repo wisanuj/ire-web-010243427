@@ -93,7 +93,7 @@ CH5.EX = (() => { const add = (a, b) => a.map((x, i) => x + b[i]), sub = (a, b) 
   const vx = [0.1, 0], near = [0.6, 0.8, 0.88, 0.898].map(x => { const s = RB.ik2(L[0], L[1], x, 0, -1), qq = [s.t1, s.t2]; return { x, q: qq, det: T.det(L, qq), qd: T.rates(L, qq, vx) }; });
   const F = [0, -10];
   return {
-    two: { L, q, p, J, det: T.det(L, q), step: stepAt([rad(2), rad(-3)]), big: stepAt([rad(10), rad(-15)]), sizes: [1, 5, 20].map(d => stepAt([rad(d), rad(d)])), qd, v, speed: norm(v), cols: [0, 1].map(j => [J[0][j] * qd[j], J[1][j] * qd[j]]) },
+    two: { L, q, p, J, det: T.det(L, q), step: stepAt([rad(2), rad(-3)]), big: stepAt([rad(12), rad(10)]), sizes: [1, 5, 20].map(d => stepAt([rad(d), rad(d)])), qd, v, speed: norm(v), cols: [0, 1].map(j => [J[0][j] * qd[j], J[1][j] * qd[j]]) },
     rp: { q: rq, qd: rqd, p: RP.P(rq), J: RP.J(rq), v: CH5.mul(RP.J(rq), rqd) },
     p3r: { L: P3.L, q: pq, qd: pqd, X: P3.X(P3.L, pq), J: P3.J(P3.L, pq), Xd: CH5.mul(P3.J(P3.L, pq), pqd) },
     rrp: { L: RR.L, q: rrq, qd: rrqd, p: RR.P(RR.L, rrq), J: rrJ, v: CH5.mul(rrJ, rrqd), dq: rrdq, pred: CH5.mul(rrJ, rrdq), act: sub(RR.P(RR.L, add(rrq, rrdq)), RR.P(RR.L, rrq)) },

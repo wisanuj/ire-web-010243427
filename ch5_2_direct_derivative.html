@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="5.2 — The Jacobian by direct differentiation">5.2 — จาโคเบียนด้วยการหาอนุพันธ์โดยตรง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=19">
+<script src="assets/stops.js?v=19"></script><script src="assets/shell.js?v=19"></script>
+<script src="assets/robot.js?v=19"></script><script src="assets/lesson.js?v=19"></script><script src="assets/ch2.js?v=19"></script><script src="assets/ch3.js?v=19"></script><script src="assets/ch4.js?v=19"></script><script src="assets/ch5.js?v=19"></script><script src="assets/scene3d.js?v=19"></script><script src="assets/gl3d.js?v=19"></script><script src="assets/ch2_3d.js?v=19"></script><script src="assets/ch3_3d.js?v=19"></script><script src="assets/ch5_3d.js?v=19"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">จาโคเบียนด้วยการหาอนุพันธ์โดยตรง <span class="en">The Jacobian by direct differentiation — one row per coordinate, one column per joint</span></h1>
+<h1 data-l="en">The Jacobian by direct differentiation <span class="en">One row per coordinate, one column per joint</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch5/s11.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 11: what is a Jacobian; six functions of six variables written as one matrix of partial derivatives, and the velocity form for a robot">
+    <figcaption data-l="th">สไลด์บทที่ 5 หน้า 11 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 5 slides, p. 11 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หน้า 5.1 สร้างก้าวของปลายแขนจากลูกศรของแต่ละข้อต่อ หน้านี้หาลูกศรเหล่านั้นด้วยการคำนวณ: <b>จาโคเบียน</b> (Jacobian) คือเมทริกซ์ของอนุพันธ์ย่อย (partial derivative) ของสมการตำแหน่งเทียบกับค่าข้อต่อทีละตัว เราจะทำแขนสองก้านทีละบรรทัดพร้อมตัวเลข อ่านความหมายของแต่ละคอลัมน์ ทำแขนที่มีข้อต่อหมุนกับข้อต่อเลื่อน (RP: revolute–prismatic) ดูว่าจาโคเบียนมีกี่แถวกี่คอลัมน์ แล้วจบด้วยการบ้านชุดที่ 5 หน้านี้ครอบคลุมสไลด์หน้า 11–17 และ 36 มี <b>5 โจทย์</b></p>
+    <p class="sub" data-l="en">Page 5.1 built the step of the tool point from one arrow per joint. This page works those arrows out: the <b>Jacobian</b> is the matrix of partial derivatives of the position equations by the joint values, one at a time. We do the two-link arm line by line with numbers, read what each column means, do an arm with a turning joint and a sliding joint (RP: revolute–prismatic), see how many rows and columns a Jacobian has, and finish with homework 5. This page covers slides pp. 11–17 and 36, with <b>5 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>จาโคเบียนคือเมทริกซ์ของอนุพันธ์ย่อยของสมการตำแหน่ง: \(J_{ij} = \partial f_i / \partial q_j\) และ \(\dot X = J(\theta)\,\dot\theta\)</li><li>แขนสองก้าน: \(J = \begin{bmatrix} -l_1s_1 - l_2s_{12} &amp; -l_2s_{12} \\ l_1c_1 + l_2c_{12} &amp; l_2c_{12} \end{bmatrix}\) คอลัมน์ 1 คือ (−y, x) ของปลายแขน</li><li><b>คอลัมน์ j</b> คือความเร็วของปลายแขนเมื่อข้อต่อ j หมุน 1 rad/s และข้อต่ออื่นหยุด ความเร็วจริงคือผลบวก \(v = J_1\dot\theta_1 + J_2\dot\theta_2\) (อัตราของข้อต่อต้องเป็น <b>rad/s</b> ไม่ใช่ °/s)</li><li><b>แถว</b> = ตัวเลขที่ใช้บอกปลายแขน <b>คอลัมน์</b> = ข้อต่อ: J ไม่จำเป็นต้องเป็นเมทริกซ์จัตุรัส</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>The Jacobian is the matrix of partial derivatives of the position equations: \(J_{ij} = \partial f_i / \partial q_j\), and \(\dot X = J(\theta)\,\dot\theta\).</li><li>Two-link arm: \(J = \begin{bmatrix} -l_1s_1 - l_2s_{12} &amp; -l_2s_{12} \\ l_1c_1 + l_2c_{12} &amp; l_2c_{12} \end{bmatrix}\); column 1 is (−y, x) of the tool point.</li><li><b>Column j</b> is the velocity of the tool point when joint j turns at 1 rad/s and the other joints stand still; the real velocity is the sum \(v = J_1\dot\theta_1 + J_2\dot\theta_2\) (joint rates in <b>rad/s</b>, never °/s).</li><li><b>Rows</b> = the numbers that describe the tool, <b>columns</b> = the joints: J need not be square.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>หา J ของแขนสองก้าน</a><a href="#ex2"><b>2</b>ความหมายของคอลัมน์</a><a href="#ex3"><b>3</b>ข้อต่อหมุนกับข้อต่อเลื่อน</a><a href="#ex4"><b>4</b>ขนาดของ J</a><a href="#ex5"><b>5</b>การบ้าน 5</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>The two-link J</a><a href="#ex2"><b>2</b>What the columns mean</a><a href="#ex3"><b>3</b>Turning and sliding</a><a href="#ex4"><b>4</b>The size of J</a><a href="#ex5"><b>5</b>Homework 5</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">แขนสองก้าน: หาจาโคเบียน</h2><h2 data-l="en">Two-link arm: find the Jacobian</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 12–13 · l₁ = 0.5, l₂ = 0.4 m · ใส่ตัวเลขที่ θ = (30°, 45°) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, pp. 12–13 · l₁ = 0.5, l₂ = 0.4 m · numbers at θ = (30°, 45°) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s12.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 12: the two-link arm with its link lengths and joint angles, and the position of the tool point, x = l1 c1 + l2 c12 and y = l1 s1 + l2 s12">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 12 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 12 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Given</div>
+        <div data-l="th">\(x = l_1c_1 + l_2c_{12}\) และ \(y = l_1s_1 + l_2s_{12}\) โดย \(c_{12} = \cos(\theta_1 + \theta_2)\) หาอนุพันธ์ย่อยทั้งสี่ตัว เรียงเป็นเมทริกซ์ J แล้วใส่ตัวเลขที่ θ = (30°, 45°)</div>
+        <div data-l="en">\(x = l_1c_1 + l_2c_{12}\) and \(y = l_1s_1 + l_2s_{12}\), with \(c_{12} = \cos(\theta_1 + \theta_2)\). Find the four partial derivatives, put them into the matrix J, then put in the numbers at θ = (30°, 45°).</div></div>
+      <div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ความเร็วของปลายแขน และความหมายของแต่ละคอลัมน์</h2><h2 data-l="en">The velocity of the tool point, and what the columns mean</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 14–15 · ท่า θ = (30°, 45°) ข้อต่อหมุนด้วย θ̇ = (0.5, −1.0) rad/s · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, pp. 14–15 · pose θ = (30°, 45°), joint rates θ̇ = (0.5, −1.0) rad/s · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch5/s15.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 15: the velocity of the tool point built from two arrows, one for each joint's rate; each arrow is square to the line from its joint to the tool point">
+      <figcaption data-l="th">สไลด์หน้า 15 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 15 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">ลูกศร<b class="ax-p">สีชมพู</b>คือส่วนของข้อต่อ 1 (J₁θ̇₁) ลูกศร<b style="color:var(--purple)">สีม่วง</b>คือส่วนของข้อต่อ 2 (J₂θ̇₂) ต่อกันแล้วได้ความเร็วของปลายแขน v <b class="ax-y">สีเขียว</b> เส้นประจากข้อต่อถึงปลายแขนคือรัศมีที่ปลายแขนหมุนรอบข้อต่อนั้น ลูกศรของข้อต่อจึงตั้งฉากกับเส้นประของตัวเอง (ลูกศรยาว 0.8 m ต่อความเร็ว 1 m/s)</p>
+      <p class="lead" data-l="en">The <b class="ax-p">pink</b> arrow is the share of joint 1 (J₁θ̇₁), the <b style="color:var(--purple)">purple</b> one the share of joint 2 (J₂θ̇₂); head to tail they give the velocity of the tool point, v, in <b class="ax-y">green</b>. The dashed line from a joint to the tool point is the radius the tool point swings on about that joint, so each joint's arrow is square to its own dashed line (0.8 m of arrow for 1 m/s).</p>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Given</div>
+        <div data-l="th">แขนสองก้านเดิมที่ θ = (30°, 45°) ข้อต่อหมุนด้วย θ̇ = (0.5, −1.0) rad/s หาความเร็วของปลายแขน v และอัตราเร็ว |v|</div>
+        <div data-l="en">The same two-link arm at θ = (30°, 45°); the joints turn at θ̇ = (0.5, −1.0) rad/s. Find the velocity v of the tool point and its speed |v|.</div></div>
+      <div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">แบบฝึกในห้อง: ข้อต่อหมุนกับข้อต่อเลื่อน (RP)</h2><h2 data-l="en">Class exercise: a turning joint and a sliding joint (RP)</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 16 · θ₁ = 60°, d₂ = 0.5 m, θ̇₁ = 0.4 rad/s, ḋ₂ = 0.1 m/s · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 16 · θ₁ = 60°, d₂ = 0.5 m, θ̇₁ = 0.4 rad/s, ḋ₂ = 0.1 m/s · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s16.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 16: an arm with a turning joint and a rod that slides through a sleeve, x = d2 c1 and y = d2 s1; find its Jacobian and the velocity of the tool point">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 16 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 16 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Given</div>
+        <div data-l="th">ข้อต่อ 1 หมุนปลอก ก้านเลื่อนผ่านปลอกออกไปเป็นระยะ d₂: \(x = d_2c_1\), \(y = d_2s_1\) &nbsp;(ก) หา J ของ q = (θ₁, d₂) &nbsp;(ข) ที่ θ₁ = 60°, d₂ = 0.5 m, θ̇₁ = 0.4 rad/s, ḋ₂ = 0.1 m/s หา v</div>
+        <div data-l="en">Joint 1 turns a sleeve and the rod slides out through it by d₂: \(x = d_2c_1\), \(y = d_2s_1\). &nbsp;(a) Find J for q = (θ₁, d₂). &nbsp;(b) At θ₁ = 60°, d₂ = 0.5 m, θ̇₁ = 0.4 rad/s, ḋ₂ = 0.1 m/s, find v.</div></div>
+      <div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">จาโคเบียนมีขนาดเท่าไร</h2><h2 data-l="en">The size of a Jacobian</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 17 · แขน 3R ในระนาบ (ข้อต่อหมุน 3 ตัว, R: revolute) พร้อมเครื่องมือ ที่ท่า θ = (20°, 40°, 30°) · เลื่อนอัตราของข้อต่อทั้งสาม · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 17 · a planar 3R arm (three turning joints, R: revolute) with a tool, at the pose θ = (20°, 40°, 30°) · move the three joint rates · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div></div>
+    <div class="card solve"><div class="given"><div class="gl" data-l="th">(ก) บอกปลายแขนด้วย (x, y, φ)</div><div class="gl" data-l="en">(a) The tool described by (x, y, φ)</div>
+        <div data-l="th">แขน 3R ในระนาบ บอกตำแหน่งของปลายแขนด้วย x, y และบอกทิศของเครื่องมือด้วยมุม φ: J มีกี่แถว กี่คอลัมน์ (แถว × คอลัมน์)</div>
+        <div data-l="en">A planar 3R arm; the tool point is given by x, y and the direction of the tool by the angle φ. How many rows and columns has J (rows × columns)?</div></div>
+      <div id="ask4a"></div>
+      <div class="given"><div class="gl" data-l="th">(ข) สนใจเฉพาะตำแหน่ง (x, y)</div><div class="gl" data-l="en">(b) Position (x, y) only</div>
+        <div data-l="th">แขนตัวเดิม แต่งานต้องการเพียงตำแหน่ง (x, y) ของปลายแขน ไม่สนใจทิศของเครื่องมือ: J มีขนาดเท่าไร</div>
+        <div data-l="en">The same arm, but the task needs only the position (x, y) of the tool point, not the direction of the tool. What size is J?</div></div>
+      <div id="ask4b"></div><div id="st4"></div>
+      <figure class="slide"><img src="slides/ch5/s17.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 17: a table of arms with the numbers that describe the tool, the number of joints and the size of the Jacobian; rows are the numbers that describe the tool, columns the joints">
+        <figcaption data-l="th">สไลด์หน้า 17: ตารางสรุปขนาดของ J ของแขนหลายแบบ · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 17: the sizes of J for several arms · tap to enlarge</figcaption></figure></div>
+  </div>
+</section>
+
+<section class="prob" id="ex5">
+  <div class="prob-head"><span class="prob-no">5</span><div><h2 data-l="th">การบ้านชุดที่ 5: ช่องตรวจคำตอบ</h2><h2 data-l="en">Homework 5: answer checks</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 36 · หน้านี้มีเพียงภาพของโจทย์และช่องตรวจคำตอบ ไม่มีวิธีทำ</div><div class="src" data-l="en">Chapter 5 slides, p. 36 · this page has only the picture of the problem and answer checks, no worked solution</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s36.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 36: homework 5; 5.1 a planar 3R arm with a tool, 5.2 the RRP arm of homework 4">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 36 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 36 · tap to enlarge</figcaption></figure>
+
+  <div class="hwbox" data-l="th"><b class="hw">การบ้าน 5.1 — แขน 3R ในระนาบพร้อมเครื่องมือ</b>: L = (0.5, 0.4, 0.15) m, θ = (30°, 45°, −60°), θ̇ = (0.2, −0.4, 0.6) rad/s &nbsp;(a) เขียน X = (x, y, φ) ของเฟรมเครื่องมือ (b) หาจาโคเบียนขนาด 3 × 3 ด้วยการหาอนุพันธ์ (c) หา Ẋ ที่ท่าและอัตราข้างต้น</div>
+  <div class="hwbox" data-l="en"><b class="hw">Homework 5.1 — planar 3R arm with a tool</b>: L = (0.5, 0.4, 0.15) m, θ = (30°, 45°, −60°), θ̇ = (0.2, −0.4, 0.6) rad/s. &nbsp;(a) Write X = (x, y, φ) of the tool frame. (b) Find the 3 × 3 Jacobian by differentiation. (c) Find Ẋ at the pose and rates above.</div>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv5a"></canvas><div class="ctl" id="ctl5a"></div><div class="simnote" data-l="th">แขน 3R ของบทที่ 3: ก้านยาว 0.5 m และ 0.4 m ต่อด้วยเครื่องมือยาว 0.15 m · เลื่อนมุมเพื่อดูท่าของแขน รูปนี้ไม่แสดงตัวเลขของปลายแขน</div><div class="simnote" data-l="en">Chapter 3's 3R arm: links of 0.5 m and 0.4 m, then a tool 0.15 m long · move the angles to see the pose; this picture shows no numbers of the tool point</div></div>
+    <div class="card"><div id="ask5a"></div><div id="ask5b"></div></div>
+  </div>
+
+  <div class="hwbox" data-l="th"><b class="hw">การบ้าน 5.2 — แขน RRP ของการบ้านชุดที่ 4</b> (ข้อต่อหมุน 2 ตัว ตามด้วยข้อต่อเลื่อน 1 ตัว): \(x = c_1(L_2 + d_3c_2)\), \(y = s_1(L_2 + d_3c_2)\), \(z = L_1 + d_3s_2\) · L₁ = 0.5, L₂ = 0.3 m · q = (35°, 25°, 0.4 m) &nbsp;(a) หาจาโคเบียนขนาด 3 × 3 ของ (x, y, z) (b) หา v เมื่อ q̇ = (0.3 rad/s, −0.2 rad/s, 0.05 m/s) (c) ขยับข้อต่อ δq = (1°, −1°, 5 mm): เทียบ J δq กับก้าวจริง</div>
+  <div class="hwbox" data-l="en"><b class="hw">Homework 5.2 — the RRP arm of homework 4</b> (two turning joints, then a sliding one): \(x = c_1(L_2 + d_3c_2)\), \(y = s_1(L_2 + d_3c_2)\), \(z = L_1 + d_3s_2\) · L₁ = 0.5, L₂ = 0.3 m · q = (35°, 25°, 0.4 m). &nbsp;(a) Find the 3 × 3 Jacobian of (x, y, z). (b) Find v for q̇ = (0.3 rad/s, −0.2 rad/s, 0.05 m/s). (c) Step the joints by δq = (1°, −1°, 5 mm): compare J δq with the real step.</div>
+  <div class="duo">
+    <div class="card sim"><canvas id="cv5b"></canvas><div class="ctl" id="ctl5b"></div><div class="simnote" data-l="th">เสา L₁ = 0.5 m หมุน θ₁ รอบแนวตั้ง ก้านนอน L₂ = 0.3 m ไปถึงข้อศอก θ₂ (แกนนอน) แล้วเลื่อน d₃ ตามแขนท่อนปลาย · ลากเพื่อหมุนมุมมอง</div><div class="simnote" data-l="en">A column L₁ = 0.5 m turning by θ₁ about the vertical, a horizontal link L₂ = 0.3 m to the elbow θ₂ (horizontal axis), then a slide d₃ along the forearm · drag to turn the view</div></div>
+    <div class="card"><div id="ask5c"></div><div id="ask5d"></div></div>
+  </div>
+  <p class="lead" data-l="th">หน้านี้ตรวจให้เฉพาะตัวเลขของคำตอบ วิธีทำของการบ้านชุดนี้อธิบายในห้องเรียน</p>
+  <p class="lead" data-l="en">This page checks the numbers only; the worked answers of this homework are discussed in class.</p>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — เมื่อ det J เป็นศูนย์</h3>
+    <ol><li>ในโจทย์ 1 เลื่อน θ₁ อย่างเดียว: ตัวเลขใน J เปลี่ยนทุกตัว แต่ det J ไม่เปลี่ยน เลื่อน θ₂ แล้ว det J จึงเปลี่ยน</li><li>ตั้ง θ₂ = 0° (แขนเหยียดตรง): det J = 0 และสองคอลัมน์ของ J ชี้แนวเดียวกัน ข้อต่อทั้งสองพาปลายแขนไปได้ทิศเดียว คือตั้งฉากกับแขน นี่คือภาวะเอกฐานของหน้า 5.4</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — อัตราของข้อต่อ</h3>
+    <ol><li>ในโจทย์ 2 เลื่อน θ̇₂ จาก −1.0 ไป +1.0 rad/s: ลูกศรสีม่วงกลับทิศ ลูกศรสีชมพูไม่เปลี่ยน แล้วอ่าน v ใหม่ใต้รูป</li><li>ทำไมต้อง rad/s: คอลัมน์ของข้อต่อหมุนมีหน่วยเมตรต่อเรเดียน (มาจาก δs = r δθ ของหน้า 5.1) ถ้าข้อต่อหมุน 30 °/s ต้องแปลงเป็น 0.524 rad/s ก่อน ใส่ 30 ตรง ๆ จะได้ความเร็วมากเกินจริง 57 เท่า</li><li>คอลัมน์ของข้อต่อเลื่อน (โจทย์ 3) ไม่มีหน่วย: ก้านเลื่อน 1 m/s ปลายแขนก็ไป 1 m/s ตามแนวก้าน</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 5 หน้า 11–17, 36 (ภาพอยู่ในหน้านี้แล้ว) · Craig 5.7 · สไลด์เดิม Part 1 หน้า 5–10</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — when det J is zero</h3>
+    <ol><li>In problem 1 move θ₁ alone: every number in J changes, but det J does not. Move θ₂ and det J changes.</li><li>Set θ₂ = 0° (the arm straight): det J = 0 and the two columns of J lie on one line. Both joints can move the tool point in one direction only, square to the arm. That is the singularity of page 5.4.</li></ol></div>
+  <div class="card"><h3>Try this 2 — joint rates</h3>
+    <ol><li>In problem 2 move θ̇₂ from −1.0 to +1.0 rad/s: the purple arrow flips, the pink one stays, and v under the picture is new.</li><li>Why rad/s: the column of a turning joint is in metres per radian (it comes from δs = r δθ of page 5.1). A joint turning at 30 °/s must first become 0.524 rad/s; putting in 30 gives a velocity 57 times too large.</li><li>The column of a sliding joint (problem 3) has no unit: the rod slides at 1 m/s and the tool point moves at 1 m/s along the rod.</li></ol>
+    <div class="book">Source: chapter 5 slides, pp. 11–17, 36 (the pictures are on this page) · Craig 5.7 · old part 1 slides pp. 5–10</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, X = CH5.EX, T2 = CH5.two, L = T2.L, Q0 = T2.q, OV = CH5.OV, Z = 0.185;
+const $ = id => document.getElementById(id), hyp = a => Math.hypot(...a), d3 = x => RB.d(x, 3), v2 = (a, n = 3) => `(${a.map(x => u(x, n)).join(', ')})`, col = (J, j) => J.map(r => r[j]), by = (a, k) => a.map(x => x * k);
+const fx = (x, n) => { const s = Math.abs(x).toFixed(n); return (x < 0 && +s ? '−' : '') + s; };   // fixed decimals for a slider's value
+const near = (A, B, tol = 0.004) => A.every((r, i) => r.every((x, j) => Math.abs(x - B[i][j]) < tol)), PUR = 'style="color:var(--purple)"';
+/* the joints of a planar chain; a point lifted to the height of the arrows; a dashed length that is left out when it has no length (a link lying along an axis) */
+const jts = (LL, q) => { const out = [[0, 0]]; let a = 0; LL.forEach((l, i) => { a += q[i]; out.push([out[i][0] + l * Math.cos(a), out[i][1] + l * Math.sin(a)]); }); return out; };
+/* a line of text added under the x, y, z readout of the tool point: same anchor (the tool point at the arm's own height), so the label placer moves it with that block */
+const under = (s, p, key, text, row = 0) => OV.name(s, [p[0], p[1], 0.11], key, text, { m: 0, s: 21, a: 'l', dx: 28, dy: 63 + 30 * row });
+const up = p => [p[0], p[1], Z], dim = (s, a, b, key, name, o) => { if (Math.hypot(b[0] - a[0], b[1] - a[1]) > 0.004) OV.dist(s, a, b, key, name, o); };
+/* sliders: a joint angle S.q[i] in degrees, a joint rate S.qd[i] (rad/s or m/s) between −lim and lim */
+const asl = (el, id, label, S, i, lo, hi, onch) => ui.slider(el, { id, label, min: lo, max: hi, step: 1, value: Math.round(deg(S.q[i])), fmt: v => `${v}°`, oninput: v => { S.q[i] = rad(v); if (onch) onch(); } });
+const rsl = (el, id, label, S, i, lim, step, n, unit, onch) => ui.slider(el, { id, label, min: -lim, max: lim, step, value: S.qd[i], fmt: v => `${fx(v, n)} ${unit}`, oninput: v => { S.qd[i] = v; onch(); } });
+
+/* ---------- 1: the Jacobian of the two-link arm ---------- */
+const J0 = X.two.J, A0 = Q0.map(x => Math.round(deg(x))), S1 = { L, q: [rad(60), rad(-30)], xy: true, xyz: true, fit: true }, ro1 = $('ro1');
+const read1 = () => { const J = T2.J(L, S1.q); ro1.innerHTML = `<div class="live"><span class="eq">J(θ) =</span>${CH2.htmlM(J, 3)}<span class="eq">det J = <b>${u(T2.det(L, S1.q), 3)}</b></span></div><div class="term">${t('แถว: x, y ของปลายแขน · คอลัมน์: θ₁, θ₂ · หน่วย: เมตรต่อเรเดียน · det J คือดีเทอร์มิแนนต์ (determinant) ของ J', 'rows: x, y of the tool point · columns: θ₁, θ₂ · unit: metres per radian · det J is the determinant of J')}</div>`; };
+const c1 = $('ctl1'), s1a = asl(c1, 'a1', 'θ₁', S1, 0, -180, 180, read1), s1b = asl(c1, 'a2', 'θ₂', S1, 1, -150, 150, read1); read1();
+/* the open step: 1 x as the sum of what the two links cover along X₀, 2 y as what they cover along Y₀, 3 one column per joint,
+   4 the two columns as arrows at the tool point (0.2 m of arrow per m/rad): column 1 is square to the line base → tool point */
+S1.ov = (s, st) => { const k = st.step; if (!k) return; const jt = jts(L, st.q), e = jt[1], p = jt[2], D = -0.2;
+  if (k === 1) { jt.forEach(c => { if (Math.abs(c[1] - D) > 0.01) OV.ref(s, up(c), [0, -1, 0], c[1] - D); });
+    dim(s, [0, D, Z], [e[0], D, Z], 'o', 'l', { sub: '1', post: 'c₁', s: 26, dy: 28 }); dim(s, [e[0], D, Z], [p[0], D, Z], 'b', 'l', { sub: '2', post: 'c₁₂', s: 26, dy: 28 }); }
+  if (k === 2) { jt.forEach(c => { if (Math.abs(c[0] - D) > 0.01) OV.ref(s, up(c), [-1, 0, 0], c[0] - D); });
+    dim(s, [D, 0, Z], [D, e[1], Z], 'o', 'l', { sub: '1', post: 's₁', s: 26, a: 'r', dx: -14 }); dim(s, [D, e[1], Z], [D, p[1], Z], 'b', 'l', { sub: '2', post: 's₁₂', s: 26, a: 'r', dx: -14 }); }
+  if (k === 3) { OV.name(s, up(jt[0]), 'pk', t('คอลัมน์ 1: θ₁', 'column 1: θ₁'), { m: 0, s: 22, a: 'r', dx: -30, dy: 40 }); OV.name(s, up(e), 'p', t('คอลัมน์ 2: θ₂', 'column 2: θ₂'), { m: 0, s: 22, a: 'l', dx: 30, dy: 30 }); }
+  if (k === 4) { const J = T2.J(L, st.q), g = 0.2, A = up(p), B = [p[0], p[1], Z - 0.012]; dim(s, up(jt[0]), A, 'pk');
+    OV.vec(s, A, [A[0] + g * J[0][0], A[1] + g * J[1][0], Z], 'pk', 'J', { sub: '1', post: ' = (−y, x)', s: 24, at: 1, a: 'r', dx: -14, dy: -10 });
+    OV.vec(s, B, [B[0] + g * J[0][1], B[1] + g * J[1][1], B[2]], 'p', 'J', { sub: '2', s: 24, at: 1, a: 'r', dx: -14, dy: 22 }); } };
+CH2.sim('cv1', S1, 'two', { aspect: 0.8, maxH: 500 });
+CH2.matAsk($('ask1'), { rows: 2, cols: 2, label: t('ที่ θ = (30°, 45°): J =', 'at θ = (30°, 45°): J ='), ans: J0, tol: 0.002,
+  check: M => near(M, CH5.tr(J0)) ? t('คุณสลับแถวกับคอลัมน์: แถวคือพิกัด (x, y) คอลัมน์คือข้อต่อ (θ₁, θ₂)', 'rows and columns are swapped: the rows are the coordinates (x, y), the columns the joints (θ₁, θ₂)')
+    : near(M, [J0[0].map(Math.abs), J0[1]]) ? t('อนุพันธ์ของ cos คือ −sin: แถวของ x ติดลบทั้งแถว', 'the derivative of cos is −sin: the whole row of x is negative') : '' });
+const sn1 = d3(Math.sin(Q0[0])), cs1 = d3(Math.cos(Q0[0])), sn12 = d3(Math.sin(Q0[0] + Q0[1])), cs12 = d3(Math.cos(Q0[0] + Q0[1])), l1 = d3(L[0]), l2 = d3(L[1]);
+LS.stepper($('st1'), { onStep: k => { S1.step = k; if (k) { S1.q = Q0.slice(); s1a.set(A0[0]); s1b.set(A0[1]); read1(); } }, steps: [
+  { why: t('<b>แถวของ x</b>: หาอนุพันธ์ของ x = l₁c₁ + l₂c₁₂ เทียบกับ θ₁ แล้วเทียบกับ θ₂ อนุพันธ์ของ cos คือ −sin และ c₁₂ = cos(θ₁ + θ₂) มีมุมทั้งสองอยู่ข้างใน (กฎลูกโซ่: อนุพันธ์ของ θ₁ + θ₂ เทียบกับมุมใดมุมหนึ่งคือ 1)', '<b>The row of x</b>: differentiate x = l₁c₁ + l₂c₁₂ by θ₁, then by θ₂. The derivative of cos is −sin, and c₁₂ = cos(θ₁ + θ₂) holds both angles (chain rule: the derivative of θ₁ + θ₂ by either angle is 1)'),
+    tex: '\\begin{aligned} \\frac{\\partial x}{\\partial\\theta_1} &= -l_1s_1 - l_2s_{12} \\\\[4pt] \\frac{\\partial x}{\\partial\\theta_2} &= -l_2s_{12} \\end{aligned}' },
+  { why: t('<b>แถวของ y</b>: ทำแบบเดียวกันกับ y = l₁s₁ + l₂s₁₂ อนุพันธ์ของ sin คือ cos', '<b>The row of y</b>: the same with y = l₁s₁ + l₂s₁₂; the derivative of sin is cos'),
+    tex: '\\begin{aligned} \\frac{\\partial y}{\\partial\\theta_1} &= l_1c_1 + l_2c_{12} \\\\[4pt] \\frac{\\partial y}{\\partial\\theta_2} &= l_2c_{12} \\end{aligned}' },
+  { why: t('<b>เรียงเป็นเมทริกซ์</b>: หนึ่งแถวต่อหนึ่งพิกัด (x, y) หนึ่งคอลัมน์ต่อหนึ่งข้อต่อ (θ₁, θ₂) ตรงกับ Craig สมการ 5.67', '<b>Put the four into a matrix</b>: one row per coordinate (x, y), one column per joint (θ₁, θ₂). This is Craig eq. 5.67'),
+    tex: 'J(\\theta) = \\begin{bmatrix} -l_1s_1 - l_2s_{12} & -l_2s_{12} \\\\ l_1c_1 + l_2c_{12} & l_2c_{12} \\end{bmatrix}' },
+  { why: t(`<b>ใส่ตัวเลข</b>: θ₁ = ${A0[0]}° และ θ₁ + θ₂ = ${A0[0] + A0[1]}° ได้ s₁ = ${sn1}, c₁ = ${cs1}, s₁₂ = ${sn12}, c₁₂ = ${cs12} หน่วยของ J คือเมตรต่อเรเดียน ในรูป สองคอลัมน์วาดเป็นลูกศรที่ปลายแขน (ย่อเหลือ 0.2 เท่า): J₁ ตั้งฉากกับเส้นประจากฐานถึงปลายแขน`, `<b>Put in the numbers</b>: θ₁ = ${A0[0]}° and θ₁ + θ₂ = ${A0[0] + A0[1]}° give s₁ = ${sn1}, c₁ = ${cs1}, s₁₂ = ${sn12}, c₁₂ = ${cs12}. J is in metres per radian. In the picture the two columns are arrows at the tool point (drawn at 0.2 of their length): J₁ is square to the dashed line base → tool point`),
+    tex: `\\begin{aligned} J &= \\begin{bmatrix} -(${l1})(${sn1}) - (${l2})(${sn12}) & -(${l2})(${sn12}) \\\\ (${l1})(${cs1}) + (${l2})(${cs12}) & (${l2})(${cs12}) \\end{bmatrix} \\\\ &= ${CH2.texM(J0, 3)} \\end{aligned}` }],
+  answer: t(`\\(J = ${CH2.texM(J0, 3)}\\) เมตรต่อเรเดียน · คอลัมน์ 1 คือ (−y, x): ตำแหน่งของปลายแขน ${v2(X.two.p)} m หมุนไป 90° · คอลัมน์ 2 คือแบบเดียวกันของก้านที่ 2 เพียงก้านเดียว`, `\\(J = ${CH2.texM(J0, 3)}\\) metres per radian · column 1 is (−y, x): the position of the tool point, ${v2(X.two.p)} m, turned by 90° · column 2 is the same for link 2 alone`) });
+
+/* ---------- 2: the velocity of the tool point, column by column ---------- */
+const QD = X.two.qd, V0 = X.two.v, K2 = X.two.cols, S2 = { L, q: Q0.slice(), qd: [1.0, 0.5], cols: true, rad: true, xyz: true, fit: true }, ro2 = $('ro2');
+const read2 = () => { const J = T2.J(L, S2.q), v = CH5.mul(J, S2.qd);
+  ro2.innerHTML = `<div class="term"><b class="ax-p">J₁θ̇₁ = ${v2(by(col(J, 0), S2.qd[0]))}</b> · <b ${PUR}>J₂θ̇₂ = ${v2(by(col(J, 1), S2.qd[1]))}</b> m/s</div><div class="term">v = J θ̇ = <b>${v2(v)} m/s</b> · ${t('อัตราเร็ว', 'speed')} |v| = <b>${u(hyp(v), 3)} m/s</b></div>`; };
+const c2 = $('ctl2'), s2a = asl(c2, 'b1', 'θ₁', S2, 0, -180, 180, read2), s2b = asl(c2, 'b2', 'θ₂', S2, 1, -150, 150, read2), s2c = rsl(c2, 'b3', 'θ̇₁', S2, 0, 2, 0.1, 1, 'rad/s', read2), s2d = rsl(c2, 'b4', 'θ̇₂', S2, 1, 2, 0.1, 1, 'rad/s', read2); read2();
+/* the open step: 1 joint 1 alone (the radius is the line base → tool point), 2 joint 2 alone (the radius is link 2), 3 both arrows head to tail, 4 the speed */
+S2.ov = (s, st) => { const k = st.step; if (!k) return; const jt = jts(L, st.q), O = up(jt[0]), E = up(jt[1]), P = up(jt[2]), md = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, Z];
+  if (k === 1) OV.name(s, md(O, P), 'pk', 'r₁ = ' + u(hyp(jt[2]), 3) + ' m', { m: 0, s: 22, a: 'r', dx: -14, dy: -6 });
+  if (k === 2) OV.name(s, md(E, P), 'p', 'l₂ = ' + u(L[1], 3) + ' m', { m: 0, s: 22, a: 'l', dx: 16 });
+  if (k === 4) under(s, jt[2], 'gr', '|v| = ' + u(hyp(CH5.mul(T2.J(L, st.q), st.qd)), 3) + ' m/s'); };
+CH2.sim('cv2', S2, 'jvel', { aspect: 0.8, maxH: 500 });
+const VW = CH5.mul(J0, [QD[0], -QD[1]]), K = Math.PI / 180;
+LS.ask($('ask2'), { fields: [{ label: t('ความเร็วของปลายแขน: v<sub>x</sub> (m/s) =', 'velocity of the tool point: v<sub>x</sub> (m/s) ='), ok: x => Math.abs(x - V0[0]) < 0.002, w: 5 }, { label: 'v<sub>y</sub> (m/s) =', ok: x => Math.abs(x - V0[1]) < 0.002, w: 5 }],
+  check: v => Math.abs(v[0] - V0[0] * K) < 3e-4 && Math.abs(v[1] - V0[1] * K) < 3e-4 ? t('0.5 และ −1.0 เป็น rad/s อยู่แล้ว คูณกับ J ได้ทันที ไม่ต้องคูณ π/180', 'the rates 0.5 and −1.0 are already in rad/s: multiply J by them as they are, without π/180')
+    : Math.abs(v[0] - V0[0] / K) < 0.1 && Math.abs(v[1] - V0[1] / K) < 0.1 ? t('อย่าแปลงอัตราของข้อต่อเป็น °/s: J มีหน่วยเมตรต่อเรเดียน อัตราจึงต้องเป็น rad/s', 'do not turn the joint rates into °/s: J is in metres per radian, so the rates stay in rad/s')
+    : Math.abs(v[0] - VW[0]) < 0.004 && Math.abs(v[1] - VW[1]) < 0.004 ? t('θ̇₂ = −1.0 rad/s ติดลบ: ลูกศรของข้อต่อ 2 ชี้กลับทิศ', 'θ̇₂ = −1.0 rad/s is negative: the arrow of joint 2 points the other way') : '' });
+const r1 = hyp(X.two.p);
+LS.stepper($('st2'), { onStep: k => { S2.step = k; S2.q = Q0.slice(); S2.qd = k === 1 ? [QD[0], 0] : k === 2 ? [0, QD[1]] : QD.slice(); s2a.set(A0[0]); s2b.set(A0[1]); s2c.set(S2.qd[0]); s2d.set(S2.qd[1]); read2(); }, steps: [
+  { why: t('<b>ข้อต่อ 1 อย่างเดียว</b> (ข้อต่อ 2 หยุด): ทั้งแขนหมุนรอบฐาน ปลายแขนวิ่งตั้งฉากกับเส้นจากฐานถึงปลายแขน ด้วยอัตราเร็ว r₁θ̇₁ คอลัมน์ 1 คือความเร็วนี้เมื่อ θ̇₁ = 1 rad/s', '<b>Joint 1 alone</b> (joint 2 standing still): the whole arm swings about the base and the tool point runs square to the line base → tool point, at the speed r₁θ̇₁. Column 1 is this velocity for θ̇₁ = 1 rad/s'),
+    tex: `\\begin{aligned} J_1\\dot\\theta_1 &= ${CH2.texV(col(J0, 0), 3)}(${d3(QD[0])}) = ${CH2.texV(K2[0], 3)}\\ \\text{m/s} \\\\ |J_1\\dot\\theta_1| &= r_1|\\dot\\theta_1| = ${d3(r1)} \\times ${d3(Math.abs(QD[0]))} = ${d3(r1 * Math.abs(QD[0]))}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>ข้อต่อ 2 อย่างเดียว</b> (ข้อต่อ 1 หยุด): เฉพาะก้านที่ 2 หมุนรอบข้อศอก ลูกศรตั้งฉากกับก้านที่ 2 อัตราติดลบ ลูกศรจึงชี้ตรงข้ามกับคอลัมน์ 2', '<b>Joint 2 alone</b> (joint 1 standing still): only link 2 swings, about the elbow, and the arrow is square to link 2. The rate is negative, so the arrow points against column 2'),
+    tex: `\\begin{aligned} J_2\\dot\\theta_2 &= ${CH2.texV(col(J0, 1), 3)}(${d3(QD[1])}) = ${CH2.texV(K2[1], 3)}\\ \\text{m/s} \\\\ |J_2\\dot\\theta_2| &= l_2|\\dot\\theta_2| = ${l2} \\times ${d3(Math.abs(QD[1]))} = ${d3(L[1] * Math.abs(QD[1]))}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>ข้อต่อทั้งสองพร้อมกัน</b>: ความเร็วของปลายแขนคือผลบวกของลูกศรทั้งสอง ซึ่งก็คือ J คูณ θ̇', '<b>Both joints together</b>: the velocity of the tool point is the sum of the two arrows, which is J times θ̇'),
+    tex: `\\begin{aligned} v &= J_1\\dot\\theta_1 + J_2\\dot\\theta_2 = J\\,\\dot\\theta \\\\ &= ${CH2.texM(J0, 3)} ${CH2.texV(QD, 3)} = ${CH2.texV(V0, 3)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>อัตราเร็วและทิศ</b> ของปลายแขน (มุมวัดจากแกน X₀)', '<b>Speed and direction</b> of the tool point (the angle is measured from X₀)'),
+    tex: `\\begin{aligned} |v| &= \\sqrt{${d3(V0[0])}^2 + ${d3(V0[1])}^2} = ${d3(X.two.speed)}\\ \\text{m/s} \\\\ \\mathrm{atan2}(${d3(V0[1])},\\ ${d3(V0[0])}) &= ${RB.d(deg(Math.atan2(V0[1], V0[0])), 1)}^\\circ \\end{aligned}` }],
+  answer: t(`v = ${v2(V0)} m/s อัตราเร็ว ${u(X.two.speed, 3)} m/s · คอลัมน์ j ของ J คือความเร็วของปลายแขนเมื่อข้อต่อ j หมุน 1 rad/s และข้อต่ออื่นหยุด · อัตราของข้อต่อต้องเป็น rad/s`, `v = ${v2(V0)} m/s, speed ${u(X.two.speed, 3)} m/s · column j of J is the velocity of the tool point when joint j turns at 1 rad/s and the others stand still · joint rates must be in rad/s`) });
+
+/* ---------- 3: class exercise, a turning joint and a sliding joint ---------- */
+const RP = CH5.rp, R0 = X.rp, S3s = { q: [rad(30), 0.4], qd: [0.5, 0], cols: true, xyz: true }, ro3 = $('ro3');
+const read3 = () => { const J = RP.J(S3s.q), v = CH5.mul(J, S3s.qd);
+  ro3.innerHTML = `<div class="live"><span class="eq">J(q) =</span>${CH2.htmlM(J, 3)}<span class="eq">det J = <b>${u(CH5.det2(J), 3)}</b></span></div><div class="term"><b class="ax-p">J₁θ̇₁ = ${v2(by(col(J, 0), S3s.qd[0]))}</b> · <b ${PUR}>J₂ḋ₂ = ${v2(by(col(J, 1), S3s.qd[1]))}</b> m/s</div><div class="term">v = <b>${v2(v)} m/s</b> · |v| = <b>${u(hyp(v), 3)} m/s</b></div>`; };
+const c3 = $('ctl3'), s3a = asl(c3, 'c1', 'θ₁', S3s, 0, -180, 180, read3), s3b = ui.slider(c3, { id: 'c2', label: 'd₂', min: 0.15, max: 0.7, step: 0.01, value: S3s.q[1], fmt: v => `${v.toFixed(2)} m`, oninput: v => { S3s.q[1] = v; read3(); } }),
+  s3c = rsl(c3, 'c3', 'θ̇₁', S3s, 0, 2, 0.1, 1, 'rad/s', read3), s3d = rsl(c3, 'c4', 'ḋ₂', S3s, 1, 0.5, 0.05, 2, 'm/s', read3); read3();
+/* the open step: 1 x and y of the tool point written with θ₁ and d₂ (on the dashed path of the x, y readout), 2 what the two columns are,
+   3 the velocity with the numbers of the exercise, 4 the sliding joint alone: its column is the direction of the rod */
+S3s.ov = (s, st) => { const k = st.step; if (!k) return; const th = st.q[0], d = st.q[1], dir = [Math.cos(th), Math.sin(th), 0], p = [d * dir[0], d * dir[1]], P = up(p);
+  if (k === 1) { OV.name(s, [p[0] / 2, 0, 0.14], 'x', 'x = d', { sub: '2', post: 'c₁', s: 24, dy: 32 }); OV.name(s, [p[0], p[1] / 2, 0.14], 'y', 'y = d', { sub: '2', post: 's₁', s: 24, a: 'l', dx: 18 }); }
+  if (k === 2) { under(s, p, 'pk', t('คอลัมน์ 1 ตั้งฉากกับก้าน', 'column 1: square to the rod')); under(s, p, 'p', t('คอลัมน์ 2 ตามแนวก้าน', 'column 2: along the rod'), 1); }
+  if (k === 3) under(s, p, 'gr', 'v = ' + v2(CH5.mul(RP.J(st.q), st.qd)) + ' m/s');
+  if (k === 4) { OV.ref(s, P, dir, 0.2, 'p'); OV.name(s, OV.v(P, dir, 0.21), 'p', '(c₁, s₁)', { m: 0, s: 22, a: 'l', dx: 14, dy: 4 }); } };
+CH2.sim('cv3', S3s, 'rp', { aspect: 0.8, maxH: 500 });
+const RW1 = by(col(R0.J, 0), R0.qd[0]), RW2 = [RW1[0] + R0.p[0] * R0.qd[1], RW1[1] + R0.p[1] * R0.qd[1]];
+LS.ask($('ask3'), { fields: [{ label: t('(ข) v<sub>x</sub> (m/s) =', '(b) v<sub>x</sub> (m/s) ='), ok: x => Math.abs(x - R0.v[0]) < 0.002, w: 5 }, { label: 'v<sub>y</sub> (m/s) =', ok: x => Math.abs(x - R0.v[1]) < 0.002, w: 5 }],
+  check: v => Math.abs(v[0] - RW1[0]) < 0.003 && Math.abs(v[1] - RW1[1]) < 0.003 ? t('นั่นคือส่วนของข้อต่อหมุนอย่างเดียว ยังต้องบวกส่วนของข้อต่อเลื่อน ḋ₂ (c₁, s₁)', 'that is the share of the turning joint alone: add the share of the sliding joint, ḋ₂ (c₁, s₁)')
+    : Math.abs(v[0] - RW2[0]) < 0.003 && Math.abs(v[1] - RW2[1]) < 0.003 ? t('คอลัมน์ของข้อต่อเลื่อนคือ (c₁, s₁) ไม่มี d₂ คูณอยู่: ∂(d₂c₁)/∂d₂ = c₁', 'the column of the sliding joint is (c₁, s₁), with no d₂ in it: ∂(d₂c₁)/∂d₂ = c₁') : '' });
+LS.stepper($('st3'), { onStep: k => { S3s.step = k; S3s.q = RP.q.slice(); S3s.qd = k === 4 ? [0, R0.qd[1]] : R0.qd.slice(); s3a.set(Math.round(deg(RP.q[0]))); s3b.set(RP.q[1]); s3c.set(S3s.qd[0]); s3d.set(S3s.qd[1]); read3(); }, steps: [
+  { why: t('<b>ตำแหน่งและอนุพันธ์ทั้งสี่ตัว</b>: ตัวแปรของข้อต่อคือ q = (θ₁, d₂) หาอนุพันธ์เทียบกับ θ₁ (ถือว่า d₂ คงที่) แล้วเทียบกับ d₂ (ถือว่า θ₁ คงที่)', '<b>The position and its four derivatives</b>: the joint variables are q = (θ₁, d₂). Differentiate by θ₁ (holding d₂) and by d₂ (holding θ₁)'),
+    tex: '\\begin{aligned} x &= d_2c_1 & y &= d_2s_1 \\\\[2pt] \\frac{\\partial x}{\\partial\\theta_1} &= -d_2s_1 & \\frac{\\partial x}{\\partial d_2} &= c_1 \\\\[4pt] \\frac{\\partial y}{\\partial\\theta_1} &= d_2c_1 & \\frac{\\partial y}{\\partial d_2} &= s_1 \\end{aligned}' },
+  { why: t('<b>(ก) เรียงเป็นเมทริกซ์</b>: คอลัมน์ 1 ของ θ₁ คอลัมน์ 2 ของ d₂', '<b>(a) As a matrix</b>: column 1 for θ₁, column 2 for d₂'),
+    tex: 'J(q) = \\begin{bmatrix} -d_2s_1 & c_1 \\\\ d_2c_1 & s_1 \\end{bmatrix}' },
+  { why: t(`<b>(ข) ใส่ตัวเลข</b>: s₁ = ${u(Math.sin(RP.q[0]), 3)}, c₁ = ${u(Math.cos(RP.q[0]), 3)}, d₂ = ${u(RP.q[1], 3)} m แล้วคูณด้วยอัตราของข้อต่อ (θ̇₁ เป็น rad/s และ ḋ₂ เป็น m/s)`, `<b>(b) Put in the numbers</b>: s₁ = ${u(Math.sin(RP.q[0]), 3)}, c₁ = ${u(Math.cos(RP.q[0]), 3)}, d₂ = ${u(RP.q[1], 3)} m, then multiply by the joint rates (θ̇₁ in rad/s, ḋ₂ in m/s)`),
+    tex: `\\begin{aligned} J &= ${CH2.texM(R0.J, 3)} \\\\ v &= J \\begin{bmatrix} \\dot\\theta_1 \\\\ \\dot d_2 \\end{bmatrix} = ${CH2.texM(R0.J, 3)} ${CH2.texV(R0.qd, 3)} \\\\ &= ${CH2.texV(R0.v, 3)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>อ่านคอลัมน์</b>: คอลัมน์ของข้อต่อเลื่อนคือทิศของแกนเลื่อน (c₁, s₁) ยาวหนึ่งหน่วย ก้านเลื่อน 1 m/s ปลายแขนก็ไป 1 m/s ตามแนวก้าน ส่วนคอลัมน์ของข้อต่อหมุนยาว d₂ และตั้งฉากกับก้าน · det J เป็นศูนย์เมื่อ d₂ = 0: ปลายแขนอยู่บนแกนหมุน หมุน θ₁ แล้วปลายแขนไม่ขยับ (ภาวะเอกฐาน หน้า 5.4)', '<b>Read the columns</b>: the column of a sliding joint is the direction of its axis, (c₁, s₁), one unit long: the rod slides at 1 m/s and the tool point moves at 1 m/s along the rod. The column of the turning joint has length d₂ and is square to the rod · det J is zero when d₂ = 0: the tool point sits on the turning axis, and turning θ₁ does not move it (a singularity, page 5.4)'),
+    tex: `\\det J = -d_2s_1^2 - d_2c_1^2 = -d_2 = ${d3(-RP.q[1])}` }],
+  answer: t(`\\(J = \\begin{bmatrix} -d_2s_1 & c_1 \\\\ d_2c_1 & s_1 \\end{bmatrix}\\) · v = ${v2(R0.v)} m/s · คอลัมน์ของข้อต่อเลื่อนคือทิศของแกนเลื่อน · det J = −d₂`, `\\(J = \\begin{bmatrix} -d_2s_1 & c_1 \\\\ d_2c_1 & s_1 \\end{bmatrix}\\) · v = ${v2(R0.v)} m/s · the column of a sliding joint is the direction of its axis · det J = −d₂`) });
+
+/* ---------- 4: the size of a Jacobian (a planar 3R arm; a pose and rates of its own, not those of homework 5.1) ---------- */
+const L3 = CH5.p3r.L, Q4 = [rad(20), rad(40), rad(30)], QD4 = [0.5, -0.5, 1], J4 = CH5.p3r.J(L3, Q4), KEY = ['pk', 'p', 'am'];
+/* joint rates that leave the tool point where it is: square to rows 1 and 2 of J (the rows of x and y), the largest one made 1 rad/s */
+const N4 = (() => { const n = RB.cross(J4[0], J4[1]), m = n.reduce((a, x) => Math.abs(x) > Math.abs(a) ? x : a, 0); return n.map(x => x / m); })();
+const S4 = { L: L3, q: Q4.slice(), qd: QD4.slice(), tool: true, cols: true, xyz: true, fit: true }, ro4 = $('ro4');
+const read4 = () => { const v = CH5.mul(J4.slice(0, 2), S4.qd); ro4.innerHTML = `<div class="term">θ̇ = (${S4.qd.map(x => fx(x, 2)).join(', ')}) rad/s</div><div class="term">v = (v<sub>x</sub>, v<sub>y</sub>) = <b>${v2(v)} m/s</b> · |v| = <b>${u(hyp(v), 3)} m/s</b></div>`; };
+const s4 = ['θ̇₁', 'θ̇₂', 'θ̇₃'].map((n, i) => rsl($('ctl4'), 'd' + (i + 1), n, S4, i, 2, 0.01, 2, 'rad/s', read4)); read4();
+/* the open step: 1 the three numbers that describe the tool (x, y and the angle φ of the tool), 2 one column per joint, 3 rates that turn every joint and leave the tool point where it is */
+S4.ov = (s, st) => { const k = st.step; if (!k) return; const jt = jts(L3, st.q), P = up(jt[3]), a = st.q[0] + st.q[1] + st.q[2];
+  if (k === 1) { OV.ref(s, up(jt[2]), [1, 0, 0], 0.22); OV.ang(s, up(jt[2]), [1, 0, 0], [Math.cos(a), Math.sin(a), 0], 0.1, 'am', 'φ', { dx: 16, dy: -8 }); OV.name(s, P, 'ink', t('ปลายแขน: x, y, φ', 'the tool: x, y, φ'), { m: 0, s: 22, a: 'r', dx: -40, dy: 50 }); }
+  if (k === 2) KEY.forEach((c, i) => OV.name(s, up(jt[i]), c, t('คอลัมน์ ', 'column ') + (i + 1), { m: 0, s: 22, a: 'r', dx: -28, dy: -24 }));
+  if (k === 3) OV.name(s, P, 'gr', t('v = 0: ปลายแขนอยู่กับที่', 'v = 0: the tool point stays put'), { m: 0, s: 22, a: 'r', dx: -40, dy: 50 }); };
+CH2.sim('cv4', S4, 'jvel', { aspect: 0.8, maxH: 500 });
+const SZ = ['2 × 3', '3 × 3', '3 × 2', '6 × 3'], NOL = ['', '', '', ''];
+LS.choose($('ask4a'), { options: SZ, answer: 1, labels: NOL }); LS.choose($('ask4b'), { options: SZ, answer: 0, labels: NOL });
+LS.stepper($('st4'), { onStep: k => { S4.step = k; S4.qd = k === 3 ? N4.slice() : QD4.slice(); s4.forEach((x, i) => x.set(S4.qd[i])); read4(); }, steps: [
+  { why: t('<b>แถว</b> = ตัวเลขที่ใช้บอกปลายแขน: (x, y, φ) มี 3 ตัว จึงมี 3 แถว ถ้างานต้องการเพียงตำแหน่ง (x, y) ก็เหลือ 2 แถว', '<b>Rows</b> = the numbers that describe the tool: (x, y, φ) are 3 numbers, so 3 rows. A task that needs the position (x, y) only keeps 2 rows'),
+    tex: '(x,\\ y,\\ \\varphi):\\ \\ \\dot X = \\begin{bmatrix} \\dot x \\\\ \\dot y \\\\ \\dot\\varphi \\end{bmatrix} \\qquad (x,\\ y):\\ \\ \\dot X = \\begin{bmatrix} \\dot x \\\\ \\dot y \\end{bmatrix}' },
+  { why: t('<b>คอลัมน์</b> = ข้อต่อ: แขนนี้มี 3 ข้อต่อ จึงมี 3 คอลัมน์เสมอ ไม่ว่าจะบอกปลายแขนด้วยตัวเลขกี่ตัว คำตอบคือ (ก) 3 × 3 และ (ข) 2 × 3', '<b>Columns</b> = the joints: this arm has 3 joints, so always 3 columns, however many numbers describe the tool. The answers: (a) 3 × 3 and (b) 2 × 3'),
+    tex: '\\begin{aligned} \\begin{bmatrix} \\dot x \\\\ \\dot y \\\\ \\dot\\varphi \\end{bmatrix} &= J_{3 \\times 3} \\begin{bmatrix} \\dot\\theta_1 \\\\ \\dot\\theta_2 \\\\ \\dot\\theta_3 \\end{bmatrix} \\\\[4pt] \\begin{bmatrix} \\dot x \\\\ \\dot y \\end{bmatrix} &= J_{2 \\times 3} \\begin{bmatrix} \\dot\\theta_1 \\\\ \\dot\\theta_2 \\\\ \\dot\\theta_3 \\end{bmatrix} \\end{aligned}' },
+  { why: t(`<b>คอลัมน์มากกว่าแถว</b> (2 × 3): ข้อต่อมีมากกว่าที่งานต้องการ แขนมีข้อต่อเกิน (redundant, บทที่ 4) อัตราของข้อต่อหลายชุดให้ v เดียวกัน และมีชุดที่ข้อต่อหมุนทั้งสามตัวแต่ปลายแขนอยู่กับที่ ดังในรูป: θ̇ = (${N4.map(x => fx(x, 2)).join(', ')}) rad/s ให้ v = 0 (เครื่องมือยังหมุนอยู่กับที่ ถ้างานต้องการ φ ด้วย J ก็เป็น 3 × 3 และไม่มีข้อต่อเกิน) · <b>แถวมากกว่าคอลัมน์</b> ก็มีได้: สไลด์เดิมบอกทิศด้วยโคไซน์แสดงทิศ (direction cosines) 9 ตัว รวมกับตำแหน่ง 3 ตัว แขน 6 ข้อต่อจึงได้ J ขนาด 12 × 6`, `<b>More columns than rows</b> (2 × 3): more joints than the task needs, a redundant arm (chapter 4). Many sets of joint rates give the same v, and one set turns all three joints while the tool point stays where it is, as in the picture: θ̇ = (${N4.map(x => fx(x, 2)).join(', ')}) rad/s gives v = 0 (the tool still turns on the spot; when the task needs φ as well, J is 3 × 3 and no joint is to spare) · <b>More rows than columns</b> happens too: the old slides wrote the orientation as 9 direction cosines, which with the 3 numbers of the position gives a six-joint arm a 12 × 6 Jacobian`) }],
+  answer: t('แถว = จำนวนตัวเลขที่ใช้บอกปลายแขน · คอลัมน์ = จำนวนข้อต่อ · (ก) 3 × 3 (ข) 2 × 3 · J ไม่จำเป็นต้องเป็นเมทริกซ์จัตุรัส', 'rows = how many numbers describe the tool · columns = how many joints · (a) 3 × 3, (b) 2 × 3 · J need not be square') });
+
+/* ---------- 5: homework 5 (answer checks only: no velocity arrow, no x, y, z readout, no worked numbers) ---------- */
+const H1 = X.p3r, S5 = { L: L3, q: H1.q.slice(), qd: [0, 0, 0], tool: true, rates: false, fit: true };
+['θ₁', 'θ₂', 'θ₃'].forEach((n, i) => asl($('ctl5a'), 'e' + (i + 1), n, S5, i, i ? -150 : -180, i ? 150 : 180));
+/* the joint angles named on the picture: θ_i from the line of the link before (X₀ for the first) */
+S5.ov = (s, st) => { const jt = jts(L3, st.q); let a = 0; st.q.forEach((q, i) => { const O = up(jt[i]), d0 = [Math.cos(a), Math.sin(a), 0]; a += q; OV.ref(s, O, d0, 0.2); OV.ang(s, O, d0, [Math.cos(a), Math.sin(a), 0], 0.12 - 0.015 * i, KEY[i], 'θ', { sub: String(i + 1), s: 26, dx: 16, dy: -8 }); }); };
+CH2.sim('cv5a', S5, 'jvel', { aspect: 0.8, maxH: 420 });
+CH2.matAsk($('ask5a'), { rows: 2, cols: 3, label: t('5.1 (b) แถวที่ 1 และ 2 ของ J =', '5.1 (b) rows 1 and 2 of J ='), ans: H1.J.slice(0, 2), tol: 0.002 });
+LS.ask($('ask5b'), { fields: [{ label: '5.1 (c) ẋ (m/s) =', ok: x => Math.abs(x - H1.Xd[0]) < 0.002, w: 5 }, { label: 'ẏ (m/s) =', ok: x => Math.abs(x - H1.Xd[1]) < 0.002, w: 5 }, { label: 'φ̇ (rad/s) =', ok: x => Math.abs(x - H1.Xd[2]) < 0.002, w: 5 }] });
+
+const H2 = X.rrp, S6 = { ex: 'rrp', q: H2.q.slice(), qd: [0, 0, 0], om: false, fit: true }, c6 = $('ctl5b'), HR = CH5.mul(H2.J, [1, -1, H2.dq[2]]);
+asl(c6, 'f1', 'θ₁', S6, 0, -180, 180); asl(c6, 'f2', 'θ₂', S6, 1, -90, 90); ui.slider(c6, { id: 'f3', label: 'd₃', min: 0.1, max: 0.8, step: 0.01, value: S6.q[2], fmt: v => `${v.toFixed(2)} m`, oninput: v => { S6.q[2] = v; } });
+/* the lengths named on the picture, as on the slide: the column L₁, the horizontal link L₂ and the slide d₃ */
+S6.ov = s => { const F = s.F; if (!F || F.length < 4) return; const O = F.map(T => RB.Tp(T)), at = (a, b, k) => a.map((x, i) => x + (b[i] - x) * k);
+  OV.name(s, at(O[0], O[1], 0.5), 'o', 'L', { sub: '1', s: 28, a: 'r', dx: -22 }); OV.name(s, at(O[1], O[2], 0.5), 'o', 'L', { sub: '2', s: 28, dy: -24 }); OV.name(s, at(O[2], O[3], 0.55), 'p', 'd', { sub: '3', s: 28, a: 'l', dx: 14, dy: 30 }); };
+CH2.sim('cv5b', S6, 'sv', { aspect: 0.8, maxH: 420 });
+LS.ask($('ask5c'), { fields: [{ label: '5.2 (b) v<sub>x</sub> (m/s) =', ok: x => Math.abs(x - H2.v[0]) < 0.002, w: 5 }, { label: 'v<sub>y</sub> (m/s) =', ok: x => Math.abs(x - H2.v[1]) < 0.002, w: 5 }, { label: 'v<sub>z</sub> (m/s) =', ok: x => Math.abs(x - H2.v[2]) < 0.002, w: 5 }] });
+LS.ask($('ask5d'), { fields: ['x', 'y', 'z'].map((n, i) => ({ label: (i ? '' : '5.2 (c) J δq: ') + `δ${n} (mm) =`, ok: x => Math.abs(x - 1000 * H2.pred[i]) < 0.05, w: 5 })),
+  check: v => v.every((x, i) => Math.abs(x - H2.pred[i]) < 1e-4) ? t('นั่นเป็นเมตร ช่องนี้ถามเป็นมิลลิเมตร', 'that is in metres; the boxes ask for millimetres')
+    : v.every((x, i) => Math.abs(x - 1000 * H2.act[i]) < 0.05) ? t('นั่นคือก้าวจริงจากจลนศาสตร์ไปข้างหน้า ช่องนี้ถามค่าที่ทำนายด้วย J δq', 'that is the real step from the forward kinematics; the boxes ask for the prediction J δq')
+    : v.every((x, i) => Math.abs(x - 1000 * HR[i]) < 2) ? t('แปลง 1° และ −1° เป็นเรเดียนก่อนคูณกับ J', 'turn 1° and −1° into radians before multiplying by J') : '' });
+});
+</script>
+</body>
+</html>

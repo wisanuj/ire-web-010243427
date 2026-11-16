@@ -26,14 +26,14 @@ const rateArc = (s, p, rate, i, r = 0.075) => { if (abs(rate) < 1e-9) return; tu
 /* ---- a small step of the joints (old part 1 slide 4: δθ ↔ δX). The arm at q (solid) and at q + δq (ghost); from the tool point:
    the step it really makes (green) and the step the Jacobian predicts, J δq (orange). st: L (1, 2 or 3 links), q, dq, show ('both' | 'act' | 'pred'),
    cols (the prediction built from one arrow per joint, J_j δθ_j), arcs (name the joint steps) ---- */
-SC.step = (st = {}, o = {}) => { const L = st.L || CH5.two.L, q = st.q || CH5.two.q.slice(0, L.length), dq = st.dq || [rad(10), rad(-15)].slice(0, L.length), fk = fkP(L), q2 = q.map((x, i) => x + dq[i]), p = fk(q), p2 = fk(q2);
+SC.step = (st = {}, o = {}) => { const L = st.L || CH5.two.L, q = st.q || CH5.two.q.slice(0, L.length), dq = st.dq || CH5.EX.two.big.dq.slice(0, L.length), fk = fkP(L), q2 = q.map((x, i) => x + dq[i]), p = fk(q), p2 = fk(q2);
   const J = CH5.numJ(fk, q), pred = CH5.mul(J, dq), w = st.w || 1200, h = st.h || 1000, A = lift(p), B = lift(p2), Pd = to(A, pred), show = st.show || 'both';
   const s = scene(st.name || 'step', w, h, planCam(st, [p, p2, [p[0] + pred[0], p[1] + pred[1]], ...jointsP(L, q)], w, h, [[0.3, 0.3, 0.05], 3.4]), o); floor(s, 1.3, [0.3, 0.3]);
   harm(s, L, q2, { al: 0.3, grip: false }); const arm = harm(s, L, q, { grip: false });
   if (st.cols) { let a = [A[0], A[1], A[2] - 0.012]; dq.forEach((d, j) => { if (abs(d) < 1e-9) return; const b = to(a, [J[0][j] * d, J[1][j] * d]); arrow(s, a, b, COL[j], 0.0042); lab(s, mid(a, b), 'J', { sub: String(j + 1), post: ' δθ' + SUB[j], m: 1, c: KEY[j], s: 24, a: 'c', dy: -16 }); a = b; }); }
   if (show !== 'act') { arrow(s, A, Pd, C.o, 0.006); lab(s, Pd, 'J δθ', { m: 1, c: 'o', s: 28, dx: 16, dy: -12 }); }
   if (show !== 'pred') { arrow(s, A, B, C.gr, 0.006); lab(s, B, T('ขยับจริง δX', 'real step δX'), { c: 'gr', s: 24, dx: 16, dy: 22 }); }
-  if (st.arcs !== false) { const jt = jointsP(L, q); let a = 0; L.forEach((l, i) => { const a0 = a + q[i], O = [jt[i][0], jt[i][1], Z0 + UP]; if (abs(dq[i]) > 0.02) { const m = S3.angArc(s, O, [cos(a0), sin(a0), 0], [cos(a0 + dq[i]), sin(a0 + dq[i]), 0], 0.2 - 0.03 * i, COL[i], 0.004); if (m) lab(s, m, 'δθ', { sub: String(i + 1), m: 1, c: KEY[i], s: 24, a: 'c', dx: 20 * cos(a0) , dy: -20 * sin(a0) }); } a = a0; }); }
+  if (st.arcs !== false) { const jt = jointsP(L, q); let a = 0; L.forEach((l, i) => { const a0 = a + q[i], O = [jt[i][0], jt[i][1], Z0 + UP]; if (abs(dq[i]) > 0.02) { const m = S3.angArc(s, O, [cos(a0), sin(a0), 0], [cos(a0 + dq[i]), sin(a0 + dq[i]), 0], 0.3 - 0.08 * i, COL[i], 0.004); if (m) lab(s, m, 'δθ', { sub: String(i + 1), m: 1, c: KEY[i], s: 24, a: 'c', dx: 24 * cos(a0), dy: -24 * sin(a0) }); } a = a0; }); }
   xyz(s, st, arm.pts[0], arm.pts[L.length]); s.info = { p, p2, J, pred, act: [p2[0] - p[0], p2[1] - p[1]] }; return s; };
 
 /* ---- the planar arm named for the direct derivative (old part 1 slide 8): l1, l2, θ1, θ2 and the tool point (x, y). st.xy: its x and y drawn too ---- */
@@ -77,7 +77,7 @@ const armOf = (ex, q) => { if (ex === 'stan') { const rows = CH5.stan.rows(CH5.s
   if (ex === 'rrp') { const rows = CH4.rrp.rows(CH4.rrp.L); return { rows, F: CH3.frames(rows, q, null, RB.trans(0, 0, 0)), V: ARM.rrp }; } const r = CH3.exFrames(ex, q); return { ...r, V: CH3.EXV[ex] }; };
 SC.sv = (st = {}, o = {}) => { const ex = st.ex || 'stan', E = CH5.EX[ex], q = st.q || E.q, qd = st.qd || (ex === 'gp8' ? E.qd6 : E.qd), { rows, F, V } = armOf(ex, q), n = F.length - 1, w = st.w || 1300, h = st.h || 1000, c0 = st.cam || V.cam, vs = st.vs || 0.8, ws = st.ws || 0.16;
   const J0 = CH5.J0(rows, q), vw = CH5.mul(J0, qd.concat([0, 0, 0, 0, 0, 0]).slice(0, J0[0].length)), vv = vw.slice(0, 3), om = vw.slice(3), tip = P(F[n]), Ve = v(tip, vv, vs), We = v(tip, om, ws);
-  const pts = st.fit ? F.map(P).concat([Ve, [V.T0[0] - 0.15, V.T0[1], 0], [V.T0[0] + 0.15, V.T0[1], 0]]) : null, s = scene(st.name || 'sv_' + ex, w, h, pts ? camFit(st, pts, c0[2], c0[3], w, h, { m: 0.2, minD: 2.4 }) : cam(st, c0[0], c0[1], c0[2], c0[3]), o); floor(s, 1.4, [c0[0][0], c0[0][1]]);
+  const pts = st.fit ? F.map(P).concat([Ve, ...(st.om !== false ? [We] : []), [V.T0[0] - 0.15, V.T0[1], 0], [V.T0[0] + 0.15, V.T0[1], 0]]) : null, s = scene(st.name || 'sv_' + ex, w, h, pts ? camFit(st, pts, c0[2], c0[3], w, h, { m: 0.2, minD: 2.4 }) : cam(st, c0[0], c0[1], c0[2], c0[3]), o); floor(s, 1.4, [c0[0][0], c0[0][1]]);
   if (V.base) pedestal(s, [V.T0[0], V.T0[1]], V.T0[2] - 0.02, 0.09);
   CH3.drawDH(s, rows, F, { frames: st.frames || [0], grip: V.grip, soft: V.soft, q, fl: 0.15, ls: 26, labAt: st.labAt });
   if (hypot(...vv) > 1e-9) { arrow(s, tip, Ve, C.gr, 0.007); lab(s, Ve, 'v', { m: 1, c: 'gr', s: 32, dx: 16, dy: -10 }); }
@@ -114,8 +114,9 @@ SC.train = (st = {}, o = {}) => { const X = CH5.EX.train, t = st.t || 0, k = 0.0
    lie on one line and the tool point cannot move along the arm. st: x (the tool point on the X axis, the arm found by inverse kinematics) or q, v (the wanted
    velocity), ring (false: no workspace boundary) ---- */
 SC.sing = (st = {}, o = {}) => { const L = st.L || CH5.two.L, R = L[0] + L[1], q = st.q || (() => { const r = RB.ik2(L[0], L[1], min(R, max(abs(L[0] - L[1]), st.x === undefined ? 0.8 : st.x)), 0, -1); return [r.t1, r.t2]; })(), vd = st.v || [0.1, 0], vs = st.vs || 2.4, js = st.js || 0.32;
-  const w = st.w || 1300, h = st.h || 1000, p = CH5.two.P(L, q), J = CH5.two.J(L, q), det = CH5.two.det(L, q), A = lift(p), s = scene(st.name || 'sing', w, h, cam(st, [0.2, 0.05, 0.05], 4.7, -90, 62), o); floor(s, 1.5, [0.2, 0]);
-  if (st.ring !== false) { tube(s, RB.ring([0, 0, 0.012], [0, 0, 1], R, 0, 2 * PI, 90), s.L[2], 0.0045); lab(s, [R * cos(rad(125)), R * sin(rad(125)), 0.012], T('ขอบปริภูมิทำงาน', 'workspace boundary'), { c: 'b', s: 24, a: 'r', dx: -12, dy: -8 }); }
+  const w = st.w || 1300, h = st.h || 1000, p = CH5.two.P(L, q), J = CH5.two.J(L, q), det = CH5.two.det(L, q), A = lift(p), s = scene(st.name || 'sing', w, h, cam(st, [0.08, -0.04, 0.05], 5.2, -90, 62), o); floor(s, 1.5, [0.1, 0]);
+  if (st.ring !== false) { const a = st.arc ? rad(st.arc) : PI, bnd = Array.from({ length: 91 }, (_, k) => { const t = -a + 2 * a * k / 90; return [R * cos(t), R * sin(t), 0.012]; }), at = st.arc ? rad(st.arc * 0.72) : rad(125);   // st.arc: only the part of the boundary within ±arc degrees of the X axis (the slide figures look closely at the arm)
+    tube(s, bnd, s.L[2], 0.0045); lab(s, [R * cos(at), R * sin(at), 0.012], T('ขอบปริภูมิทำงาน', 'workspace boundary'), { c: 'b', s: 24, a: 'r', dx: -12, dy: -8 }); }
   harm(s, L, q, { grip: false });
   [0, 1].forEach(j => { const b = to([A[0], A[1], A[2] - 0.01 * j], [J[0][j], J[1][j]], js); arrow(s, [A[0], A[1], A[2] - 0.01 * j], b, COL[j], 0.005); lab(s, b, 'J', { sub: String(j + 1), m: 1, c: KEY[j], s: 28, dx: j ? 16 : -16, dy: j ? 20 : -12, a: j ? 'l' : 'r' }); });
   if (hypot(vd[0], vd[1]) > 1e-9) { const V = to(A, vd, vs); arrow(s, A, V, C.gr, 0.0065); lab(s, V, 'v', { m: 1, c: 'gr', s: 32, dx: 16, dy: -8 }); }

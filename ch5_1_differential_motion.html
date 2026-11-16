@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="5.1 — Differential motion">5.1 — การเคลื่อนที่เชิงอนุพันธ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=19">
+<script src="assets/stops.js?v=19"></script><script src="assets/shell.js?v=19"></script>
+<script src="assets/robot.js?v=19"></script><script src="assets/lesson.js?v=19"></script><script src="assets/ch2.js?v=19"></script><script src="assets/ch3.js?v=19"></script><script src="assets/ch4.js?v=19"></script><script src="assets/ch5.js?v=19"></script><script src="assets/scene3d.js?v=19"></script><script src="assets/gl3d.js?v=19"></script><script src="assets/ch2_3d.js?v=19"></script><script src="assets/ch3_3d.js?v=19"></script><script src="assets/ch5_3d.js?v=19"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">การเคลื่อนที่เชิงอนุพันธ์ <span class="en">Differential motion — a small joint step and the step of the tool point</span></h1>
+<h1 data-l="en">Differential motion <span class="en">A small joint step and the step of the tool point</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch5/s06.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 6: a small step of the joints, the real step of the tool point and the step the Jacobian predicts">
+    <figcaption data-l="th">สไลด์บทที่ 5 หน้า 6 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 5 slides, p. 6 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">บทที่ 3–4 ตอบว่าปลายแขน<b>อยู่ที่ไหน</b> บทนี้ถามว่าปลายแขน<b>เคลื่อนที่เร็วแค่ไหนและไปทางไหน</b> เมื่อข้อต่อขยับ จุดเริ่มคือการขยับข้อต่อทีละนิด (δθ) แล้วดูว่าปลายแขนขยับเท่าไร (δX): ข้อต่อแต่ละตัวให้ลูกศรหนึ่งอัน บวกกันได้ก้าวของปลายแขน และยิ่งก้าวเล็ก ค่าที่ทำนายยิ่งตรงกับของจริง หน้านี้ครอบคลุมสไลด์หน้า 5–9 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">Chapters 3–4 tell <b>where</b> the tool point is. This chapter asks <b>how fast it moves and which way</b> when the joints move. We start with a small step of the joints (δθ) and watch the step of the tool point (δX): every joint gives one arrow, the arrows add up to the step of the tool point, and the smaller the step, the better the prediction. This page covers slides pp. 5–9, with <b>one tool (A)</b> and <b>3 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>ข้อต่อเดียว: ปลายก้านยาว r ขยับ \(\delta s = r\,\delta\theta\) (θ เป็นเรเดียน) ในทิศ<b>ตั้งฉากกับก้าน</b></li><li>หลายข้อต่อ: ข้อต่อ j ให้ลูกศร \(J_j\,\delta\theta_j\) ตั้งฉากกับเส้นจากข้อต่อนั้นถึงปลายแขน แล้วบวกกัน: \(\delta X \approx J_1\delta\theta_1 + J_2\delta\theta_2 = J\,\delta\theta\)</li><li>ค่าที่ทำนายตรงกับของจริงเมื่อก้าวเล็ก และตรงพอดีเมื่อก้าวเล็กจนเป็นศูนย์: นั่นคือความเร็ว \(\dot X = J(\theta)\,\dot\theta\)</li><li>J เปลี่ยนตามท่าของแขน ต้องคำนวณใหม่ทุกครั้งที่แขนขยับ</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>One joint: the end of a link of length r moves \(\delta s = r\,\delta\theta\) (θ in radians), <b>at right angles to the link</b>.</li><li>Several joints: joint j gives an arrow \(J_j\,\delta\theta_j\), square to the line from that joint to the tool point; the arrows add: \(\delta X \approx J_1\delta\theta_1 + J_2\delta\theta_2 = J\,\delta\theta\).</li><li>The prediction is good for a small step and exact in the limit of an ever smaller one: that limit is the velocity, \(\dot X = J(\theta)\,\dot\theta\).</li><li>J changes with the pose: it must be worked out again whenever the arm has moved.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>ขยับทีละนิด</a><a href="#ex1"><b>1</b>ข้อต่อเดียว</a><a href="#ex2"><b>2</b>สองข้อต่อ</a><a href="#ex3"><b>3</b>ทำนายแม่นแค่ไหน</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>A small step</a><a href="#ex1"><b>1</b>One joint</a><a href="#ex2"><b>2</b>Two joints</a><a href="#ex3"><b>3</b>How good?</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: ขยับข้อต่อทีละนิด</h2><h2 data-l="en">Tool: step the joints a little</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 5–6 · แขนสองก้าน l₁ = 0.5, l₂ = 0.4 m · ตั้งท่า แล้วเลื่อนขนาดก้าว δθ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, pp. 5–6 · two-link arm l₁ = 0.5, l₂ = 0.4 m · set a pose, then move the step δθ · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="ctl" id="selA"></div><div class="readout" id="roA"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch5/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: why velocities matter; an arm with the velocity of its tool point">
+      <figcaption data-l="th">สไลด์หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 5 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">แขนทึบคือท่าปัจจุบัน แขนโปร่งแสงคือท่าหลังขยับข้อต่อไป δθ ลูกศร<b class="ax-y">สีเขียว</b>คือระยะที่ปลายแขนขยับจริง ลูกศร<b class="ax-a">สีส้ม</b>คือค่าที่ทำนายด้วย J δθ ลองลดขนาดก้าวลง: สองลูกศรจะทับกัน แล้วลองเพิ่มเป็น 30°: ลูกศรสีส้มยังเป็นเส้นตรง แต่ปลายแขนจริงเดินตามส่วนโค้ง</p>
+      <p class="lead" data-l="en">The solid arm is the present pose, the see-through one the pose after the joints have stepped by δθ. The <b class="ax-y">green</b> arrow is the real step of the tool point, the <b class="ax-a">orange</b> one the prediction J δθ. Make the step smaller: the two arrows fall on each other. Then make it 30°: the orange arrow is still a straight line, while the real tool point goes round a curve.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">ข้อต่อเดียว: ปลายก้านเดินตามส่วนโค้ง</h2><h2 data-l="en">One joint: the end moves along an arc</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 7 · ก้านยาว r = 0.6 m · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 7 · a link of length r = 0.6 m · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch5/s07.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 7: one link turning by a small angle; its end moves at right angles to the link">
+      <figcaption data-l="th">สไลด์หน้า 7 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 7 · tap to enlarge</figcaption></figure><div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">สองข้อต่อ: บวกลูกศรของแต่ละข้อต่อ</h2><h2 data-l="en">Two joints: add one arrow per joint</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 8 · ท่า θ = (30°, 45°) ก้าว δθ = (6°, −4°) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 8 · pose θ = (30°, 45°), step δθ = (6°, −4°) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s08.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 8: the predicted step built from one arrow per joint">
+    <figcaption data-l="th">สไลด์หน้า 8 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 8 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div></div>
+    <div class="card solve"><div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">ค่าที่ทำนายแม่นแค่ไหน</h2><h2 data-l="en">How good is the prediction?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 9 · ท่า θ = (30°, 45°) ข้อต่อทั้งสองขยับด้วยมุมเท่ากัน · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 9 · pose θ = (30°, 45°), both joints step by the same angle · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s09.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 9: compare the predicted step with the real one for steps of 1, 5 and 20 degrees">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 9 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 9 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div></div>
+    <div class="card solve"><div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ท่าเปลี่ยน ลูกศรเปลี่ยน</h3>
+    <ol><li>ในเครื่องมือ A ตั้ง δθ = (10°, 0°) แล้วเลื่อน θ₂ จาก 0° ถึง 150°: ก้าวของปลายแขนสั้นลงเมื่อแขนพับ เพราะปลายแขนอยู่ใกล้ฐานมากขึ้น (r สั้นลง)</li><li>ตั้ง θ₂ = 0° (แขนเหยียดตรง) แล้วขยับข้อต่อใดก็ได้: ลูกศรทุกอันตั้งฉากกับแขน ปลายแขนขยับตามแนวแขนไม่ได้เลย นี่คือภาวะเอกฐานของหน้า 5.4</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ทำไมต้องเรเดียน</h3>
+    <ol><li>δs = r δθ ใช้ได้เมื่อ θ เป็นเรเดียนเท่านั้น: 5° = 0.0873 rad ถ้าใส่ 5 ตรง ๆ จะได้ระยะผิดไป 57 เท่า</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 5 หน้า 5–9 (ภาพอยู่ในหน้านี้แล้ว) · Craig 5.1 และ 5.7 · สไลด์เดิม Part 1 หน้า 3–4</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — another pose, other arrows</h3>
+    <ol><li>In tool A set δθ = (10°, 0°) and move θ₂ from 0° to 150°: the step of the tool point gets shorter as the arm folds, because the tool point is closer to the base (a shorter r).</li><li>Set θ₂ = 0° (the arm straight) and step either joint: every arrow is square to the arm, so the tool point cannot move along the arm at all. That is the singularity of page 5.4.</li></ol></div>
+  <div class="card"><h3>Try this 2 — why radians</h3>
+    <ol><li>δs = r δθ holds only with θ in radians: 5° = 0.0873 rad. Putting in 5 gives a distance 57 times too large.</li></ol>
+    <div class="book">Source: chapter 5 slides, pp. 5–9 (the pictures are on this page) · Craig 5.1 and 5.7 · old part 1 slides pp. 3–4</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, rad = RB.rad, deg = RB.deg, T2 = CH5.two, L = T2.L, Q0 = T2.q, OV = CH5.OV, Z = 0.185;
+const mm = (x, n = 1) => u(1000 * x, n), v2 = (a, n = 1) => `(${mm(a[0], n)}, ${mm(a[1], n)})`, hyp = a => Math.hypot(a[0], a[1]);
+/* the step the Jacobian predicts and the step the arm really makes, from pose q by dq */
+const stp = (q, dq) => { const J = T2.J(L, q), pred = CH5.mul(J, dq), p = T2.P(L, q), p2 = T2.P(L, q.map((x, i) => x + dq[i])), act = [p2[0] - p[0], p2[1] - p[1]]; return { J, p, pred, act, err: hyp([act[0] - pred[0], act[1] - pred[1]]) }; };
+const dsl = (el, id, label, S, key, i, lo, hi, onch, val) => ui.slider(el, { id, label, min: lo, max: hi, step: 1, value: val === undefined ? Math.round(deg(S[key][i])) : val, fmt: v => `${v}°`, oninput: v => { S[key][i] = rad(v); onch(); } });
+
+/* ---------- A: step the joints a little ---------- */
+const SA = { L, q: Q0.slice(), dq: [rad(12), rad(10)], xyz: true, fit: true }, roA = document.getElementById('roA');
+const readA = () => { const r = stp(SA.q, SA.dq), a = hyp(r.act); roA.innerHTML = `<div class="term">${t('ทำนาย', 'predicted')} J δθ = ${v2(r.pred)} mm · ${t('ขยับจริง', 'real step')} δX = ${v2(r.act)} mm</div><div class="term">${t('ต่างกัน', 'apart by')} <b>${mm(r.err)} mm</b>${a > 1e-9 ? ` (${u(100 * r.err / a, 1)} % ${t('ของก้าวจริง', 'of the real step')})` : ''}</div>`; };
+const cA = document.getElementById('ctlA'); dsl(cA, 'a1', 'θ₁', SA, 'q', 0, -180, 180, readA); dsl(cA, 'a2', 'θ₂', SA, 'q', 1, -150, 150, readA); dsl(cA, 'a3', 'δθ₁', SA, 'dq', 0, -30, 30, readA); dsl(cA, 'a4', 'δθ₂', SA, 'dq', 1, -30, 30, readA);
+ui.radio(document.getElementById('selA'), [{ id: 'one', label: t('ลูกศรรวม', 'the whole step'), on: true }, { id: 'cols', label: t('แยกเป็นลูกศรของแต่ละข้อต่อ', 'one arrow per joint') }], id => { SA.cols = id === 'cols'; }); readA();
+CH2.sim('cvA', SA, 'step', { aspect: 0.8, maxH: 520 });
+
+/* ---------- 1: one joint ---------- */
+const R1 = 0.6, S1 = { L: [R1], q: [rad(35)], dq: [rad(12)], fit: true }, ro1 = document.getElementById('ro1');
+const read1 = () => { const d = S1.dq[0], chord = 2 * R1 * Math.abs(Math.sin(d / 2)); ro1.innerHTML = `<div class="term">δθ = ${u(deg(d), 0)}° = ${u(d, 4)} rad · r δθ = <b>${mm(Math.abs(R1 * d))} mm</b> · ${t('ระยะตรงที่ปลายก้านขยับจริง', 'the straight distance the end really moves')} = ${mm(chord)} mm</div>`; };
+const c1 = document.getElementById('ctl1'), s1a = dsl(c1, 'b1', 'θ', S1, 'q', 0, -180, 180, read1), s1b = dsl(c1, 'b2', 'δθ', S1, 'dq', 0, -40, 40, read1); read1();
+/* the open step: 1 the angle, 2 the radius the end turns about, 3 the step square to the link */
+S1.ov = (s, st) => { const k = st.step; if (!k) return; const a = st.q[0], d = [Math.cos(a), Math.sin(a), 0], n = [-d[1], d[0], 0], O = [0, 0, Z], E = [R1 * d[0], R1 * d[1], Z];
+  if (k >= 2) OV.dist(s, OV.v(O, n, -0.07), OV.v(E, n, -0.07), 'am', 'r = 0.6 m', { m: 0, s: 24, dy: 26 });
+  if (k === 3) { OV.ref(s, E, n, 0.24, 'pk'); OV.name(s, OV.v(E, n, 0.26), 'pk', t('ตั้งฉากกับก้าน', 'square to the link'), { m: 0, s: 22, a: 'c', dy: -16 }); } };
+CH2.sim('cv1', S1, 'step', { aspect: 0.8, maxH: 480 });
+LS.ask(document.getElementById('ask1'), { fields: [{ label: t('r = 0.6 m, δθ = 5°: ปลายก้านขยับ δs (mm) =', 'r = 0.6 m, δθ = 5°: the end moves δs (mm) ='), ok: x => Math.abs(x - 52.4) < 0.3, w: 5 }],
+  check: v => Math.abs(v[0] - 3000) < 5 ? t('5 ต้องแปลงเป็นเรเดียนก่อน: 5° = 0.0873 rad', 'turn 5° into radians first: 5° = 0.0873 rad') : Math.abs(v[0] - 0.0524) < 0.001 ? t('นั่นเป็นเมตร ช่องนี้ถามเป็นมิลลิเมตร', 'that is in metres; the box asks for millimetres') : '' });
+LS.stepper(document.getElementById('st1'), { onStep: k => { S1.step = k; if (k) { S1.q = [rad(35)]; S1.dq = [rad(5)]; s1a.set(35); s1b.set(5); read1(); } }, steps: [
+  { why: t('<b>มุมเป็นเรเดียน</b>', '<b>The angle in radians</b>'), tex: '\\delta\\theta = 5^\\circ \\times \\frac{\\pi}{180^\\circ} = 0.0873\\ \\text{rad}' },
+  { why: t('<b>ส่วนโค้ง</b> = รัศมี × มุม', '<b>Arc</b> = radius × angle'), tex: '\\delta s = r\\,\\delta\\theta = 0.6 \\times 0.0873 = 0.0524\\ \\text{m}' },
+  { why: t('<b>ทิศ</b>: ตั้งฉากกับก้าน (สัมผัสกับวงกลมที่ปลายก้านวิ่ง) ก้าวเล็กแบบนี้ ส่วนโค้งกับเส้นตรงต่างกันไม่ถึง 0.1 mm', '<b>Direction</b>: square to the link (tangent to the circle its end runs on). For a step this small the arc and the straight line differ by less than 0.1 mm') }],
+  answer: t('δs = 52.4 mm ตั้งฉากกับก้าน · หารด้วยเวลา: v = r θ̇', 'δs = 52.4 mm, square to the link · divide by time: v = r θ̇') });
+
+/* ---------- 2: two joints ---------- */
+const D2 = [rad(6), rad(-4)], S2 = { L, q: Q0.slice(), dq: [rad(10), rad(8)], cols: true, fit: true }, ro2 = document.getElementById('ro2'), X2 = stp(Q0, D2), r1 = hyp(X2.p), j1 = [X2.J[0][0] * D2[0], X2.J[1][0] * D2[0]], j2 = [X2.J[0][1] * D2[1], X2.J[1][1] * D2[1]];
+const read2 = () => { const r = stp(S2.q, S2.dq), a = [r.J[0][0] * S2.dq[0], r.J[1][0] * S2.dq[0]], b = [r.J[0][1] * S2.dq[1], r.J[1][1] * S2.dq[1]];
+  ro2.innerHTML = `<div class="term"><b class="ax-p">J₁ δθ₁ = ${v2(a)} mm</b> · <b style="color:var(--purple)">J₂ δθ₂ = ${v2(b)} mm</b></div><div class="term">${t('รวม', 'sum')} J δθ = <b>${v2(r.pred)} mm</b> · ${t('ขยับจริง', 'real step')} ${v2(r.act)} mm</div>`; };
+const c2 = document.getElementById('ctl2'), s2a = dsl(c2, 'c1', 'δθ₁', S2, 'dq', 0, -30, 30, read2), s2b = dsl(c2, 'c2', 'δθ₂', S2, 'dq', 1, -30, 30, read2); read2();
+/* the open step: 1 joint 1 alone (the line from the base to the tool point), 2 joint 2 alone (link 2), 3 and 4 both arrows together */
+S2.ov = (s, st) => { const k = st.step; if (!k) return; const p = T2.P(L, st.q), a = st.q[0], E = [L[0] * Math.cos(a), L[0] * Math.sin(a), Z], P = [p[0], p[1], Z], O = [0, 0, Z];
+  if (k === 1) OV.dist(s, O, P, 'pk', 'r₁ = ' + u(Math.hypot(p[0], p[1]), 3) + ' m', { m: 0, s: 22, a: 'r', dx: -14, dy: -6 });
+  if (k === 2) OV.dist(s, E, P, 'p', 'l₂ = 0.4 m', { m: 0, s: 22, a: 'l', dx: 16 }); };
+CH2.sim('cv2', S2, 'step', { aspect: 0.8, maxH: 500 });
+LS.ask(document.getElementById('ask2'), { fields: [{ label: t('ก้าวที่ทำนาย: δx (mm) =', 'the predicted step: δx (mm) ='), ok: x => Math.abs(x - 1000 * X2.pred[0]) < 0.4, w: 5 }, { label: 'δy (mm) =', ok: x => Math.abs(x - 1000 * X2.pred[1]) < 0.4, w: 5 }] });
+LS.stepper(document.getElementById('st2'), { onStep: k => { S2.step = k; S2.q = Q0.slice(); S2.dq = k === 1 ? [D2[0], 0] : k === 2 ? [0, D2[1]] : D2.slice(); if (k) { s2a.set(Math.round(deg(S2.dq[0]))); s2b.set(Math.round(deg(S2.dq[1]))); } read2(); }, steps: [
+  { why: t('<b>ข้อต่อ 1 อย่างเดียว</b>: ทั้งแขนหมุนรอบฐาน รัศมีคือระยะจากฐานถึงปลายแขน ทิศตั้งฉากกับเส้นนั้น คือ (−y, x)/r₁', '<b>Joint 1 alone</b>: the whole arm swings about the base. The radius is the distance base → tool point, the direction square to that line: (−y, x)/r₁'),
+    tex: `\\begin{aligned} r_1 &= \\sqrt{${u(X2.p[0], 4)}^2 + ${u(X2.p[1], 4)}^2} = ${u(r1, 4)}\\ \\text{m} \\\\ r_1\\,\\delta\\theta_1 &= ${u(r1, 4)} \\times ${u(D2[0], 4)} = ${mm(r1 * D2[0])}\\ \\text{mm} \\\\ J_1\\delta\\theta_1 &= ${v2(j1)}\\ \\text{mm} \\end{aligned}` },
+  { why: t('<b>ข้อต่อ 2 อย่างเดียว</b>: เฉพาะก้านที่ 2 หมุนรอบข้อศอก รัศมี l₂ มุมติดลบจึงหมุนตามเข็ม', '<b>Joint 2 alone</b>: only link 2 swings, about the elbow, with radius l₂. The angle is negative, so it turns clockwise'),
+    tex: `\\begin{aligned} l_2\\,\\delta\\theta_2 &= 0.4 \\times (${u(D2[1], 4)}) = ${mm(L[1] * D2[1])}\\ \\text{mm} \\\\ J_2\\delta\\theta_2 &= ${v2(j2)}\\ \\text{mm} \\end{aligned}` },
+  { why: t('<b>บวกลูกศรทั้งสอง</b>', '<b>Add the two arrows</b>'), tex: `\\delta X \\approx J_1\\delta\\theta_1 + J_2\\delta\\theta_2 = ${v2(X2.pred)}\\ \\text{mm}` },
+  { why: t('<b>เทียบกับของจริง</b> (จลนศาสตร์ไปข้างหน้าที่ท่า 36°, 41° ลบท่าเดิม)', '<b>Compare with the real step</b> (forward kinematics at 36°, 41° minus the old pose)'), tex: `\\delta X_{\\text{real}} = ${v2(X2.act)}\\ \\text{mm} \\quad (\\text{${mm(X2.err)} mm apart})` }],
+  answer: t(`ทำนาย ${v2(X2.pred)} mm ของจริง ${v2(X2.act)} mm ต่างกัน ${mm(X2.err)} mm · J₁ และ J₂ คือคอลัมน์ของจาโคเบียน (หน้า 5.2)`, `predicted ${v2(X2.pred)} mm, real ${v2(X2.act)} mm, ${mm(X2.err)} mm apart · J₁ and J₂ are the columns of the Jacobian (page 5.2)`) });
+
+/* ---------- 3: how good is the prediction ---------- */
+const S3s = { L, q: Q0.slice(), dq: [rad(10), rad(10)], fit: true }, ro3 = document.getElementById('ro3'), X5 = stp(Q0, [rad(5), rad(5)]), row = d => { const r = stp(Q0, [rad(d), rad(d)]); return `<tr><td>${d}°</td><td>${mm(hyp(r.pred))}</td><td>${mm(hyp(r.act))}</td><td>${mm(r.err)}</td><td>${u(100 * r.err / hyp(r.act), 1)} %</td></tr>`; };
+const read3 = () => { const r = stp(S3s.q, S3s.dq); ro3.innerHTML = `<div class="term">|J δθ| = ${mm(hyp(r.pred))} mm · |δX| = ${mm(hyp(r.act))} mm · ${t('ต่างกัน', 'apart by')} <b>${mm(r.err)} mm (${u(100 * r.err / Math.max(1e-9, hyp(r.act)), 1)} %)</b></div>`; };
+const s3 = ui.slider(document.getElementById('ctl3'), { id: 'd3', label: t('ก้าวของข้อต่อทั้งสอง', 'step of both joints'), min: 1, max: 30, step: 1, value: 10, fmt: v => `${v}°`, oninput: v => { S3s.dq = [rad(v), rad(v)]; read3(); } }); read3();   // starts away from the example: the readout must not show the answer the box asks for (the stepper puts the example back)
+S3s.ov = (s, st) => { const k = st.step; if (k !== 3) return; const p = T2.P(L, st.q); OV.name(s, [p[0], p[1], Z], 'ink', t('สองลูกศรห่างกัน ', 'the two arrows are ') + mm(stp(st.q, st.dq).err) + ' mm' + t('', ' apart'), { m: 0, s: 22, a: 'r', dx: -30, dy: 30 }); };
+CH2.sim('cv3', S3s, 'step', { aspect: 0.8, maxH: 500 });
+LS.ask(document.getElementById('ask3'), { fields: [{ label: t('ก้าว 5°: ปลายแขนขยับจริง |δX| (mm) =', 'a 5° step: the real step |δX| (mm) ='), ok: x => Math.abs(x - 1000 * hyp(X5.act)) < 0.6, w: 5 }, { label: t('ค่าที่ทำนายคลาดไป (%) =', 'the prediction is off by (%) ='), ok: x => Math.abs(x - 100 * X5.err / hyp(X5.act)) < 0.4, w: 5 }] });
+LS.stepper(document.getElementById('st3'), { onStep: k => { S3s.step = k; S3s.show = k === 1 ? 'pred' : k === 2 ? 'act' : 'both'; if (k) { S3s.q = Q0.slice(); S3s.dq = [rad(5), rad(5)]; s3.set(5); read3(); } }, steps: [
+  { why: t('<b>ทำนาย</b>: ข้อต่อทั้งสองขยับ 5° = 0.0873 rad ใช้ J ของท่านี้ (หาในหน้า 5.2)', '<b>Predict</b>: both joints step by 5° = 0.0873 rad; use the J of this pose (found on page 5.2)'),
+    tex: `\\begin{aligned} J\\,\\delta\\theta &= ${CH2.texM(X5.J, 3)} \\begin{bmatrix} 0.0873 \\\\ 0.0873 \\end{bmatrix} \\\\ &= ${v2(X5.pred)}\\ \\text{mm}, \\quad |J\\,\\delta\\theta| = ${mm(hyp(X5.pred))}\\ \\text{mm} \\end{aligned}` },
+  { why: t('<b>ของจริง</b>: จลนศาสตร์ไปข้างหน้าที่ (35°, 50°) ลบที่ (30°, 45°)', '<b>The real step</b>: forward kinematics at (35°, 50°) minus at (30°, 45°)'), tex: `\\delta X = ${v2(X5.act)}\\ \\text{mm}, \\quad |\\delta X| = ${mm(hyp(X5.act))}\\ \\text{mm}` },
+  { why: t('<b>ต่างกัน</b> เท่าไรเมื่อเทียบกับก้าวจริง', '<b>How far apart</b>, as a share of the real step'), tex: `\\frac{${mm(X5.err)}}{${mm(hyp(X5.act))}} = ${u(100 * X5.err / hyp(X5.act), 1)}\\ \\%` },
+  { why: t('<b>ทุกขนาดก้าว</b>: ยิ่งเล็กยิ่งตรง', '<b>Every step size</b>: the smaller, the closer'), body: () => `<div class="tscroll"><table class="dhtab sols"><tr><th>${t('ก้าว', 'step')}</th><th>|J δθ| (mm)</th><th>|δX| (mm)</th><th>${t('ต่างกัน (mm)', 'apart (mm)')}</th><th>${t('คลาด', 'off by')}</th></tr>${[1, 5, 10, 20, 30].map(row).join('')}</table></div>` }],
+  answer: t(`ก้าว 5°: ขยับจริง ${mm(hyp(X5.act))} mm ค่าที่ทำนายคลาด ${u(100 * X5.err / hyp(X5.act), 1)} % · ก้าว 1° คลาดเพียง 1.4 % · เมื่อก้าวเล็กจนเป็นศูนย์ค่าที่ทำนายตรงพอดี: Ẋ = J θ̇`, `A 5° step: the real step is ${mm(hyp(X5.act))} mm and the prediction is off by ${u(100 * X5.err / hyp(X5.act), 1)} % · a 1° step is off by only 1.4 % · in the limit of an ever smaller step the prediction is exact: Ẋ = J θ̇`) });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="5.3 — The basic Jacobian: linear and angular velocity">5.3 — จาโคเบียนพื้นฐาน: ความเร็วเชิงเส้นและเชิงมุม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=19">
+<script src="assets/stops.js?v=19"></script><script src="assets/shell.js?v=19"></script>
+<script src="assets/robot.js?v=19"></script><script src="assets/lesson.js?v=19"></script><script src="assets/ch2.js?v=19"></script><script src="assets/ch3.js?v=19"></script><script src="assets/ch4.js?v=19"></script><script src="assets/ch5.js?v=19"></script><script src="assets/scene3d.js?v=19"></script><script src="assets/gl3d.js?v=19"></script><script src="assets/ch2_3d.js?v=19"></script><script src="assets/ch3_3d.js?v=19"></script><script src="assets/ch5_3d.js?v=19"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">จาโคเบียนพื้นฐาน: ความเร็วเชิงเส้นและเชิงมุม <span class="en">The basic Jacobian — linear and angular velocity</span></h1>
+<h1 data-l="en">The basic Jacobian: linear and angular velocity <span class="en">From the transform to v and ω, and the notation for velocities</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch5/s19.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 19: the transform of the last frame with its position column and nine direction cosines; describing the turning by the angular velocity gives the basic Jacobian">
+    <figcaption data-l="th">สไลด์บทที่ 5 หน้า 19 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 5 slides, p. 19 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หน้า 5.2 หาจาโคเบียนของแขนในระนาบด้วยการหาอนุพันธ์ของ x, y โดยตรง สำหรับแขนในปริภูมิ ส่วนตำแหน่งของจาโคเบียนได้ด้วยวิธีเดียวกันจาก<b>คอลัมน์ 4 ของ \({}^0_NT\)</b> แต่ส่วนทิศของ \({}^0_NT\) เป็นโคไซน์แสดงทิศ 9 ตัว ซึ่งใช้ไม่สะดวก (9 แถวสำหรับองศาอิสระเพียง 3) จึงบอกการหมุนด้วย<b>ความเร็วเชิงมุม ω</b> (ตัวเลข 3 ตัว) แทน ได้ \((v, \omega) = J_0\,\dot q\) เรียกว่า<b>จาโคเบียนพื้นฐาน</b> ซึ่งไม่ขึ้นกับวิธีเขียนตำแหน่งและทิศ ถ้าต้องการอัตราของพิกัดแบบอื่นจึงค่อยคูณด้วย \(E_P\) และ \(E_R\) ท้ายหน้าเป็นสัญกรณ์ของความเร็วแบบ Craig ซึ่งใช้ต่อทั้งบทที่ 6 หน้านี้ครอบคลุมสไลด์หน้า 19–25 และ 27–29 มี <b>5 โจทย์</b></p>
+    <p class="sub" data-l="en">Page 5.2 found the Jacobian of a planar arm by differentiating x and y. For an arm in space the position part comes the same way, from <b>column 4 of \({}^0_NT\)</b>. The orientation part of \({}^0_NT\) is nine direction cosines, which are awkward (nine rows for only three degrees of freedom), so the turning is described by the <b>angular velocity ω</b> (three numbers) instead: \((v, \omega) = J_0\,\dot q\) is the <b>basic Jacobian</b>, which does not depend on how position and orientation are written. The rates of any other coordinates follow by multiplying with \(E_P\) and \(E_R\). The page ends with Craig's notation for velocities, used all through chapter 6. It covers slides pp. 19–25 and 27–29, with <b>5 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>จาโคเบียนของตำแหน่ง = อนุพันธ์ของ<b>คอลัมน์ 4 ของ \({}^0_NT\)</b> เทียบตัวแปรข้อต่อทีละตัว: \(\dot x_P = J_v(q)\,\dot q\)</li><li>ข้อต่อของข้อมือ (θ₄–θ₆) หมุนแล้วจุดข้อมือไม่ขยับ: สามคอลัมน์นั้นของ \(J_v\) เป็น<b>ศูนย์</b></li><li>จาโคเบียนพื้นฐาน: \(\begin{bmatrix} v \\ \omega \end{bmatrix} = J_0(q)\,\dot q\) ขนาด 6 × n · v คือความเร็วเชิงเส้นของจุดกำเนิดเฟรมปลายแขน ω คือความเร็วเชิงมุมของก้านสุดท้าย</li><li>เขียนตำแหน่งหรือทิศแบบอื่น: \(\dot x_P = E_P\,v\) และ \(\dot x_R = E_R\,\omega\) · มุมออยเลอร์ใช้ไม่ได้ที่ \(\sin\beta = 0\) ทั้งที่แขนยังปกติ</li><li>สัญกรณ์: \({}^A({}^BV_Q) = {}^A_BR\,{}^BV_Q\) ตัวยกนำด้านนอกบอกเฟรมที่ใช้<b>เขียน</b> ด้านในบอกเฟรมที่ใช้<b>มอง</b>การเคลื่อนที่</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>The position Jacobian is the derivative of <b>column 4 of \({}^0_NT\)</b> by one joint variable at a time: \(\dot x_P = J_v(q)\,\dot q\).</li><li>The wrist joints (θ₄–θ₆) do not move the wrist point: those three columns of \(J_v\) are <b>zero</b>.</li><li>The basic Jacobian: \(\begin{bmatrix} v \\ \omega \end{bmatrix} = J_0(q)\,\dot q\), 6 × n · v is the linear velocity of the origin of the tool frame, ω the angular velocity of the last link.</li><li>Other ways to write a position or an orientation: \(\dot x_P = E_P\,v\) and \(\dot x_R = E_R\,\omega\) · Euler angles fail at \(\sin\beta = 0\), although the arm itself is fine.</li><li>Notation: \({}^A({}^BV_Q) = {}^A_BR\,{}^BV_Q\). The outer leading superscript is the frame the numbers are <b>written in</b>, the inner one the frame the motion is <b>watched from</b>.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>แขน Stanford</a><a href="#ex2"><b>2</b>GP8</a><a href="#ex3"><b>3</b>ω และ J₀</a><a href="#ex4"><b>4</b>E<sub>P</sub> และ E<sub>R</sub></a><a href="#ex5"><b>5</b>รถไฟกับรถยนต์</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>Stanford arm</a><a href="#ex2"><b>2</b>GP8</a><a href="#ex3"><b>3</b>ω and J₀</a><a href="#ex4"><b>4</b>E<sub>P</sub> and E<sub>R</sub></a><a href="#ex5"><b>5</b>Train and car</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">แขน Stanford: จาโคเบียนของตำแหน่ง</h2><h2 data-l="en">A Stanford arm: the position Jacobian</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 20 · L₂ = 0.15 m · ท่า q = (30°, 60°, 0.5 m) · อัตรา q̇ = (0.3 rad/s, −0.2 rad/s, 0.1 m/s) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 20 · L₂ = 0.15 m · pose q = (30°, 60°, 0.5 m) · rates q̇ = (0.3 rad/s, −0.2 rad/s, 0.1 m/s) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s20.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 20: the first three joints of a Stanford arm and the position of its wrist point; find the 3 by 6 position Jacobian">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 20 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 20 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">ลูกศร<b class="ax-y">สีเขียว</b>คือความเร็ว v ของจุดข้อมือ (ลูกศรยาว 0.08 m แทนความเร็ว 0.1 m/s) ตัวเลข x, y, z ข้างจุดสีชมพูคือ x<sub>P</sub> เทียบเฟรม {0} ลองตั้งอัตราให้เหลือข้อต่อเดียว: ลูกศรที่เห็นคือคอลัมน์ของข้อต่อนั้นคูณกับอัตราของมัน</div>
+      <div class="simnote" data-l="en">The <b class="ax-y">green</b> arrow is the velocity v of the wrist point (0.08 m of arrow for 0.1 m/s). The x, y, z beside the pink dot are x<sub>P</sub> in frame {0}. Leave only one rate non-zero: the arrow you then see is that joint's column times its rate.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">สามข้อต่อแรกของแขน Stanford: หมุน θ₁ รอบแกนตั้ง ไหล่เยื้องออกไป L₂ = 0.15 m หมุน θ₂ แล้วเลื่อน d₃ แขนอยู่ที่ท่า \(q = (30^\circ,\ 60^\circ,\ 0.5\ \text{m})\) และข้อต่อเคลื่อนที่ด้วย \(\dot q = (0.3\ \text{rad/s},\ -0.2\ \text{rad/s},\ 0.1\ \text{m/s})\) หาจาโคเบียนของตำแหน่ง \(J_v\) และความเร็ว \(v\) ของจุดข้อมือ</div>
+        <div data-l="en">The first three joints of a Stanford arm: a turn θ₁ about the vertical, a shoulder offset L₂ = 0.15 m, a turn θ₂ and a slide d₃. The arm is at \(q = (30^\circ,\ 60^\circ,\ 0.5\ \text{m})\) and its joints move at \(\dot q = (0.3\ \text{rad/s},\ -0.2\ \text{rad/s},\ 0.1\ \text{m/s})\). Find the position Jacobian \(J_v\) and the velocity \(v\) of the wrist point.</div></div>
+      <div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">GP8 ของภาควิชา: จุดศูนย์กลางข้อมือ</h2><h2 data-l="en">The department's GP8: the wrist centre</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 21 · a₁ = 0.04, a₂ = 0.345, a₃ = 0.04, d₄ = 0.34 m · ท่า θ = (30°, −60°, 20°) · อัตรา θ̇ = (0.5, −0.3, 0.4) rad/s · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 21 · a₁ = 0.04, a₂ = 0.345, a₃ = 0.04, d₄ = 0.34 m · pose θ = (30°, −60°, 20°) · rates θ̇ = (0.5, −0.3, 0.4) rad/s · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s21.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 21: the Yaskawa GP8 with the velocity of its wrist centre; find the three non-zero columns of the position Jacobian and v">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 21 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 21 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">ลูกศร<b class="ax-y">สีเขียว</b>คือความเร็ว v ของจุดศูนย์กลางข้อมือ θ₄–θ₆ ไม่มีแถบเลื่อน เพราะหมุนข้อมือแล้วจุดนี้ไม่ขยับ r คือระยะในแนวราบจากแกน 1 และ p<sub>z</sub> คือความสูงจากเฟรม {0} (ซึ่งอยู่ระดับไหล่)</div>
+      <div class="simnote" data-l="en">The <b class="ax-y">green</b> arrow is the velocity v of the wrist centre. θ₄–θ₆ have no sliders: turning the wrist does not move this point. r is the horizontal distance from axis 1 and p<sub>z</sub> the height above frame {0} (which sits level with the shoulder).</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขน Yaskawa GP8 ของภาควิชา ใช้ตาราง DH (Denavit–Hartenberg) ของบทที่ 3 แขนอยู่ที่ท่า \(\theta = (30^\circ,\ -60^\circ,\ 20^\circ)\) และสามข้อต่อแรกหมุนด้วย \(\dot\theta = (0.5,\ -0.3,\ 0.4)\ \text{rad/s}\) หาสามคอลัมน์ที่ไม่เป็นศูนย์ของ \(J_v\) และความเร็ว \(v\) ของจุดศูนย์กลางข้อมือ</div>
+        <div data-l="en">The department's Yaskawa GP8, with the DH (Denavit–Hartenberg) table of chapter 3. The arm is at \(\theta = (30^\circ,\ -60^\circ,\ 20^\circ)\) and its first three joints turn at \(\dot\theta = (0.5,\ -0.3,\ 0.4)\ \text{rad/s}\). Find the three non-zero columns of \(J_v\) and the velocity \(v\) of the wrist centre.</div></div>
+      <div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">ความเร็วเชิงมุมและจาโคเบียนพื้นฐาน</h2><h2 data-l="en">Angular velocity and the basic Jacobian</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 22 · GP8 ที่ท่า (30°, −60°, 20°, 40°, 50°, −30°) · อัตรา q̇ = (0.5, −0.3, 0.4, 1.0, −0.5, 0.8) rad/s · ตารางใต้รูปคือ J₀ ของท่านี้ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, p. 22 · the GP8 at (30°, −60°, 20°, 40°, 50°, −30°) · rates q̇ = (0.5, −0.3, 0.4, 1.0, −0.5, 0.8) rad/s · the table under the picture is J₀ of this pose · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">ท่าของแขนคงที่ เลื่อนได้เฉพาะอัตราของข้อต่อ ลูกศร<b class="ax-y">สีเขียว</b>คือ v ลูกศร<b style="color:var(--purple)">สีม่วง</b>คือ ω: ชี้ตามแกนที่ก้านสุดท้ายกำลังหมุนรอบ (กฎมือขวา) และยาวตามอัตราการหมุน (0.16 m แทน 1 rad/s) ทั้งสองเขียนในเฟรม {0}</div>
+      <div class="simnote" data-l="en">The pose is fixed; only the joint rates move. The <b class="ax-y">green</b> arrow is v, the <b style="color:var(--purple)">purple</b> one ω: it points along the axis the last link is turning about (right-hand rule) and its length is the rate of turning (0.16 m for 1 rad/s). Both are written in frame {0}.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch5/s22.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 22: the GP8 with the linear velocity v and the angular velocity omega at its wrist centre; v and omega stacked equal J0 times the joint rates">
+      <figcaption data-l="th">สไลด์หน้า 22 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 22 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th"><b>(ก)</b> แขนสองก้านในระนาบของหน้า 5.2 หมุนด้วย θ̇ = (0.5, −1.0) rad/s ก้านสุดท้ายมีความเร็วเชิงมุมรอบแกน Z เท่าไร</p>
+      <p class="lead" data-l="en"><b>(a)</b> The planar two-link arm of page 5.2 turns at θ̇ = (0.5, −1.0) rad/s. What is the angular velocity of its last link about Z?</p>
+      <div id="ask3a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> ข้อต่อใดของ GP8 ทำให้ความเร็วเชิงเส้น v ของจุดศูนย์กลางข้อมือเปลี่ยน</p>
+      <p class="lead" data-l="en"><b>(b)</b> Which joints of the GP8 change the linear velocity v of the wrist centre?</p>
+      <div id="ask3b"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">เขียนตำแหน่งและทิศแบบอื่น</h2><h2 data-l="en">Other ways to write a position and an orientation</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 23–25 · P = (0.3, 0.4, 0.25) m · v = (0.1, −0.05, 0.02) m/s · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, pp. 23–25 · P = (0.3, 0.4, 0.25) m · v = (0.1, −0.05, 0.02) m/s · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s25.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 25: a point in cylindrical coordinates with its velocity arrow; find the rates of rho, theta and z">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 25 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 25 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="ctl" id="sel4"></div><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div>
+      <div class="simnote" data-l="th">จุด P และลูกศร v <b class="ax-y">สีเขียว</b>เป็นของเดิมเสมอ (ลูกศรยาว 0.16 m แทน 0.1 m/s) ที่เปลี่ยนคือวิธีเขียนตำแหน่ง ลูกศรสั้นสามอันที่จุด P คือทิศที่พิกัดแต่ละตัวเพิ่มขึ้น φ ของพิกัดทรงกลมวัดจากแกน Z</div>
+      <div class="simnote" data-l="en">The point P and the <b class="ax-y">green</b> arrow v are always the same (0.16 m of arrow for 0.1 m/s); what changes is how the position is written. The three short arrows at P are the directions in which each coordinate grows. The φ of spherical coordinates is measured from the Z axis.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">จุดหนึ่งอยู่ที่ \(P = (0.3,\ 0.4,\ 0.25)\ \text{m}\) และเคลื่อนที่ด้วย \(v = (0.1,\ -0.05,\ 0.02)\ \text{m/s}\) หาอัตราการเปลี่ยนของพิกัดทรงกระบอก \((\dot\rho,\ \dot\theta,\ \dot z)\) ของจุดนี้</div>
+        <div data-l="en">A point is at \(P = (0.3,\ 0.4,\ 0.25)\ \text{m}\) and moves with \(v = (0.1,\ -0.05,\ 0.02)\ \text{m/s}\). Find the rates of its cylindrical coordinates \((\dot\rho,\ \dot\theta,\ \dot z)\).</div></div>
+      <div id="ask4"></div><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex5">
+  <div class="prob-head"><span class="prob-no">5</span><div><h2 data-l="th">สัญกรณ์ของความเร็ว: รถไฟกับรถยนต์</h2><h2 data-l="en">Notation for velocities: a train and a car</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 5 หน้า 27–29 (Craig 5.2 ตัวอย่าง 5.1 เปลี่ยนเป็น km/h) · รถไฟ 100 km/h รถยนต์ 30 km/h · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 5 slides, pp. 27–29 (Craig 5.2, example 5.1, in km/h) · the train at 100 km/h, the car at 30 km/h · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch5/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: a train with frame T at 100 kilometres per hour and a car with frame C at 30, both driving along the X axis of the fixed frame U; find three velocities">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 29 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 29 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv5"></canvas><div class="ctl" id="ctl5"></div><div class="readout" id="ro5"></div>
+      <div class="simnote" data-l="th">เลื่อนเวลา: ทั้งสองคันวิ่งไปตามแกน X ของเฟรม {U} ซึ่งติดกับพื้น ลูกศร<b class="ax-y">สีเขียว</b>คือความเร็วเมื่อมองจากพื้น เฟรม {T} ติดกับรถไฟและขนานกับ {U} เฟรม {C} ติดกับรถยนต์ โดยแกน Y ชี้ไปข้างหน้า</div>
+      <div class="simnote" data-l="en">Move the time: both vehicles drive along the X axis of frame {U}, which is fixed to the ground. The <b class="ax-y">green</b> arrows are the velocities watched from the ground. Frame {T} rides on the train and is parallel to {U}; frame {C} rides on the car with its Y axis pointing forward.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">สัญกรณ์ของ Craig (สไลด์หน้า 27–28)</div><div class="gl" data-l="en">Craig's notation (slides pp. 27–28)</div>
+        <div data-l="th">\({}^BV_Q = \dfrac{{}^Bd}{dt}\,{}^BQ\) คือความเร็วของจุด Q เมื่อ<b>มองจาก</b>เฟรม {B}: คนที่นั่งอยู่บนรถไฟมีความเร็วเป็นศูนย์เมื่อมองจากรถไฟ แต่เป็น 100 km/h เมื่อมองจากพื้น</div>
+        <div data-l="th" style="margin-top:6px">\({}^A({}^BV_Q) = {}^A_BR\;{}^BV_Q\): ตัวยกนำด้าน<b>นอก</b> (A) บอกเฟรมที่ใช้<b>เขียน</b>ตัวเลข ตัวยกนำด้าน<b>ใน</b> (B) บอกเฟรมที่ใช้<b>มอง</b>การเคลื่อนที่ ความเร็วเป็นเวกเตอร์อิสระ การเปลี่ยนเฟรมที่เขียนจึงใช้เมทริกซ์การหมุนอย่างเดียว ไม่ต้องบวกตำแหน่งของจุดกำเนิด</div>
+        <div data-l="th" style="margin-top:6px">\(v_C = {}^UV_{CORG}\) (ตัวพิมพ์เล็ก) คือความเร็วของจุดกำเนิดของเฟรม {C} (CORG ย่อจาก origin of {C}) เมื่อมองจากเฟรมอ้างอิง {U} ที่ติดกับพื้น ในโจทย์นี้ \({}^U_CR = R_Z(-90^\circ)\) หา <b>(ก)</b> \({}^U\dfrac{d}{dt}\,{}^UP_{CORG}\) <b>(ข)</b> \({}^C({}^UV_{TORG})\) <b>(ค)</b> \({}^C({}^TV_{CORG})\)</div>
+        <div data-l="en">\({}^BV_Q = \dfrac{{}^Bd}{dt}\,{}^BQ\) is the velocity of the point Q as <b>watched from</b> frame {B}: a passenger sitting in the train has velocity zero watched from the train, and 100 km/h watched from the ground.</div>
+        <div data-l="en" style="margin-top:6px">\({}^A({}^BV_Q) = {}^A_BR\;{}^BV_Q\): the <b>outer</b> leading superscript (A) is the frame the numbers are <b>written in</b>, the <b>inner</b> one (B) the frame the motion is <b>watched from</b>. A velocity is a free vector, so changing the frame it is written in takes a rotation matrix only; no origin is added.</div>
+        <div data-l="en" style="margin-top:6px">\(v_C = {}^UV_{CORG}\) (a small letter) is the velocity of the origin of frame {C} (CORG: the origin of {C}) watched from the reference frame {U} fixed to the ground. Here \({}^U_CR = R_Z(-90^\circ)\). Find <b>(a)</b> \({}^U\dfrac{d}{dt}\,{}^UP_{CORG}\), <b>(b)</b> \({}^C({}^UV_{TORG})\) and <b>(c)</b> \({}^C({}^TV_{CORG})\).</div></div>
+      <p class="lead" data-l="th"><b>(ข)</b> องค์ประกอบ x, y, z ของ \({}^C({}^UV_{TORG})\) เป็น km/h (TORG คือจุดกำเนิดของเฟรม {T})</p>
+      <p class="lead" data-l="en"><b>(b)</b> The x, y, z components of \({}^C({}^UV_{TORG})\) in km/h (TORG: the origin of frame {T})</p>
+      <div id="ask5b"></div>
+      <p class="lead" data-l="th"><b>(ค)</b> องค์ประกอบ x, y, z ของ \({}^C({}^TV_{CORG})\) เป็น km/h</p>
+      <p class="lead" data-l="en"><b>(c)</b> The x, y, z components of \({}^C({}^TV_{CORG})\) in km/h</p>
+      <div id="ask5c"></div><div id="st5"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — คอลัมน์ทีละตัว</h3>
+    <ol><li>โจทย์ 2: ตั้ง θ̇₂ = θ̇₃ = 0 ให้เหลือแต่ θ̇₁ แล้วเลื่อนมุมของข้อต่อ: v อยู่ในแนวราบเสมอ (v<sub>z</sub> = 0) และมีขนาด |r θ̇₁| พับแขนเข้าหาแกน 1 (r เล็กลง) v ก็เล็กลงตาม</li><li>โจทย์ 3: ตั้งอัตราเป็น 0 ทุกตัว ยกเว้นตัวเดียว: ω ชี้ตามแกนของข้อต่อนั้น (สวนทางถ้าอัตราติดลบ) และมีขนาดเท่ากับอัตราที่ตั้ง ลองทีละข้อต่อจนครบทั้ง 6 แล้วเทียบกับครึ่งล่างของตาราง J₀</li><li>โจทย์ 3: ตั้งเฉพาะ θ̇₄, θ̇₅, θ̇₆: ลูกศร v หายไป เหลือแต่ ω นี่คือบล็อกศูนย์ 3 × 3 ที่มุมขวาบนของ J₀</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — มองจากเฟรมไหน เขียนในเฟรมไหน</h3>
+    <ol><li>โจทย์ 5: ถ้ารถยนต์เร่งจนเร็วเท่ารถไฟ (100 km/h) ข้อ (ค) จะได้เท่าไร ทายก่อนคำนวณ: ได้ (0, 0, 0) เพราะมองจากรถไฟแล้วรถยนต์อยู่นิ่ง ส่วนข้อ (ข) ยังเป็น (0, 100, 0) เพราะไม่เกี่ยวกับความเร็วของรถยนต์</li><li>โจทย์ 4: ตั้ง v = (0.06, 0.08, 0) m/s ซึ่งชี้ออกจากแกน Z ตรง ๆ: ได้ ρ̇ = 0.1 m/s และ θ̇ = 0 แล้วเปลี่ยนเป็นพิกัดทรงกลม: ตัวเลขเปลี่ยน แต่ลูกศร v ยังเป็นอันเดิม</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 5 หน้า 19–25 และ 27–29 · Craig 5.2 และ 5.7 · เอกสารประกอบการสอนของ Khatib (จาโคเบียนพื้นฐาน, E<sub>P</sub>, E<sub>R</sub>) · สไลด์เดิม Part 1 หน้า 11–14 และ Part 2 หน้า 3–15</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — one column at a time</h3>
+    <ol><li>Problem 2: set θ̇₂ = θ̇₃ = 0 so that only θ̇₁ is left, then move the joint angles: v stays horizontal (v<sub>z</sub> = 0) and its size is |r θ̇₁|. Fold the arm in towards axis 1 (a smaller r) and v gets smaller too.</li><li>Problem 3: set every rate to 0 except one: ω points along that joint's axis (against it for a negative rate) and its size is the rate you set. Try all six joints in turn and compare with the lower half of the J₀ table.</li><li>Problem 3: set only θ̇₄, θ̇₅, θ̇₆: the arrow v disappears and only ω is left. That is the 3 × 3 block of zeros at the top right of J₀.</li></ol></div>
+  <div class="card"><h3>Try this 2 — watched from which frame, written in which</h3>
+    <ol><li>Problem 5: if the car speeds up to the train's 100 km/h, what does (c) become? Guess before you calculate: (0, 0, 0), because watched from the train the car stands still. Answer (b) is still (0, 100, 0): it has nothing to do with the car's speed.</li><li>Problem 4: set v = (0.06, 0.08, 0) m/s, which points straight away from the Z axis: ρ̇ = 0.1 m/s and θ̇ = 0. Then switch to spherical coordinates: the numbers change, the arrow v does not.</li></ol>
+    <div class="book">Source: chapter 5 slides, pp. 19–25 and 27–29 · Craig 5.2 and 5.7 · Khatib's lecture notes (basic Jacobian, E<sub>P</sub>, E<sub>R</sub>) · old part 1 slides pp. 11–14 and part 2 slides pp. 3–15</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, dn = RB.d, rad = RB.rad, deg = RB.deg, X = CH5.EX, OV = CH5.OV, G = CH3.EX.gp8, KEY = ['pk', 'p', 'am'], SUB = '₁₂₃₄₅₆';
+const el = id => document.getElementById(id), norm = a => Math.hypot(...a), near3 = (a, b, tol) => a.every((x, i) => Math.abs(x - b[i]) < tol);
+const fx = (x, n = 3) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n), v3 = (a, n = 3) => `(${a.map(x => fx(x, n)).join(', ')})`;   // fixed decimals: the numbers do not jump about while a slider moves
+const tv = (a, n = 3) => `(${a.map(x => dn(x, n)).join(',\\ ')})`, colOf = (J, j) => J.map(r => [r[j]]);                                          // TeX: a row vector, and column j of a matrix
+const Pp = T => RB.Tp(T), Dd = (T, j) => RB.col(RB.TR(T), j), up = (p, h) => [p[0], p[1], p[2] + h], mid = (a, b) => OV.v(a, OV.sub(b, a), 0.5);
+/* a dashed line a → b with its name; left out when the two points fall together */
+const seg = (s, a, b, key, tx, o) => { if (norm(OV.sub(b, a)) > 0.012) OV.dist(s, a, b, key, tx, o); };
+/* a velocity built from one arrow per joint, tip to tail from the point A: J_j q̇_j (vs metres of arrow per m/s) */
+const chain = (s, A, J, qd, vs) => { let a = A; [0, 1, 2].forEach(j => { const dv = J.map(r => r[j] * qd[j]); if (norm(dv) < 1e-9) return; const b = OV.v(a, dv, vs); OV.vec(s, a, b, KEY[j], 'J', { sub: String(j + 1), s: 22, r: 0.0035, dy: -14 }); a = b; }); };
+/* sliders: an angle M.q[i] shown in degrees, or a plain number M[key][i] */
+const angS = (box, id, label, M, i, lo, hi, onch) => ui.slider(box, { id, label, min: lo, max: hi, step: 1, value: Math.round(deg(M.q[i])), fmt: v => `${v}°`, oninput: v => { M.q[i] = rad(v); onch(); } });
+const numS = (box, id, label, M, key, i, lo, hi, step, unit, onch) => ui.slider(box, { id, label, min: lo, max: hi, step, value: M[key][i], fmt: v => `${u(v, 2)} ${unit}`, oninput: v => { M[key][i] = v; onch(); } });
+
+/* ---------- 1: a Stanford arm, the position Jacobian ---------- */
+const ST = CH5.stan, XS = X.stan, L2 = XS.L2, M1 = { ex: 'stan', om: false, fit: true, xyz: true, frames: [0, 3], vs: 0.8, q: [rad(-20), rad(75), 0.4], qd: [0.2, 0.2, 0] }, ro1 = el('ro1'), c1 = el('ctl1');
+const read1 = () => { const p = ST.P(L2, M1.q), J = ST.Jv(L2, M1.q), v = CH5.mul(J, M1.qd);
+  ro1.innerHTML = `<div class="term">x<sub>P</sub> = ${v3(p)} m</div><div class="live"><span class="eq">J<sub>v</sub> =</span>${CH2.htmlM(J, 3)}<span class="term">${t('คอลัมน์ของ θ₁, θ₂, d₃ (อีกสามคอลัมน์เป็นศูนย์)', 'the columns of θ₁, θ₂, d₃ (the other three are zero)')}</span></div><div class="term">v = J<sub>v</sub> q̇ = <b>${v3(v)} m/s</b> · |v| = ${fx(norm(v))} m/s</div>`; };
+const s1 = [angS(c1, 'p1a', 'θ₁', M1, 0, -180, 180, read1), angS(c1, 'p1b', 'θ₂', M1, 1, 10, 170, read1), numS(c1, 'p1c', 'd₃', M1, 'q', 2, 0.2, 0.7, 0.01, 'm', read1),
+  numS(c1, 'p1d', 'θ̇₁', M1, 'qd', 0, -1, 1, 0.1, 'rad/s', read1), numS(c1, 'p1e', 'θ̇₂', M1, 'qd', 1, -1, 1, 0.1, 'rad/s', read1), numS(c1, 'p1f', 'ḋ₃', M1, 'qd', 2, -0.3, 0.3, 0.05, 'm/s', read1)];
+/* back to the pose of the example, with the rates qd (the picture and the sliders) */
+const put1 = qd => { M1.q = XS.q.slice(); M1.qd = qd.slice(); [Math.round(deg(M1.q[0])), Math.round(deg(M1.q[1])), M1.q[2], ...M1.qd].forEach((x, i) => s1[i].set(x)); read1(); }; read1();
+/* the open step: 1 L₂, d₃, θ₁, θ₂; 2 the radius about the vertical axis (joint 1 alone); 3 the axis of joint 2 and its radius d₃; 4 the line of the slide;
+   5 the wrist point the wrist joints turn about; 6 the three arrows J_j q̇_j, tip to tail, that add up to v */
+M1.ov = (s, st) => { const k = st.step, F = s.F; if (!k || !F) return; const O = Pp(F[0]), O2 = Pp(F[2]), E = Pp(F[3]), X0 = Dd(F[0], 0), Z0 = Dd(F[0], 2), X1 = Dd(F[1], 0), Z2 = Dd(F[2], 2), X3 = Dd(F[3], 0), Z3 = Dd(F[3], 2), off = p => OV.v(p, X3, -0.06);
+  if (k === 1) { seg(s, up(O, 0.05), up(O2, 0.05), 'o', 'L', { sub: '2', dy: -18 }); seg(s, off(O2), off(E), 'am', 'd', { sub: '3', dy: -18 });
+    OV.ref(s, O, X1, 0.24); OV.ang(s, O, X0, X1, 0.13, 'pk', 'θ', { sub: '1', dx: 14, dy: 18 }); OV.ref(s, O2, Z0, 0.26); OV.ang(s, O2, Z0, Z3, 0.17, 'p', 'θ', { sub: '2', dx: 14, dy: -10 }); }
+  if (k === 2) { const ax = [O[0], O[1], E[2]]; seg(s, O, ax, 'z', null); seg(s, ax, E, 'pk', t('รัศมี ', 'radius ') + fx(norm(OV.sub(E, ax))) + ' m', { m: 0, s: 22, dy: -16 }); }
+  if (k === 3) { seg(s, O2, OV.v(O2, Z2, 0.2), 'p', t('แกนของข้อต่อ 2', 'axis of joint 2'), { m: 0, s: 20, at: 1, a: 'l', dx: 10 }); seg(s, off(O2), off(E), 'p', 'd₃ = ' + u(st.q[2], 2) + ' m', { m: 0, s: 22, dy: -18 }); }
+  if (k === 4) { OV.ref(s, E, Z3, 0.3, 'am'); OV.name(s, OV.v(E, Z3, 0.3), 'am', t('แนวเลื่อน', 'line of the slide') + ' (c₁s₂, s₁s₂, c₂)', { m: 0, s: 20, a: 'l', dx: 12, dy: -8 }); }
+  if (k === 5) OV.name(s, E, 'pk', t('θ₄–θ₆ หมุนรอบจุดนี้: จุดนี้ไม่ขยับ', 'θ₄–θ₆ turn about this point: it stays put'), { m: 0, s: 20, a: 'r', dx: -24, dy: 34 });
+  if (k === 6) chain(s, E, ST.Jv(L2, st.q), st.qd, st.vs); };
+CH2.sim('cv1', M1, 'sv', { aspect: 0.8, maxH: 520 });
+const noL2 = CH5.mul(ST.Jv(0, XS.q), XS.qd);
+LS.ask(el('ask1'), { fields: ['x', 'y', 'z'].map((c, i) => ({ label: `v<sub>${c}</sub> (m/s) =`, ok: x => Math.abs(x - XS.v[i]) < 0.002, w: 5 })),
+  check: v => near3(v, noL2, 0.002) ? t('คอลัมน์ 1 ยังขาดพจน์ของ L₂: −c₁L₂ และ −s₁L₂', 'column 1 still lacks its L₂ terms: −c₁L₂ and −s₁L₂') : '' });
+LS.stepper(el('st1'), { onStep: k => { const was = M1.step; M1.step = k; if (k || was) put1(k === 2 ? [XS.qd[0], 0, 0] : k === 3 ? [0, XS.qd[1], 0] : k === 4 ? [0, 0, XS.qd[2]] : XS.qd); }, steps: [
+  { why: t('<b>ตำแหน่งของจุดข้อมือ</b> คือคอลัมน์ 4 ของ \\({}^0_3T\\) (s₁ = sin θ₁, c₂ = cos θ₂) ขึ้นกับ θ₁, θ₂ และ d₃ เท่านั้น', '<b>The position of the wrist point</b> is column 4 of \\({}^0_3T\\) (s₁ = sin θ₁, c₂ = cos θ₂). It depends on θ₁, θ₂ and d₃ only'),
+    tex: `x_P = \\begin{bmatrix} c_1s_2d_3 - s_1L_2 \\\\ s_1s_2d_3 + c_1L_2 \\\\ c_2d_3 \\end{bmatrix} = ${CH2.texV(XS.p, 3)}\\ \\text{m}` },
+  { why: t(`<b>คอลัมน์ 1</b>: หาอนุพันธ์ของทุกแถวเทียบ θ₁ ได้ (−y, x, 0): ข้อต่อ 1 หมุนจุดข้อมือรอบแกนตั้ง Z₀ ลูกศรจึงอยู่ในแนวราบและตั้งฉากกับรัศมี ${fx(Math.hypot(XS.p[0], XS.p[1]))} m ในรูปคือคอลัมน์นี้คูณกับ θ̇₁ = ${u(XS.qd[0], 2)} rad/s`, `<b>Column 1</b>: differentiate every row by θ₁. The result is (−y, x, 0): joint 1 swings the wrist point about the vertical axis Z₀, so the arrow is horizontal and square to the radius of ${fx(Math.hypot(XS.p[0], XS.p[1]))} m. The picture shows this column times θ̇₁ = ${u(XS.qd[0], 2)} rad/s`),
+    tex: `\\frac{\\partial x_P}{\\partial\\theta_1} = \\begin{bmatrix} -s_1s_2d_3 - c_1L_2 \\\\ c_1s_2d_3 - s_1L_2 \\\\ 0 \\end{bmatrix} = ${CH2.texM(colOf(XS.J, 0), 3)}` },
+  { why: t(`<b>คอลัมน์ 2</b>: เทียบ θ₂ ก้านเลื่อนแกว่งรอบแกนของข้อต่อ 2 ด้วยรัศมี d₃ คอลัมน์นี้จึงยาวเท่ากับ d₃ = ${u(XS.q[2], 2)} พอดี ในรูป θ̇₂ = ${u(XS.qd[1], 2)} rad/s (ติดลบ: ก้านเงยขึ้น)`, `<b>Column 2</b>: by θ₂. The sliding link swings about the axis of joint 2 with radius d₃, so this column is exactly d₃ = ${u(XS.q[2], 2)} long. In the picture θ̇₂ = ${u(XS.qd[1], 2)} rad/s (negative: the link rises)`),
+    tex: `\\frac{\\partial x_P}{\\partial\\theta_2} = \\begin{bmatrix} c_1c_2d_3 \\\\ s_1c_2d_3 \\\\ -s_2d_3 \\end{bmatrix} = ${CH2.texM(colOf(XS.J, 1), 3)}` },
+  { why: t(`<b>คอลัมน์ 3</b>: เทียบ d₃ ได้เวกเตอร์ยาวหนึ่งหน่วยตามแนวเลื่อน (แกน Z₃): คอลัมน์ของข้อต่อเลื่อนคือ<b>ทิศของแกนเลื่อน</b> ในรูป ḋ₃ = ${u(XS.qd[2], 2)} m/s`, `<b>Column 3</b>: by d₃. The result is a unit vector along the slide (axis Z₃): the column of a sliding joint is <b>the direction of its axis</b>. In the picture ḋ₃ = ${u(XS.qd[2], 2)} m/s`),
+    tex: `\\frac{\\partial x_P}{\\partial d_3} = \\begin{bmatrix} c_1s_2 \\\\ s_1s_2 \\\\ c_2 \\end{bmatrix} = ${CH2.texM(colOf(XS.J, 2), 3)}` },
+  { why: t('<b>ครบทั้ง 6 ข้อต่อ</b>: q = (θ₁, θ₂, d₃, θ₄, θ₅, θ₆) ข้อมือ θ₄–θ₆ หมุนรอบจุดข้อมือ จุดนี้จึงไม่ขยับ: สามคอลัมน์หลังเป็นศูนย์', '<b>All six joints</b>: q = (θ₁, θ₂, d₃, θ₄, θ₅, θ₆). The wrist joints θ₄–θ₆ turn about the wrist point, which therefore does not move: the last three columns are zero'),
+    tex: 'J_v = \\begin{bmatrix} -s_1s_2d_3 - c_1L_2 & c_1c_2d_3 & c_1s_2 & 0 & 0 & 0 \\\\ c_1s_2d_3 - s_1L_2 & s_1c_2d_3 & s_1s_2 & 0 & 0 & 0 \\\\ 0 & -s_2d_3 & c_2 & 0 & 0 & 0 \\end{bmatrix}' },
+  { why: t('<b>แทนค่า</b> แล้วคูณกับอัตราของข้อต่อ: ลูกศรสามอันของขั้นที่ 2–4 ต่อหัวต่อหางกันได้ v', '<b>Put in the numbers</b> and multiply by the joint rates: the three arrows of steps 2–4, tip to tail, add up to v'),
+    tex: `\\begin{aligned} v &= ${CH2.texM(XS.J, 3)} ${CH2.texV(XS.qd, 2)} \\\\ &= ${CH2.texV(XS.v, 3)}\\ \\text{m/s} \\end{aligned}` }],
+  answer: t(`v = ${v3(XS.v)} m/s (|v| = ${fx(norm(XS.v))} m/s) · คอลัมน์ของข้อต่อหมุนคือลูกศรที่ตั้งฉากกับรัศมี คอลัมน์ของข้อต่อเลื่อนคือทิศของแกนเลื่อน และสามคอลัมน์ของข้อมือเป็นศูนย์`, `v = ${v3(XS.v)} m/s (|v| = ${fx(norm(XS.v))} m/s) · the column of a turning joint is an arrow square to its radius, the column of a sliding joint is the direction of its axis, and the three wrist columns are zero`) });
+
+/* ---------- 2: the GP8, the wrist centre ---------- */
+const GP = CH5.gp8, XG = X.gp8, PT = XG.parts, M2 = { ex: 'gp8', om: false, fit: true, xyz: true, vs: 0.8, q: G.q.slice(), qd: [0.3, 0.2, -0.2, 0, 0, 0] }, ro2 = el('ro2'), c2 = el('ctl2');
+const read2 = () => { const P = GP.parts(M2.q), J = GP.Jv(M2.q), v = CH5.mul(J, M2.qd);
+  ro2.innerHTML = `<div class="term">r = ${fx(P.r)} m · p<sub>z</sub> = ${fx(P.pz)} m</div><div class="live"><span class="eq">J<sub>v</sub> =</span>${CH2.htmlM(J, 3)}<span class="term">${t('คอลัมน์ของ θ₁, θ₂, θ₃', 'the columns of θ₁, θ₂, θ₃')}</span></div><div class="term">v = J<sub>v</sub> θ̇ = <b>${v3(v)} m/s</b> · |v| = ${fx(norm(v))} m/s</div>`; };
+const s2 = [0, 1, 2].map(i => angS(c2, 'p2q' + i, 'θ' + SUB[i], M2, i, G.lim[i][0], G.lim[i][1], read2)).concat([0, 1, 2].map(i => numS(c2, 'p2r' + i, 'θ̇' + SUB[i], M2, 'qd', i, -1, 1, 0.1, 'rad/s', read2)));
+const put2 = qd => { M2.q = G.q.slice(); M2.qd = [...qd, 0, 0, 0]; [0, 1, 2].forEach(i => { s2[i].set(Math.round(deg(M2.q[i]))); s2[3 + i].set(qd[i]); }); read2(); }; read2();
+/* the open step: 1 r, p_z and a₁; 2 the radius r about axis 1; 3 the line shoulder → wrist centre with its parts r − a₁ and p_z, and axis 2;
+   4 the line elbow → wrist centre with its parts u and w, and axis 3; 5 the three arrows J_j θ̇_j that add up to v */
+M2.ov = (s, st) => { const k = st.step, F = s.F; if (!k || !F) return; const O = Pp(F[0]), Sh = Pp(F[2]), El = Pp(F[3]), W = Pp(F[6]), Wp = [W[0], W[1], O[2]], P = GP.parts(st.q);
+  if (k === 1) { seg(s, O, Wp, 'pk', 'r', { dy: 26 }); OV.name(s, mid(Wp, W), 'am', 'p', { sub: 'z', a: 'r', dx: -16 }); seg(s, up(O, 0.06), up(Sh, 0.06), 'o', 'a', { sub: '1', dy: -18 }); }
+  if (k === 2) { const ax = [O[0], O[1], W[2]]; seg(s, O, ax, 'z', null); seg(s, ax, W, 'pk', 'r = ' + fx(P.r) + ' m', { m: 0, s: 22, dy: -16 }); }
+  if (k === 3) { const Z2 = Dd(F[2], 2); seg(s, OV.v(Sh, Z2, -0.16), OV.v(Sh, Z2, 0.16), 'p', t('แกน 2', 'axis 2'), { m: 0, s: 20, at: 1, a: 'l', dx: 10 }); seg(s, Sh, W, 'p', null);
+    seg(s, Sh, Wp, 'ink', 'r − a₁', { m: 0, s: 22, dy: 28 }); OV.name(s, mid(Wp, W), 'am', 'p', { sub: 'z', a: 'r', dx: -16 }); }
+  if (k === 4) { const Z3 = Dd(F[3], 2), Ep = [W[0], W[1], El[2]]; seg(s, OV.v(El, Z3, -0.16), OV.v(El, Z3, 0.16), 'am', t('แกน 3', 'axis 3'), { m: 0, s: 20, at: 1, a: 'l', dx: 10 }); seg(s, El, W, 'am', null);
+    seg(s, El, Ep, 'ink', 'u', { dy: -18 }); seg(s, Ep, W, 'o', 'w', { a: 'l', dx: 16 }); }
+  if (k === 5) chain(s, W, GP.Jv(st.q), st.qd, st.vs); };
+CH2.sim('cv2', M2, 'sv', { aspect: 0.8, maxH: 520 });
+const vzR = -PT.r * XG.qd[1] - PT.u * XG.qd[2];   // a known slip: −r instead of −(r − a₁) in column 2
+LS.ask(el('ask2'), { fields: ['x', 'y', 'z'].map((c, i) => ({ label: `v<sub>${c}</sub> (m/s) =`, ok: x => Math.abs(x - XG.v[i]) < 0.002, w: 5 })),
+  check: v => Math.abs(v[2] - vzR) < 0.002 ? t('แถวที่ 3 ของคอลัมน์ 2 คือ −(r − a₁) ไม่ใช่ −r: ไหล่อยู่ห่างแกน 1 เป็นระยะ a₁', 'row 3 of column 2 is −(r − a₁), not −r: the shoulder is a₁ away from axis 1') : '' });
+LS.stepper(el('st2'), { onStep: k => { const was = M2.step; M2.step = k; if (k || was) put2(k === 2 ? [XG.qd[0], 0, 0] : k === 3 ? [0, XG.qd[1], 0] : k === 4 ? [0, 0, XG.qd[2]] : XG.qd); }, steps: [
+  { why: t('<b>ตำแหน่งของจุดศูนย์กลางข้อมือ</b> (คอลัมน์ 4 ของ \\({}^0_6T\\) จากบทที่ 3): อยู่ห่างแกน 1 ในแนวราบเป็นระยะ r สูง p<sub>z</sub> แล้วหมุนไปด้วย θ₁ (c₂₃ = cos(θ₂ + θ₃))', '<b>The position of the wrist centre</b> (column 4 of \\({}^0_6T\\), chapter 3): a horizontal distance r from axis 1 and a height p<sub>z</sub>, turned by θ₁ (c₂₃ = cos(θ₂ + θ₃))'),
+    tex: `\\begin{aligned} p &= (c_1r,\\ s_1r,\\ p_z) \\\\ r &= a_1 + a_2c_2 + a_3c_{23} - d_4s_{23} = ${dn(PT.r, 3)}\\ \\text{m} \\\\ p_z &= -a_2s_2 - a_3s_{23} - d_4c_{23} = ${dn(PT.pz, 3)}\\ \\text{m} \\end{aligned}` },
+  { why: t('<b>คอลัมน์ 1</b>: r และ p<sub>z</sub> ไม่ขึ้นกับ θ₁ ข้อต่อ 1 หมุนจุดศูนย์กลางข้อมือรอบแกนตั้งด้วยรัศมี r ลูกศรจึงอยู่ในแนวราบ', '<b>Column 1</b>: r and p<sub>z</sub> do not depend on θ₁. Joint 1 swings the wrist centre about the vertical axis with radius r, so the arrow is horizontal'),
+    tex: `\\frac{\\partial p}{\\partial\\theta_1} = \\begin{bmatrix} -s_1r \\\\ c_1r \\\\ 0 \\end{bmatrix} = ${CH2.texM(colOf(XG.J, 0), 3)}` },
+  { why: t('<b>คอลัมน์ 2</b>: ข้อต่อ 2 หมุนจุดศูนย์กลางข้อมือรอบไหล่ เวกเตอร์จากไหล่ถึงจุดนี้คือ (r − a₁, p<sub>z</sub>) เมื่อหมุนไปหนึ่งในสี่รอบจะได้ (p<sub>z</sub>, −(r − a₁))', '<b>Column 2</b>: joint 2 swings the wrist centre about the shoulder. The vector from the shoulder to it is (r − a₁, p<sub>z</sub>); a quarter turn of that is (p<sub>z</sub>, −(r − a₁))'),
+    tex: `\\begin{aligned} \\frac{\\partial r}{\\partial\\theta_2} &= -a_2s_2 - a_3s_{23} - d_4c_{23} = p_z \\\\ \\frac{\\partial p_z}{\\partial\\theta_2} &= -a_2c_2 - a_3c_{23} + d_4s_{23} = -(r - a_1) \\\\ \\frac{\\partial p}{\\partial\\theta_2} &= \\begin{bmatrix} c_1p_z \\\\ s_1p_z \\\\ -(r - a_1) \\end{bmatrix} = ${CH2.texM(colOf(XG.J, 1), 3)} \\end{aligned}` },
+  { why: t('<b>คอลัมน์ 3</b>: เหลือเฉพาะพจน์ที่มี θ₂ + θ₃ ข้อต่อ 3 หมุนจุดศูนย์กลางข้อมือรอบข้อศอก: u และ w คือระยะในแนวราบและแนวดิ่งจากข้อศอกถึงจุดนี้', '<b>Column 3</b>: only the terms with θ₂ + θ₃ are left. Joint 3 swings the wrist centre about the elbow: u and w are the horizontal and vertical distances from the elbow to it'),
+    tex: `\\begin{aligned} w &= \\frac{\\partial r}{\\partial\\theta_3} = -a_3s_{23} - d_4c_{23} = ${dn(PT.w, 3)} \\\\ u &= a_3c_{23} - d_4s_{23} = ${dn(PT.u, 3)}, \\quad \\frac{\\partial p_z}{\\partial\\theta_3} = -u \\\\ \\frac{\\partial p}{\\partial\\theta_3} &= \\begin{bmatrix} c_1w \\\\ s_1w \\\\ -u \\end{bmatrix} = ${CH2.texM(colOf(XG.J, 2), 3)} \\end{aligned}` },
+  { why: t('<b>รวมสามคอลัมน์</b> (คอลัมน์ของ θ₄–θ₆ เป็นศูนย์: หมุนข้อมือแล้วจุดศูนย์กลางข้อมือไม่ขยับ) แล้วคูณกับ θ̇', '<b>Put the three columns together</b> (the columns of θ₄–θ₆ are zero: turning the wrist does not move the wrist centre) and multiply by θ̇'),
+    tex: `\\begin{aligned} J_v &= \\begin{bmatrix} -s_1r & c_1p_z & c_1w \\\\ c_1r & s_1p_z & s_1w \\\\ 0 & -(r - a_1) & -u \\end{bmatrix} \\\\ &= ${CH2.texM(XG.J, 3)} \\\\ v &= J_v ${CH2.texV(XG.qd, 2)} = ${CH2.texV(XG.v, 3)}\\ \\text{m/s} \\end{aligned}` }],
+  answer: t(`v = ${v3(XG.v)} m/s (|v| = ${fx(norm(XG.v))} m/s) · สูตรปิดนี้ตรงกับอนุพันธ์เชิงตัวเลขของ ⁰₆T ทุกท่า (ตรวจในชุดทดสอบของเว็บ)`, `v = ${v3(XG.v)} m/s (|v| = ${fx(norm(XG.v))} m/s) · this closed form agrees with a numerical derivative of ⁰₆T at every pose (checked in the site's tests)`) });
+
+/* ---------- 3: angular velocity and the basic Jacobian ---------- */
+const TW = X.two, WZ = TW.qd[0] + TW.qd[1], M3 = { ex: 'gp8', fit: true, xyz: true, vs: 0.8, ws: 0.16, q: G.q.slice(), qd: XG.qd6.slice() }, ro3 = el('ro3'), c3 = el('ctl3'), ROW = ['v<sub>x</sub>', 'v<sub>y</sub>', 'v<sub>z</sub>', 'ω<sub>x</sub>', 'ω<sub>y</sub>', 'ω<sub>z</sub>'];
+const jtab = J => `<div class="tscroll"><table class="dhtab sols"><tr><th>J₀</th>${[...SUB].map(c => `<th>θ̇${c}</th>`).join('')}</tr>${J.map((r, i) => `<tr><th>${ROW[i]}</th>${r.map(x => `<td>${Math.abs(x) < 5e-10 ? '0' : fx(x)}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const read3 = () => { const J = CH5.J0(G.rows(), M3.q), vw = CH5.mul(J, M3.qd), w = vw.slice(3);
+  ro3.innerHTML = jtab(J) + `<div class="term">v = <b class="ax-y">${v3(vw.slice(0, 3))} m/s</b> · ω = <b style="color:var(--purple)">${v3(w)} rad/s</b> · |ω| = ${fx(norm(w))} rad/s</div>`; };
+const s3 = [0, 1, 2, 3, 4, 5].map(i => numS(c3, 'p3r' + i, 'θ̇' + SUB[i], M3, 'qd', i, -1.5, 1.5, 0.1, 'rad/s', read3));
+const put3 = qd => { M3.qd = qd.slice(); s3.forEach((x, i) => x.set(qd[i])); read3(); }; read3();
+/* the open step: 1 what the two arrows are (and the line the last link turns about); 2 joints 2 and 3 alone: their two parallel axes, like a planar arm;
+   3 the wrist joints alone: the three axes through the wrist centre (no v, only ω); 4 the whole example */
+M3.ov = (s, st) => { const k = st.step, F = s.F, I = s.info; if (!k || !F || !I) return; const W = Pp(F[6]);
+  if (k === 1) { if (norm(I.v) > 1e-9) OV.name(s, OV.v(W, I.v, st.vs), 'gr', t('ความเร็วเชิงเส้นของจุดกำเนิด {6}', 'linear velocity of the origin of {6}'), { m: 0, s: 20, a: 'l', dx: 44, dy: -8 });
+    if (norm(I.w) > 1e-9) { const e = I.w.map(x => x / norm(I.w)); seg(s, OV.v(W, e, -0.22), W, 'p', null); OV.name(s, OV.v(W, I.w, st.ws), 'p', t('ก้านสุดท้ายหมุนรอบเส้นนี้', 'the last link turns about this line'), { m: 0, s: 20, a: 'l', dx: 44, dy: 14 }); } }
+  if (k === 2) [[2, 'b'], [3, 'o']].forEach(([i, c]) => { const A = Pp(F[i]), Z = Dd(F[i], 2); seg(s, OV.v(A, Z, -0.16), OV.v(A, Z, 0.2), c, 'Z', { sub: String(i), s: 24, at: 1, a: 'l', dx: 12 }); });
+  if (k === 3) [[4, 'b'], [5, 'am'], [6, 'o']].forEach(([i, c]) => { const Z = Dd(F[i], 2); seg(s, OV.v(W, Z, -0.14), OV.v(W, Z, 0.22), c, 'Z', { sub: String(i), s: 24, at: 1, a: 'l', dx: 12 }); }); };
+CH2.sim('cv3', M3, 'sv', { aspect: 0.8, maxH: 520 });
+LS.ask(el('ask3a'), { fields: [{ label: 'ω<sub>z</sub> (rad/s) =', ok: x => Math.abs(x - WZ) < 0.01, w: 5 }],
+  check: v => Math.abs(v[0] - (Math.abs(TW.qd[0]) + Math.abs(TW.qd[1]))) < 0.01 ? t('บวกพร้อมเครื่องหมาย: θ̇₂ ติดลบ', 'add them with their signs: θ̇₂ is negative') : Math.abs(v[0] + WZ) < 0.01 ? t('ดูเครื่องหมาย: ข้อต่อ 2 หมุนตามเข็มเร็วกว่าที่ข้อต่อ 1 หมุนทวนเข็ม', 'mind the sign: joint 2 turns clockwise faster than joint 1 turns counter-clockwise') : '' });
+LS.choose(el('ask3b'), { options: [t('ทั้ง 6 ข้อต่อ', 'all six joints'), t('ข้อต่อ 1–3 เท่านั้น', 'joints 1–3 only'), t('ข้อต่อ 4–6 เท่านั้น', 'joints 4–6 only')], answer: 1 });
+const J6 = XG.J0, zc = j => `(${J6.slice(3).map(r => u(r[j], 3)).join(', ')})`;   // the lower half of column j + 1: the axis ⁰Ẑ of that joint
+LS.stepper(el('st3'), { onStep: k => { const was = M3.step; M3.step = k; if (k || was) put3(k === 2 ? [0, TW.qd[0], TW.qd[1], 0, 0, 0] : k === 3 ? [0, 0, 0, ...XG.qd6.slice(3)] : XG.qd6); }, steps: [
+  { why: t('<b>ความเร็วสองแบบ</b>: v คือความเร็วเชิงเส้นของจุดกำเนิดเฟรมปลายแขน (3 ตัวเลข) ส่วน ω คือความเร็วเชิงมุมของก้านสุดท้าย (3 ตัวเลข): ทิศของ ω คือแกนที่ก้านกำลังหมุนรอบ ขนาดคืออัตราการหมุนเป็น rad/s เมทริกซ์ที่ให้ทั้งสองจากอัตราของข้อต่อคือจาโคเบียนพื้นฐาน J₀ ซึ่งไม่ขึ้นกับวิธีเขียนตำแหน่งหรือทิศ', '<b>Two kinds of velocity</b>: v is the linear velocity of the origin of the tool frame (3 numbers), ω the angular velocity of the last link (3 numbers): the direction of ω is the axis the link is turning about, its length the rate of turning in rad/s. The matrix that gives both from the joint rates is the basic Jacobian J₀, which does not depend on how position or orientation is written'),
+    tex: '\\begin{bmatrix} v \\\\ \\omega \\end{bmatrix} = J_0(q)\\,\\dot q \\qquad (6 \\times n)' },
+  { why: t(`<b>(ก) แขนในระนาบ</b>: ทุกข้อต่อหมุนรอบแกน Z อัตราจึงบวกกันตรง ๆ บน GP8 ข้อต่อ 2 และ 3 ก็เป็นแบบเดียวกันเพราะแกนขนานกัน: ในรูปตั้ง (θ̇₂, θ̇₃) = (${fx(TW.qd[0], 1)}, ${fx(TW.qd[1], 1)}) rad/s ได้ ω ขนาด ${u(Math.abs(WZ), 2)} rad/s ชี้สวนทางกับ Ẑ₂`, `<b>(a) A planar arm</b>: every joint turns about Z, so the rates simply add. Joints 2 and 3 of the GP8 behave the same way, because their axes are parallel: the picture has (θ̇₂, θ̇₃) = (${fx(TW.qd[0], 1)}, ${fx(TW.qd[1], 1)}) rad/s, which gives an ω of ${u(Math.abs(WZ), 2)} rad/s pointing against Ẑ₂`),
+    tex: `\\omega = \\begin{bmatrix} 0 \\\\ 0 \\\\ \\dot\\theta_1 + \\dot\\theta_2 \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ 0 \\\\ ${TW.qd[0].toFixed(1)} + (${TW.qd[1].toFixed(1)}) \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ 0 \\\\ ${dn(WZ, 2)} \\end{bmatrix}\\ \\text{rad/s}` },
+  { why: t(`<b>(ข) J₀ ของ GP8</b> (ตารางใต้รูป): ครึ่งบนคือ J<sub>v</sub> ของโจทย์ 2 กับบล็อกศูนย์ 3 × 3 ทางขวา เพราะแกน 4, 5, 6 ผ่านจุดศูนย์กลางข้อมือ ครึ่งล่าง: ข้อต่อหมุนตัวที่ i เพิ่ม ω ตามแกน Ẑ<sub>i</sub> ของตัวเอง คอลัมน์ i จึงเป็น ⁰Ẑ<sub>i</sub> (พิสูจน์ในบทที่ 6) เช่น คอลัมน์ 1 คือ ${zc(0)} และคอลัมน์ 2 กับ 3 เท่ากันคือ ${zc(1)} เพราะแกน 2 ขนานกับแกน 3 ในรูป: หมุนเฉพาะข้อมือ ลูกศร v หายไป เหลือแต่ ω`, `<b>(b) The J₀ of the GP8</b> (the table under the picture): its upper half is the J<sub>v</sub> of problem 2 with a 3 × 3 block of zeros on the right, because axes 4, 5 and 6 pass through the wrist centre. Lower half: turning joint i adds ω along its own axis Ẑ<sub>i</sub>, so column i is ⁰Ẑ<sub>i</sub> (derived in chapter 6). Column 1 is ${zc(0)}, and columns 2 and 3 are both ${zc(1)} because axis 2 is parallel to axis 3. In the picture only the wrist turns: the arrow v is gone and only ω is left`),
+    tex: 'J_0 = \\begin{bmatrix} J_v\\ (3 \\times 3) & 0\\ (3 \\times 3) \\\\ {}^0\\hat Z_1\\ \\ {}^0\\hat Z_2\\ \\ {}^0\\hat Z_3 & {}^0\\hat Z_4\\ \\ {}^0\\hat Z_5\\ \\ {}^0\\hat Z_6 \\end{bmatrix}' },
+  { why: t('<b>ตัวเลขของตัวอย่าง</b>: คูณ J₀ กับอัตราทั้งหก v เท่ากับของโจทย์ 2 พอดี เพราะ θ̇₄–θ̇₆ ไม่เปลี่ยน v', '<b>The numbers of the example</b>: multiply J₀ by the six rates. v is exactly that of problem 2, because θ̇₄–θ̇₆ do not change v'),
+    tex: `\\begin{aligned} \\dot q &= ${tv(XG.qd6, 2)}\\ \\text{rad/s} \\\\ v &= ${tv(XG.v6, 3)}\\ \\text{m/s} \\\\ \\omega &= ${tv(XG.w6, 3)}\\ \\text{rad/s} \\end{aligned}` }],
+  answer: t(`(ก) ω<sub>z</sub> = ${u(WZ, 2)} rad/s (ข) ข้อต่อ 1–3 เท่านั้น · ตัวอย่าง: v = ${v3(XG.v6)} m/s และ ω = ${v3(XG.w6)} rad/s (|ω| = ${fx(norm(XG.w6), 2)} rad/s) เขียนในเฟรม {0}`, `(a) ω<sub>z</sub> = ${u(WZ, 2)} rad/s (b) joints 1–3 only · the example: v = ${v3(XG.v6)} m/s and ω = ${v3(XG.w6)} rad/s (|ω| = ${fx(norm(XG.w6), 2)} rad/s), written in frame {0}`) });
+
+/* ---------- 4: other ways to write a position and an orientation ---------- */
+const RP = CH5.rep, XR = X.rep, M4 = { mode: 'cyl', vs: 1.6, p: XR.p.slice(), v: [0.05, 0.1, 0] }, ro4 = el('ro4'), dg = x => fx(deg(x), 2) + '°';
+const read4 = () => { const p = M4.p, v = M4.v, m = M4.mode; let a, b;
+  if (m === 'cart') { a = `(x, y, z) = ${v3(p)} m`; b = `(ẋ, ẏ, ż) = v = <b>${v3(v)} m/s</b>`; }
+  else if (m === 'cyl') { const c = RP.cyl(p), r = CH5.mul(RP.Ecyl(p), v); a = `(ρ, θ, z) = (${fx(c[0])} m, ${dg(c[1])}, ${fx(c[2])} m)`; b = `(ρ̇, θ̇, ż) = E<sub>P</sub> v = <b>(${fx(r[0])} m/s, ${fx(r[1])} rad/s, ${fx(r[2])} m/s)</b>`; }
+  else { const c = RP.sph(p), r = CH5.mul(RP.Esph(p), v); a = `(ρ, θ, φ) = (${fx(c[0])} m, ${dg(c[1])}, ${dg(c[2])})`; b = `(ρ̇, θ̇, φ̇) = E<sub>P</sub> v = <b>(${fx(r[0])} m/s, ${fx(r[1])} rad/s, ${fx(r[2])} rad/s)</b>`; }
+  ro4.innerHTML = `<div class="term">${a} · v = ${v3(v)} m/s</div><div class="term">${b}</div>`; };
+const rd4 = ui.radio(el('sel4'), [{ id: 'm-cart', label: t('คาร์ทีเซียน (x, y, z)', 'Cartesian (x, y, z)') }, { id: 'm-cyl', label: t('ทรงกระบอก (ρ, θ, z)', 'cylindrical (ρ, θ, z)'), on: true }, { id: 'm-sph', label: t('ทรงกลม (ρ, θ, φ)', 'spherical (ρ, θ, φ)') }], id => { M4.mode = id.slice(2); read4(); });
+const s4 = ['x', 'y', 'z'].map((c, i) => numS(el('ctl4'), 'p4' + c, `v<sub>${c}</sub>`, M4, 'v', i, -0.2, 0.2, 0.01, 'm/s', read4));
+const put4 = mode => { M4.mode = mode; rd4.set('m-' + mode); M4.v = XR.v.slice(); s4.forEach((x, i) => x.set(M4.v[i])); read4(); }; read4();
+/* the open step: 1 the x and y that make ρ and θ; 2 which arrow at P belongs to which row of E_P; 3 v split along those three directions (ρ̇, ρθ̇, ż);
+   4 the picture goes to spherical coordinates (set in onStep), whose E_P fails on the Z axis the way Euler angles fail at sin β = 0 */
+M4.ov = (s, st) => { const k = st.step; if (!k || st.mode !== 'cyl') return; const p = st.p, v = st.v, O = [0, 0, 0], th = Math.atan2(p[1], p[0]), er = [Math.cos(th), Math.sin(th), 0], et = [-Math.sin(th), Math.cos(th), 0], ez = [0, 0, 1];
+  if (k === 1) { const A = [p[0], 0, 0]; seg(s, O, A, 'x', 'x = ' + u(p[0], 2), { m: 0, s: 22, dy: 26 }); seg(s, A, [p[0], p[1], 0], 'y', 'y = ' + u(p[1], 2), { m: 0, s: 22, a: 'l', dx: 14 }); }
+  if (k === 2) [[er, 'am', t('แถว 1', 'row 1')], [et, 'pk', t('แถว 2 × ρ', 'row 2 × ρ')], [ez, 'p', t('แถว 3', 'row 3')]].forEach(([e, c, tx]) => OV.name(s, OV.v(p, e, 0.17), c, tx, { m: 0, s: 18, a: 'l', dx: 44, dy: -6 }));
+  if (k === 3) { let a = p; [[er, 'am', 'ρ̇'], [et, 'pk', 'ρθ̇'], [ez, 'p', 'ż']].forEach(([e, c, n]) => { const x = v[0] * e[0] + v[1] * e[1] + v[2] * e[2], b = OV.v(a, e, st.vs * x); seg(s, a, b, c, n + ' = ' + u(x, 3), { m: 0, s: 20, a: 'l', dx: 12, dy: 18 }); a = b; }); } };
+CH2.sim('cv4', M4, 'coords', { aspect: 0.8, maxH: 520 });
+LS.ask(el('ask4'), { fields: [{ label: 'ρ̇ (m/s) =', ok: x => Math.abs(x - XR.rate[0]) < 0.002, w: 5 }, { label: 'θ̇ (rad/s) =', ok: x => Math.abs(x - XR.rate[1]) < 0.002, w: 5 }, { label: 'ż (m/s) =', ok: x => Math.abs(x - XR.rate[2]) < 0.002, w: 5 }],
+  check: v => Math.abs(v[1] - XR.rate[1] * XR.cyl[0]) < 0.002 ? t('นั่นคือ ρθ̇ (m/s): หารด้วย ρ อีกครั้งจึงได้ θ̇', 'that is ρθ̇ (m/s): divide by ρ once more to get θ̇') : Math.abs(v[1] - deg(XR.rate[1])) < 0.2 ? t('ตอบเป็น rad/s', 'answer in rad/s') : '' });
+const E4 = XR.E, vv = XR.v, cth = XR.p[0] / XR.cyl[0], sth = XR.p[1] / XR.cyl[0], rowT = i => `${dn(E4[i][0], 2)}(${dn(vv[0], 2)}) + ${dn(E4[i][1], 2)}(${dn(vv[1], 2)})`;
+LS.stepper(el('st4'), { onStep: k => { const was = M4.step; M4.step = k; if (k || was) put4(k === 4 ? 'sph' : 'cyl'); }, steps: [
+  { why: t('<b>พิกัดทรงกระบอกของ P</b>: ρ คือระยะจากแกน Z และ θ คือมุมรอบแกน Z วัดจากแกน X', '<b>The cylindrical coordinates of P</b>: ρ is the distance from the Z axis, θ the angle about Z measured from the X axis'),
+    tex: `\\begin{aligned} \\rho &= \\sqrt{${dn(XR.p[0], 2)}^2 + ${dn(XR.p[1], 2)}^2} = ${dn(XR.cyl[0], 3)}\\ \\text{m} \\\\ c_\\theta &= \\frac{x}{\\rho} = ${dn(cth, 3)}, \\quad s_\\theta = \\frac{y}{\\rho} = ${dn(sth, 3)} \\quad (\\theta = ${dn(deg(XR.cyl[1]), 2)}^\\circ) \\end{aligned}` },
+  { why: t('<b>E<sub>P</sub> ของพิกัดทรงกระบอก</b>: หาอนุพันธ์ของ ρ = √(x² + y²), θ = atan2(y, x) และ z เทียบ x, y, z แถว 1 คือทิศที่ ρ เพิ่ม แถว 2 คือทิศที่ θ เพิ่ม หารด้วย ρ (ยิ่งใกล้แกน Z มุมยิ่งเปลี่ยนเร็ว)', '<b>E<sub>P</sub> for cylindrical coordinates</b>: differentiate ρ = √(x² + y²), θ = atan2(y, x) and z by x, y, z. Row 1 is the direction in which ρ grows; row 2 the direction in which θ grows, divided by ρ (the closer to the Z axis, the faster the angle changes)'),
+    tex: `\\begin{aligned} E_P &= \\begin{bmatrix} c_\\theta & s_\\theta & 0 \\\\ -s_\\theta/\\rho & c_\\theta/\\rho & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\\\ &= ${CH2.texM(E4, 2)} \\end{aligned}` },
+  { why: t('<b>คูณ</b> \\(\\dot x_P = E_P\\,v\\) ความหมาย: จุดกำลังถอยห่างแกน Z ช้า ๆ และหมุนรอบแกน Z ตามเข็มนาฬิกาเมื่อมองจากด้านบน (θ̇ ติดลบ)', '<b>Multiply</b>: \\(\\dot x_P = E_P\\,v\\). In words: the point moves slowly away from the Z axis and goes round it clockwise seen from above (θ̇ is negative)'),
+    tex: `\\begin{aligned} \\dot\\rho &= ${rowT(0)} = ${dn(XR.rate[0], 3)}\\ \\text{m/s} \\\\ \\dot\\theta &= ${rowT(1)} = ${dn(XR.rate[1], 3)}\\ \\text{rad/s} \\\\ \\dot z &= ${dn(XR.rate[2], 3)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>ทิศก็ทำแบบเดียวกัน</b>: ถ้าเขียนทิศด้วยมุมออยเลอร์ Z–X–Z \\(x_R = (\\alpha, \\beta, \\gamma)\\) โดย \\(R = R_Z(\\alpha)\\,R_X(\\beta)\\,R_Z(\\gamma)\\) อัตราของมุมทั้งสามไม่ใช่ ω ต้องคูณด้วย \\(E_R\\)', '<b>An orientation goes the same way</b>: written as Z–X–Z Euler angles \\(x_R = (\\alpha, \\beta, \\gamma)\\) with \\(R = R_Z(\\alpha)\\,R_X(\\beta)\\,R_Z(\\gamma)\\), the rates of the three angles are not ω: multiply by \\(E_R\\)'),
+    tex: '\\dot x_R = E_R\\,\\omega, \\qquad E_R = \\begin{bmatrix} -s_\\alpha c_\\beta/s_\\beta & c_\\alpha c_\\beta/s_\\beta & 1 \\\\ c_\\alpha & s_\\alpha & 0 \\\\ s_\\alpha/s_\\beta & -c_\\alpha/s_\\beta & 0 \\end{bmatrix}',
+    body: () => `<div class="why">${t('\\(E_R\\) <b>หารด้วย sin β</b>: ที่ β = 0° หรือ 180° มุมออยเลอร์ใช้ไม่ได้ ทั้งที่แขนยังปกติ (ภาวะเอกฐานของการแทน แบบเดียวกับบทที่ 2) รูปเปลี่ยนเป็นพิกัดทรงกลมเพื่อให้เห็นเรื่องเดียวกันกับตำแหน่ง: \\(E_P\\) ของพิกัดทรงกลมหารด้วย ρ sin φ จุดที่อยู่บนแกน Z จึงไม่มีค่า θ จาโคเบียนพื้นฐาน J₀ ไม่มีปัญหานี้ จึงใช้ J₀ เป็นหลัก แล้วคูณเมื่อต้องการ: \\(J_{X_P} = E_P\\,J_v\\) และ \\(J_{X_R} = E_R\\,J_\\omega\\)', '\\(E_R\\) <b>divides by sin β</b>: at β = 0° or 180° the Euler angles fail, although the arm itself is fine (a singularity of the representation, as in chapter 2). The picture has gone to spherical coordinates to show the same thing for a position: their \\(E_P\\) divides by ρ sin φ, so a point on the Z axis has no θ. The basic Jacobian J₀ has no such trouble; that is why we use it and multiply only when needed: \\(J_{X_P} = E_P\\,J_v\\) and \\(J_{X_R} = E_R\\,J_\\omega\\)')}</div>` }],
+  answer: t(`(ρ̇, θ̇, ż) = (${fx(XR.rate[0], 2)} m/s, ${fx(XR.rate[1], 2)} rad/s, ${fx(XR.rate[2], 2)} m/s) · v เป็นเวกเตอร์เดิมเสมอ ที่เปลี่ยนคือตัวเลขที่ใช้เขียน`, `(ρ̇, θ̇, ż) = (${fx(XR.rate[0], 2)} m/s, ${fx(XR.rate[1], 2)} rad/s, ${fx(XR.rate[2], 2)} m/s) · v is always the same vector; only the numbers that write it change`) });
+
+/* ---------- 5: notation for velocities, a train and a car ---------- */
+const TR = X.train, RCt = RB.tr(TR.RC), M5 = { t: 0 }, ro5 = el('ro5'), kmh = (a, tol) => ['x', 'y', 'z'].map((c, i) => ({ label: `${c} =`, ok: x => Math.abs(x - a[i]) < tol, w: 4 }));
+/* the slider runs over 36 s: at 100 km/h the train then covers 1 km */
+const read5 = () => { const sec = 36 * M5.t, m = v => v / 3.6 * sec;
+  ro5.innerHTML = `<div class="term">t = ${u(sec, 0)} s · ${t('รถไฟวิ่งไปแล้ว', 'the train has gone')} ${u(m(TR.vT), 0)} m · ${t('รถยนต์', 'the car')} ${u(m(TR.vC), 0)} m</div><div class="term">${t('มองจากรถไฟ รถยนต์ถอยหลังไปแล้ว', 'watched from the train, the car has fallen back by')} <b>${u(m(TR.vT - TR.vC), 0)} m</b></div>`; };
+ui.slider(el('ctl5'), { id: 'p5t', label: t('เวลา', 'time'), min: 0, max: 1, step: 0.01, value: 0, fmt: v => `${u(36 * v, 0)} s`, oninput: v => { M5.t = v; read5(); } }); read5();
+/* the open step is named on the picture: which vehicle, watched from where, written in which frame */
+const PILL = [t(`(ก) รถยนต์ มองจากพื้น เขียนใน {U}: ${v3(TR.a, 0)} km/h`, `(a) the car, watched from the ground, written in {U}: ${v3(TR.a, 0)} km/h`), t(`(ข) รถไฟ มองจากพื้น เขียนใน {C}: ${v3(TR.b, 0)} km/h`, `(b) the train, watched from the ground, written in {C}: ${v3(TR.b, 0)} km/h`), t(`(ค) รถยนต์ มองจากรถไฟ เขียนใน {C}: ${v3(TR.c, 0)} km/h`, `(c) the car, watched from the train, written in {C}: ${v3(TR.c, 0)} km/h`)];
+CH2.sim('cv5', M5, 'train', { aspect: 0.64, maxH: 480, after: (c, W, H, P) => { if (M5.step) CH2.pillAt(c, PILL[M5.step - 1], P.l2); } });
+LS.ask(el('ask5b'), { fields: kmh(TR.b, 0.5),
+  check: v => near3(v, [TR.vT, 0, 0], 0.5) ? t('นั่นคือตัวเลขที่เขียนใน {U}: ต้องหมุนเข้าเฟรม {C}', 'those numbers are written in {U}: rotate them into frame {C}') : near3(v, RB.mv(TR.RC, [TR.vT, 0, 0]), 0.5) ? t('ใช้ (ᵁ_C R)ᵀ ไม่ใช่ ᵁ_C R: แกน Y ของรถยนต์ชี้ไปข้างหน้า', 'use (ᵁ_C R)ᵀ, not ᵁ_C R: the Y axis of the car points forward') : '' });
+LS.ask(el('ask5c'), { fields: kmh(TR.c, 0.5),
+  check: v => near3(v, [TR.vC - TR.vT, 0, 0], 0.5) ? t('นั่นคือตัวเลขที่เขียนใน {T} (หรือ {U}): ต้องหมุนเข้าเฟรม {C}', 'those numbers are written in {T} (or {U}): rotate them into frame {C}') : near3(v, [0, TR.vT - TR.vC, 0], 0.5) ? t('ดูเครื่องหมาย: รถยนต์ช้ากว่ารถไฟ มองจากรถไฟจึงถอยหลัง', 'mind the sign: the car is slower than the train, so watched from the train it moves backwards') : near3(v, RB.mv(RCt, [TR.vC, 0, 0]), 0.5) ? t('นั่นคือความเร็วของรถยนต์เมื่อมองจากพื้น ข้อนี้มองจากรถไฟ', 'that is the velocity of the car watched from the ground; this one is watched from the train') : '' });
+LS.stepper(el('st5'), { onStep: k => { M5.step = k; }, steps: [
+  { why: t('<b>(ก)</b> อนุพันธ์ของตำแหน่งจุดกำเนิดของ {C} เมื่อมองจาก {U} และเขียนใน {U} คือ v<sub>C</sub> ตามนิยาม: รถยนต์วิ่งไปตามแกน X ของ {U}', '<b>(a)</b> The derivative of the position of the origin of {C}, watched from {U} and written in {U}, is v<sub>C</sub> by definition: the car drives along the X axis of {U}'),
+    tex: `{}^U\\frac{d}{dt}\\,{}^UP_{CORG} = {}^UV_{CORG} = v_C = ${tv(TR.a, 0)}\\ \\text{km/h}` },
+  { why: t(`<b>(ข)</b> รถไฟเมื่อมองจากพื้นคือ v<sub>T</sub> = ${v3([TR.vT, 0, 0], 0)} km/h ที่เขียนใน {U} เปลี่ยนไปเขียนใน {C} ด้วย \\({}^C_UR = ({}^U_CR)^T\\): รถไฟวิ่งไปตามแกน Y ของรถยนต์`, `<b>(b)</b> The train watched from the ground is v<sub>T</sub> = ${v3([TR.vT, 0, 0], 0)} km/h written in {U}. Write it in {C} with \\({}^C_UR = ({}^U_CR)^T\\): the train moves along the Y axis of the car`),
+    tex: `\\begin{aligned} {}^U_CR &= R_Z(-90^\\circ) = ${CH2.texM(TR.RC, 0)} \\\\ {}^C({}^UV_{TORG}) &= ({}^U_CR)^T\\,v_T \\\\ &= ${CH2.texM(RCt, 0)} ${CH2.texV([TR.vT, 0, 0], 0)} = ${CH2.texV(TR.b, 0)}\\ \\text{km/h} \\end{aligned}` },
+  { why: t('<b>(ค)</b> มองจากรถไฟ: {T} ขนานกับ {U} และไม่หมุน ความเร็วของรถยนต์เมื่อมองจากรถไฟจึงเป็น v<sub>C</sub> − v<sub>T</sub> แล้วหมุนเข้า {C} ด้วยเมทริกซ์เดิม (\\({}^C_TR = {}^C_UR\\) เพราะ {T} ขนานกับ {U})', '<b>(c)</b> Watched from the train: {T} is parallel to {U} and does not turn, so the velocity of the car watched from the train is v<sub>C</sub> − v<sub>T</sub>. Then rotate it into {C} with the same matrix (\\({}^C_TR = {}^C_UR\\), because {T} is parallel to {U})'),
+    tex: `\\begin{aligned} {}^TV_{CORG} &= v_C - v_T = (${TR.vC} - ${TR.vT},\\ 0,\\ 0) = ${tv([TR.vC - TR.vT, 0, 0], 0)}\\ \\text{km/h} \\\\ {}^C({}^TV_{CORG}) &= {}^C_TR\\;{}^TV_{CORG} = ${CH2.texM(RCt, 0)} ${CH2.texV([TR.vC - TR.vT, 0, 0], 0)} \\\\ &= ${CH2.texV(TR.c, 0)}\\ \\text{km/h} \\end{aligned}` }],
+  answer: t(`(ก) ${v3(TR.a, 0)} (ข) ${v3(TR.b, 0)} (ค) ${v3(TR.c, 0)} km/h · มองจากรถไฟ รถยนต์ถอยหลังด้วย ${TR.vT - TR.vC} km/h ตามแกน Y ของรถยนต์เอง`, `(a) ${v3(TR.a, 0)} (b) ${v3(TR.b, 0)} (c) ${v3(TR.c, 0)} km/h · watched from the train, the car falls back at ${TR.vT - TR.vC} km/h along its own Y axis`) });
+});
+</script>
+</body>
+</html>

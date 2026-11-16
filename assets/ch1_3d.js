@@ -136,7 +136,7 @@ SC.ik2 = (st, o = {}) => { const ctr = st.ctr || [0.35, 0.33], s = scene(st.name
    CH1.view.name(ctx, W, H, state, palette): draws the 3-D scene with gl3d.js, then the labels and a few 2-D notes on top.
    Without WebGL it falls back to the flat drawing of ch1.js. The camera of the last frame is kept in state._v for CH1.pick. */
 if (typeof document === 'undefined') return;
-const G = RB.G, KEY = { ink: 'ink', mut: 'muted', o: 'l1', b: 'l2', p: 'l3', x: 'x', y: 'y', z: 'z', pk: 'sel', gr: 'good', am: 'warn' }, V = CH1.view = {};
+const G = RB.G, KEY = { ink: 'ink', mut: 'muted', o: 'l1', b: 'l2', p: 'l3', x: 'x', y: 'y', z: 'z', pk: 'sel', gr: 'good', am: 'warn', rd: 'bad' }, V = CH1.view = {};
 /* the picture, then its labels, moved off the picture and off each other where needed (S3.place, as on the slides), with leader lines */
 const symW = (c, L, size) => { c.save(); c.font = `italic 500 ${size * 1.05}px ${RB.SERIF}`; let w = c.measureText(L.t).width; if (L.sub) { c.font = `500 ${Math.round(size * 1.05 * 0.68)}px ${RB.SERIF}`; w += c.measureText(L.sub).width + 0.5; } c.restore(); return w; };
 const txtW = (c, L, size) => { c.save(); c.font = `${L.b ? 700 : 500} ${size}px ${RB.FONT}`; const w = c.measureText(L.t).width; c.restore(); return w; };

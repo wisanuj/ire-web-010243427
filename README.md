@@ -13,8 +13,9 @@ Interactive Thai/English teaching site for KMUTNB course 010243427 Industrial Ro
 | 2 การบรรยายตำแหน่งและทิศทาง | `ch2_1_frames_rotation` · `ch2_2_mapping` · `ch2_3_transform_arithmetic` · `ch2_4_orientation` |
 | 3 จลนศาสตร์ไปข้างหน้า | `ch3_1_link_parameters` · `ch3_2_link_transform` · `ch3_3_examples` · `ch3_4_dh_conventions` |
 | 4 จลนศาสตร์ผกผัน | `ch4_1_solvability` · `ch4_2_algebraic` · `ch4_3_geometric` · `ch4_4_six_axis` |
+| 5 จาโคเบียน | `ch5_1_differential_motion` · `ch5_2_direct_derivative` · `ch5_3_basic_jacobian` · `ch5_4_using_jacobian` |
 
-บทที่ 5–9 จะเพิ่มทีละบท (แผนที่การเรียนใน `index.html` แสดงเป็น "เร็ว ๆ นี้")
+บทที่ 6–9 จะเพิ่มทีละบท (แผนที่การเรียนใน `index.html` แสดงเป็น "เร็ว ๆ นี้")
 
 ทุกหน้า: ภาพสไลด์อยู่ในเนื้อเรื่อง · ภาพจำลองแยกทีละโจทย์ เรียงตามลำดับ · ลองตอบก่อน แล้วเปิดเฉลยทีละขั้นด้วยปุ่ม · แขนกลในภาพจำลองบอกพิกัด x, y, z ของปลายแขนตลอดเวลา
 

@@ -249,7 +249,7 @@ SC.multi = (st = {}, o = {}) => { const c3 = view([0, 0, 0.12], 6.6, 28, 20), s 
    CH2.view(name, ctx, W, H, state, palette): draws the scene with gl3d.js (or flat without WebGL), then its labels in 2-D on top.
    The camera of the last frame is kept in state._v for picking. */
 if (typeof document === 'undefined') return;
-const G = RB.G, KEY = { ink: 'ink', mut: 'muted', o: 'l1', b: 'l2', p: 'l3', x: 'x', y: 'y', z: 'z', pk: 'sel', gr: 'good', am: 'warn' };
+const G = RB.G, KEY = { ink: 'ink', mut: 'muted', o: 'l1', b: 'l2', p: 'l3', x: 'x', y: 'y', z: 'z', pk: 'sel', gr: 'good', am: 'warn', rd: 'bad' };
 /* a label with Craig's leading superscript (ᴬP), a subscript and trailing text */
 /* a label with Craig's leading superscript (ᴬP), a subscript and trailing text. lw: its width; label: draws it with the left end of its baseline at (x, y) */
 const fonts = size => { const fs = Math.round(size * 0.66); return { fM: `italic 600 ${size}px ${RB.SERIF}`, fS: `600 ${fs}px ${RB.SERIF}`, fP: `italic 600 ${fs}px ${RB.SERIF}`, fT: b => `${b ? 700 : 500} ${size}px ${RB.FONT}` }; };
