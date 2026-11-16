@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="6.2 — Velocity propagation from link to link">6.2 — การส่งต่อความเร็วจากก้านสู่ก้าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=19">
+<script src="assets/stops.js?v=19"></script><script src="assets/shell.js?v=19"></script>
+<script src="assets/robot.js?v=19"></script><script src="assets/lesson.js?v=19"></script><script src="assets/ch2.js?v=19"></script><script src="assets/ch3.js?v=19"></script><script src="assets/ch4.js?v=19"></script><script src="assets/ch5.js?v=19"></script><script src="assets/ch6.js?v=19"></script><script src="assets/scene3d.js?v=19"></script><script src="assets/gl3d.js?v=19"></script><script src="assets/ch2_3d.js?v=19"></script><script src="assets/ch3_3d.js?v=19"></script><script src="assets/ch6_3d.js?v=19"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">การส่งต่อความเร็วจากก้านสู่ก้าน <span class="en">Velocity propagation — from the base to the tool, one link at a time</span></h1>
+<h1 data-l="en">Velocity propagation from link to link <span class="en">From the base to the tool, one link at a time</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch6/s12.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 12: the two formulas that pass the angular and the linear velocity from link i to link i + 1, for a turning joint and for a sliding joint">
+    <figcaption data-l="th">สไลด์บทที่ 6 หน้า 12 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 6 slides, p. 12 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">ความเร็วของก้าน i บอกได้ด้วยเวกเตอร์สองตัว: <b>\(v_i\)</b> คือความเร็วเชิงเส้นของจุดกำเนิดเฟรม {i} และ <b>\(\omega_i\)</b> คือความเร็วเชิงมุมของก้าน ทั้งสองวัดเทียบกับฐานที่อยู่นิ่ง แต่เขียนตัวเลขในเฟรมของก้านนั้นเอง: \({}^iv_i\) และ \({}^i\omega_i\) หลักคิดมีเพียงข้อเดียว: <b>ก้าน i + 1 มีความเร็วของก้าน i บวกกับสิ่งที่ข้อต่อ i + 1 เพิ่มให้</b> จึงเริ่มที่ฐานซึ่งความเร็วเป็นศูนย์ทั้งสองตัว แล้วเดินขึ้นไปทีละก้านจนถึงปลายแขน วิธีนี้ไม่ต้องหาอนุพันธ์เลย ใช้เพียงเมทริกซ์การแปลงของก้านจากบทที่ 3 กับผลคูณไขว้ หัวข้อนี้ผิดกันบ่อยในการสอบ หน้านี้จึงเดินทีละขั้นเล็ก ๆ ครอบคลุมสไลด์หน้า 11–19 มี <b>เครื่องมือ 1 ชิ้น (A)</b> และ <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">The velocity of link i is two vectors: <b>\(v_i\)</b>, the linear velocity of the origin of frame {i}, and <b>\(\omega_i\)</b>, the angular velocity of the link. Both are measured against the fixed base, but their numbers are written in the link's own frame: \({}^iv_i\) and \({}^i\omega_i\). There is one idea only: <b>link i + 1 has the velocity of link i plus what joint i + 1 adds</b>. So we start at the base, where both velocities are zero, and walk up the arm one link at a time until we reach the tool. Nothing is differentiated: all it takes is the link transforms of chapter 3 and a cross product. This topic often goes wrong in exams, so this page takes small steps. It covers slides pp. 11–19, with <b>one tool (A)</b> and <b>3 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>ข้อต่อ i + 1 เป็น<b>ข้อต่อหมุน</b>: \({}^{i+1}\omega_{i+1} = {}^{i+1}_iR\,{}^i\omega_i + \dot\theta_{i+1}\,{}^{i+1}\hat Z_{i+1}\) และ \({}^{i+1}v_{i+1} = {}^{i+1}_iR\,\big({}^iv_i + {}^i\omega_i \times {}^iP_{i+1}\big)\)</li><li>ข้อต่อ i + 1 เป็น<b>ข้อต่อเลื่อน</b>: ω ส่งต่อไปโดยไม่มีอะไรเพิ่ม \({}^{i+1}\omega_{i+1} = {}^{i+1}_iR\,{}^i\omega_i\) ส่วน v ได้เพิ่ม \(\dot d_{i+1}\,{}^{i+1}\hat Z_{i+1}\): \({}^{i+1}v_{i+1} = {}^{i+1}_iR\,\big({}^iv_i + {}^i\omega_i \times {}^iP_{i+1}\big) + \dot d_{i+1}\,{}^{i+1}\hat Z_{i+1}\)</li><li>\({}^{i+1}_iR\) คือ<b>ทรานสโพส</b>ของส่วนการหมุน (3 × 3) ของ \({}^i_{i+1}T\) และ \({}^iP_{i+1}\) คือ<b>คอลัมน์ 4</b> ของเมทริกซ์เดียวกัน ส่วน \({}^{i+1}\hat Z_{i+1} = (0, 0, 1)\) เสมอ</li><li>หา <b>ω ก่อน v</b> ทุกครั้ง เพราะ v ของก้านถัดไปต้องใช้ ω ของก้านปัจจุบัน</li><li>คำตอบออกมาในเฟรมสุดท้าย {N} ถ้าต้องการในเฟรมฐาน ให้คูณด้วย \({}^0_NR\): \({}^0v_N = {}^0_NR\,{}^Nv_N\) ตัวเลขเปลี่ยน แต่ความยาวของเวกเตอร์เท่าเดิม</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>Joint i + 1 <b>turns</b>: \({}^{i+1}\omega_{i+1} = {}^{i+1}_iR\,{}^i\omega_i + \dot\theta_{i+1}\,{}^{i+1}\hat Z_{i+1}\) and \({}^{i+1}v_{i+1} = {}^{i+1}_iR\,\big({}^iv_i + {}^i\omega_i \times {}^iP_{i+1}\big)\).</li><li>Joint i + 1 <b>slides</b>: ω is passed on with nothing added, \({}^{i+1}\omega_{i+1} = {}^{i+1}_iR\,{}^i\omega_i\), and v gets \(\dot d_{i+1}\,{}^{i+1}\hat Z_{i+1}\) more: \({}^{i+1}v_{i+1} = {}^{i+1}_iR\,\big({}^iv_i + {}^i\omega_i \times {}^iP_{i+1}\big) + \dot d_{i+1}\,{}^{i+1}\hat Z_{i+1}\).</li><li>\({}^{i+1}_iR\) is the <b>transpose</b> of the rotation part (3 × 3) of \({}^i_{i+1}T\), and \({}^iP_{i+1}\) is <b>column 4</b> of the same matrix. \({}^{i+1}\hat Z_{i+1} = (0, 0, 1)\), always.</li><li>Always <b>ω first, then v</b>: the v of the next link needs the ω of this one.</li><li>The answer comes out in the last frame {N}. For the base frame multiply by \({}^0_NR\): \({}^0v_N = {}^0_NR\,{}^Nv_N\). The numbers change, the length of the vector does not.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#tA"><b>A</b>ดูความเร็วส่งต่อขึ้นแขน</a><a href="#ex1"><b>1</b>แขนสองก้าน</a><a href="#ex2"><b>2</b>เขียนในเฟรมฐาน</a><a href="#ex3"><b>3</b>แขน RRP</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#tA"><b>A</b>Velocities up the arm</a><a href="#ex1"><b>1</b>Two-link arm</a><a href="#ex2"><b>2</b>In the base frame</a><a href="#ex3"><b>3</b>RRP arm</a></nav>
+
+<section class="prob" id="tA">
+  <div class="prob-head"><span class="prob-no">A</span><div><h2 data-l="th">เครื่องมือ: ดูความเร็วส่งต่อขึ้นไปตามแขน</h2><h2 data-l="en">Tool: watch the velocities travel up the arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 11–13 · แขนสองก้าน l₁ = 0.5, l₂ = 0.4 m · ตั้งท่าและอัตราของข้อต่อ แล้วเลือกว่าจะดูถึงเฟรมไหน · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, pp. 11–13 · two-link arm l₁ = 0.5, l₂ = 0.4 m · set a pose and the joint rates, then choose how far up the arm to look · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cvA"></canvas><div class="ctl" id="ctlA"></div><div class="ctl" id="selA"></div><div class="readout" id="roA"></div>
+      <div class="simnote" data-l="th">ลูกศร<b class="ax-y">สีเขียว</b>คือ v ของจุดกำเนิดแต่ละเฟรม (ลูกศรยาว 0.04 m แทนความเร็ว 0.1 m/s) ลูกศรโค้ง<b style="color:var(--purple)">สีม่วง</b>คือ ω: ทวนเข็มนาฬิกาเมื่อเป็นบวก และโค้งยาวขึ้นเมื่อหมุนเร็วขึ้น ตัวเลขในตารางเขียนในเฟรมของก้านนั้นเอง เฟรม {3} อยู่ที่ปลายแขนและติดกับก้าน 2</div>
+      <div class="simnote" data-l="en">The <b class="ax-y">green</b> arrows are the v of the origin of each frame (0.04 m of arrow for 0.1 m/s). The curved <b style="color:var(--purple)">purple</b> arrows are ω: counter-clockwise when positive, and a longer arc for a faster turn. The numbers in the table are written in each link's own frame. Frame {3} sits at the tip and is fixed to link 2.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch6/s13.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 13: the recipe in six steps: link transforms, start at the base, omega first, then v, repeat to the tool, multiply by the rotation to the base frame">
+      <figcaption data-l="th">สไลด์หน้า 13 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 13 · tap to enlarge</figcaption></figure>
+      <p class="lead" data-l="th">สไลด์นี้คือวิธีทำทั้งหมดของหน้านี้ ย่อเหลือ 6 ขั้น ก่อนลงมือคำนวณ ลองดูให้เห็นภาพก่อน กดปุ่ม <b>ถึงเฟรม {1}</b>, <b>{2}</b>, <b>{3}</b> ตามลำดับ: ความเร็วของแต่ละเฟรมสร้างต่อจากเฟรมก่อนหน้าเสมอ</p>
+      <p class="lead" data-l="th">แล้วลองสองกรณีนี้ <b>(ก)</b> ตั้ง θ̇₂ = 0 เลื่อนเฉพาะ θ̇₁: ทั้งแขนหมุนเป็นชิ้นเดียว ω₂ = ω₁ และ v โตตามระยะจากฐาน <b>(ข)</b> ตั้ง θ̇₁ = 0 เลื่อนเฉพาะ θ̇₂: ก้าน 1 อยู่นิ่ง ข้อศอกจึงไม่มีความเร็ว (v₂ = 0) เหลือแต่ปลายแขนที่วิ่งตั้งฉากกับก้าน 2 สุดท้ายเลื่อน θ₁: รูปหมุนไปทั้งแขน แต่ตัวเลขในตารางไม่เปลี่ยนเลย เพราะเขียนในเฟรมที่ติดไปกับก้าน</p>
+      <p class="lead" data-l="en">This slide is the whole method of this page in six steps. Before any calculation, get the picture: press <b>up to frame {1}</b>, <b>{2}</b>, <b>{3}</b> in turn. The velocity of each frame is always built on that of the frame before.</p>
+      <p class="lead" data-l="en">Then try two cases. <b>(a)</b> Set θ̇₂ = 0 and move only θ̇₁: the whole arm turns as one piece, ω₂ = ω₁, and v grows with the distance from the base. <b>(b)</b> Set θ̇₁ = 0 and move only θ̇₂: link 1 stands still, so the elbow has no velocity (v₂ = 0) and only the tip moves, square to link 2. Last, move θ₁: the whole picture turns, but the numbers in the table do not change at all, because they are written in frames that ride on the links.</p></div>
+  </div>
+</section>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">แขนสองก้าน: ทำทีละก้าน</h2><h2 data-l="en">The two-link arm, link by link</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 14–17 (Craig ตัวอย่าง 5.3) · l₁ = 0.5, l₂ = 0.4 m · ท่า θ = (30°, 45°) · อัตรา θ̇ = (0.5, −1.0) rad/s · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, pp. 14–17 (Craig, example 5.3) · l₁ = 0.5, l₂ = 0.4 m · pose θ = (30°, 45°) · rates θ̇ = (0.5, −1.0) rad/s · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s14.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 14: the two-link arm with frames 0 and 1 at the base, frame 2 at the elbow and frame 3 at the tip, and its three link transforms">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 14 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 14 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">แขนเริ่มที่ท่าของโจทย์ แต่อัตราของข้อต่อ<b>ยังไม่ใช่</b>ของโจทย์ เมื่อเปิดเฉลย รูปและตารางจะกลับไปใช้ค่าของโจทย์ แล้วแสดงความเร็วเพิ่มทีละก้านตามขั้นที่เปิด ในขั้นที่หา ω รูปจะแสดงเฉพาะ ω (ลูกศรโค้งสีม่วง) ลูกศร v ยาว 0.08 m แทนความเร็ว 0.1 m/s</div>
+      <div class="simnote" data-l="en">The arm starts in the pose of the problem, but the joint rates are <b>not yet</b> those of the problem. Once you open the solution, the picture and the table go to the values of the problem and show the velocities one link further with every step. In a step that finds ω the picture shows the ω only (curved purple arrows). 0.08 m of arrow v stands for 0.1 m/s.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขนสองก้านในระนาบ ข้อต่อทั้งสองเป็นข้อต่อหมุน เฟรม {3} อยู่ที่ปลายแขน มีทิศเดียวกับเฟรม {2} และไม่มีข้อต่อ (\(\dot\theta_3 = 0\)) เมทริกซ์การแปลงของก้านจากบทที่ 3 (\(c_1 = \cos\theta_1\), \(s_2 = \sin\theta_2\)):</div>
+        <div data-l="en">A planar two-link arm; both joints turn. Frame {3} sits at the tip, has the orientation of frame {2} and has no joint (\(\dot\theta_3 = 0\)). The link transforms from chapter 3 (\(c_1 = \cos\theta_1\), \(s_2 = \sin\theta_2\)):</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;margin:8px 0">
+          <span>\({}^0_1T = \begin{bmatrix} c_1 &amp; -s_1 &amp; 0 &amp; 0 \\ s_1 &amp; c_1 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}\)</span>
+          <span>\({}^1_2T = \begin{bmatrix} c_2 &amp; -s_2 &amp; 0 &amp; l_1 \\ s_2 &amp; c_2 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}\)</span>
+          <span>\({}^2_3T = \begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; l_2 \\ 0 &amp; 1 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}\)</span></div>
+        <div data-l="th">ที่ \(l_1 = 0.5\), \(l_2 = 0.4\ \text{m}\), \(\theta = (30^\circ,\ 45^\circ)\) และ \(\dot\theta = (0.5,\ -1.0)\ \text{rad/s}\) หาความเร็วของปลายแขน \({}^3v_3\) และ \({}^3\omega_3\) (เขียนในเฟรม {3})</div>
+        <div data-l="en">At \(l_1 = 0.5\), \(l_2 = 0.4\ \text{m}\), \(\theta = (30^\circ,\ 45^\circ)\) and \(\dot\theta = (0.5,\ -1.0)\ \text{rad/s}\), find the velocity of the tip, \({}^3v_3\) and \({}^3\omega_3\) (written in frame {3}).</div></div>
+      <div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">เขียนคำตอบในเฟรมฐาน</h2><h2 data-l="en">Written in the base frame</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 18 (Craig สมการ 5.57) · แขน ท่า และอัตราเดียวกับโจทย์ 1 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, p. 18 (Craig, equation 5.57) · the arm, pose and rates of problem 1 · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s18.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 18: the rotation matrix from frame 3 to frame 0, a turn by theta 1 plus theta 2 about Z, and the product that writes the tip velocity in the base frame">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 18 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 18 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">ในรูปมีลูกศร v ของปลายแขนเพียงอันเดียว (ยาว 0.15 m แทนความเร็ว 0.1 m/s) เส้นประคือองค์ประกอบของลูกศรนี้ตามแกนของเฟรมที่ใช้เขียน: <b class="ax-x">สีแดง</b>ตามแกน X และ<b class="ax-y">สีเขียว</b>ตามแกน Y ลองเลื่อน θ₁: ลูกศรหมุนไปพร้อมกับแขน ³v₃ จึงไม่เปลี่ยน แต่ ⁰v₃ เปลี่ยน</div>
+      <div class="simnote" data-l="en">The picture has one arrow only, the v of the tip (0.15 m of arrow for 0.1 m/s). The dashed lines are its components along the axes of the frame it is written in: <b class="ax-x">red</b> along X and <b class="ax-y">green</b> along Y. Move θ₁: the arrow turns with the arm, so ³v₃ stays the same while ⁰v₃ changes.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">โจทย์ 1 ได้ \({}^3v_3\) ซึ่งเขียนในเฟรม {3} ที่หมุนไปกับปลายแขน ถ้าอยากรู้ว่าปลายแขนเคลื่อนที่ไปทางไหนเมื่อเทียบกับพื้นโรงงาน ต้องเขียนในเฟรมฐาน {0}: หา \({}^0v_3\) ที่ท่าและอัตราเดิม</div>
+        <div data-l="en">Problem 1 gave \({}^3v_3\), written in frame {3}, which turns with the tip. To know which way the tip moves over the factory floor, the velocity must be written in the base frame {0}: find \({}^0v_3\) at the same pose and rates.</div></div>
+      <div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">แบบฝึกหัดในห้อง (ทำเป็นคู่): แขน RRP</h2><h2 data-l="en">Class exercise in pairs: the RRP arm</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 19 · แขนของการบ้านชุดที่ 4 · L₁ = 0.5, L₂ = 0.3 m · ท่า q = (35°, 25°, 0.4 m) · อัตรา q̇ = (0.3 rad/s, −0.2 rad/s, 0.05 m/s) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, p. 19 · the arm of homework 4 · L₁ = 0.5, L₂ = 0.3 m · pose q = (35°, 25°, 0.4 m) · rates q̇ = (0.3 rad/s, −0.2 rad/s, 0.05 m/s) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s19.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 19: the RRP arm of homework 4 with its four frames, a column, a horizontal link to the elbow and a sliding link, and its table of link parameters">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 19 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 19 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">ลูกศร<b class="ax-y">สีเขียว</b>คือ v (ยาว 0.08 m แทนความเร็ว 0.1 m/s) ลูกศร<b style="color:var(--purple)">สีม่วง</b>คือ ω: ชี้ตามแกนที่ก้านกำลังหมุนรอบ (กฎมือขวา) ยาว 0.03 m แทน 0.1 rad/s ทั้งสองวาดที่จุดกำเนิดของเฟรมนั้น แขนเริ่มที่ท่าของโจทย์ แต่อัตราของข้อต่อยังไม่ใช่ของโจทย์ ในขั้นที่หา ω รูปจะแสดงเฉพาะ ω</div>
+      <div class="simnote" data-l="en">The <b class="ax-y">green</b> arrows are v (0.08 m of arrow for 0.1 m/s). The <b style="color:var(--purple)">purple</b> arrows are ω: each points along the axis its link is turning about (right-hand rule), 0.03 m of arrow for 0.1 rad/s. Both are drawn at the origin of their frame. The arm starts in the pose of the problem, but the joint rates are not yet those of the problem. In a step that finds ω the picture shows the ω only.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขน RRP (revolute–revolute–prismatic: ข้อต่อหมุน 2 ตัว ตามด้วยข้อต่อเลื่อน 1 ตัว) ของการบ้านชุดที่ 4: เสาสูง L₁ หมุนรอบแกนตั้งด้วย θ₁ ก้านแนวราบยาว L₂ ไปถึงข้อศอกซึ่งหมุนด้วย θ₂ แล้วก้านเลื่อนยืดออกไปเป็นระยะ d₃ ตาราง DH (Denavit–Hartenberg) แบบ Craig:</div>
+        <div data-l="en">The RRP arm (revolute–revolute–prismatic: two turning joints, then a sliding one) of homework 4: a column of height L₁ turns about the vertical by θ₁, a horizontal link of length L₂ leads to an elbow that turns by θ₂, and a sliding link reaches out by d₃. Its DH (Denavit–Hartenberg) table in Craig's convention:</div>
+        <div id="tab3"></div>
+        <div data-l="th">ส่งต่อความเร็วจากฐาน หา \({}^3\omega_3\) และ \({}^3v_3\) ในรูปของ \(\dot\theta_1,\ \dot\theta_2,\ \dot d_3\) แล้วแทนค่าที่ \(L_1 = 0.5\), \(L_2 = 0.3\ \text{m}\), \(q = (35^\circ,\ 25^\circ,\ 0.4\ \text{m})\) และ \(\dot q = (0.3\ \text{rad/s},\ -0.2\ \text{rad/s},\ 0.05\ \text{m/s})\)</div>
+        <div data-l="en">Propagate the velocities from the base. Find \({}^3\omega_3\) and \({}^3v_3\) in terms of \(\dot\theta_1,\ \dot\theta_2,\ \dot d_3\), then put in \(L_1 = 0.5\), \(L_2 = 0.3\ \text{m}\), \(q = (35^\circ,\ 25^\circ,\ 0.4\ \text{m})\) and \(\dot q = (0.3\ \text{rad/s},\ -0.2\ \text{rad/s},\ 0.05\ \text{m/s})\).</div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> องค์ประกอบ x, y, z ของ \({}^3v_3\) เป็น m/s</p>
+      <p class="lead" data-l="en"><b>(a)</b> The x, y, z components of \({}^3v_3\) in m/s</p>
+      <div id="ask3v"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> องค์ประกอบ x, y, z ของ \({}^3\omega_3\) เป็น rad/s</p>
+      <p class="lead" data-l="en"><b>(b)</b> The x, y, z components of \({}^3\omega_3\) in rad/s</p>
+      <div id="ask3w"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ก้านที่ไม่หมุน แต่ปลายยังเคลื่อนที่</h3>
+    <ol><li>ในเครื่องมือ A ตั้ง θ̇₁ = 1.0 และ θ̇₂ = −1.0 rad/s: ω₂ = θ̇₁ + θ̇₂ = 0 ก้าน 2 ไม่หมุนเลยเมื่อเทียบกับพื้น (ชี้ไปทิศเดิมตลอด) แต่ปลายแขนยังมีความเร็ว เพราะข้อศอกพาทั้งก้านไป ดูตาราง: ³v₃ เท่ากับ ²v₂ ทุกช่อง ทุกจุดบนก้านที่ไม่หมุนมีความเร็วเท่ากัน</li><li>เครื่องมือ A: ตั้ง θ₂ = 0° (แขนเหยียดตรง) แล้วเลื่อนอัตราใดก็ได้: ช่อง x ของ ³v₃ เป็นศูนย์เสมอ ปลายแขนไม่มีความเร็วตามแนวแขน นี่คือภาวะเอกฐานของหน้า 5.4 ที่เห็นได้จากสูตร l₁s₂θ̇₁</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ข้อต่อเลื่อนให้อะไร</h3>
+    <ol><li>โจทย์ 3: ตั้ง θ̇₁ = θ̇₂ = 0 แล้วเลื่อนเฉพาะ ḋ₃: ลูกศร v ชี้ตามแกน Z₃ ของก้านเลื่อนพอดี ³v₃ = (0, 0, ḋ₃) และไม่มีลูกศร ω เลย ข้อต่อเลื่อนเพิ่มได้แต่ความเร็วเชิงเส้น</li><li>โจทย์ 3: ตั้งเฉพาะ θ̇₁ แล้วเลื่อน d₃ ให้ยาวขึ้น: v ของปลายแขนโตขึ้นเพราะรัศมี L₂ + d₃c₂ ยาวขึ้น แต่ ω ไม่เปลี่ยน ความเร็วเชิงมุมไม่ขึ้นกับว่าจุดอยู่ไกลแค่ไหน</li></ol></div>
+  <div class="card"><h3>สี่จุดที่ผิดบ่อย</h3>
+    <ol><li><b>ลืมทรานสโพส</b>: สูตรใช้ \({}^{i+1}_iR\) ไม่ใช่ \({}^i_{i+1}R\) ที่อยู่ในเมทริกซ์การแปลงของก้าน</li><li><b>ใช้ \({}^iP_{i+1}\) ผิดตัว</b>: ต้องเป็นคอลัมน์ 4 ของ \({}^i_{i+1}T\) ซึ่งเขียนในเฟรม {i} เฟรมเดียวกับ \({}^i\omega_i\) ที่นำมาคูณไขว้</li><li><b>ลืมพจน์</b>: \(\omega \times P\) ของทุกก้าน หรือ \(\dot d\,\hat Z\) ของข้อต่อเลื่อน</li><li><b>θ ในตาราง DH ไม่ใช่ตัวแปรข้อต่อเสมอไป</b>: แถวที่ 2 ของแขน RRP คือ θ₂ − 90° จึงได้ \(\cos(\theta_2 - 90^\circ) = s_2\)</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 6 หน้า 11–19 (ภาพอยู่ในหน้านี้แล้ว) · Craig 5.5–5.6 (ตัวอย่าง 5.3) · สไลด์เดิม Part I หน้า 8–23</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — a link that does not turn, a tip that still moves</h3>
+    <ol><li>In tool A set θ̇₁ = 1.0 and θ̇₂ = −1.0 rad/s: ω₂ = θ̇₁ + θ̇₂ = 0. Link 2 does not turn at all against the floor (it keeps pointing the same way), yet the tip has a velocity, because the elbow carries the whole link along. Look at the table: ³v₃ equals ²v₂ in every component. Every point of a link that does not turn has the same velocity.</li><li>Tool A: set θ₂ = 0° (the arm straight) and move either rate: the x component of ³v₃ is always zero, so the tip has no velocity along the arm. That is the singularity of page 5.4, seen here in the term l₁s₂θ̇₁.</li></ol></div>
+  <div class="card"><h3>Try this 2 — what a sliding joint adds</h3>
+    <ol><li>Problem 3: set θ̇₁ = θ̇₂ = 0 and move only ḋ₃: the arrow v points exactly along Z₃ of the sliding link, ³v₃ = (0, 0, ḋ₃), and there is no arrow ω at all. A sliding joint can add linear velocity only.</li><li>Problem 3: set only θ̇₁ and make d₃ longer: the v of the tip grows, because the radius L₂ + d₃c₂ grows, but ω does not change. An angular velocity does not depend on how far out a point is.</li></ol></div>
+  <div class="card"><h3>Four usual mistakes</h3>
+    <ol><li><b>Forgetting the transpose</b>: the formulas use \({}^{i+1}_iR\), not the \({}^i_{i+1}R\) that stands in the link transform.</li><li><b>The wrong \({}^iP_{i+1}\)</b>: it is column 4 of \({}^i_{i+1}T\), written in frame {i}, the same frame as the \({}^i\omega_i\) it is crossed with.</li><li><b>A forgotten term</b>: the \(\omega \times P\) of every link, or the \(\dot d\,\hat Z\) of a sliding joint.</li><li><b>The θ of the DH table is not always the joint variable</b>: row 2 of the RRP arm is θ₂ − 90°, which gives \(\cos(\theta_2 - 90^\circ) = s_2\).</li></ol>
+    <div class="book">Source: chapter 6 slides, pp. 11–19 (the pictures are on this page) · Craig 5.5–5.6 (example 5.3) · old part I slides pp. 8–23</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, dn = RB.d, rad = RB.rad, deg = RB.deg, X = CH6.EX, OV = CH6.OV, T2 = CH6.two, XT = X.two, L = XT.L, XR = X.rrp, LR = XR.L, RROWS = CH6.rrp.rows(LR);
+const el = id => document.getElementById(id), norm = a => Math.hypot(...a), near = (a, b, tol = 0.002) => a.every((x, i) => Math.abs(x - b[i]) < tol);
+const fx = (x, n = 3) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n), v3 = (a, n = 3) => `(${a.map(x => fx(x, n)).join(', ')})`;   // fixed decimals: the numbers do not jump about while a slider moves
+const vu = (a, n = 3) => `(${a.map(x => u(x, n)).join(', ')})`;                                                                                // a vector in an answer line, trailing zeros dropped
+const col = (...a) => `\\begin{bmatrix} ${a.join(' \\\\ ')} \\end{bmatrix}`, tc = (a, n = 3) => CH2.texV(a, n), pn = (x, n = 3) => x < 0 ? `(${dn(x, n)})` : dn(x, n), p1 = x => x < 0 ? `(${x.toFixed(1)})` : x.toFixed(1);   // TeX: a column of symbols, a column of numbers, a negative number in brackets (p1: with one decimal)
+const Pp = T => RB.Tp(T), Dd = (T, j) => RB.col(RB.TR(T), j), up = (p, h) => [p[0], p[1], p[2] + h];
+/* a dashed line a → b with its name; left out when the two points fall together */
+const seg = (s, a, b, key, tx, o) => { if (norm(OV.sub(b, a)) > 0.012) OV.dist(s, a, b, key, tx, o); };
+/* an arrow from a along d, k metres of arrow per unit of d; returns its head, so that the next arrow can start there */
+const arw = (s, a, d, k, key, tx, o) => { const b = OV.v(a, d, k); if (norm(OV.sub(b, a)) > 0.012) OV.vec(s, a, b, key, tx, o); return b; };
+/* a velocity with the numbers c written in frame Fr, drawn as dashed legs along that frame's axes, tip to tail from a; lab(j) = [text, options] */
+const legs = (s, a, Fr, c, vs, lab) => { [0, 1, 2].forEach(j => { if (Math.abs(c[j]) * vs < 0.012) return; const b = OV.v(a, Dd(Fr, j), c[j] * vs), [tx, o] = lab(j); OV.dist(s, a, b, 'xyz'[j], tx, o); a = b; }); };
+/* the velocities of frames 1…n as a table, each row written in its own frame. Rows above `upto` are still to come (the solution has not reached them);
+   o.noV: the newest row has its ω only (that step is finding ω); o.hl: the row to highlight */
+const vtab = (P, upto, o = {}) => `<div class="tscroll"><table class="dhtab sols"><tr><th>${t('เฟรม', 'frame')} i</th><th><sup>i</sup>ω<sub>i</sub> (rad/s)</th><th><sup>i</sup>v<sub>i</sub> (m/s)</th><th>|v<sub>i</sub>| (m/s)</th></tr>` +
+  P.slice(1).map((p, j) => { const i = j + 1, on = i <= upto, onV = on && !(o.noV && i === upto); return `<tr class="${o.hl === i ? 'hl' : ''}"><th>{${i}}</th><td>${on ? v3(p.w) : '…'}</td><td>${onV ? v3(p.v) : '…'}</td><td>${onV ? fx(norm(p.v)) : '…'}</td></tr>`; }).join('') + '</table></div>';
+/* the propagation done with one of the usual slips, for the hints of the answer boxes: noT ^i_{i+1}R used without the transpose, noX the ω × P term left out,
+   noD the ḋ Ẑ of a sliding joint left out, own ω not passed on (only the joint's own rate), th0 the constant part of θ in the DH table dropped */
+const slip = (rows, q, qd, o) => { let w = [0, 0, 0], v = [0, 0, 0];
+  rows.forEach((r, i) => { const T = RB.dhT(r.al, r.a, (o.th0 ? 0 : r.th) + (r.j === 'R' ? q[i] : 0), r.d + (r.j === 'P' ? q[i] : 0)), R = RB.TR(T), M = o.noT ? R : RB.tr(R), rate = r.j ? qd[i] : 0;
+    const w2 = RB.add(o.own && r.j === 'R' ? [0, 0, 0] : RB.mv(M, w), r.j === 'R' ? [0, 0, rate] : [0, 0, 0]);
+    v = RB.add(RB.mv(M, o.noX ? v : RB.add(v, RB.cross(w, RB.Tp(T)))), r.j === 'P' && !o.noD ? [0, 0, rate] : [0, 0, 0]); w = w2; }); return { w, v }; };
+/* sliders: an angle M.q[i] shown in degrees, or a plain number M[key][i] */
+const angS = (box, id, label, M, i, lo, hi, onch) => ui.slider(box, { id, label, min: lo, max: hi, step: 1, value: Math.round(deg(M.q[i])), fmt: v => `${v}°`, oninput: v => { M.q[i] = rad(v); onch(); } });
+const numS = (box, id, label, M, key, i, lo, hi, step, unit, onch) => ui.slider(box, { id, label, min: lo, max: hi, step, value: M[key][i], fmt: v => `${u(v, 2)} ${unit}`, oninput: v => { M[key][i] = v; onch(); } });
+/* TeX of the matrices the steps use again and again */
+const R21 = '\\begin{bmatrix} c_2 & s_2 & 0 \\\\ -s_2 & c_2 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix}', W1 = col('0', '0', '\\dot\\theta_1'), W12 = col('0', '0', '\\dot\\theta_1 + \\dot\\theta_2'), Z0 = col('0', '0', '0');
+
+/* ---------- A: watch the velocities travel up the arm (a pose and rates of its own, not those of problem 1) ---------- */
+const MA = { ex: 'two', q: [rad(40), rad(60)], qd: [1.0, 0.5], upto: 3, frames: [0, 1, 2, 3], vs: 0.4, fit: true, xyz: true }, roA = el('roA'), cA = el('ctlA');
+const readA = () => { const P = CH6.prop(T2.rows(L), MA.q, MA.qd);
+  roA.innerHTML = vtab(P, 3, { hl: MA.upto }) + `<div class="term">${t('แถวที่เน้นคือเฟรมที่ลูกศรเส้นหนาในรูป · ตัวเลขทุกแถวเขียนในเฟรมของแถวนั้นเอง', 'the highlighted row is the frame with the bold arrows in the picture · every row is written in its own frame')}</div>`; };
+angS(cA, 'a1', 'θ₁', MA, 0, -180, 180, readA); angS(cA, 'a2', 'θ₂', MA, 1, -150, 150, readA); numS(cA, 'a3', 'θ̇₁', MA, 'qd', 0, -2, 2, 0.1, 'rad/s', readA); numS(cA, 'a4', 'θ̇₂', MA, 'qd', 1, -2, 2, 0.1, 'rad/s', readA);
+ui.radio(el('selA'), [{ id: 'upA1', label: t('ถึงเฟรม {1}', 'up to frame {1}') }, { id: 'upA2', label: t('ถึงเฟรม {2}', 'up to frame {2}') }, { id: 'upA3', label: t('ถึงเฟรม {3}', 'up to frame {3}'), on: true }], id => { MA.upto = +id.slice(3); readA(); }); readA();
+CH2.sim('cvA', MA, 'prop', { aspect: 0.8, maxH: 520 });
+
+/* ---------- 1: the two-link arm, link by link ---------- */
+/* starts away from the example (other rates): the table must not show the answer the box asks for; the stepper puts the example back */
+const M1 = { ex: 'two', q: XT.q.slice(), qd: [0.6, 0.3], upto: 3, frames: [0, 1, 2, 3], fit: true, xyz: true }, ro1 = el('ro1'), c1 = el('ctl1');
+const read1 = () => { ro1.innerHTML = vtab(CH6.prop(T2.rows(L), M1.q, M1.qd), M1.upto, { noV: M1.show === 'w' }); };
+const s1 = [angS(c1, 'p1a', 'θ₁', M1, 0, -180, 180, read1), angS(c1, 'p1b', 'θ₂', M1, 1, -150, 150, read1), numS(c1, 'p1c', 'θ̇₁', M1, 'qd', 0, -1.5, 1.5, 0.1, 'rad/s', read1), numS(c1, 'p1d', 'θ̇₂', M1, 'qd', 1, -1.5, 1.5, 0.1, 'rad/s', read1)];
+const put1 = () => { M1.q = XT.q.slice(); M1.qd = XT.qd.slice(); [...M1.q.map(a => Math.round(deg(a))), ...M1.qd].forEach((x, i) => s1[i].set(x)); }; read1();
+/* how far up the arm each step has come: [upto, what is drawn]. A step that finds ω shows the ω only */
+const WALK1 = [[0, 'both'], [1, 'w'], [1, 'both'], [2, 'w'], [2, 'w'], [2, 'both'], [3, 'w'], [3, 'both'], [3, 'both']];
+/* the open step: 1 the base stands still; 3 the origin of {1} stays put; 5 ¹P₂ and the velocity the turning of link 1 gives the elbow;
+   6 that same arrow split along X₂ and Y₂; 8 ²P₃ and, at the tip, the elbow's velocity plus the turning of link 2, tip to tail; 9 ³v₃ split along X₃ and Y₃ (the scene's comp) */
+M1.ov = (s, st) => { const k = st.step, F = s.F, I = s.info; if (!k || !F || !I) return; const O = F.map(T => up(Pp(T), 0.06)), Pr = I.prop, vs = st.vs || 0.8;
+  if (k === 1) OV.name(s, O[0], 'ink', t('ฐานอยู่นิ่ง', 'the base stands still'), { m: 0, s: 20, a: 'l', dx: 46, dy: 36 });
+  if (k === 3) OV.name(s, O[1], 'gr', t('จุดกำเนิดของ {1} อยู่บนแกนหมุน: ไม่ขยับ', 'the origin of {1} is on the axis: it stays put'), { m: 0, s: 20, a: 'l', dx: 46, dy: 36 });
+  if (k === 5) { seg(s, O[1], O[2], 'am', 'P', { pre: '1', sub: '2', s: 26, dy: -18 }); arw(s, O[2], RB.mv(Pr[1].R0, Pr[2].wxP), vs, 'pk', '¹ω₁ × ¹P₂', { m: 0, s: 19, a: 'l', dx: 14, dy: 16, r: 0.0055 }); }
+  if (k === 6) legs(s, O[2], F[2], Pr[2].v, vs, j => [['l₁s₂θ̇₁', 'l₁c₂θ̇₁', ''][j], { m: 0, s: 19, a: 'l', dx: 12, dy: j ? -12 : 20 }]);
+  if (k === 8) { seg(s, O[2], O[3], 'am', 'P', { pre: '2', sub: '3', s: 26, dy: -18 });
+    const a = arw(s, O[3], Pr[2].v0, vs, 'gr', 'v', { sub: '2', s: 22, dy: -14, r: 0.0035 }); arw(s, a, RB.mv(Pr[2].R0, Pr[3].wxP), vs, 'pk', '²ω₂ × ²P₃', { m: 0, s: 19, a: 'l', dx: 14, dy: 16, r: 0.0045 }); } };
+CH2.sim('cv1', M1, 'prop', { aspect: 0.8, maxH: 520 });
+const E1 = { noT: slip(XT.rows, XT.q, XT.qd, { noT: true }), own: slip(XT.rows, XT.q, XT.qd, { own: true }) };
+LS.ask(el('ask1'), { fields: [{ label: '³v₃: x (m/s) =', ok: x => Math.abs(x - XT.v3[0]) < 0.002, w: 5 }, { label: 'y (m/s) =', ok: x => Math.abs(x - XT.v3[1]) < 0.002, w: 5 }, { label: '³ω₃: z (rad/s) =', ok: x => Math.abs(x - XT.w3[2]) < 0.002, w: 5 }],
+  check: a => { const v = [a[0], a[1], 0];
+    return near([a[0], a[1]], XT.v0) ? t('นั่นคือความเร็วที่เขียนในเฟรม {0} (โจทย์ 2): ช่องนี้ถามในเฟรม {3}', 'that is the velocity written in frame {0} (problem 2): the boxes ask for frame {3}')
+      : near(v, E1.noT.v) ? t('ใช้ ²₁R ซึ่งเป็นทรานสโพสของส่วนการหมุนของ ¹₂T: −s₂ ต้องอยู่แถวที่ 2', 'use ²₁R, the transpose of the rotation part of ¹₂T: the −s₂ belongs in row 2')
+      : near(v, XT.prop[2].v) ? t('นั่นคือ ²v₂ ของข้อศอก: ปลายแขนยังต้องบวก ²ω₂ × ²P₃', 'that is ²v₂ of the elbow: the tip still needs ²ω₂ × ²P₃ added')
+      : near(v, E1.own.v) || Math.abs(a[2] - XT.qd[1]) < 0.002 ? t('ω ของก้าน 2 คือ θ̇₁ + θ̇₂ ไม่ใช่ θ̇₂ อย่างเดียว: ก้าน 1 พาก้าน 2 หมุนไปด้วย', 'the ω of link 2 is θ̇₁ + θ̇₂, not θ̇₂ alone: link 1 carries link 2 round with it')
+      : Math.abs(Math.abs(a[2]) - (Math.abs(XT.qd[0]) + Math.abs(XT.qd[1]))) < 0.002 ? t('บวก θ̇₁ กับ θ̇₂ พร้อมเครื่องหมาย: θ̇₂ ติดลบ', 'add θ̇₁ and θ̇₂ with their signs: θ̇₂ is negative')
+      : Math.abs(a[2] + XT.w3[2]) < 0.002 ? t('ดูเครื่องหมายของ ω: ข้อต่อ 2 หมุนตามเข็มเร็วกว่าที่ข้อต่อ 1 หมุนทวนเข็ม', 'mind the sign of ω: joint 2 turns clockwise faster than joint 1 turns counter-clockwise') : ''; } });
+const [l1, l2] = L, s2 = Math.sin(XT.q[1]), c2 = Math.cos(XT.q[1]), [d1, d2] = XT.qd;
+LS.stepper(el('st1'), { onStep: k => { const was = M1.step, w = k ? WALK1[k - 1] : [3, 'both']; M1.step = k; M1.upto = w[0]; M1.show = w[1]; M1.comp = k === 9 ? 3 : undefined; if (k || was) put1(); read1(); }, steps: [
+  { why: t('<b>เริ่มที่ฐาน</b>: เฟรม {0} ติดอยู่กับฐานซึ่งอยู่นิ่ง ไม่หมุนและไม่เคลื่อนที่ ความเร็วทั้งสองจึงเป็นศูนย์ จากนี้เดินขึ้นไปทีละก้าน และหา ω ก่อน v ทุกครั้ง', '<b>Start at the base</b>: frame {0} is fixed to the base, which stands still: it neither turns nor moves, so both velocities are zero. From here we go up one link at a time, always ω before v'),
+    tex: `{}^0\\omega_0 = ${Z0}, \\qquad {}^0v_0 = ${Z0}` },
+  { why: t(`<b>ω ของก้าน 1</b> (สูตรของข้อต่อหมุน ใส่ i = 0): พจน์แรกคือ ω ของฐานซึ่งเป็นศูนย์ ข้อต่อ 1 เพิ่ม θ̇₁ รอบแกน Z ของเฟรม {1} เอง ซึ่งเมื่อเขียนในเฟรม {1} คือ (0, 0, 1) เสมอ ในรูป: ω₁ = ${fx(d1, 1)} rad/s ทวนเข็มนาฬิกา`, `<b>ω of link 1</b> (the turning-joint formula with i = 0): the first term is the ω of the base, which is zero. Joint 1 adds θ̇₁ about the Z axis of frame {1} itself, and written in frame {1} that axis is always (0, 0, 1). In the picture: ω₁ = ${fx(d1, 1)} rad/s, counter-clockwise`),
+    tex: `\\begin{aligned} {}^1\\omega_1 &= {}^1_0R\\,{}^0\\omega_0 + \\dot\\theta_1\\,{}^1\\hat Z_1 \\\\ &= ${Z0} + \\dot\\theta_1 ${col('0', '0', '1')} = ${W1} \\end{aligned}` },
+  { why: t('<b>v ของก้าน 1</b>: \\({}^0P_1\\) คือคอลัมน์ 4 ของ \\({}^0_1T\\) ซึ่งเป็นศูนย์ เพราะจุดกำเนิดของ {1} อยู่ที่เดียวกับของ {0} และฐานก็ไม่มีความเร็ว ทุกพจน์ในวงเล็บจึงเป็นศูนย์ ก้าน 1 หมุนอยู่ก็จริง แต่จุดกำเนิดของเฟรม {1} อยู่บนแกนหมุน จึงอยู่กับที่', '<b>v of link 1</b>: \\({}^0P_1\\) is column 4 of \\({}^0_1T\\), which is zero because the origin of {1} sits on that of {0}; the base has no velocity either, so every term in the bracket is zero. Link 1 does turn, but the origin of frame {1} lies on the axis it turns about and stays where it is'),
+    tex: `\\begin{aligned} {}^1v_1 &= {}^1_0R\\,\\big({}^0v_0 + {}^0\\omega_0 \\times {}^0P_1\\big) \\\\ &= {}^1_0R\\,\\big(0 + 0 \\times 0\\big) = ${Z0} \\end{aligned}` },
+  { why: t(`<b>ω ของก้าน 2</b> (i = 1): \\({}^2_1R\\) คือ<b>ทรานสโพส</b>ของส่วนการหมุนของ \\({}^1_2T\\) (สลับแถวกับคอลัมน์: −s₂ ย้ายลงมาอยู่แถวที่ 2) เป็นการหมุนรอบแกน Z จึงไม่เปลี่ยนเวกเตอร์ที่ชี้ตาม Z แล้วข้อต่อ 2 เพิ่ม θ̇₂: อัตราของสองข้อต่อบวกกัน ในรูป: ${fx(d1, 1)} + (${fx(d2, 1)}) = ${fx(d1 + d2, 1)} rad/s ก้าน 2 หมุนตามเข็มนาฬิกา`, `<b>ω of link 2</b> (i = 1): \\({}^2_1R\\) is the <b>transpose</b> of the rotation part of \\({}^1_2T\\) (rows and columns swapped: the −s₂ moves down to row 2). It is a turn about Z, so it leaves a vector along Z as it is. Then joint 2 adds θ̇₂: the two rates add. In the picture: ${fx(d1, 1)} + (${fx(d2, 1)}) = ${fx(d1 + d2, 1)} rad/s, so link 2 turns clockwise`),
+    tex: `\\begin{aligned} {}^2\\omega_2 &= {}^2_1R\\,{}^1\\omega_1 + \\dot\\theta_2\\,{}^2\\hat Z_2 \\\\ &= ${R21} ${W1} + ${col('0', '0', '\\dot\\theta_2')} \\\\ &= ${W12} \\end{aligned}` },
+  { why: t(`<b>ผลคูณไขว้</b>: \\({}^1P_2 = (l_1, 0, 0)\\) คือคอลัมน์ 4 ของ \\({}^1_2T\\): เวกเตอร์จากจุดกำเนิดของ {1} ไปยังข้อศอก (เส้นประในรูป) ส่วน \\({}^1\\omega_1 \\times {}^1P_2\\) คือความเร็วที่ข้อศอกได้จากการหมุนของก้าน 1 (ลูกศรสีชมพู): ตั้งฉากกับก้าน 1 ขนาด l₁θ̇₁ = ${u(l1 * d1, 3)} m/s วิธีลัดเมื่อหมุนรอบ Z: (0, 0, ω) × (x, y, 0) = (−ωy, ωx, 0)`, `<b>The cross product</b>: \\({}^1P_2 = (l_1, 0, 0)\\) is column 4 of \\({}^1_2T\\): the vector from the origin of {1} to the elbow (dashed in the picture). \\({}^1\\omega_1 \\times {}^1P_2\\) is the velocity the turning of link 1 gives the elbow (pink arrow): square to link 1, of size l₁θ̇₁ = ${u(l1 * d1, 3)} m/s. A shortcut for a turn about Z: (0, 0, ω) × (x, y, 0) = (−ωy, ωx, 0)`),
+    tex: `{}^1\\omega_1 \\times {}^1P_2 = ${W1} \\times ${col('l_1', '0', '0')} = ${col('0', 'l_1\\dot\\theta_1', '0')}` },
+  { why: t('<b>v ของก้าน 2</b>: ในวงเล็บ \\({}^1v_1 = 0\\) จึงเหลือแต่ผลคูณไขว้ ซึ่งยังเขียนในเฟรม {1} คูณด้วย \\({}^2_1R\\) เพื่อเปลี่ยนไปเขียนในเฟรม {2} ลูกศรในรูปยังเป็นอันเดิม (ตอนนี้เป็นสีเขียว) ที่เปลี่ยนคือตัวเลข: เส้นประคือองค์ประกอบของมันตามแกน X₂ และ Y₂', '<b>v of link 2</b>: in the bracket \\({}^1v_1 = 0\\), so only the cross product is left, still written in frame {1}. Multiply by \\({}^2_1R\\) to write it in frame {2}. The arrow in the picture is the same one (now green); what changes is its numbers: the dashed lines are its components along X₂ and Y₂'),
+    tex: `\\begin{aligned} {}^2v_2 &= {}^2_1R\\,\\big({}^1v_1 + {}^1\\omega_1 \\times {}^1P_2\\big) \\\\ &= ${R21} ${col('0', 'l_1\\dot\\theta_1', '0')} = ${col('l_1s_2\\dot\\theta_1', 'l_1c_2\\dot\\theta_1', '0')} \\end{aligned}` },
+  { why: t('<b>ω ของปลายแขน</b> (i = 2): เฟรม {3} ไม่มีข้อต่อ จึงไม่มีอะไรเพิ่ม (\\(\\dot\\theta_3 = 0\\)) และมีทิศเดียวกับเฟรม {2} (\\({}^3_2R = I\\)) ω จึงเท่าเดิม: เฟรม {3} ติดอยู่กับก้าน 2 จึงหมุนไปด้วยกัน', '<b>ω of the tip</b> (i = 2): frame {3} has no joint, so nothing is added (\\(\\dot\\theta_3 = 0\\)), and it has the orientation of frame {2} (\\({}^3_2R = I\\)). ω stays as it is: frame {3} is fixed to link 2 and turns with it'),
+    tex: `{}^3\\omega_3 = {}^3_2R\\,{}^2\\omega_2 + 0 = {}^2\\omega_2 = ${W12}` },
+  { why: t('<b>v ของปลายแขน</b>: \\({}^2P_3 = (l_2, 0, 0)\\) คือคอลัมน์ 4 ของ \\({}^2_3T\\) (เส้นประ) ผลคูณไขว้คือความเร็วที่ปลายแขนได้จากการหมุนของก้าน 2 รอบข้อศอก (ลูกศรสีชมพู) บวกกับความเร็วของข้อศอก \\({}^2v_2\\) (ลูกศรสีเขียวเส้นบางที่ยกมาวางที่ปลายแขน) บวกกันได้เพราะทั้งสองเขียนในเฟรม {2} แล้ว และ \\({}^3_2R = I\\) ไม่เปลี่ยนตัวเลข', '<b>v of the tip</b>: \\({}^2P_3 = (l_2, 0, 0)\\) is column 4 of \\({}^2_3T\\) (dashed). The cross product is the velocity the turning of link 2 about the elbow gives the tip (pink arrow). Add the velocity of the elbow, \\({}^2v_2\\) (the thin green arrow, moved to the tip). They may be added because both are written in frame {2}, and \\({}^3_2R = I\\) leaves the numbers as they are'),
+    tex: `\\begin{aligned} {}^2\\omega_2 \\times {}^2P_3 &= ${W12} \\times ${col('l_2', '0', '0')} = ${col('0', 'l_2(\\dot\\theta_1 + \\dot\\theta_2)', '0')} \\\\ {}^3v_3 &= {}^3_2R\\,\\big({}^2v_2 + {}^2\\omega_2 \\times {}^2P_3\\big) \\\\ &= ${col('l_1s_2\\dot\\theta_1', 'l_1c_2\\dot\\theta_1 + l_2(\\dot\\theta_1 + \\dot\\theta_2)', '0')} \\end{aligned}` },
+  { why: t(`<b>แทนค่า</b>: l₁ = ${dn(l1)}, l₂ = ${dn(l2)} m, θ₂ = ${Math.round(deg(XT.q[1]))}° (s₂ = c₂ = ${dn(s2, 3)}) และ θ̇ = (${fx(d1, 1)}, ${fx(d2, 1)}) rad/s เส้นประในรูปคือองค์ประกอบของ v₃ ตามแกน X₃ และ Y₃`, `<b>Put in the numbers</b>: l₁ = ${dn(l1)}, l₂ = ${dn(l2)} m, θ₂ = ${Math.round(deg(XT.q[1]))}° (s₂ = c₂ = ${dn(s2, 3)}) and θ̇ = (${fx(d1, 1)}, ${fx(d2, 1)}) rad/s. The dashed lines in the picture are the components of v₃ along X₃ and Y₃`),
+    tex: `\\begin{aligned} {}^3v_3 &= ${col(`${dn(l1)}(${dn(s2, 3)})(${dn(d1)})`, `${dn(l1)}(${dn(c2, 3)})(${dn(d1)}) + ${dn(l2)}(${dn(d1)} + ${p1(d2)})`, '0')} = ${tc(XT.v3)}\\ \\text{m/s} \\\\ {}^3\\omega_3 &= ${col('0', '0', `${dn(d1)} + ${p1(d2)}`)} = ${tc(XT.w3)}\\ \\text{rad/s} \\end{aligned}` }],
+  answer: t(`³v₃ = ${vu(XT.v3)} m/s และ ³ω₃ = ${vu(XT.w3)} rad/s · ในคำตอบไม่มี θ₁ เลย: เมื่อเขียนในเฟรมที่ติดกับปลายแขน ความเร็วไม่ขึ้นกับว่าทั้งแขนหันไปทางไหน (Craig สมการ 5.55)`, `³v₃ = ${vu(XT.v3)} m/s and ³ω₃ = ${vu(XT.w3)} rad/s · there is no θ₁ in the answer: written in a frame fixed to the tip, the velocity does not depend on which way the whole arm points (Craig, equation 5.55)`) });
+
+/* ---------- 2: written in the base frame ---------- */
+const M2 = { ex: 'two', q: XT.q.slice(), qd: [-0.4, 0.6], from: 3, comp: 0, show: 'v', frames: [0, 3], vs: 1.5, fit: true, xyz: true }, ro2 = el('ro2'), c2b = el('ctl2'), R03 = RB.Rz(XT.q[0] + XT.q[1]), th12 = Math.round(deg(XT.q[0] + XT.q[1]));
+const read2 = () => { const P = CH6.prop(T2.rows(L), M2.q, M2.qd)[3], a = M2.q[0] + M2.q[1];
+  ro2.innerHTML = `<div class="live"><span class="eq">⁰₃R =</span>${CH2.htmlM(RB.Rz(a), 3)}<span class="term">θ₁ + θ₂ = ${Math.round(deg(a))}°</span></div><div class="term">³v₃ = ${v3(P.v)} m/s · ⁰v₃ = <b>${v3(P.v0)} m/s</b></div><div class="term">${t('ยาวเท่ากันทั้งสองเฟรม', 'the same length in both frames')}: |v₃| = ${fx(norm(P.v))} m/s</div>`; };
+const s2b = [angS(c2b, 'p2a', 'θ₁', M2, 0, -180, 180, read2), angS(c2b, 'p2b', 'θ₂', M2, 1, -150, 150, read2), numS(c2b, 'p2c', 'θ̇₁', M2, 'qd', 0, -1, 1, 0.1, 'rad/s', read2), numS(c2b, 'p2d', 'θ̇₂', M2, 'qd', 1, -1, 1, 0.1, 'rad/s', read2)];
+const put2 = () => { M2.q = XT.q.slice(); M2.qd = XT.qd.slice(); [...M2.q.map(a => Math.round(deg(a))), ...M2.qd].forEach((x, i) => s2b[i].set(x)); }; read2();
+/* the open step: 1 the arrow split along X₃, Y₃ (the scene's comp) and the angle θ₁ + θ₂ from X₀ to X₃; 2, 3 the same arrow split along X₀, Y₀;
+   4 both splits at once: one arrow, two sets of numbers */
+M2.ov = (s, st) => { const k = st.step, F = s.F, I = s.info; if (!k || !F || !I) return; const E = up(Pp(F[3]), 0.06), X0 = Dd(F[0], 0), X3 = Dd(F[3], 0);
+  if (k === 1) { OV.ref(s, E, X0, 0.34); OV.ang(s, E, X0, X3, 0.2, 'am', 'θ₁ + θ₂', { m: 0, s: 20, a: 'l', dx: 14, dy: 6 }); }
+  if (k === 4) legs(s, E, F[3], I.prop[3].v, st.vs, j => ['v', { pre: '3', sub: 'xyz'[j], s: 22, a: 'c', dy: j ? 22 : -16 }]); };
+CH2.sim('cv2', M2, 'prop', { aspect: 0.8, maxH: 520 });
+LS.ask(el('ask2'), { fields: [{ label: '⁰v₃: x (m/s) =', ok: x => Math.abs(x - XT.v0[0]) < 0.002, w: 5 }, { label: 'y (m/s) =', ok: x => Math.abs(x - XT.v0[1]) < 0.002, w: 5 }],
+  check: a => { const v = [a[0], a[1], 0];
+    return near(v, XT.v3) ? t('นั่นคือตัวเลขในเฟรม {3}: ต้องคูณด้วย ⁰₃R ก่อน', 'those numbers are written in frame {3}: multiply by ⁰₃R first')
+      : near(v, RB.mv(RB.tr(R03), XT.v3)) ? t('ครั้งนี้ใช้ ⁰₃R ตรง ๆ ไม่ต้องทรานสโพส: กำลังไปจาก {3} สู่ {0}', 'this time use ⁰₃R as it is, not its transpose: we are going from {3} to {0}')
+      : near(v, RB.mv(RB.Rz(XT.q[0]), XT.v3)) || near(v, RB.mv(RB.Rz(XT.q[1]), XT.v3)) ? t(`มุมของ ⁰₃R คือ θ₁ + θ₂ = ${th12}° ไม่ใช่มุมของข้อต่อตัวเดียว`, `the angle of ⁰₃R is θ₁ + θ₂ = ${th12}°, not the angle of one joint`) : ''; } });
+LS.stepper(el('st2'), { onStep: k => { const was = M2.step; M2.step = k; M2.comp = k === 1 ? 3 : 0; if (k || was) put2(); read2(); }, steps: [
+  { why: t(`<b>เมทริกซ์การหมุนจาก {3} กลับสู่ {0}</b>: คูณส่วนการหมุนของเมทริกซ์การแปลงทั้งสามต่อกัน ทุกตัวหมุนรอบแกน Z มุมจึงบวกกัน ครั้งนี้<b>ไม่ต้องทรานสโพส</b> เพราะกำลังไปจากเฟรมปลายแขนกลับสู่ฐาน ในรูป: เส้นประคือ ³v₃ ของโจทย์ 1 ซึ่งแยกตามแกน X₃ และ Y₃ และแกน X₃ เอียงจากแกน X₀ ไป θ₁ + θ₂ = ${th12}°`, `<b>The rotation from {3} back to {0}</b>: multiply the rotation parts of the three link transforms. Each is a turn about Z, so the angles add. <b>No transpose</b> this time: we are going from the tip frame back to the base. In the picture: the dashed lines are the ³v₃ of problem 1, split along X₃ and Y₃, and X₃ is turned θ₁ + θ₂ = ${th12}° away from X₀`),
+    tex: '\\begin{aligned} {}^0_3R &= {}^0_1R\\;{}^1_2R\\;{}^2_3R = R_Z(\\theta_1)\\,R_Z(\\theta_2)\\,I \\\\ &= R_Z(\\theta_1 + \\theta_2) = \\begin{bmatrix} c_{12} & -s_{12} & 0 \\\\ s_{12} & c_{12} & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} \\end{aligned}' },
+  { why: t('<b>คูณ</b> \\({}^0v_3 = {}^0_3R\\,{}^3v_3\\) แล้วจัดรูปด้วย \\(c_{12}s_2 - s_{12}c_2 = -s_1\\) และ \\(s_{12}s_2 + c_{12}c_2 = c_1\\) (สูตรมุมผลต่าง: θ₂ − (θ₁ + θ₂) = −θ₁) ได้ Craig สมการ 5.57 ในรูป: ลูกศรเป็นอันเดิม แต่เส้นประเปลี่ยนเป็นองค์ประกอบตามแกน X₀ และ Y₀', '<b>Multiply</b>: \\({}^0v_3 = {}^0_3R\\,{}^3v_3\\), then tidy up with \\(c_{12}s_2 - s_{12}c_2 = -s_1\\) and \\(s_{12}s_2 + c_{12}c_2 = c_1\\) (the angle-difference formulas: θ₂ − (θ₁ + θ₂) = −θ₁). The result is Craig, equation 5.57. In the picture: the same arrow, but the dashed lines are now its components along X₀ and Y₀'),
+    tex: `\\begin{aligned} {}^0v_3 &= \\begin{bmatrix} c_{12} & -s_{12} & 0 \\\\ s_{12} & c_{12} & 0 \\\\ 0 & 0 & 1 \\end{bmatrix} ${col('l_1s_2\\dot\\theta_1', 'l_1c_2\\dot\\theta_1 + l_2(\\dot\\theta_1 + \\dot\\theta_2)', '0')} \\\\ &= ${col('-l_1s_1\\dot\\theta_1 - l_2s_{12}(\\dot\\theta_1 + \\dot\\theta_2)', 'l_1c_1\\dot\\theta_1 + l_2c_{12}(\\dot\\theta_1 + \\dot\\theta_2)', '0')} \\end{aligned}` },
+  { why: t(`<b>แทนค่า</b>: θ₁ + θ₂ = ${th12}° (c₁₂ = ${dn(R03[0][0], 3)}, s₁₂ = ${dn(R03[1][0], 3)}) คูณกับ ³v₃ ของโจทย์ 1`, `<b>Put in the numbers</b>: θ₁ + θ₂ = ${th12}° (c₁₂ = ${dn(R03[0][0], 3)}, s₁₂ = ${dn(R03[1][0], 3)}), times the ³v₃ of problem 1`),
+    tex: `{}^0v_3 = ${CH2.texM(R03, 3)} ${tc(XT.v3)} = ${tc(XT.v0)}\\ \\text{m/s}` },
+  { why: t(`<b>ตรวจ</b>: (ก) ตัวเลขเปลี่ยน แต่ลูกศรยังเป็นอันเดิม ความยาวจึงต้องเท่ากัน (ในรูปมีเส้นประครบทั้งสองชุด) (ข) ⁰v₃ = ${vu(XT.v0.slice(0, 2))} m/s คือ v = J θ̇ ของหน้า 5.2 พอดี: สองวิธีที่ต่างกันให้ความเร็วเดียวกัน เมทริกซ์ที่คูณอยู่กับ θ̇ ในขั้นที่ 2 ก็คือจาโคเบียนที่เขียนในเฟรม {0} ซึ่งเป็นเรื่องของส่วนถัดไปของบทนี้`, `<b>Check</b>: (a) the numbers change, the arrow does not, so the two lengths must agree (the picture now has both sets of dashed lines). (b) ⁰v₃ = ${vu(XT.v0.slice(0, 2))} m/s is exactly the v = J θ̇ of page 5.2: two different methods, one velocity. The matrix that multiplies θ̇ in step 2 is the Jacobian written in frame {0}, the subject of the next part of this chapter`),
+    tex: `\\begin{aligned} |{}^3v_3| &= \\sqrt{${dn(XT.v3[0], 3)}^2 + (${dn(XT.v3[1], 3)})^2} = ${dn(norm(XT.v3), 3)}\\ \\text{m/s} \\\\ |{}^0v_3| &= \\sqrt{${dn(XT.v0[0], 3)}^2 + ${dn(XT.v0[1], 3)}^2} = ${dn(norm(XT.v0), 3)}\\ \\text{m/s} \\end{aligned}` }],
+  answer: t(`⁰v₃ = ${vu(XT.v0)} m/s ยาว ${u(norm(XT.v0), 3)} m/s เท่ากับ ³v₃ · เวกเตอร์เดียวกันที่เขียนในสองเฟรม: อย่าเทียบตัวเลขทีละช่อง ให้เทียบความยาว`, `⁰v₃ = ${vu(XT.v0)} m/s, ${u(norm(XT.v0), 3)} m/s long, the same as ³v₃ · one vector written in two frames: do not compare the numbers one by one, compare the lengths`) });
+
+/* ---------- 3: class exercise in pairs, the RRP arm ---------- */
+/* its ⁰v₃ is the answer of homework 5.2 (b): the readout and the steps show the velocities in the frames of the links only, never the numbers written in {0} */
+el('tab3').innerHTML = CH3.dhTable(CH4.rrp.sym);
+const M3 = { ex: 'rrp', q: XR.q.slice(), qd: [-0.2, 0.4, 0.1], upto: 3, frames: [0, 1, 2, 3], ws: 0.3, fit: true, xyz: true }, ro3 = el('ro3'), c3 = el('ctl3');
+const read3 = () => { ro3.innerHTML = vtab(CH6.prop(RROWS, M3.q, M3.qd), M3.upto, { noV: M3.show === 'w' }); };
+const s3 = [angS(c3, 'p3a', 'θ₁', M3, 0, -180, 180, read3), angS(c3, 'p3b', 'θ₂', M3, 1, -90, 90, read3), numS(c3, 'p3c', 'd₃', M3, 'q', 2, 0.1, 0.8, 0.01, 'm', read3),
+  numS(c3, 'p3d', 'θ̇₁', M3, 'qd', 0, -1, 1, 0.1, 'rad/s', read3), numS(c3, 'p3e', 'θ̇₂', M3, 'qd', 1, -1, 1, 0.1, 'rad/s', read3), numS(c3, 'p3f', 'ḋ₃', M3, 'qd', 2, -0.3, 0.3, 0.05, 'm/s', read3)];
+const put3 = () => { M3.q = XR.q.slice(); M3.qd = XR.qd.slice(); [Math.round(deg(M3.q[0])), Math.round(deg(M3.q[1])), M3.q[2], ...M3.qd].forEach((x, i) => s3[i].set(x)); }; read3();
+const WALK3 = [[0, 'both'], [1, 'both'], [2, 'w'], [2, 'both'], [3, 'w'], [3, 'w'], [3, 'both'], [3, 'both'], [3, 'v']];
+/* the open step: 1 the three vectors ⁰P₁, ¹P₂, ²P₃ (column 4 of each link transform); 4 ¹P₂; 6 ²P₃ and, at the tip, the elbow's velocity plus ²ω₂ × ²P₃;
+   7 that sum plus the slide ḋ₃ Ẑ₃; 8 ³v₃ split along X₃, Y₃, Z₃ (the scene's comp); 9 the two radii the turning joints swing the tip on */
+M3.ov = (s, st) => { const k = st.step, F = s.F, I = s.info; if (!k || !F || !I) return; const O = F.map(Pp), Pr = I.prop, vs = st.vs || 0.8, X1 = Dd(F[1], 0), X3 = Dd(F[3], 0), Z3 = Dd(F[3], 2), off = p => OV.v(p, X3, -0.07);
+  const P01 = () => seg(s, OV.v(O[0], X1, -0.07), OV.v(O[1], X1, -0.07), 'o', 'P', { pre: '0', sub: '1', s: 26, a: 'r', dx: -14 }), P12 = () => seg(s, up(O[1], 0.07), up(O[2], 0.07), 'am', 'P', { pre: '1', sub: '2', s: 26, dy: -16 }), P23 = () => seg(s, off(O[2]), off(O[3]), 'pk', 'P', { pre: '2', sub: '3', s: 26, dy: -16 });
+  if (k === 1) { P01(); P12(); P23(); }
+  if (k === 4) P12();
+  if (k === 6) { P23(); const a = arw(s, O[3], Pr[2].v0, vs, 'gr', 'v', { sub: '2', s: 22, dy: -14, r: 0.0035 }); arw(s, a, RB.mv(Pr[2].R0, Pr[3].wxP), vs, 'pk', '²ω₂ × ²P₃', { m: 0, s: 19, a: 'l', dx: 14, dy: 16, r: 0.0045 }); }
+  if (k === 7) { const a = arw(s, O[3], RB.mv(Pr[2].R0, Pr[3].sum), vs, 'pk', t('จากข้อต่อหมุนสองตัว', 'from the two turning joints'), { m: 0, s: 19, a: 'l', dx: 14, dy: 18, r: 0.0045 }); arw(s, a, Z3, vs * Pr[3].rate, 'am', 'ḋ₃ Ẑ₃', { m: 0, s: 19, a: 'l', dx: 14, dy: -10, r: 0.0045 }); }
+  if (k === 9) { const E = O[3], ax = [O[0][0], O[0][1], E[2]]; seg(s, O[1], ax, 'z', null); seg(s, ax, E, 'pk', 'L₂ + d₃c₂ = ' + fx(LR.L2 + st.q[2] * Math.cos(st.q[1])) + ' m', { m: 0, s: 20, dy: -16 }); seg(s, off(O[2]), off(E), 'p', 'd₃ = ' + u(st.q[2], 2) + ' m', { m: 0, s: 20, dy: -16 }); } };
+CH2.sim('cv3', M3, 'prop', { aspect: 0.8, maxH: 520 });
+const E3 = { noT: slip(RROWS, XR.q, XR.qd, { noT: true }), noD: slip(RROWS, XR.q, XR.qd, { noD: true }), noX: slip(RROWS, XR.q, XR.qd, { noX: true }), th0: slip(RROWS, XR.q, XR.qd, { th0: true }) };
+const H3 = { noT: t('ใช้ทรานสโพสทุกครั้ง: ²₁R = (¹₂R)ᵀ และ ³₂R = (²₃R)ᵀ', 'take the transpose every time: ²₁R = (¹₂R)ᵀ and ³₂R = (²₃R)ᵀ'), th0: t('แถวที่ 2 ของตาราง DH คือ θ₂ − 90° ไม่ใช่ θ₂: cos(θ₂ − 90°) = s₂ และ sin(θ₂ − 90°) = −c₂', 'row 2 of the DH table is θ₂ − 90°, not θ₂: cos(θ₂ − 90°) = s₂ and sin(θ₂ − 90°) = −c₂'),
+  in0: t('นั่นคือตัวเลขที่เขียนในเฟรม {0}: ช่องนี้ถามในเฟรม {3}', 'those numbers are written in frame {0}: the boxes ask for frame {3}') };
+LS.ask(el('ask3v'), { fields: ['x', 'y', 'z'].map((c, i) => ({ label: `${c} =`, ok: x => Math.abs(x - XR.v3[i]) < 0.002, w: 5 })),
+  check: a => near(a, E3.noD.v) ? t('ข้อต่อ 3 เป็นข้อต่อเลื่อน: ต้องบวก ḋ₃ Ẑ₃ = (0, 0, ḋ₃)', 'joint 3 slides: add ḋ₃ Ẑ₃ = (0, 0, ḋ₃)') : near(a, E3.noT.v) ? H3.noT : near(a, E3.th0.v) ? H3.th0 : near(a, XR.v0) ? H3.in0
+    : near(a, E3.noX.v) ? t('ยังขาดพจน์ ω × P ของทั้งสองก้าน', 'the ω × P terms of both links are still missing')
+    : near(a, [-XR.v3[0], XR.v3[1], XR.v3[2]]) ? t('ดูเครื่องหมายของช่อง x: θ̇₂ ติดลบ −d₃θ̇₂ จึงเป็นบวก', 'mind the sign of x: θ̇₂ is negative, so −d₃θ̇₂ is positive') : '' });
+LS.ask(el('ask3w'), { fields: ['x', 'y', 'z'].map((c, i) => ({ label: `${c} =`, ok: x => Math.abs(x - XR.w3[i]) < 0.002, w: 5 })),
+  check: a => near(a, XR.prop[2].w) ? t('นั่นคือ ²ω₂: ข้อต่อเลื่อนไม่เพิ่ม ω แต่ยังต้องคูณ ³₂R เพื่อเขียนในเฟรม {3}', 'that is ²ω₂: a sliding joint adds no ω, but ³₂R must still write it in frame {3}') : near(a, E3.noT.w) ? H3.noT : near(a, E3.th0.w) ? H3.th0 : near(a, XR.w0) ? H3.in0
+    : near(a, [XR.w3[0], -XR.w3[1], XR.w3[2]]) ? t('ดูเครื่องหมายของช่อง y: θ̇₂ ติดลบ −θ̇₂ จึงเป็นบวก', 'mind the sign of y: θ̇₂ is negative, so −θ̇₂ is positive') : '' });
+const [, rq2, rd3] = XR.q, [w1, w2, dd3] = XR.qd, rs2 = Math.sin(rq2), rc2 = Math.cos(rq2), rad3 = LR.L2 + rd3 * rc2;
+const R21r = '\\begin{bmatrix} s_2 & 0 & -c_2 \\\\ c_2 & 0 & s_2 \\\\ 0 & -1 & 0 \\end{bmatrix}', R32r = '\\begin{bmatrix} 1 & 0 & 0 \\\\ 0 & 0 & -1 \\\\ 0 & 1 & 0 \\end{bmatrix}', W2r = col('-c_2\\dot\\theta_1', 's_2\\dot\\theta_1', '\\dot\\theta_2');
+LS.stepper(el('st3'), { onStep: k => { const was = M3.step, w = k ? WALK3[k - 1] : [3, 'both']; M3.step = k; M3.upto = w[0]; M3.show = w[1]; M3.comp = k >= 8 ? 3 : undefined; if (k || was) put3(); read3(); }, steps: [
+  { why: t('<b>เมทริกซ์การแปลงของก้าน</b> จากตาราง DH (บทที่ 3) เก็บไว้สองอย่างต่อก้าน: ส่วนการหมุน 3 × 3 และคอลัมน์ 4 (เส้นประในรูป) ระวังแถวที่ 2: มุมในตารางคือ θ₂ − 90° จึงได้ cos(θ₂ − 90°) = s₂ และ sin(θ₂ − 90°) = −c₂', '<b>The link transforms</b> from the DH table (chapter 3). Keep two things per link: the 3 × 3 rotation part and column 4 (dashed in the picture). Mind row 2: the angle in the table is θ₂ − 90°, so cos(θ₂ − 90°) = s₂ and sin(θ₂ − 90°) = −c₂'),
+    tex: `\\begin{aligned} {}^0_1R &= \\begin{bmatrix} c_1 & -s_1 & 0 \\\\ s_1 & c_1 & 0 \\\\ 0 & 0 & 1 \\end{bmatrix}, & \\quad {}^0P_1 &= ${col('0', '0', 'L_1')} \\\\ {}^1_2R &= \\begin{bmatrix} s_2 & c_2 & 0 \\\\ 0 & 0 & -1 \\\\ -c_2 & s_2 & 0 \\end{bmatrix}, & \\quad {}^1P_2 &= ${col('L_2', '0', '0')} \\\\ {}^2_3R &= \\begin{bmatrix} 1 & 0 & 0 \\\\ 0 & 0 & 1 \\\\ 0 & -1 & 0 \\end{bmatrix}, & \\quad {}^2P_3 &= ${col('0', 'd_3', '0')} \\end{aligned}` },
+  { why: t('<b>ก้าน 1</b> (i = 0): เริ่มจาก \\({}^0\\omega_0 = 0\\) และ \\({}^0v_0 = 0\\) ข้อต่อ 1 เพิ่ม θ̇₁ รอบ Z₁ ครั้งนี้ \\({}^0P_1 = (0, 0, L_1)\\) ไม่เป็นศูนย์ แต่ \\({}^0\\omega_0 = 0\\) ผลคูณไขว้จึงยังเป็นศูนย์: จุดกำเนิดของ {1} อยู่บนแกนหมุนของข้อต่อ 1 จึงไม่ขยับ', '<b>Link 1</b> (i = 0): start from \\({}^0\\omega_0 = 0\\) and \\({}^0v_0 = 0\\). Joint 1 adds θ̇₁ about Z₁. This time \\({}^0P_1 = (0, 0, L_1)\\) is not zero, but \\({}^0\\omega_0 = 0\\), so the cross product is still zero: the origin of {1} lies on the axis of joint 1 and does not move'),
+    tex: `\\begin{aligned} {}^1\\omega_1 &= {}^1_0R\\,{}^0\\omega_0 + \\dot\\theta_1\\,{}^1\\hat Z_1 = ${W1} \\\\ {}^1v_1 &= {}^1_0R\\,\\big({}^0v_0 + {}^0\\omega_0 \\times {}^0P_1\\big) = ${Z0} \\end{aligned}` },
+  { why: t('<b>ω ของก้าน 2</b> (i = 1): ทรานสโพส \\({}^1_2R\\) ก่อน แกน Z₁ ตั้งขึ้น แต่แกน Z₂ ของข้อศอกนอนราบ θ̇₁ จึงไม่ได้อยู่ในช่อง z ของเฟรม {2}: มันกระจายไปตามแกน X₂ และ Y₂ ส่วน θ̇₂ ของข้อต่อ 2 เองอยู่ในช่อง z เสมอ', '<b>ω of link 2</b> (i = 1): transpose \\({}^1_2R\\) first. Z₁ is vertical, but Z₂ of the elbow is horizontal, so θ̇₁ does not land in the z place of frame {2}: it is shared between X₂ and Y₂. The θ̇₂ of joint 2 itself is always in the z place'),
+    tex: `\\begin{aligned} {}^2_1R &= \\big({}^1_2R\\big)^T = ${R21r} \\\\ {}^2\\omega_2 &= {}^2_1R\\,${W1} + ${col('0', '0', '\\dot\\theta_2')} = ${W2r} \\end{aligned}` },
+  { why: t('<b>v ของก้าน 2</b>: \\({}^1v_1 = 0\\) จึงเหลือแต่ผลคูณไขว้กับ \\({}^1P_2\\) (เส้นประ): ข้อศอกวนรอบแกนตั้งด้วยรัศมี L₂ ความเร็ว L₂θ̇₁ ตั้งฉากกับก้านแนวราบ เมื่อเขียนในเฟรม {2} ชี้ตาม −Z₂', '<b>v of link 2</b>: \\({}^1v_1 = 0\\), so only the cross product with \\({}^1P_2\\) (dashed) is left: the elbow goes round the vertical axis on a radius L₂, with a velocity L₂θ̇₁ square to the horizontal link. Written in frame {2} it points along −Z₂'),
+    tex: `\\begin{aligned} {}^1\\omega_1 \\times {}^1P_2 &= ${W1} \\times ${col('L_2', '0', '0')} = ${col('0', 'L_2\\dot\\theta_1', '0')} \\\\ {}^2v_2 &= {}^2_1R\\,${col('0', 'L_2\\dot\\theta_1', '0')} = ${col('0', '0', '-L_2\\dot\\theta_1')} \\end{aligned}` },
+  { why: t('<b>ω ของก้าน 3</b> (i = 2): ข้อต่อ 3 เป็น<b>ข้อต่อเลื่อน</b> จึงไม่เพิ่มความเร็วเชิงมุม ก้าน 3 หมุนไปพร้อมกับก้าน 2 แต่ตัวเลขยังต้องเปลี่ยนไปเขียนในเฟรม {3}: \\({}^3_2R\\) สลับช่อง y กับ z และกลับเครื่องหมายหนึ่งตัว', '<b>ω of link 3</b> (i = 2): joint 3 <b>slides</b>, so it adds no angular velocity: link 3 turns together with link 2. The numbers must still be written in frame {3}: \\({}^3_2R\\) swaps the y and z places and changes one sign'),
+    tex: `\\begin{aligned} {}^3_2R &= \\big({}^2_3R\\big)^T = ${R32r} \\\\ {}^3\\omega_3 &= {}^3_2R\\,${W2r} = ${col('-c_2\\dot\\theta_1', '-\\dot\\theta_2', 's_2\\dot\\theta_1')} \\end{aligned}` },
+  { why: t('<b>ในวงเล็บของ v₃</b>: \\({}^2P_3 = (0, d_3, 0)\\) (เส้นประ) มีแต่ช่อง y ผลคูณไขว้จึงทำได้เร็ว: (a, b, c) × (0, d, 0) = (−cd, 0, ad) นี่คือความเร็วที่ปลายแขนได้จากการหมุนของก้าน 2 (ลูกศรสีชมพู) บวกกับ \\({}^2v_2\\) ของข้อศอก (ลูกศรสีเขียวเส้นบาง) ได้ เพราะทั้งสองเขียนในเฟรม {2}', '<b>Inside the bracket of v₃</b>: \\({}^2P_3 = (0, d_3, 0)\\) (dashed) has a y place only, which makes the cross product quick: (a, b, c) × (0, d, 0) = (−cd, 0, ad). It is the velocity the turning of link 2 gives the tip (pink arrow). Add the \\({}^2v_2\\) of the elbow (thin green arrow): both are written in frame {2}'),
+    tex: `\\begin{aligned} {}^2\\omega_2 \\times {}^2P_3 &= ${W2r} \\times ${col('0', 'd_3', '0')} = ${col('-d_3\\dot\\theta_2', '0', '-d_3c_2\\dot\\theta_1')} \\\\ {}^2v_2 + {}^2\\omega_2 \\times {}^2P_3 &= ${col('-d_3\\dot\\theta_2', '0', '-(L_2 + d_3c_2)\\dot\\theta_1')} \\end{aligned}` },
+  { why: t('<b>v ของก้าน 3</b>: คูณวงเล็บด้วย \\({}^3_2R\\) แล้ว<b>บวก \\(\\dot d_3\\,{}^3\\hat Z_3\\)</b> ซึ่งเป็นสิ่งที่ข้อต่อเลื่อนเพิ่มให้: ความเร็ว ḋ₃ ตามแกน Z₃ ของตัวเอง (ลูกศรสีส้มในรูป ต่อจากลูกศรสีชมพู รวมกันได้ลูกศรสีเขียว v₃)', '<b>v of link 3</b>: multiply the bracket by \\({}^3_2R\\), then <b>add \\(\\dot d_3\\,{}^3\\hat Z_3\\)</b>, which is what a sliding joint gives: a velocity ḋ₃ along its own Z₃ (the orange arrow in the picture; set after the pink one, it makes the green arrow v₃)'),
+    tex: `\\begin{aligned} {}^3v_3 &= {}^3_2R\\,\\big({}^2v_2 + {}^2\\omega_2 \\times {}^2P_3\\big) + \\dot d_3\\,{}^3\\hat Z_3 \\\\ &= ${col('-d_3\\dot\\theta_2', '(L_2 + d_3c_2)\\dot\\theta_1', '0')} + ${col('0', '0', '\\dot d_3')} = ${col('-d_3\\dot\\theta_2', '(L_2 + d_3c_2)\\dot\\theta_1', '\\dot d_3')} \\end{aligned}` },
+  { why: t(`<b>แทนค่า</b>: θ₂ = ${Math.round(deg(rq2))}°, d₃ = ${dn(rd3)} m, L₂ = ${dn(LR.L2)} m และ q̇ = (${dn(w1)} rad/s, ${u(w2)} rad/s, ${dn(dd3)} m/s) เส้นประในรูปคือองค์ประกอบของ v₃ ตามแกน X₃, Y₃ และ Z₃`, `<b>Put in the numbers</b>: θ₂ = ${Math.round(deg(rq2))}°, d₃ = ${dn(rd3)} m, L₂ = ${dn(LR.L2)} m and q̇ = (${dn(w1)} rad/s, ${u(w2)} rad/s, ${dn(dd3)} m/s). The dashed lines in the picture are the components of v₃ along X₃, Y₃ and Z₃`),
+    tex: `\\begin{aligned} c_2 &= ${dn(rc2, 3)}, \\quad s_2 = ${dn(rs2, 3)} \\\\ {}^3\\omega_3 &= ${col(`-${dn(rc2, 3)}(${dn(w1)})`, `-${pn(w2)}`, `${dn(rs2, 3)}(${dn(w1)})`)} = ${tc(XR.w3)}\\ \\text{rad/s} \\\\ {}^3v_3 &= ${col(`-${dn(rd3)}${pn(w2)}`, `(${dn(LR.L2)} + ${dn(rd3)}(${dn(rc2, 3)}))(${dn(w1)})`, dn(dd3))} = ${tc(XR.v3)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t(`<b>ตรวจด้วยความหมาย</b>: แต่ละช่องของ ³v₃ มาจากข้อต่อเพียงตัวเดียว · ช่อง x = −d₃θ̇₂: ข้อต่อ 2 เหวี่ยงปลายแขนรอบข้อศอกด้วยรัศมี d₃ · ช่อง y = (L₂ + d₃c₂)θ̇₁: ข้อต่อ 1 พาปลายแขนวนรอบแกนตั้งด้วยรัศมี L₂ + d₃c₂ = ${fx(rad3)} m (เส้นประสีชมพู) · ช่อง z = ḋ₃: ข้อต่อเลื่อนดันปลายแขนไปตามแกน Z₃ <b>ตรวจกับการบ้าน 5.2</b>: คูณ \\({}^0_3R\\,{}^3v_3\\) (ส่วนการหมุนของ \\({}^0_3T\\) จากการบ้านชุดที่ 4) ต้องได้ v ชุดเดียวกับที่หาด้วยจาโคเบียนในการบ้าน 5.2 (ข) และต้องยาวเท่ากัน`, `<b>Check by meaning</b>: each place of ³v₃ comes from one joint only · x = −d₃θ̇₂: joint 2 swings the tip about the elbow on a radius d₃ · y = (L₂ + d₃c₂)θ̇₁: joint 1 carries the tip round the vertical axis on a radius L₂ + d₃c₂ = ${fx(rad3)} m (dashed pink) · z = ḋ₃: the sliding joint pushes the tip along Z₃. <b>Check against homework 5.2</b>: the product \\({}^0_3R\\,{}^3v_3\\) (with the rotation part of the \\({}^0_3T\\) of homework 4) must give the same v as the Jacobian of homework 5.2 (b), and the same length`),
+    tex: `|{}^3v_3| = \\sqrt{${dn(XR.v3[0], 3)}^2 + ${dn(XR.v3[1], 3)}^2 + ${dn(XR.v3[2], 3)}^2} = ${dn(norm(XR.v3), 3)}\\ \\text{m/s} = |{}^0v_3|` }],
+  answer: t(`³ω₃ = ${vu(XR.w3)} rad/s และ ³v₃ = ${vu(XR.v3)} m/s · ข้อต่อเลื่อนไม่เพิ่ม ω แต่เพิ่ม ḋ₃ ในช่อง z ของ v`, `³ω₃ = ${vu(XR.w3)} rad/s and ³v₃ = ${vu(XR.v3)} m/s · the sliding joint adds no ω, but it adds ḋ₃ in the z place of v`) });
+});
+</script>
+</body>
+</html>

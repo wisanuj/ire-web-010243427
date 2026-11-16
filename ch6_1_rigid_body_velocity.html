@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="6.1 — The velocity of a rigid body">6.1 — ความเร็วของวัตถุแข็งเกร็ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=19">
+<script src="assets/stops.js?v=19"></script><script src="assets/shell.js?v=19"></script>
+<script src="assets/robot.js?v=19"></script><script src="assets/lesson.js?v=19"></script><script src="assets/ch2.js?v=19"></script><script src="assets/ch3.js?v=19"></script><script src="assets/ch4.js?v=19"></script><script src="assets/ch5.js?v=19"></script><script src="assets/ch6.js?v=19"></script><script src="assets/scene3d.js?v=19"></script><script src="assets/gl3d.js?v=19"></script><script src="assets/ch2_3d.js?v=19"></script><script src="assets/ch3_3d.js?v=19"></script><script src="assets/ch6_3d.js?v=19"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">ความเร็วของวัตถุแข็งเกร็ง <span class="en">The velocity of a rigid body — a point of a body that slides and turns</span></h1>
+<h1 data-l="en">The velocity of a rigid body <span class="en">A point of a body that slides and turns, watched from a fixed frame</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch6/s08.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 8: a plate with frame B that slides and turns at once; three arrows at the point Q, tip to tail, add up to the velocity of Q watched from the fixed frame A">
+    <figcaption data-l="th">สไลด์บทที่ 6 หน้า 8 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 6 slides, p. 8 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">บทที่ 5 หาจาโคเบียนด้วยการหาอนุพันธ์ของสมการตำแหน่ง บทที่ 6 หาจาโคเบียนตัวเดียวกัน<b>โดยไม่ต้องหาอนุพันธ์</b>: ส่งต่อความเร็วจากก้านหนึ่งไปยังก้านถัดไป ตั้งแต่ฐานจนถึงปลายแขน วิธีนี้ต้องใช้สูตรเพียงสูตรเดียว คือ<b>ความเร็วของจุด Q บนวัตถุ {B} ที่ทั้งเลื่อนและหมุน เมื่อมองจากเฟรม {A} ที่อยู่นิ่ง</b> หน้านี้สร้างสูตรนั้นทีละส่วน: วัตถุที่เลื่อนอย่างเดียว วัตถุที่หมุนอย่างเดียว แล้วรวมทั้งสองอย่างเข้าด้วยกัน และเขียนผลคูณไขว้ (cross product) ในรูปเมทริกซ์ หน้านี้ครอบคลุมสไลด์หน้า 5–9 มี <b>4 โจทย์</b></p>
+    <p class="sub" data-l="en">Chapter 5 found the Jacobian by differentiating the position equations. Chapter 6 finds the same Jacobian <b>without differentiating</b>: it passes velocities on from one link to the next, from the base to the tool. That takes a single formula: <b>the velocity of a point Q of a body {B} that slides and turns, watched from a fixed frame {A}</b>. This page builds it part by part (a body that only slides, a body that only turns, then both at once) and writes the cross product as a matrix. It covers slides pp. 5–9, with <b>4 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>เลื่อนอย่างเดียว</b>: \({}^AV_Q = {}^AV_{BORG} + {}^A_BR\,{}^BV_Q\) โดย \({}^AV_{BORG}\) คือความเร็วของจุดกำเนิดของ {B} (BORG ย่อจาก origin of {B}) และ \({}^BV_Q\) คือความเร็วของ Q เทียบกับวัตถุ ซึ่งต้องหมุนเข้าแกนของ {A} ด้วย \({}^A_BR\) ก่อนบวก</li><li><b>หมุนอย่างเดียว</b>: \({}^AV_Q = {}^A\Omega_B \times {}^A_BR\,{}^BQ\) ความเร็วนี้ตั้งฉากกับแกนหมุนและกับเส้นจากแกนหมุนถึง Q มีขนาดเท่ากับ Ω คูณระยะจากแกนหมุน</li><li><b>ผลคูณไขว้ในรูปเมทริกซ์</b>: \(\Omega \times p = S(\Omega)\,p\) โดย \(S(\Omega) = \begin{bmatrix} 0 & -\Omega_z & \Omega_y \\ \Omega_z & 0 & -\Omega_x \\ -\Omega_y & \Omega_x & 0 \end{bmatrix}\) เป็นเมทริกซ์สมมาตรเอียง (skew-symmetric matrix): \(S^T = -S\)</li><li><b>ทั้งเลื่อนและหมุน</b> (Craig สมการ 5.13): \({}^AV_Q = {}^AV_{BORG} + {}^A_BR\,{}^BV_Q + {}^A\Omega_B \times {}^A_BR\,{}^BQ\)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Sliding only</b>: \({}^AV_Q = {}^AV_{BORG} + {}^A_BR\,{}^BV_Q\). \({}^AV_{BORG}\) is the velocity of the origin of {B} (BORG: the origin of {B}); \({}^BV_Q\) is the velocity of Q relative to the body, and \({}^A_BR\) turns it into the axes of {A} before the two are added.</li><li><b>Turning only</b>: \({}^AV_Q = {}^A\Omega_B \times {}^A_BR\,{}^BQ\). This velocity is square to the axis of turning and to the line from the axis to Q; its size is Ω times the distance of Q from the axis.</li><li><b>The cross product as a matrix</b>: \(\Omega \times p = S(\Omega)\,p\), where \(S(\Omega) = \begin{bmatrix} 0 & -\Omega_z & \Omega_y \\ \Omega_z & 0 & -\Omega_x \\ -\Omega_y & \Omega_x & 0 \end{bmatrix}\) is a skew-symmetric matrix: \(S^T = -S\).</li><li><b>Sliding and turning at once</b> (Craig, equation 5.13): \({}^AV_Q = {}^AV_{BORG} + {}^A_BR\,{}^BV_Q + {}^A\Omega_B \times {}^A_BR\,{}^BQ\).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>วัตถุที่เลื่อน</a><a href="#ex2"><b>2</b>วัตถุที่หมุน</a><a href="#ex3"><b>3</b>ผลคูณไขว้เป็นเมทริกซ์</a><a href="#ex4"><b>4</b>เลื่อนและหมุนพร้อมกัน</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>A body that slides</a><a href="#ex2"><b>2</b>A body that turns</a><a href="#ex3"><b>3</b>Cross product as a matrix</a><a href="#ex4"><b>4</b>Both at once</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">วัตถุที่เลื่อน: ความเร็วเชิงเส้น</h2><h2 data-l="en">A body that slides: linear velocity</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 5 · Craig 5.3 (สมการ 5.7) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, p. 5 · Craig 5.3 (equation 5.7) · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">เฟรม {A} อยู่นิ่ง เฟรม {B} ติดอยู่กับแผ่นวัตถุ ซึ่งเลื่อนโดยไม่หมุน ลูกศร<b class="ax-a">สีส้ม</b>คือความเร็วของจุดกำเนิดของ {B} ลูกศร<b style="color:var(--purple)">สีม่วง</b>คือความเร็วของ Q บนวัตถุ (หมุนเข้าแกนของ {A} แล้ว) ต่อหัวต่อหางกันได้ลูกศร<b class="ax-y">สีเขียว</b> คือความเร็วของ Q เมื่อมองจาก {A} แถบ “มุมของ {B}” ตั้งทิศของวัตถุเท่านั้น ไม่ได้ทำให้วัตถุหมุน ลูกศรยาว 0.12 m แทนความเร็ว 0.1 m/s ถ้าตั้งค่าจนลูกศรยาวเกินภาพ หน้านี้จะย่อลูกศรลงทีละครึ่ง และบอกสเกลใหม่ไว้ที่มุมซ้ายบนของภาพ</div>
+      <div class="simnote" data-l="en">Frame {A} is fixed. Frame {B} rides on the plate, which slides without turning. The <b class="ax-a">orange</b> arrow is the velocity of the origin of {B}, the <b style="color:var(--purple)">purple</b> one the velocity of Q on the body (already turned into the axes of {A}); tip to tail they give the <b class="ax-y">green</b> arrow, the velocity of Q watched from {A}. The slider “angle of {B}” only sets the orientation of the body; it does not make the body turn. An arrow 0.12 m long stands for 0.1 m/s. When a setting would push the arrows out of the picture, the page halves them (more than once if need be) and writes the new scale at the top left of the picture.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch6/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: a fixed frame A and a plate with frame B that slides without turning; at a point Q of the plate two arrows, tip to tail, add up to its velocity">
+      <figcaption data-l="th">สไลด์หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 5 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">เฟรม {B} ติดอยู่กับวัตถุซึ่ง<b>เลื่อนโดยไม่หมุน</b>เทียบกับเฟรม {A} ที่อยู่นิ่ง ทิศของ {B} คือ \({}^A_BR = R_Z(30^\circ)\) จุดกำเนิดของ {B} เคลื่อนที่ด้วย \({}^AV_{BORG} = (0.1,\ 0.05,\ 0)\ \text{m/s}\) จุด Q เคลื่อนที่อยู่บนวัตถุไปตามแกน \(X_B\) ด้วย \({}^BV_Q = (0.08,\ 0,\ 0)\ \text{m/s}\) หาความเร็วของ Q เมื่อมองจาก {A} คือ \({}^AV_Q\)</div>
+        <div data-l="en">Frame {B} rides on a body that <b>slides without turning</b> relative to the fixed frame {A}. The orientation of {B} is \({}^A_BR = R_Z(30^\circ)\). The origin of {B} moves with \({}^AV_{BORG} = (0.1,\ 0.05,\ 0)\ \text{m/s}\). The point Q moves on the body along \(X_B\) with \({}^BV_Q = (0.08,\ 0,\ 0)\ \text{m/s}\). Find the velocity of Q watched from {A}, \({}^AV_Q\).</div></div>
+      <div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">วัตถุที่หมุน: ความเร็วเชิงมุม</h2><h2 data-l="en">A body that turns: rotational velocity</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 6 · Craig 5.3 (สมการ 5.10) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, p. 6 · Craig 5.3 (equation 5.10) · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">วัตถุหมุนรอบแกนตั้งที่ผ่านจุดกำเนิดของ {B}: ลูกศร<b class="ax-p">สีชมพู</b>ที่ตั้งขึ้นบอกทิศของ ᴬΩ<sub>B</sub> (ชี้ลงเมื่อ Ω ติดลบ) และลูกศรโค้งยาวขึ้นเมื่อหมุนเร็วขึ้น Q ติดอยู่กับวัตถุ เส้นประคือ ᴮQ ลูกศร<b class="ax-y">สีเขียว</b>คือความเร็วของ Q Craig วาดจุดกำเนิดของ {A} และ {B} ทับกัน ในรูปนี้วาด {B} แยกออกมาเพื่อให้เห็นสองเฟรมชัด ผลไม่เปลี่ยน เพราะความเร็วของ Q ขึ้นกับเวกเตอร์จากจุดกำเนิดของ {B} ถึง Q เท่านั้น</div>
+      <div class="simnote" data-l="en">The body turns about the vertical axis through the origin of {B}: the upright <b class="ax-p">pink</b> arrow gives the direction of ᴬΩ<sub>B</sub> (it points down for a negative Ω) and the curved arrow gets longer as the turning gets faster. Q is fixed to the body; the dashed line is ᴮQ and the <b class="ax-y">green</b> arrow the velocity of Q. Craig draws the origins of {A} and {B} on top of each other; here {B} is drawn aside so that the two frames can be told apart. Nothing changes, because the velocity of Q depends only on the vector from the origin of {B} to Q.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch6/s06.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 6: a plate with frame B turning about a vertical axis; a point Q of the plate moves at right angles to the line from the axis to Q">
+      <figcaption data-l="th">สไลด์หน้า 6 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 6 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">คราวนี้วัตถุ<b>หมุนอย่างเดียว</b>: จุดกำเนิดของ {B} อยู่นิ่ง และ {B} หมุนด้วยความเร็วเชิงมุม \({}^A\Omega_B = (0,\ 0,\ 0.5)\ \text{rad/s}\) ทิศของ \({}^A\Omega_B\) คือแกนที่ {B} กำลังหมุนรอบเมื่อมองจาก {A} (กฎมือขวา) ขนาดคืออัตราการหมุน ขณะนี้ \({}^A_BR = R_Z(30^\circ)\) และจุด Q <b>ติดอยู่กับวัตถุ</b>ที่ \({}^BQ = (0.3,\ 0.1,\ 0)\ \text{m}\) หา \({}^AV_Q\)</div>
+        <div data-l="en">Now the body <b>only turns</b>: the origin of {B} stays put and {B} turns with the angular velocity \({}^A\Omega_B = (0,\ 0,\ 0.5)\ \text{rad/s}\). The direction of \({}^A\Omega_B\) is the axis {B} is turning about, watched from {A} (right-hand rule); its length is the rate of turning. At this instant \({}^A_BR = R_Z(30^\circ)\), and the point Q is <b>fixed to the body</b> at \({}^BQ = (0.3,\ 0.1,\ 0)\ \text{m}\). Find \({}^AV_Q\).</div></div>
+      <div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">ผลคูณไขว้ในรูปเมทริกซ์</h2><h2 data-l="en">The cross product as a matrix</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 7 · Craig 5.4 · วัตถุของโจทย์ 2 · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, p. 7 · Craig 5.4 · the body of problem 2 · drag to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">ภาพเดียวกับโจทย์ 2 ใต้ภาพคือผลคูณ S(Ω) ᴬQ ของค่าที่ตั้งอยู่ เลื่อน Ω แล้วดูว่าช่องไหนของเมทริกซ์เปลี่ยน เลื่อนมุมของ {B} แล้วจะเห็นว่า ᴬQ เปลี่ยน แต่ S(Ω) ไม่เปลี่ยน</div>
+      <div class="simnote" data-l="en">The picture of problem 2. Under it is the product S(Ω) ᴬQ for the present settings. Move Ω and watch which entries of the matrix change; move the angle of {B} and ᴬQ changes while S(Ω) does not.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch6/s07.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 7: the cross product of Omega and p written as the skew-symmetric matrix S of Omega times p; S transposed is minus S, and for a turning body R-dot times R transposed is S of Omega">
+      <figcaption data-l="th">สไลด์หน้า 7 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 7 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ผลคูณไขว้กับ Ω เขียนเป็นการคูณด้วยเมทริกซ์ได้: \(\Omega \times p = S(\Omega)\,p\) สำหรับเวกเตอร์ p ใดก็ได้ ใช้รูปแบบของ \(S(\Omega)\) ในสไลด์ <b>(ก)</b> เขียน \(S(\Omega)\) ของ \({}^A\Omega_B = (0,\ 0,\ 0.5)\ \text{rad/s}\) <b>(ข)</b> คูณกับ \({}^AQ = (0.2098,\ 0.2366,\ 0)\ \text{m}\) ของโจทย์ 2 แล้วเทียบกับคำตอบของโจทย์ 2</div>
+        <div data-l="en">A cross product with Ω can be written as a multiplication by a matrix: \(\Omega \times p = S(\Omega)\,p\) for any vector p. With the pattern of \(S(\Omega)\) on the slide, <b>(a)</b> write \(S(\Omega)\) for \({}^A\Omega_B = (0,\ 0,\ 0.5)\ \text{rad/s}\); <b>(b)</b> multiply it by \({}^AQ = (0.2098,\ 0.2366,\ 0)\ \text{m}\) of problem 2 and compare with the answer of problem 2.</div></div>
+      <div id="ask3a"></div><div id="ask3b"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">เลื่อนและหมุนพร้อมกัน</h2><h2 data-l="en">Sliding and turning at once</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 8–9 · Craig 5.3 (สมการ 5.13) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, pp. 8–9 · Craig 5.3 (equation 5.13) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s09.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 9: the example; given the rotation matrix of B, the velocity of the origin of B, the angular velocity of B, and the position and the velocity of Q in B, find the velocity of Q watched from A">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 9 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 9 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div>
+      <div class="simnote" data-l="th">ลูกศรสามอันต่อหัวต่อหางกันที่ Q: <b class="ax-a">สีส้ม</b> จุดกำเนิดของ {B} เคลื่อนที่ <b style="color:var(--purple)">สีม่วง</b> Q เคลื่อนที่บนวัตถุ <b class="ax-p">สีชมพู</b> วัตถุหมุนและพา Q ไปด้วย ผลรวมคือลูกศร<b class="ax-y">สีเขียว</b> ᴬV<sub>Q</sub> ส่วนที่เป็นศูนย์จะไม่มีลูกศร สเกลของลูกศรเหมือนโจทย์ 1</div>
+      <div class="simnote" data-l="en">Three arrows, tip to tail at Q: <b class="ax-a">orange</b>, the origin of {B} moves; <b style="color:var(--purple)">purple</b>, Q moves on the body; <b class="ax-p">pink</b>, the body turns and carries Q round. Their sum is the <b class="ax-y">green</b> arrow ᴬV<sub>Q</sub>. A part that is zero has no arrow. The arrows are drawn to the scale of problem 1.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">วัตถุทั้งเลื่อนและหมุน: \({}^A_BR = R_Z(30^\circ)\) จุดกำเนิดของ {B} เคลื่อนที่ด้วย \({}^AV_{BORG} = (0.1,\ 0.05,\ 0)\ \text{m/s}\) และ {B} หมุนด้วย \({}^A\Omega_B = (0,\ 0,\ 0.5)\ \text{rad/s}\) จุด Q อยู่ที่ \({}^BQ = (0.3,\ 0.1,\ 0)\ \text{m}\) และเคลื่อนที่บนวัตถุด้วย \({}^BV_Q = (0.08,\ 0,\ 0)\ \text{m/s}\) หา \({}^AV_Q\) $$ {}^AV_Q = {}^AV_{BORG} + {}^A_BR\,{}^BV_Q + {}^A\Omega_B \times {}^A_BR\,{}^BQ $$</div>
+        <div data-l="en">The body slides and turns: \({}^A_BR = R_Z(30^\circ)\), the origin of {B} moves with \({}^AV_{BORG} = (0.1,\ 0.05,\ 0)\ \text{m/s}\) and {B} turns with \({}^A\Omega_B = (0,\ 0,\ 0.5)\ \text{rad/s}\). The point Q is at \({}^BQ = (0.3,\ 0.1,\ 0)\ \text{m}\) and moves on the body with \({}^BV_Q = (0.08,\ 0,\ 0)\ \text{m/s}\). Find \({}^AV_Q\). $$ {}^AV_Q = {}^AV_{BORG} + {}^A_BR\,{}^BV_Q + {}^A\Omega_B \times {}^A_BR\,{}^BQ $$</div></div>
+      <div id="ask4"></div><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ทีละส่วน</h3>
+    <ol><li>โจทย์ 4: ตั้ง Ω<sub>z</sub> = 0 และ ᴬV<sub>BORG</sub> = (0, 0): เหลือแต่ลูกศรสีม่วง คือความเร็วของ Q บนวัตถุ แล้วเลื่อนมุมของ {B}: ลูกศรยาวเท่าเดิม แต่หันตามแกน X<sub>B</sub> เสมอ</li><li>โจทย์ 4: ตั้ง ᴮQ = (0, 0) ให้ Q อยู่บนแกนหมุนพอดี: ลูกศรสีชมพูหายไป ไม่ว่า Ω จะมากแค่ไหน เพราะระยะจากแกนหมุนเป็นศูนย์ การหมุนจึงไม่เพิ่มความเร็วให้ Q</li><li>โจทย์ 4: เปลี่ยนเครื่องหมายของ Ω<sub>z</sub>: ลูกศรสีชมพูกลับทิศ แต่ยาวเท่าเดิม ส่วนลูกศรสีส้มและสีม่วงไม่เปลี่ยนเลย</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ระยะจากแกนหมุน</h3>
+    <ol><li>โจทย์ 2: ตั้งมุมของ {B} เป็น 0°: ᴬQ เท่ากับ ᴮQ และความเร็วคือ (−ωy, ωx, 0) ของ ᴮQ ตรง ๆ แล้วเลื่อนมุมไปที่ 90°: ความเร็วหมุนตามไป 90° แต่ขนาดเท่าเดิม เพราะขนาดขึ้นกับระยะจากแกนหมุนเท่านั้น</li><li>โจทย์ 2: เลื่อน Q ออกห่างจากแกนหมุนเป็นสองเท่า เช่น จาก (0.1, 0.1) เป็น (0.2, 0.2): ความเร็วเพิ่มเป็นสองเท่า</li><li>โจทย์ 3: เลื่อน Ω แล้วดูเมทริกซ์ใต้ภาพ: มีเพียงสองช่องที่เปลี่ยน และมีเครื่องหมายตรงข้ามกันเสมอ</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 6 หน้า 5–9 (ภาพอยู่ในหน้านี้แล้ว) · Craig 5.3–5.4 · สไลด์เดิม Part I หน้า 3–7</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — one part at a time</h3>
+    <ol><li>Problem 4: set Ω<sub>z</sub> = 0 and ᴬV<sub>BORG</sub> = (0, 0): only the purple arrow is left, the velocity of Q on the body. Then move the angle of {B}: the arrow keeps its length and always points along X<sub>B</sub>.</li><li>Problem 4: set ᴮQ = (0, 0), which puts Q right on the axis of turning: the pink arrow is gone, however large Ω is, because the distance from the axis is zero. Turning then adds nothing to the velocity of Q.</li><li>Problem 4: change the sign of Ω<sub>z</sub>: the pink arrow flips over and keeps its length, while the orange and purple arrows do not change at all.</li></ol></div>
+  <div class="card"><h3>Try this 2 — the distance from the axis</h3>
+    <ol><li>Problem 2: set the angle of {B} to 0°: ᴬQ equals ᴮQ and the velocity is simply (−ωy, ωx, 0) of ᴮQ. Then move the angle to 90°: the velocity turns by 90° with it and keeps its size, because the size depends only on the distance from the axis.</li><li>Problem 2: move Q twice as far from the axis, for example from (0.1, 0.1) to (0.2, 0.2): the velocity doubles.</li><li>Problem 3: move Ω and watch the matrix under the picture: only two entries change, and they always have opposite signs.</li></ol>
+    <div class="book">Source: chapter 6 slides, pp. 5–9 (the pictures are on this page) · Craig 5.3–5.4 · old part I slides pp. 3–7</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, dn = RB.d, rad = RB.rad, deg = RB.deg, X = CH6.EX.rigid, OV = CH6.OV, TH = Math.round(deg(X.th)), PUR = 'style="color:var(--purple)"';
+const el = id => document.getElementById(id), hyp = a => Math.hypot(a[0], a[1], a[2]), up = (p, h) => [p[0], p[1], p[2] + h], neg = a => a.map(x => -x);
+const near2 = (v, a, tol = 0.002) => Math.abs(v[0] - a[0]) < tol && Math.abs(v[1] - a[1]) < tol;
+const fx = (x, n = 3) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n);   // fixed decimals: the numbers do not jump about while a slider moves
+const v3 = (a, n = 3) => `(${fx(a[0], n)}, ${fx(a[1], n)}, 0)`;                          // every vector of this page lies in the X–Y plane of {A}
+const tv = (a, n = 4) => `(${a.map(x => dn(x, n)).join(',\\ ')})`;                       // TeX: a row vector
+/* the three parts of Craig 5.13 for the state M of a picture (th, vB, vQ, W about Z_A, Q), and the points the scene `rigid` draws them at:
+   the origin of {B} 0.02 m above the floor, the arrows 0.012 m above Q */
+const partsOf = M => CH6.vQ(RB.Rz(M.th), M.vB, M.vQ, [0, 0, M.W], M.Q);
+const geo = M => { const r = partsOf(M), Ob = [X.O[0], X.O[1], 0.02], Qw = OV.v(Ob, r.rQ); return { r, Ob, Qw, A: up(Qw, 0.012), R: RB.Rz(M.th) }; };
+/* the scale of the arrows: 1.2 m of arrow for 1 m/s as on the slides. The camera of this scene is fixed, so while a slider setting would push an arrow out of
+   the picture (as the scene's own camera sees it on a 1000 × 800 canvas, less a margin) the arrows are halved, until the three of them are 0.1 m long together */
+const VS = 1.2, CAM = CH6.S3.rigid({}, {}).cam, seen = p => { const q = window.S3.proj(CAM, 1000, 800, p); return q[0] > 40 && q[0] < 960 && q[1] > 40 && q[1] < 760; };
+const vsOf = M => { const g = geo(M), r = g.r, m = hyp(r.trans) + hyp(r.rel) + hyp(r.rot); let k = VS;
+  while (k * m > 0.1) { const a1 = OV.v(g.A, r.trans, k), a2 = OV.v(a1, r.rel, k); if (seen(a1) && seen(a2) && seen(OV.v(a2, r.rot, k))) break; k /= 2; } return k; };
+const scaleTx = k => t(`ลูกศรย่อลง: ${u(0.1 * k, 3)} m แทน 0.1 m/s`, `arrows scaled down: ${u(0.1 * k, 3)} m for 0.1 m/s`);
+const sim = (cv, M) => CH2.sim(cv, M, 'rigid', { aspect: 0.8, maxH: 520, after: (c, W, H, P) => { if (M.vs < VS) CH2.pillAt(c, scaleTx(M.vs), P.muted); } });
+/* a vector d (k metres of picture per unit) drawn from a as its part along X_A and then its part along Y_A, each with its number
+   (left out where the corner between the two parts would fall outside the picture) */
+const comp = (s, a, d, k, nx, ny) => { const b = [a[0] + k * d[0], a[1], a[2]], c = [b[0], b[1] + k * d[1], b[2]]; if (!seen(b) || !seen(c)) return;
+  if (Math.abs(k * d[0]) > 0.012) OV.dist(s, a, b, 'x', nx, { m: 0, s: 20, dy: 24 });
+  if (Math.abs(k * d[1]) > 0.012) OV.dist(s, b, c, 'y', ny, { m: 0, s: 20, a: 'l', dx: 12 }); };
+/* a body that only slides: two more of its points, each with the velocity of the origin of {B} */
+const same = (s, g, st) => { if (hyp(g.r.trans) < 1e-9) return; let named = false; [[0.38, -0.04, 0], [0, 0.17, 0]].forEach(p => { const a = up(OV.v(g.Ob, RB.mv(g.R, p)), 0.012), b = OV.v(a, g.r.trans, st.vs); if (!seen(a) || !seen(b)) return;   // not where the arrow would leave the picture
+  OV.pt(s, a, 'o', null, { r: 0.011 }); OV.vec(s, a, b, 'o', named ? null : t('ทุกจุดที่ติดกับวัตถุ', 'every point fixed to the body'), { m: 0, s: 20, at: 1, a: 'l', dx: 12, dy: 22, r: 0.004 }); named = true; }); };
+/* the line from the axis of turning to Q with its length, and the right angle between it and the turning part drawn from the point a */
+const radius = (s, g, a) => { const d = hyp(g.r.rQ); if (d < 0.012) return; OV.dist(s, up(g.Ob, 0.008), up(g.Qw, 0.008), 'pk', 'r = ' + fx(d) + ' m', { m: 0, s: 20, dy: -20, r: 0.004 });
+  if (a && hyp(g.r.rot) > 1e-9) OV.ang(s, a, neg(g.r.rQ), g.r.rot, 0.05, 'ink', '90°', { m: 0, s: 18, dy: -16 }); };
+/* sliders: the angle of {B} in degrees, and a plain number M[key] or M[key][i] */
+const angS = (box, id, M, read) => ui.slider(box, { id, label: t('มุมของ {B}', 'angle of {B}'), min: -90, max: 90, step: 1, value: Math.round(deg(M.th)), fmt: v => `${u(v, 0)}°`, oninput: v => { M.th = rad(v); read(); } });
+const numS = (box, id, label, M, key, i, lo, hi, step, unit, read) => ui.slider(box, { id, label, min: lo, max: hi, step, value: i === null ? M[key] : M[key][i], fmt: v => `${fx(v, step < 0.1 ? 2 : 1)} ${unit}`,
+  oninput: v => { if (i === null) M[key] = v; else M[key][i] = v; read(); } });
+const LB = { bx: 'ᴬV<sub>BORG,x</sub>', by: 'ᴬV<sub>BORG,y</sub>', qx: 'ᴮV<sub>Q,x</sub>', w: 'Ω<sub>z</sub>', Qx: 'ᴮQ<sub>x</sub>', Qy: 'ᴮQ<sub>y</sub>' };
+/* a "try first" box for the x and y of a velocity */
+const xy = (lab, a) => [{ label: `${lab} x (m/s) =`, ok: x => Math.abs(x - a[0]) < 0.002, w: 5 }, { label: 'y (m/s) =', ok: x => Math.abs(x - a[1]) < 0.002, w: 5 }];
+const w0 = dn(X.W[2], 2), qx0 = dn(X.rQ[0], 4), qy0 = dn(X.rQ[1], 4), vq0 = u(X.vQ[0], 2), RQ = hyp(X.rQ);
+const turnTx = () => t('นั่นคือ Ω × ᴮQ: ต้องเขียน Q ใน {A} ก่อน (ᴬQ = ᴬ<sub>B</sub>R ᴮQ)', 'that is Ω × ᴮQ: write Q in {A} first (ᴬQ = ᴬ<sub>B</sub>R ᴮQ)');
+
+/* ---------- 1: a body that slides ---------- */
+const P1 = RB.add(X.trans, X.rel), M1 = { mode: 'trans', vs: VS, th: rad(-20), vB: [0.05, 0.12, 0], vQ: [0.14, 0, 0], W: 0, Q: X.Q.slice() }, ro1 = el('ro1'), c1 = el('ctl1');   // starts away from the example: the readout must not show the answer the box asks for (the stepper puts the example back)
+const read1 = () => { const r = partsOf(M1); M1.vs = vsOf(M1);
+  ro1.innerHTML = `<div class="term"><b class="ax-a">ᴬV<sub>BORG</sub> = ${v3(r.trans)} m/s</b></div><div class="term"><b ${PUR}>ᴬ<sub>B</sub>R ᴮV<sub>Q</sub> = ${v3(r.rel)} m/s</b></div><div class="term">${t('รวม', 'sum')}: <b class="ax-y">ᴬV<sub>Q</sub> = ${v3(r.v)} m/s</b> · |ᴬV<sub>Q</sub>| = ${fx(hyp(r.v))} m/s</div>`; };
+const s1 = [angS(c1, 'p1a', M1, read1), numS(c1, 'p1b', LB.bx, M1, 'vB', 0, -0.2, 0.2, 0.01, 'm/s', read1), numS(c1, 'p1c', LB.by, M1, 'vB', 1, -0.2, 0.2, 0.01, 'm/s', read1), numS(c1, 'p1d', LB.qx, M1, 'vQ', 0, -0.2, 0.2, 0.01, 'm/s', read1)];
+/* back to the numbers of the example (the picture and the sliders) */
+const put1 = () => { M1.th = X.th; M1.vB = X.vB.slice(); M1.vQ = X.vQ.slice(); [TH, M1.vB[0], M1.vB[1], M1.vQ[0]].forEach((x, i) => s1[i].set(x)); read1(); }; read1();
+/* the open step: 1 two more points of the body with the same velocity as the origin of {B}; 2 the purple arrow split along X_A and Y_A, and the angle of X_B;
+   3 the sum split along X_A and Y_A */
+M1.ov = (s, st) => { const k = st.step; if (!k) return; const g = geo(st), r = g.r, a1 = OV.v(g.A, r.trans, st.vs);
+  if (k === 1) same(s, g, st);
+  if (k === 2) { OV.ang(s, a1, [1, 0, 0], RB.col(g.R, 0), 0.06, 'p', u(deg(st.th), 0) + '°', { m: 0, s: 18, dx: 16, dy: -4 }); comp(s, a1, r.rel, st.vs, 'x: ' + fx(r.rel[0]), 'y: ' + fx(r.rel[1])); }
+  if (k === 3) comp(s, g.A, r.v, st.vs, 'x: ' + fx(r.v[0]), 'y: ' + fx(r.v[1])); };
+sim('cv1', M1);
+LS.ask(el('ask1'), { fields: xy('ᴬV<sub>Q</sub>:', P1),
+  check: v => near2(v, RB.add(X.vB, X.vQ)) ? t('ᴮV<sub>Q</sub> ยังเขียนตามแกนของ {B}: คูณด้วย ᴬ<sub>B</sub>R ก่อนบวก', 'ᴮV<sub>Q</sub> is still written along the axes of {B}: multiply it by ᴬ<sub>B</sub>R before adding')
+    : near2(v, RB.add(X.vB, RB.mv(RB.tr(X.R), X.vQ))) ? t('ใช้ ᴬ<sub>B</sub>R ไม่ใช่ทรานสโพสของมัน: แกน X<sub>B</sub> ชี้เฉียงขึ้นไปทาง +Y<sub>A</sub>', 'use ᴬ<sub>B</sub>R, not its transpose: X<sub>B</sub> points up towards +Y<sub>A</sub>')
+    : near2(v, X.rel) ? t('อย่าลืมบวกความเร็วของจุดกำเนิดของ {B}', 'do not forget to add the velocity of the origin of {B}') : '' });
+LS.stepper(el('st1'), { onStep: k => { const was = M1.step; M1.step = k; if (k || was) put1(); }, steps: [
+  { why: t('<b>แต่ละพจน์คืออะไร</b>: วัตถุเลื่อนโดยไม่หมุน ทุกจุดที่ติดอยู่กับวัตถุจึงมีความเร็วเท่ากับจุดกำเนิดของ {B} คือ \\({}^AV_{BORG}\\) (ลูกศรสีส้ม ในรูปวาดเพิ่มไว้ที่อีกสองจุดของวัตถุ) แต่ Q ไม่ได้ติดอยู่กับวัตถุ: มันเคลื่อนที่บนวัตถุด้วย \\({}^BV_Q\\) ซึ่งเขียนตามแกนของ {B} จึงต้องหมุนเข้าแกนของ {A} ด้วย \\({}^A_BR\\) ก่อนบวก ทิศของ {B} ไม่เปลี่ยน \\({}^A_BR\\) จึงเป็นค่าคงที่', '<b>What each term is</b>: the body slides without turning, so every point fixed to it has the velocity of the origin of {B}, \\({}^AV_{BORG}\\) (the orange arrow; the picture draws it at two more points of the body). Q is not fixed to the body: it moves on it with \\({}^BV_Q\\), which is written along the axes of {B}, so \\({}^A_BR\\) must turn it into the axes of {A} before the two are added. The orientation of {B} does not change, so \\({}^A_BR\\) is constant'),
+    tex: '{}^AV_Q = {}^AV_{BORG} + {}^A_BR\\,{}^BV_Q' },
+  { why: t(`<b>หมุน \\({}^BV_Q\\) เข้าแกนของ {A}</b>: Q เคลื่อนที่ไปตามแกน X<sub>B</sub> ซึ่งทำมุม ${TH}° กับ X<sub>A</sub> ผลคูณจึงเป็นคอลัมน์แรกของ \\({}^A_BR\\) คูณ ${vq0}: ส่วนตามแกน X<sub>A</sub> คือ ${vq0} cos ${TH}° และส่วนตามแกน Y<sub>A</sub> คือ ${vq0} sin ${TH}° (เส้นประสีแดงและสีเขียวในรูป)`, `<b>Turn \\({}^BV_Q\\) into the axes of {A}</b>: Q moves along X<sub>B</sub>, which makes ${TH}° with X<sub>A</sub>, so the product is the first column of \\({}^A_BR\\) times ${vq0}: ${vq0} cos ${TH}° along X<sub>A</sub> and ${vq0} sin ${TH}° along Y<sub>A</sub> (the red and green dashed lines in the picture)`),
+    tex: `\\begin{aligned} {}^A_BR &= R_Z(${TH}^\\circ) = ${CH2.texM(X.R, 3)} \\\\ {}^A_BR\\,{}^BV_Q &= ${CH2.texM(X.R, 3)} ${CH2.texV(X.vQ, 2)} = ${CH2.texV(X.rel, 4)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>บวกสองส่วน</b>ทีละองค์ประกอบ: ลูกศรสีส้มต่อด้วยลูกศรสีม่วงได้ลูกศรสีเขียว เส้นประคือส่วนตามแกน X<sub>A</sub> และ Y<sub>A</sub> ของผลรวม', '<b>Add the two parts</b>, component by component: the orange arrow followed by the purple one gives the green one. The dashed lines are the parts of the sum along X<sub>A</sub> and Y<sub>A</sub>'),
+    tex: `{}^AV_Q = ${CH2.texV(X.trans, 4)} + ${CH2.texV(X.rel, 4)} = ${CH2.texV(P1, 4)}\\ \\text{m/s}` }],
+  answer: t(`ᴬV<sub>Q</sub> = ${v3(P1)} m/s (ขนาด ${fx(hyp(P1))} m/s) · ถ้าบวก ᴮV<sub>Q</sub> เข้าไปตรง ๆ โดยไม่หมุน จะได้ ${v3(RB.add(X.vB, X.vQ))} ซึ่งผิด`, `ᴬV<sub>Q</sub> = ${v3(P1)} m/s (size ${fx(hyp(P1))} m/s) · adding ᴮV<sub>Q</sub> as it stands, without turning it, gives ${v3(RB.add(X.vB, X.vQ))}, which is wrong`) });
+
+/* ---------- 2: a body that turns ---------- */
+const Z3 = [0, 0, 0], M2 = { mode: 'rot', vs: VS, th: 0, vB: Z3, vQ: Z3, W: -0.8, Q: [0.2, 0.2, 0] }, ro2 = el('ro2'), c2 = el('ctl2');   // starts away from the example
+const read2 = () => { const r = partsOf(M2), d = hyp(r.rQ); M2.vs = vsOf(M2);
+  ro2.innerHTML = `<div class="term">ᴬQ = ᴬ<sub>B</sub>R ᴮQ = ${v3(r.rQ)} m · ${t('ระยะจากแกนหมุน', 'distance from the axis')} r = ${fx(d)} m</div><div class="term"><b class="ax-y">ᴬV<sub>Q</sub> = ᴬΩ<sub>B</sub> × ᴬQ = ${v3(r.v)} m/s</b></div><div class="term">|ᴬV<sub>Q</sub>| = ${fx(hyp(r.v))} m/s · |Ω| r = ${fx(Math.abs(M2.W), 1)} × ${fx(d)} = ${fx(Math.abs(M2.W) * d)} m/s</div>`; };
+const s2 = [numS(c2, 'p2a', LB.w, M2, 'W', null, -2, 2, 0.1, 'rad/s', read2), angS(c2, 'p2b', M2, read2), numS(c2, 'p2c', LB.Qx, M2, 'Q', 0, 0, 0.4, 0.01, 'm', read2), numS(c2, 'p2d', LB.Qy, M2, 'Q', 1, 0, 0.4, 0.01, 'm', read2)];
+const put2 = () => { M2.W = X.W[2]; M2.th = X.th; M2.Q = X.Q.slice(); [M2.W, TH, M2.Q[0], M2.Q[1]].forEach((x, i) => s2[i].set(x)); read2(); }; read2();
+/* the open step: 1 ᴬQ split along X_A and Y_A; 2 the velocity split along X_A (−ωy) and Y_A (ωx); 3 the distance from the axis and the right angle at Q */
+M2.ov = (s, st) => { const k = st.step; if (!k) return; const g = geo(st), r = g.r;
+  if (k === 1) comp(s, up(g.Ob, 0.006), r.rQ, 1, 'x: ' + fx(r.rQ[0]) + ' m', 'y: ' + fx(r.rQ[1]) + ' m');
+  if (k === 2) comp(s, g.A, r.rot, st.vs, '−ωy: ' + fx(r.rot[0]), 'ωx: ' + fx(r.rot[1]));
+  if (k === 3) radius(s, g, g.A); };
+sim('cv2', M2);
+LS.ask(el('ask2'), { fields: xy('ᴬV<sub>Q</sub>:', X.rot),
+  check: v => near2(v, RB.cross(X.W, X.Q)) ? turnTx()
+    : near2(v, neg(X.rot)) ? t('เครื่องหมายกลับกัน: Ω × Q ไม่ใช่ Q × Ω เมื่อ Ω ชี้ไปทาง +Z วัตถุหมุนทวนเข็มนาฬิกาเมื่อมองจากด้านบน', 'the signs are reversed: Ω × Q, not Q × Ω. With Ω along +Z the body turns counter-clockwise seen from above')
+    : near2(v, [X.W[2] * X.rQ[0], X.W[2] * X.rQ[1]]) ? t('นั่นคือ ω คูณ ᴬQ ตรง ๆ ซึ่งชี้ออกจากแกนหมุน: ความเร็วต้องตั้งฉากกับ ᴬQ คือ (−ωy, ωx, 0)', 'that is ω times ᴬQ, which points away from the axis: the velocity must be square to ᴬQ, (−ωy, ωx, 0)') : '' });
+LS.stepper(el('st2'), { onStep: k => { const was = M2.step; M2.step = k; if (k || was) put2(); }, steps: [
+  { why: t('<b>เขียน Q ใน {A}</b>: ผลคูณไขว้ต้องใช้เวกเตอร์สองตัวที่เขียนในเฟรมเดียวกัน \\({}^A\\Omega_B\\) เขียนใน {A} อยู่แล้ว จึงหมุน \\({}^BQ\\) เข้าแกนของ {A} เส้นประสีแดงและสีเขียวในรูปคือส่วนตามแกน X<sub>A</sub> และ Y<sub>A</sub> ของเวกเตอร์จากแกนหมุนถึง Q', '<b>Write Q in {A}</b>: a cross product needs both vectors written in the same frame. \\({}^A\\Omega_B\\) is already written in {A}, so turn \\({}^BQ\\) into the axes of {A}. The red and green dashed lines in the picture are the parts along X<sub>A</sub> and Y<sub>A</sub> of the vector from the axis of turning to Q'),
+    tex: `{}^AQ = {}^A_BR\\,{}^BQ = ${CH2.texM(X.R, 3)} ${CH2.texV(X.Q, 2)} = ${CH2.texV(X.rQ, 4)}\\ \\text{m}` },
+  { why: t('<b>ผลคูณไขว้</b>: Ω ชี้ตามแกน Z อย่างเดียว คือ (0, 0, ω) ผลคูณไขว้กับ (x, y, 0) จึงเป็น (−ωy, ωx, 0): สลับ x กับ y แล้วใส่เครื่องหมายลบที่ตัวแรก', '<b>The cross product</b>: Ω points along Z only, (0, 0, ω), so its cross product with (x, y, 0) is (−ωy, ωx, 0): swap x and y, and put a minus sign on the first'),
+    tex: `\\begin{aligned} {}^A\\Omega_B \\times {}^AQ &= (0,\\ 0,\\ \\omega) \\times (x,\\ y,\\ 0) = (-\\omega y,\\ \\omega x,\\ 0) \\\\ {}^AV_Q &= (-${w0} \\times ${qy0},\\ ${w0} \\times ${qx0},\\ 0) \\\\ &= ${tv(X.rot)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t(`<b>ตรวจคำตอบ</b>: ขนาดต้องเท่ากับ ω คูณระยะ r จากแกนหมุนถึง Q (แบบเดียวกับ v = r θ̇ ของบทที่ 5) การหมุนไม่เปลี่ยนความยาว r จึงเท่ากับ |ᴮQ| = √(${u(X.Q[0], 2)}² + ${u(X.Q[1], 2)}²) ด้วย และความเร็วต้องตั้งฉากกับเส้นจากแกนหมุนถึง Q: ผลคูณจุด (dot product) ของทั้งสองเป็นศูนย์`, `<b>Check</b>: the size must be ω times the distance r from the axis to Q (the v = r θ̇ of chapter 5). A rotation keeps lengths, so r is also |ᴮQ| = √(${u(X.Q[0], 2)}² + ${u(X.Q[1], 2)}²). And the velocity must be square to the line from the axis to Q: their dot product is zero`),
+    tex: `\\begin{aligned} r &= \\sqrt{${qx0}^2 + ${qy0}^2} = ${dn(RQ, 4)}\\ \\text{m} \\\\ \\omega r &= ${w0} \\times ${dn(RQ, 4)} = ${dn(hyp(X.rot), 4)}\\ \\text{m/s} = |{}^AV_Q| \\\\ {}^AV_Q \\cdot {}^AQ &= (${dn(X.rot[0], 4)})(${qx0}) + (${dn(X.rot[1], 4)})(${qy0}) = 0 \\end{aligned}` }],
+  answer: t(`ᴬV<sub>Q</sub> = ${v3(X.rot)} m/s · ขนาด ${fx(hyp(X.rot))} m/s = ω r · ตั้งฉากกับแกนหมุนและกับเส้นจากแกนหมุนถึง Q`, `ᴬV<sub>Q</sub> = ${v3(X.rot)} m/s · size ${fx(hyp(X.rot))} m/s = ω r · square to the axis of turning and to the line from the axis to Q`) });
+
+/* ---------- 3: the cross product as a matrix ---------- */
+const SK = CH6.skew(X.W), M3 = { mode: 'rot', vs: VS, th: rad(-40), vB: Z3, vQ: Z3, W: 1, Q: X.Q.slice() }, ro3 = el('ro3'), c3 = el('ctl3'), colM = a => a.map(x => [x]);   // starts away from the example
+const sameM = (A, B) => A.every((r, i) => r.every((x, j) => Math.abs(x - B[i][j]) < 0.006));
+const read3 = () => { const r = partsOf(M3); M3.vs = vsOf(M3);
+  ro3.innerHTML = `<div class="live"><span class="eq">S(Ω) ᴬQ =</span>${CH2.htmlM(CH6.skew([0, 0, M3.W]), 2)}${CH2.htmlM(colM(r.rQ), 3)}<span class="eq">=</span>${CH2.htmlM(colM(r.rot), 3)}<span class="term">m/s</span></div><div class="term">ᴬΩ<sub>B</sub> × ᴬQ = (−ωy, ωx, 0) = ${v3(r.rot)} m/s</div>`; };
+const s3 = [numS(c3, 'p3a', LB.w, M3, 'W', null, -2, 2, 0.1, 'rad/s', read3), angS(c3, 'p3b', M3, read3)];
+const put3 = () => { M3.W = X.W[2]; M3.th = X.th; s3[0].set(M3.W); s3[1].set(TH); read3(); }; read3();
+/* the open step: 2 the three numbers of Ω; 3 the two rows of the product as the parts of the velocity along X_A and Y_A;
+   4 the velocities of the tips of X_B and Y_B, Ω × axis: the columns of the derivative of the rotation matrix (the axes are drawn 0.26 m long) */
+M3.ov = (s, st) => { const k = st.step; if (!k) return; const g = geo(st), r = g.r, AX = 0.26;
+  if (k === 2 && st.W) OV.name(s, up(g.Ob, 0.3 * Math.sign(st.W)), 'pk', 'Ω = (0, 0, ' + u(st.W, 1) + ') rad/s', { m: 0, s: 20, a: 'l', dx: 16, dy: 26 });
+  if (k === 3) comp(s, g.A, r.rot, st.vs, t('แถว 1: ', 'row 1: ') + fx(r.rot[0]), t('แถว 2: ', 'row 2: ') + fx(r.rot[1]));
+  if (k === 4 && st.W) [0, 1].forEach(j => { const e = RB.col(g.R, j), tip = OV.v(g.Ob, e, AX), d = RB.cross([0, 0, st.W], e); OV.vec(s, tip, OV.v(tip, d, AX * st.vs), 'pk', 'Ω × ' + 'XY'[j], { sub: 'B', s: 22, at: 1, a: 'l', dx: 12, dy: -8, r: 0.004 }); }); };
+sim('cv3', M3);
+CH2.matAsk(el('ask3a'), { label: t('(ก) S(Ω) =', '(a) S(Ω) ='), ans: SK, tol: 0.006,
+  check: M => sameM(M, RB.tr(SK)) ? t('เครื่องหมายสลับกัน: แถวที่ 1 คือ (0, −Ω<sub>z</sub>, Ω<sub>y</sub>) และแถวที่ 2 คือ (Ω<sub>z</sub>, 0, −Ω<sub>x</sub>)', 'the signs are swapped: row 1 is (0, −Ω<sub>z</sub>, Ω<sub>y</sub>) and row 2 is (Ω<sub>z</sub>, 0, −Ω<sub>x</sub>)')
+    : (M[0][0] || M[1][1] || M[2][2]) ? t('แนวทแยงของเมทริกซ์สมมาตรเอียงเป็นศูนย์ทั้งหมด', 'the diagonal of a skew-symmetric matrix is all zeros') : '' });
+LS.ask(el('ask3b'), { fields: xy(t('(ข) S(Ω) ᴬQ:', '(b) S(Ω) ᴬQ:'), X.rot),
+  check: v => near2(v, neg(X.rot)) ? t('เครื่องหมายกลับกัน: ตรวจ S(Ω) ในข้อ (ก) อีกครั้ง', 'the signs are reversed: check your S(Ω) of part (a) again') : near2(v, RB.cross(X.W, X.Q)) ? turnTx() : '' });
+LS.stepper(el('st3'), { onStep: k => { const was = M3.step; M3.step = k; if (k || was) put3(); }, steps: [
+  { why: t('<b>รูปแบบของ S(Ω)</b>: แนวทแยงเป็นศูนย์ทั้งหมด และสมาชิกที่อยู่คนละฝั่งของแนวทแยงมีเครื่องหมายตรงข้ามกัน (\\(S^T = -S\\)) ตัวเลขสามตัวของ Ω จึงเติมได้ทั้งเมทริกซ์ เมื่อคูณกับ p ทีละแถวจะได้ผลคูณไขว้ Ω × p พอดี', '<b>The pattern of S(Ω)</b>: zeros all along the diagonal and opposite signs across it (\\(S^T = -S\\)), so the three numbers of Ω fill the whole matrix. Multiplied by p row by row, it gives exactly the cross product Ω × p'),
+    tex: '\\begin{aligned} S(\\Omega)\\,p &= \\begin{bmatrix} 0 & -\\Omega_z & \\Omega_y \\\\ \\Omega_z & 0 & -\\Omega_x \\\\ -\\Omega_y & \\Omega_x & 0 \\end{bmatrix} \\begin{bmatrix} p_x \\\\ p_y \\\\ p_z \\end{bmatrix} \\\\ &= \\begin{bmatrix} \\Omega_yp_z - \\Omega_zp_y \\\\ \\Omega_zp_x - \\Omega_xp_z \\\\ \\Omega_xp_y - \\Omega_yp_x \\end{bmatrix} = \\Omega \\times p \\end{aligned}' },
+  { why: t(`<b>(ก) S ของ Ω = (0, 0, ${w0})</b>: Ω<sub>x</sub> = Ω<sub>y</sub> = 0 จึงเหลือเพียงสองช่องที่ไม่เป็นศูนย์ คือ −Ω<sub>z</sub> ที่แถว 1 คอลัมน์ 2 และ Ω<sub>z</sub> ที่แถว 2 คอลัมน์ 1`, `<b>(a) S for Ω = (0, 0, ${w0})</b>: Ω<sub>x</sub> = Ω<sub>y</sub> = 0, so only two entries are not zero: −Ω<sub>z</sub> in row 1, column 2 and Ω<sub>z</sub> in row 2, column 1`),
+    tex: `S({}^A\\Omega_B) = ${CH2.texM(SK, 2)}` },
+  { why: t(`<b>(ข) คูณกับ \\({}^AQ\\)</b>: แถวที่ 1 ให้ −${w0} × ${qy0} แถวที่ 2 ให้ ${w0} × ${qx0} ซึ่งก็คือ (−ωy, ωx, 0) ของโจทย์ 2 นั่นเอง`, `<b>(b) Multiply by \\({}^AQ\\)</b>: row 1 gives −${w0} × ${qy0} and row 2 gives ${w0} × ${qx0}, which is the (−ωy, ωx, 0) of problem 2`),
+    tex: `S({}^A\\Omega_B)\\,{}^AQ = ${CH2.texM(SK, 2)} ${CH2.texV(X.rQ, 4)} = ${CH2.texV(X.rot, 4)}\\ \\text{m/s}` },
+  { why: t('<b>S(Ω) มาจากไหน</b>: คอลัมน์ของ \\({}^A_BR\\) คือแกน X<sub>B</sub>, Y<sub>B</sub>, Z<sub>B</sub> ที่เขียนใน {A} เมื่อวัตถุหมุน ปลายของแต่ละแกนเคลื่อนที่ด้วย Ω × แกนนั้น (ลูกศรสีชมพูที่ปลายแกน X<sub>B</sub> และ Y<sub>B</sub> ในรูป) อนุพันธ์ของเมทริกซ์การหมุนจึงเป็น \\(\\dot R = S(\\Omega)\\,R\\) คูณด้วย \\(R^T\\) ทางขวา (\\(R\\,R^T = I\\)) ได้ \\(\\dot R\\,R^T = S(\\Omega)\\): อัตราการเปลี่ยนของเมทริกซ์การหมุนเก็บความเร็วเชิงมุมไว้ ชุดทดสอบของเว็บใช้ความสัมพันธ์นี้ตรวจความเร็วเชิงมุม ลองตรวจกับ \\(R = R_Z(\\theta)\\) ที่ \\(\\dot\\theta = \\omega\\):', '<b>Where S(Ω) comes from</b>: the columns of \\({}^A_BR\\) are the axes X<sub>B</sub>, Y<sub>B</sub>, Z<sub>B</sub> written in {A}. When the body turns, the tip of each axis moves with Ω × that axis (the pink arrows at the tips of X<sub>B</sub> and Y<sub>B</sub> in the picture), so the derivative of the rotation matrix is \\(\\dot R = S(\\Omega)\\,R\\). Multiply by \\(R^T\\) on the right (\\(R\\,R^T = I\\)): \\(\\dot R\\,R^T = S(\\Omega)\\). The rate of change of a rotation matrix holds the angular velocity; the tests of this site use it to check angular velocities. Try it with \\(R = R_Z(\\theta)\\) and \\(\\dot\\theta = \\omega\\):'),
+    tex: '\\begin{aligned} \\dot R &= \\omega \\begin{bmatrix} -s_\\theta & -c_\\theta & 0 \\\\ c_\\theta & -s_\\theta & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} \\\\ \\dot R\\,R^T &= \\omega \\begin{bmatrix} 0 & -1 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} = S(\\Omega) \\end{aligned}' }],
+  answer: t(`S(Ω) ᴬQ = ${v3(X.rot)} m/s เท่ากับ Ω × ᴬQ ของโจทย์ 2 · เมื่อเขียนผลคูณไขว้เป็นเมทริกซ์ สมการความเร็วทั้งหมดเป็นการคูณเมทริกซ์ล้วน ๆ`, `S(Ω) ᴬQ = ${v3(X.rot)} m/s, the same as Ω × ᴬQ in problem 2 · with the cross product written as a matrix, every velocity equation is plain matrix multiplication`) });
+
+/* ---------- 4: sliding and turning at once ---------- */
+const M4 = { mode: 'both', vs: VS, th: rad(-20), vB: [0.05, 0.1, 0], vQ: [0.1, 0, 0], W: -0.6, Q: [0.2, 0.2, 0] }, ro4 = el('ro4'), c4 = el('ctl4');   // starts away from the example
+const read4 = () => { const r = partsOf(M4); M4.vs = vsOf(M4);
+  ro4.innerHTML = `<div class="term"><b class="ax-a">ᴬV<sub>BORG</sub> = ${v3(r.trans)} m/s</b></div><div class="term"><b ${PUR}>ᴬ<sub>B</sub>R ᴮV<sub>Q</sub> = ${v3(r.rel)} m/s</b></div><div class="term"><b class="ax-p">ᴬΩ<sub>B</sub> × ᴬQ = ${v3(r.rot)} m/s</b></div><div class="term">${t('รวม', 'sum')}: <b class="ax-y">ᴬV<sub>Q</sub> = ${v3(r.v)} m/s</b> · |ᴬV<sub>Q</sub>| = ${fx(hyp(r.v))} m/s</div>`; };
+const s4 = [angS(c4, 'p4a', M4, read4), numS(c4, 'p4b', LB.bx, M4, 'vB', 0, -0.2, 0.2, 0.01, 'm/s', read4), numS(c4, 'p4c', LB.by, M4, 'vB', 1, -0.2, 0.2, 0.01, 'm/s', read4), numS(c4, 'p4d', LB.qx, M4, 'vQ', 0, -0.2, 0.2, 0.01, 'm/s', read4),
+  numS(c4, 'p4e', LB.w, M4, 'W', null, -2, 2, 0.1, 'rad/s', read4), numS(c4, 'p4f', LB.Qx, M4, 'Q', 0, 0, 0.4, 0.01, 'm', read4), numS(c4, 'p4g', LB.Qy, M4, 'Q', 1, 0, 0.4, 0.01, 'm', read4)];
+/* back to the example; step 1 shows the first part alone (Q at rest on the body, no turning), step 2 the first two (no turning), from step 3 on all three */
+const put4 = k => { M4.th = X.th; M4.vB = X.vB.slice(); M4.vQ = k === 1 ? [0, 0, 0] : X.vQ.slice(); M4.W = k === 1 || k === 2 ? 0 : X.W[2]; M4.Q = X.Q.slice();
+  [TH, M4.vB[0], M4.vB[1], M4.vQ[0], M4.W, M4.Q[0], M4.Q[1]].forEach((x, i) => s4[i].set(x)); read4(); }; read4();
+/* the open step: 1 two more points of the body with the velocity of the origin of {B}; 2 the purple arrow split along X_A and Y_A; 3 the distance from the axis
+   and the pink arrow split into −ωy and ωx; 4 the sum split along X_A and Y_A; 5 what each frame and point stands for in velocity propagation (Craig 5.6): {A} the fixed base, {B} link i, Q the origin of frame {i + 1} */
+M4.ov = (s, st) => { const k = st.step; if (!k) return; const g = geo(st), r = g.r, a1 = OV.v(g.A, r.trans, st.vs), a2 = OV.v(a1, r.rel, st.vs);
+  if (k === 1) same(s, g, st);
+  if (k === 2) comp(s, a1, r.rel, st.vs, 'x: ' + fx(r.rel[0]), 'y: ' + fx(r.rel[1]));
+  if (k === 3) { radius(s, g, null); comp(s, a2, r.rot, st.vs, '−ωy: ' + fx(r.rot[0]), 'ωx: ' + fx(r.rot[1])); }
+  if (k === 4) comp(s, g.A, r.v, st.vs, 'x: ' + fx(r.v[0]), 'y: ' + fx(r.v[1]));
+  if (k === 5) { OV.name(s, [0, 0, 0.004], 'ink', t('ฐาน (อยู่นิ่ง)', 'the base (fixed)'), { m: 0, s: 24, a: 'r', dx: -28, dy: 66 }); OV.name(s, g.Ob, 'ink', t('ก้าน i', 'link i'), { m: 0, s: 24, a: 'r', dx: -24, dy: -52 }); OV.name(s, g.Qw, 'ink', t('จุดกำเนิดของเฟรม {i + 1}', 'origin of frame {i + 1}'), { m: 0, s: 22, a: 'l', dx: 22, dy: 40 }); } };
+sim('cv4', M4);
+LS.ask(el('ask4'), { fields: xy('ᴬV<sub>Q</sub>:', X.v),
+  check: v => near2(v, P1) ? t('ยังขาดส่วนที่มาจากการหมุน: ᴬΩ<sub>B</sub> × ᴬQ', 'the part that comes from the turning is still missing: ᴬΩ<sub>B</sub> × ᴬQ')
+    : near2(v, RB.add(P1, RB.cross(X.W, X.Q))) ? turnTx()
+    : near2(v, RB.add(RB.add(X.vB, X.vQ), X.rot)) ? t('ᴮV<sub>Q</sub> ยังเขียนตามแกนของ {B}: คูณด้วย ᴬ<sub>B</sub>R ก่อนบวก', 'ᴮV<sub>Q</sub> is still written along the axes of {B}: multiply it by ᴬ<sub>B</sub>R before adding')
+    : near2(v, RB.add(X.trans, X.rot)) ? t('ยังขาดความเร็วของ Q บนวัตถุ: ᴬ<sub>B</sub>R ᴮV<sub>Q</sub>', 'the velocity of Q on the body is still missing: ᴬ<sub>B</sub>R ᴮV<sub>Q</sub>') : '' });
+LS.stepper(el('st4'), { onStep: k => { const was = M4.step; M4.step = k; if (k || was) put4(k); }, steps: [
+  { why: t('<b>ส่วนที่ 1: จุดกำเนิดของ {B} เคลื่อนที่</b> (สีส้ม) ถ้ามีแต่ส่วนนี้ คือวัตถุไม่หมุนและ Q อยู่นิ่งบนวัตถุ ทุกจุดของวัตถุมีความเร็วเท่ากัน: ในรูป ลูกศรสีเขียวที่ Q ทับลูกศรสีส้มพอดี และเท่ากับลูกศรสีส้มที่อีกสองจุดของวัตถุ', '<b>Part 1: the origin of {B} moves</b> (orange). With this part alone (the body does not turn and Q sits still on it) every point of the body has the same velocity: in the picture the green arrow at Q lies exactly on the orange one, and equals the orange arrows at two more points of the body'),
+    tex: `{}^AV_{BORG} = ${tv(X.trans)}\\ \\text{m/s}` },
+  { why: t('<b>ส่วนที่ 2: Q เคลื่อนที่บนวัตถุ</b> (สีม่วง) หมุนเข้าแกนของ {A} แบบเดียวกับโจทย์ 1 แล้วต่อเข้าที่หัวลูกศรสีส้ม', '<b>Part 2: Q moves on the body</b> (purple). Turn it into the axes of {A} as in problem 1 and place it at the head of the orange arrow'),
+    tex: `{}^A_BR\\,{}^BV_Q = R_Z(${TH}^\\circ)\\,${CH2.texV(X.vQ, 2)} = ${CH2.texV(X.rel, 4)}\\ \\text{m/s}` },
+  { why: t('<b>ส่วนที่ 3: วัตถุหมุนและพา Q ไปด้วย</b> (สีชมพู) แบบเดียวกับโจทย์ 2: เขียน Q ใน {A} ก่อน แล้วคูณไขว้กับ Ω ส่วนนี้ขึ้นกับตำแหน่งของ Q ไม่ขึ้นกับว่า Q กำลังเคลื่อนที่บนวัตถุหรือไม่', '<b>Part 3: the body turns and carries Q round</b> (pink), as in problem 2: write Q in {A} first, then take the cross product with Ω. This part depends on where Q is, not on whether Q is moving on the body'),
+    tex: `\\begin{aligned} {}^AQ &= {}^A_BR\\,{}^BQ = ${tv(X.rQ)}\\ \\text{m} \\\\ {}^A\\Omega_B \\times {}^AQ &= (-\\omega y,\\ \\omega x,\\ 0) = ${tv(X.rot)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>บวกสามส่วน</b>: ลูกศรสามอันต่อหัวต่อหางกัน ได้ลูกศรสีเขียวจาก Q ถึงหัวลูกศรอันสุดท้าย เส้นประคือส่วนตามแกน X<sub>A</sub> และ Y<sub>A</sub> ของผลรวม', '<b>Add the three parts</b>: the three arrows, tip to tail, give the green arrow from Q to the head of the last one. The dashed lines are the parts of the sum along X<sub>A</sub> and Y<sub>A</sub>'),
+    tex: `\\begin{aligned} {}^AV_Q &= ${CH2.texV(X.trans, 4)} + ${CH2.texV(X.rel, 4)} + ${CH2.texV(X.rot, 4)} \\\\ &= ${CH2.texV(X.v, 4)}\\ \\text{m/s} \\end{aligned}` },
+  { why: t('<b>สูตรนี้ใช้ทำอะไรต่อ</b>: การส่งต่อความเร็วในหน้า 6.2 ใช้สูตรนี้โดยให้ {A} เป็นฐานที่อยู่นิ่ง {B} เป็นเฟรมของก้าน i และ Q เป็นจุดกำเนิดของเฟรม {i + 1} ซึ่งติดอยู่กับก้าน i: ได้ \\(v_{i+1} = v_i + \\omega_i \\times P_{i+1}\\) ถ้าข้อต่อ i + 1 เลื่อน จุดนั้นเลื่อนบนก้าน i ด้วย \\(\\dot d_{i+1}\\) ตามแกน Z ของข้อต่อ (คือพจน์ \\({}^BV_Q\\)) ส่วนข้อต่อหมุนเพิ่มความเร็วเชิงมุม \\(\\dot\\theta_{i+1}\\) รอบแกน Z ให้ก้าน i + 1 ใช้สูตรนี้ซ้ำจากฐานจนถึงปลายแขน', '<b>What the formula is for</b>: every link of an arm slides or turns relative to the link before it. Velocity propagation (page 6.2) uses it with {A} the fixed base, {B} the frame of link i and Q the origin of frame {i + 1}, which rides on link i: \\(v_{i+1} = v_i + \\omega_i \\times P_{i+1}\\). If joint i + 1 slides, that point moves on link i at \\(\\dot d_{i+1}\\) along the Z axis of the joint (the term \\({}^BV_Q\\)); a turning joint adds an angular velocity \\(\\dot\\theta_{i+1}\\) about Z to link i + 1. The formula is used again and again, from the base to the tool') }],
+  answer: t(`ᴬV<sub>Q</sub> = ${v3(X.v)} m/s (ขนาด ${fx(hyp(X.v))} m/s) · สามส่วน: จุดกำเนิดของ {B} เคลื่อนที่ + Q เคลื่อนที่บนวัตถุ + วัตถุหมุนและพา Q ไปด้วย`, `ᴬV<sub>Q</sub> = ${v3(X.v)} m/s (size ${fx(hyp(X.v))} m/s) · three parts: the origin of {B} moves + Q moves on the body + the body turns and carries Q round`) });
+});
+</script>
+</body>
+</html>

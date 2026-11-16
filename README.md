@@ -14,8 +14,9 @@ Interactive Thai/English teaching site for KMUTNB course 010243427 Industrial Ro
 | 3 จลนศาสตร์ไปข้างหน้า | `ch3_1_link_parameters` · `ch3_2_link_transform` · `ch3_3_examples` · `ch3_4_dh_conventions` |
 | 4 จลนศาสตร์ผกผัน | `ch4_1_solvability` · `ch4_2_algebraic` · `ch4_3_geometric` · `ch4_4_six_axis` |
 | 5 จาโคเบียน | `ch5_1_differential_motion` · `ch5_2_direct_derivative` · `ch5_3_basic_jacobian` · `ch5_4_using_jacobian` |
+| 6 การส่งต่อความเร็ว | `ch6_1_rigid_body_velocity` · `ch6_2_velocity_propagation` · `ch6_3_jacobian_frames` · `ch6_4_explicit_form` |
 
-บทที่ 6–9 จะเพิ่มทีละบท (แผนที่การเรียนใน `index.html` แสดงเป็น "เร็ว ๆ นี้")
+บทที่ 7–9 จะเพิ่มทีละบท (แผนที่การเรียนใน `index.html` แสดงเป็น "เร็ว ๆ นี้")
 
 ทุกหน้า: ภาพสไลด์อยู่ในเนื้อเรื่อง · ภาพจำลองแยกทีละโจทย์ เรียงตามลำดับ · ลองตอบก่อน แล้วเปิดเฉลยทีละขั้นด้วยปุ่ม · แขนกลในภาพจำลองบอกพิกัด x, y, z ของปลายแขนตลอดเวลา
 

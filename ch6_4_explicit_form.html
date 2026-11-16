@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="6.4 — The Jacobian in explicit form">6.4 — จาโคเบียนรูปชัดแจ้ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=19">
+<script src="assets/stops.js?v=19"></script><script src="assets/shell.js?v=19"></script>
+<script src="assets/robot.js?v=19"></script><script src="assets/lesson.js?v=19"></script><script src="assets/ch2.js?v=19"></script><script src="assets/ch3.js?v=19"></script><script src="assets/ch4.js?v=19"></script><script src="assets/ch5.js?v=19"></script><script src="assets/ch6.js?v=19"></script><script src="assets/scene3d.js?v=19"></script><script src="assets/gl3d.js?v=19"></script><script src="assets/ch2_3d.js?v=19"></script><script src="assets/ch3_3d.js?v=19"></script><script src="assets/ch6_3d.js?v=19"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">จาโคเบียนรูปชัดแจ้ง <span class="en">The Jacobian in explicit form</span></h1>
+<h1 data-l="en">The Jacobian in explicit form <span class="en">One column per joint, read off the picture</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch6/s27.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 27: one column per joint; for joint 1 of a Stanford arm its axis Z1, the dashed vector P1n to the tool point and the arrow Z1 cross P; a table: a turning joint has the linear part Z cross P and the angular part Z, a sliding joint the linear part Z and the angular part 0">
+    <figcaption data-l="th">สไลด์บทที่ 6 หน้า 27 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 6 slides, p. 27 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หน้า 6.2 และ 6.3 หาความเร็วของปลายแขนด้วยการส่งต่อความเร็วจากก้านสู่ก้าน แล้วอ่านจาโคเบียน (Jacobian) จากผลที่ได้ ผลนั้นเขียนสรุปไว้ครั้งเดียวแล้วใช้ได้กับทุกแขน: <b>ข้อต่อแต่ละตัวให้หนึ่งคอลัมน์</b> ซึ่งอ่านจากภาพของแขนได้เลย ข้อต่อหมุนให้ส่วนเชิงเส้น \(Z_i \times P_{in}\) และส่วนเชิงมุม \(Z_i\) ข้อต่อเลื่อนให้ส่วนเชิงเส้น \(Z_i\) และไม่มีส่วนเชิงมุม โดย \(Z_i\) คือแกนของข้อต่อ และ \(P_{in}\) คือเวกเตอร์จากจุดกำเนิดของเฟรม {i} ถึงจุดปลายแขน ทุกตัวเขียนในเฟรม {0} จาโคเบียนที่เขียนแบบนี้เรียกว่า<b>รูปชัดแจ้ง</b> (explicit form) สไลด์เดิมของส่วนนี้ทำตามเอกสารประกอบการสอนของ Khatib หน้านี้ใช้กฎทั้งสองกับแขน Stanford หกข้อต่อและแขน Yaskawa GP8 ของภาควิชา แล้วปิดบทด้วยการบ้านชุดที่ 6 และรายการทบทวนก่อนสอบกลางภาค ครอบคลุมสไลด์หน้า 26–34 มี <b>4 โจทย์</b></p>
+    <p class="sub" data-l="en">Pages 6.2 and 6.3 found the velocity of the tool by passing velocities on from link to link, and read the Jacobian off the result. That result can be written down once and for all: <b>every joint gives one column</b>, and the column can be read straight off a picture of the arm. A turning joint gives the linear part \(Z_i \times P_{in}\) and the angular part \(Z_i\); a sliding joint gives the linear part \(Z_i\) and no angular part. \(Z_i\) is the joint axis and \(P_{in}\) the vector from the origin of frame {i} to the tool point, all written in frame {0}. A Jacobian written this way is in <b>explicit form</b>; the old slides follow Khatib's lecture notes here. The page applies the two rules to a six-joint Stanford arm and to the department's Yaskawa GP8, and closes the chapter with homework 6 and a checklist for the midterm. It covers slides pp. 26–34, with <b>4 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li>ความเร็วของปลายแขนคือผลรวมของสิ่งที่ทุกข้อต่อเพิ่มให้ ข้อต่อละหนึ่งคอลัมน์: \(\begin{bmatrix} v \\ \omega \end{bmatrix} = J_1\dot q_1 + J_2\dot q_2 + \dots + J_n\dot q_n\)</li><li>ข้อต่อหมุน: \(J_i = \begin{bmatrix} Z_i \times P_{in} \\ Z_i \end{bmatrix}\) · ข้อต่อเลื่อน: \(J_i = \begin{bmatrix} Z_i \\ 0 \end{bmatrix}\) (สามแถวบนคือ<b>ส่วนเชิงเส้น</b> สามแถวล่างคือ<b>ส่วนเชิงมุม</b>)</li><li>\({}^0Z_i\) คือ<b>คอลัมน์ 3</b> ของ \({}^0_iT\) ส่วน \(P_{in} = p_n - p_i\) ได้จาก<b>คอลัมน์ 4</b> ของ \({}^0_nT\) และ \({}^0_iT\)</li><li>ส่วนเชิงเส้นของทุกคอลัมน์รวมกันคือจาโคเบียนของตำแหน่งที่บทที่ 5 หาด้วยการหาอนุพันธ์โดยตรง: สองวิธี คำตอบเดียวกัน</li><li>แขนที่มีข้อมือทรงกลม (spherical wrist: แกนของข้อต่อสามตัวสุดท้ายตัดกันที่จุดเดียว) และใช้จุดนั้นเป็นจุดปลายแขน: \(P_{in} = 0\) ส่วนเชิงเส้นของข้อต่อข้อมือจึงเป็น<b>ศูนย์</b></li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li>The velocity of the tool is the sum of what every joint adds, one column per joint: \(\begin{bmatrix} v \\ \omega \end{bmatrix} = J_1\dot q_1 + J_2\dot q_2 + \dots + J_n\dot q_n\).</li><li>A turning joint: \(J_i = \begin{bmatrix} Z_i \times P_{in} \\ Z_i \end{bmatrix}\) · a sliding joint: \(J_i = \begin{bmatrix} Z_i \\ 0 \end{bmatrix}\) (the upper three rows are the <b>linear part</b>, the lower three the <b>angular part</b>).</li><li>\({}^0Z_i\) is <b>column 3</b> of \({}^0_iT\); \(P_{in} = p_n - p_i\) comes from <b>column 4</b> of \({}^0_nT\) and \({}^0_iT\).</li><li>The linear parts of all the columns together are the position Jacobian chapter 5 found by direct differentiation: two ways, one answer.</li><li>An arm with a spherical wrist (the axes of its last three joints meet at one point) whose tool point is that point: \(P_{in} = 0\), so the linear parts of the wrist joints are <b>zero</b>.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>ข้อต่อละหนึ่งคอลัมน์</a><a href="#ex2"><b>2</b>แขน Stanford</a><a href="#ex3"><b>3</b>GP8</a><a href="#ex4"><b>4</b>การบ้าน 6</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>One column per joint</a><a href="#ex2"><b>2</b>Stanford arm</a><a href="#ex3"><b>3</b>GP8</a><a href="#ex4"><b>4</b>Homework 6</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">ข้อต่อละหนึ่งคอลัมน์</h2><h2 data-l="en">One column per joint</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 26–28 · แขน Stanford หกข้อต่อ d₂ = 0.15 m · ท่าของตัวอย่าง q = (30°, 60°, 0.5 m, 20°, 40°, −30°) · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, pp. 26–28 · a six-joint Stanford arm, d₂ = 0.15 m · the pose of the example q = (30°, 60°, 0.5 m, 20°, 40°, −30°) · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s26.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 26: a Stanford arm with the axes Z1 to Z6 of its six joints; a sliding joint adds V = Z q-dot along its axis, a turning joint adds Omega = Z q-dot about its axis; the velocity of the tool is the sum of what every joint adds">
+    <figcaption data-l="th">สไลด์หน้า 26: สิ่งที่ข้อต่อแต่ละชนิดเพิ่มให้ · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 26: what each kind of joint adds · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><div class="ctl" id="sel1"></div><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">ลูกศร<b class="ax-z">สีน้ำเงิน</b>คือแกน Z<sub>i</sub> ของข้อต่อทั้งหก เมื่อเลือกข้อต่อ เส้นประ<b class="ax-a">สีเหลือง</b>คือ P<sub>in</sub> จากจุดกำเนิดของเฟรม {i} ถึงจุดปลายแขน (ในแขนนี้คือจุดข้อมือ) ลูกศร<b class="ax-p">สีชมพู</b>ที่จุดปลายแขนคือส่วนเชิงเส้นของคอลัมน์ (ลูกศรยาว 0.5 m แทนขนาด 1) และลูกศรสั้น<b style="color:var(--purple)">สีม่วง</b>คือส่วนเชิงมุม ตัวเลข x, y, z ข้างจุดปลายแขนคือตำแหน่งเทียบเฟรม {0} · θ₄–θ₆ คงที่ที่ 20°, 40°, −30°</div>
+      <div class="simnote" data-l="en">The <b class="ax-z">blue</b> arrows are the axes Z<sub>i</sub> of the six joints. Choose a joint: the dashed <b class="ax-a">yellow</b> line is P<sub>in</sub>, from the origin of frame {i} to the tool point (for this arm the wrist point). The <b class="ax-p">pink</b> arrow at the tool point is the linear part of that joint's column (0.5 m of arrow for a size of 1), the short <b style="color:var(--purple)">purple</b> one its angular part. The x, y, z beside the tool point are its position in frame {0}. θ₄–θ₆ stay at 20°, 40°, −30°.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขน Stanford หกข้อต่อ (d₂ = 0.15 m): ข้อต่อ 1 และ 2 หมุน ข้อต่อ 3 เลื่อน ข้อต่อ 4–6 เป็นข้อมือซึ่งแกนทั้งสามตัดกันที่จุดข้อมือ จุดปลายแขนของตัวอย่างนี้คือจุดข้อมือ แขนอยู่ที่ท่า \(q = (30^\circ,\ 60^\circ,\ 0.5\ \text{m},\ 20^\circ,\ 40^\circ,\ -30^\circ)\) และแนวเลื่อนของข้อต่อ 3 คือ \({}^0Z_3 = (c_1s_2,\ s_1s_2,\ c_2)\) ตามที่หาไว้ในหน้า 5.3 ข้อต่อแต่ละชนิดเพิ่มความเร็วแบบใดให้ปลายแขน และคอลัมน์ของข้อต่อนั้นในจาโคเบียนเขียนได้อย่างไร</div>
+        <div data-l="en">A six-joint Stanford arm (d₂ = 0.15 m): joints 1 and 2 turn, joint 3 slides, and joints 4–6 are a wrist whose three axes meet at the wrist point, the tool point of this example. The arm is at \(q = (30^\circ,\ 60^\circ,\ 0.5\ \text{m},\ 20^\circ,\ 40^\circ,\ -30^\circ)\), and the slide of joint 3 points along \({}^0Z_3 = (c_1s_2,\ s_1s_2,\ c_2)\), as found on page 5.3. What does each kind of joint add to the velocity of the tool, and how is its column of the Jacobian written?</div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> องค์ประกอบ x, y, z ของ<b>ส่วนเชิงเส้น</b>ของคอลัมน์ 3 (ข้อต่อเลื่อน) ที่ท่าของตัวอย่าง</p>
+      <p class="lead" data-l="en"><b>(a)</b> The x, y, z components of the <b>linear part</b> of column 3 (the sliding joint) at the pose of the example</p>
+      <div id="ask1a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> ส่วนเชิงมุมของคอลัมน์ของข้อต่อเลื่อนคือ</p>
+      <p class="lead" data-l="en"><b>(b)</b> The angular part of the column of a sliding joint is</p>
+      <div id="ask1b"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">แขน Stanford: แกนของข้อต่อและจาโคเบียน</h2><h2 data-l="en">A Stanford arm: the axes and the Jacobian</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 29–31 · d₂ = 0.15 m · ท่า q = (30°, 60°, 0.5 m, 20°, 40°, −30°) · ตารางใต้รูปคือแกนทั้งหกของท่าที่ตั้งอยู่ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, pp. 29–31 · d₂ = 0.15 m · pose q = (30°, 60°, 0.5 m, 20°, 40°, −30°) · the table under the picture lists the six axes of the pose you set · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s29.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 29: a Stanford arm with its six joint axes and its DH table in Craig's convention; joint 3 slides, the other five turn; axes 4, 5 and 6 meet at the wrist point; find Z1 to Z6 and the 6 by 6 Jacobian in explicit form">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 29 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 29 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><div class="ctl" id="sel2"></div><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">ตารางใต้รูปคือแกน Z₁–Z₆ ของท่าที่ตั้งอยู่ เขียนในเฟรม {0} (ข้อต่อที่เลือกมีสีพื้น) เลื่อน θ₄ แล้ว Z₅ กับ Z₆ เปลี่ยน ส่วน Z₁–Z₄ ไม่เปลี่ยน เมื่อเลือกข้อต่อ 4, 5 หรือ 6 จะไม่มีเส้นประ P และไม่มีลูกศร<b class="ax-p">สีชมพู</b> เพราะแกนทั้งสามผ่านจุดข้อมือ ซึ่งเป็นจุดปลายแขน</div>
+      <div class="simnote" data-l="en">The table under the picture lists the axes Z₁–Z₆ of the pose you set, written in frame {0} (the chosen joint is shaded). Move θ₄: Z₅ and Z₆ change, Z₁–Z₄ do not. With joint 4, 5 or 6 chosen there is no dashed P and no <b class="ax-p">pink</b> arrow, because all three axes pass through the wrist point, which is the tool point.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขน Stanford หกข้อต่อ มีตาราง DH (Denavit–Hartenberg) แบบ Craig ดังนี้</div>
+        <div data-l="en">A six-joint Stanford arm with this DH (Denavit–Hartenberg) table in Craig's convention:</div>
+        <div id="tab2"></div>
+        <div data-l="th">d₂ = 0.15 m คือระยะเยื้องของไหล่ (หน้า 5.3 เรียกว่า L₂) แขนอยู่ที่ท่า \(q = (\theta_1, \theta_2, d_3, \theta_4, \theta_5, \theta_6) = (30^\circ,\ 60^\circ,\ 0.5\ \text{m},\ 20^\circ,\ 40^\circ,\ -30^\circ)\) ข้อต่อ 3 เลื่อน อีกห้าข้อต่อหมุน แกน 4, 5, 6 ตัดกันที่จุดข้อมือ ซึ่งเป็นจุดกำเนิดของเฟรม {3}–{6} และเป็นจุดปลายแขนของตัวอย่างนี้ หาแกน \(Z_1 \dots Z_6\) ในเฟรม {0} และจาโคเบียน 6 × 6 ในรูปชัดแจ้ง</div>
+        <div data-l="en">d₂ = 0.15 m is the shoulder offset (page 5.3 called it L₂). The arm is at \(q = (\theta_1, \theta_2, d_3, \theta_4, \theta_5, \theta_6) = (30^\circ,\ 60^\circ,\ 0.5\ \text{m},\ 20^\circ,\ 40^\circ,\ -30^\circ)\). Joint 3 slides and the other five turn. Axes 4, 5 and 6 meet at the wrist point, which is the origin of frames {3}–{6} and the tool point of this example. Find the axes \(Z_1 \dots Z_6\) in frame {0} and the 6 × 6 Jacobian in explicit form.</div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> องค์ประกอบ x, y, z ของ \({}^0Z_2\) ที่ θ₁ = 30°</p>
+      <p class="lead" data-l="en"><b>(a)</b> The x, y, z components of \({}^0Z_2\) at θ₁ = 30°</p>
+      <div id="ask2a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> องค์ประกอบ x, y, z ของส่วนเชิงเส้นของคอลัมน์ 1 คือ \(Z_1 \times P_{1n}\)</p>
+      <p class="lead" data-l="en"><b>(b)</b> The x, y, z components of the linear part of column 1, \(Z_1 \times P_{1n}\)</p>
+      <div id="ask2b"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">GP8 ของภาควิชาในรูปชัดแจ้ง</h2><h2 data-l="en">The department's GP8 in explicit form</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 32 · a₁ = 0.04, a₂ = 0.345, a₃ = 0.04, d₄ = 0.34 m · ท่า θ = (30°, −60°, 20°, 40°, 50°, −30°) · ตารางใต้รูปคือ J₀ ของท่าที่ตั้งอยู่ · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 6 slides, p. 32 · a₁ = 0.04, a₂ = 0.345, a₃ = 0.04, d₄ = 0.34 m · pose θ = (30°, −60°, 20°, 40°, 50°, −30°) · the table under the picture is J₀ of the pose you set · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s32.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 32: the Yaskawa GP8 drawn as links and joints; for joint 2 its axis Z2, the dashed vector P2n to the wrist centre and the arrow Z2 cross P; all six joints turn and axes 4, 5 and 6 meet at the wrist centre; the upper right block of the Jacobian is zero">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 32 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 32 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="sel3"></div><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">ตารางใต้รูปคือ J₀ ของท่าที่ตั้งอยู่ เขียนในเฟรม {0}: สามแถวบนคือส่วนเชิงเส้น สามแถวล่างคือส่วนเชิงมุม คอลัมน์ของข้อต่อที่เลือกมีสีพื้น จุดปลายแขนของตาราง DH นี้คือจุดศูนย์กลางข้อมือ เส้นประ<b class="ax-a">สีเหลือง</b>คือ P<sub>in</sub> และลูกศร<b class="ax-p">สีชมพู</b>คือ Z<sub>i</sub> × P<sub>in</sub> (ลูกศรยาว 0.5 m แทนขนาด 1)</div>
+      <div class="simnote" data-l="en">The table under the picture is J₀ of the pose you set, written in frame {0}: the upper three rows are the linear part, the lower three the angular part, and the column of the chosen joint is shaded. The tool point of this DH table is the wrist centre. The dashed <b class="ax-a">yellow</b> line is P<sub>in</sub> and the <b class="ax-p">pink</b> arrow is Z<sub>i</sub> × P<sub>in</sub> (0.5 m of arrow for a size of 1).</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขน Yaskawa GP8 ของภาควิชา ใช้ตาราง DH ของบทที่ 3 ทั้งหกข้อต่อเป็นข้อต่อหมุน และแกน 4, 5, 6 ตัดกันที่จุดศูนย์กลางข้อมือ ซึ่งเป็นจุดปลายแขนของตารางนี้ แขนอยู่ที่ท่า \(\theta = (30^\circ,\ -60^\circ,\ 20^\circ,\ 40^\circ,\ 50^\circ,\ -30^\circ)\) เขียนจาโคเบียน 6 × 6 ในรูปชัดแจ้ง</div>
+        <div data-l="en">The department's Yaskawa GP8, with the DH table of chapter 3. All six joints turn, and axes 4, 5 and 6 meet at the wrist centre, the tool point of this table. The arm is at \(\theta = (30^\circ,\ -60^\circ,\ 20^\circ,\ 40^\circ,\ 50^\circ,\ -30^\circ)\). Write the 6 × 6 Jacobian in explicit form.</div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> องค์ประกอบ x, y, z ของส่วนเชิงเส้นของคอลัมน์ 2 คือ \(Z_2 \times P_{2n}\) ที่ท่าของตัวอย่าง</p>
+      <p class="lead" data-l="en"><b>(a)</b> The x, y, z components of the linear part of column 2, \(Z_2 \times P_{2n}\), at the pose of the example</p>
+      <div id="ask3a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> ทำไมบล็อก 3 × 3 ที่มุมขวาบนของจาโคเบียนนี้จึงเป็นศูนย์</p>
+      <p class="lead" data-l="en"><b>(b)</b> Why is the 3 × 3 block at the upper right of this Jacobian zero?</p>
+      <div id="ask3b"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">การบ้านชุดที่ 6: ช่องตรวจคำตอบ</h2><h2 data-l="en">Homework 6: answer checks</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 6 หน้า 33 · แขน RPR ของบทที่ 3 · หน้านี้มีเพียงภาพของโจทย์และช่องตรวจคำตอบ ไม่มีวิธีทำ</div><div class="src" data-l="en">Chapter 6 slides, p. 33 · the RPR arm of chapter 3 · this page has only the picture of the problem and answer checks, no worked solution</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch6/s33.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 33: homework 6; the RPR arm of chapter 3 with its frames and its DH table, L2 = 0.15 m, the pose q and the joint rates, and the four tasks (a) to (d)">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 33 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 33 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><div class="ctl" id="ctl4"></div>
+      <div class="simnote" data-l="th">แขน RPR: เสาหมุน θ₁ รอบแนวตั้ง ก้านเลื่อน d₂ ออกไปในแนวราบ แล้วข้อต่อ 3 หมุน θ₃ รอบแนวของก้านเลื่อน (L₂ = 0.15 m) เลื่อนค่าข้อต่อเพื่อดูท่าของแขนและเฟรม {0}–{3} รูปนี้ไม่แสดงลูกศรความเร็วและไม่แสดงตัวเลขของปลายแขน · ลากเพื่อหมุนมุมมอง</div>
+      <div class="simnote" data-l="en">The RPR arm: a column turning by θ₁ about the vertical, a rod sliding out by d₂ horizontally, then joint 3 turning by θ₃ about the line of the rod (L₂ = 0.15 m). Move the joint values to see the pose and frames {0}–{3}. This picture shows no velocity arrows and no numbers of the tool point · drag to turn the view</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">การบ้านชุดที่ 6 — แขน RPR</div><div class="gl" data-l="en">Homework 6 — the RPR arm</div>
+        <div data-l="th">แขน RPR (revolute–prismatic–revolute: หมุน–เลื่อน–หมุน) ของบทที่ 3 (Craig ตัวอย่าง 3.4) มีตาราง DH ดังนี้</div>
+        <div data-l="en">The RPR arm (revolute–prismatic–revolute: turn, slide, turn) of chapter 3 (Craig, example 3.4) with this DH table:</div>
+        <div id="tab4"></div>
+        <div data-l="th">L₂ = 0.15 m · \(q = (\theta_1, d_2, \theta_3) = (30^\circ,\ 0.35\ \text{m},\ 45^\circ)\) · \(\dot q = (0.4\ \text{rad/s},\ 0.1\ \text{m/s},\ -0.6\ \text{rad/s})\)</div>
+        <div data-l="th" style="margin-top:6px"><b>(a)</b> ส่งต่อความเร็วจากฐานถึงปลายแขน: หา \({}^3\omega_3\) และ \({}^3v_3\) &nbsp;<b>(b)</b> เขียนทั้งสองในเฟรม {0}: \({}^0v_3\) และ \({}^0\omega_3\) &nbsp;<b>(c)</b> เขียนจาโคเบียน \({}^0J\) ขนาด 6 × 3 ในรูปชัดแจ้ง &nbsp;<b>(d)</b> แทนค่าตัวเลขข้างต้น</div>
+        <div data-l="en">L₂ = 0.15 m · \(q = (\theta_1, d_2, \theta_3) = (30^\circ,\ 0.35\ \text{m},\ 45^\circ)\) · \(\dot q = (0.4\ \text{rad/s},\ 0.1\ \text{m/s},\ -0.6\ \text{rad/s})\)</div>
+        <div data-l="en" style="margin-top:6px"><b>(a)</b> Propagate the velocities from the base to the tool: find \({}^3\omega_3\) and \({}^3v_3\). &nbsp;<b>(b)</b> Write them in frame {0}: \({}^0v_3\) and \({}^0\omega_3\). &nbsp;<b>(c)</b> Write the 6 × 3 Jacobian \({}^0J\) in explicit form. &nbsp;<b>(d)</b> Put in the numbers above.</div></div>
+      <div id="ask4a"></div><div id="ask4b"></div><div id="ask4c"></div><div id="ask4d"></div>
+      <p class="lead" data-l="th">หน้านี้ตรวจให้เฉพาะตัวเลขของคำตอบ วิธีทำของการบ้านชุดนี้อธิบายในห้องเรียน</p>
+      <p class="lead" data-l="en">This page checks the numbers only; the worked answers of this homework are discussed in class.</p></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ก่อนสอบกลางภาค (สัปดาห์ที่ 8): บทที่ 1–6</h3>
+    <figure class="slide" style="margin-top:0"><img src="slides/ch6/s34.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 34: before the midterm, chapters 1 to 6; one card per chapter with what to be able to do">
+      <figcaption>สไลด์หน้า 34 · แตะรูปเพื่อขยาย</figcaption></figure>
+    <p>สิ่งที่ควรทำได้ในแต่ละบท ทุกบทมีหน้าเว็บให้ฝึกพร้อมช่องตรวจคำตอบ</p>
+    <ul><li><b>บทที่ 1 บทนำ</b>: บอกชนิดของข้อต่อ นับองศาอิสระ อธิบายปริภูมิทำงาน ความแม่นยำซ้ำ (repeatability) และความแม่นยำ (accuracy)</li><li><b>บทที่ 2 ตำแหน่งและทิศในปริภูมิ</b>: ใช้เมทริกซ์การหมุนและเมทริกซ์การแปลงเอกพันธุ์ คูณต่อกัน หาตัวผกผัน และใช้มุมออยเลอร์</li><li><b>บทที่ 3 จลนศาสตร์ไปข้างหน้า</b>: ติดเฟรม เขียนตาราง DH แล้วคูณเมทริกซ์การแปลงของก้าน</li><li><b>บทที่ 4 จลนศาสตร์ผกผัน</b>: บอกจำนวนคำตอบ และแก้ด้วยวิธีพีชคณิตกับวิธีเรขาคณิตโดยใช้ atan2</li><li><b>บทที่ 5 จาโคเบียน</b>: หาด้วยการหาอนุพันธ์โดยตรง อ่านความหมายของคอลัมน์ หาอัตราของข้อต่อ บอกท่าเอกฐาน และใช้ τ = JᵀF</li><li><b>บทที่ 6 การส่งต่อความเร็ว</b>: หา ω และ v จากฐานถึงปลายแขน เขียนจาโคเบียนในเฟรมที่ต้องการ และเขียนในรูปชัดแจ้ง</li></ul></div>
+  <div class="card"><h3>ลองทำดู 1 — ข้อมือกับบล็อกศูนย์</h3>
+    <ol><li>โจทย์ 1: เลือกข้อต่อ 4, 5 หรือ 6 ไม่มีลูกศรสีชมพูที่จุดข้อมือ เหลือแต่ลูกศรสีม่วง เพราะแกนของข้อต่อผ่านจุดนั้นพอดี (P<sub>in</sub> = 0): หมุนข้อมืออย่างไร จุดข้อมือก็ไม่ขยับ</li><li>โจทย์ 3: เลื่อน θ₄, θ₅ และ θ₆ ทีละตัว สามคอลัมน์ซ้ายของตาราง J₀ ไม่เปลี่ยนเลย θ₄ เปลี่ยนเฉพาะ Z₅ กับ Z₆ ส่วน θ₅ เปลี่ยนเฉพาะ Z₆ และ θ₆ ไม่เปลี่ยนตัวเลขใดเลย เพราะการหมุนรอบแกนสุดท้ายไม่ทำให้แกนใดเปลี่ยนทิศ</li><li>โจทย์ 3: เลือกข้อต่อ 2 แล้วเลื่อน θ₂ ลูกศรสีชมพูตั้งฉากกับเส้นประ P₂ₙ เสมอ และยาวเท่าเดิม เพราะระยะจากไหล่ถึงจุดศูนย์กลางข้อมือไม่ขึ้นกับ θ₂ เมื่อเลื่อน θ₃ ความยาวจึงเปลี่ยน</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — สองวิธี คำตอบเดียวกัน</h3>
+    <ol><li>โจทย์ 2: ตั้งแถบเลื่อนให้ตรงกับท่าของตัวอย่าง แล้วเลือกข้อต่อ 1, 2 และ 3 ทีละตัว เทียบส่วนเชิงเส้นกับคอลัมน์ของ J<sub>v</sub> ในหน้า 5.3 โจทย์ 1 ซึ่งใช้ท่าเดียวกัน: เท่ากันทุกตัว</li><li>โจทย์ 1: เลือกข้อต่อ 1 แล้วเลื่อน θ₂ ไปที่ 10° และ d₃ ไปที่ 0.20 m ลูกศรสีชมพูสั้นลงแต่ไม่หายไป ขนาดของ Z₁ × P₁ₙ คือระยะจากแกน 1 ถึงจุดข้อมือ ซึ่งไม่น้อยกว่าระยะเยื้องของไหล่ d₂ = 0.15 m</li><li>โจทย์ 1: เลือกข้อต่อ 3 แล้วเลื่อน d₃ ตัวเลขของคอลัมน์ 3 ไม่เปลี่ยน เพราะทิศของแกนเลื่อนขึ้นกับ θ₁ และ θ₂ เท่านั้น</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 6 หน้า 26–34 · สไลด์เดิม Part II (ตามเอกสารประกอบการสอนของ Khatib) · Spong 4.6 · Craig 5.7</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Before the midterm (week 8): chapters 1 to 6</h3>
+    <figure class="slide" style="margin-top:0"><img src="slides/ch6/s34.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 34: before the midterm, chapters 1 to 6; one card per chapter with what to be able to do">
+      <figcaption>Slide p. 34 · tap to enlarge</figcaption></figure>
+    <p>What you should be able to do, chapter by chapter. Every chapter has pages on this site with answer checks to practise on.</p>
+    <ul><li><b>Chapter 1, introduction</b>: name the joint types, count degrees of freedom, explain workspace, repeatability and accuracy.</li><li><b>Chapter 2, spatial descriptions</b>: use rotation matrices and homogeneous transforms, compound and invert them, and use Euler angles.</li><li><b>Chapter 3, forward kinematics</b>: attach frames, write the DH table and multiply the link transforms.</li><li><b>Chapter 4, inverse kinematics</b>: say how many solutions there are; solve algebraically and geometrically with atan2.</li><li><b>Chapter 5, the Jacobian</b>: find it by direct differentiation, read its columns, find joint rates, name singular poses and use τ = JᵀF.</li><li><b>Chapter 6, velocity propagation</b>: find ω and v from the base to the tool; write the Jacobian in a chosen frame and in explicit form.</li></ul></div>
+  <div class="card"><h3>Try this 1 — the wrist and the block of zeros</h3>
+    <ol><li>Problem 1: choose joint 4, 5 or 6. There is no pink arrow at the wrist point, only the purple one, because the joint axis passes through that very point (P<sub>in</sub> = 0): however the wrist turns, the wrist point stays where it is.</li><li>Problem 3: move θ₄, θ₅ and θ₆ one at a time. The three left columns of the J₀ table do not change at all. θ₄ changes only Z₅ and Z₆, θ₅ only Z₆, and θ₆ changes no number at all, because turning about the last axis does not turn any axis.</li><li>Problem 3: choose joint 2 and move θ₂. The pink arrow stays square to the dashed P₂ₙ and keeps its length, because the distance from the shoulder to the wrist centre does not depend on θ₂. Move θ₃ and the length changes.</li></ol></div>
+  <div class="card"><h3>Try this 2 — two ways, one answer</h3>
+    <ol><li>Problem 2: set the sliders to the pose of the example and choose joints 1, 2 and 3 in turn. Compare the linear parts with the columns of J<sub>v</sub> on page 5.3, problem 1, which uses the same pose: they agree number for number.</li><li>Problem 1: choose joint 1 and move θ₂ to 10° and d₃ to 0.20 m. The pink arrow gets shorter but never disappears: the size of Z₁ × P₁ₙ is the distance from axis 1 to the wrist point, which is never less than the shoulder offset d₂ = 0.15 m.</li><li>Problem 1: choose joint 3 and move d₃. The numbers of column 3 do not change, because the direction of the slide depends on θ₁ and θ₂ only.</li></ol>
+    <div class="book">Source: chapter 6 slides, pp. 26–34 · old part II slides (after Khatib's lecture notes) · Spong 4.6 · Craig 5.7</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, dn = RB.d, rad = RB.rad, deg = RB.deg, X = CH6.EX, OV = CH6.OV, G = CH3.EX.gp8, SUB = '₁₂₃₄₅₆';
+const el = id => document.getElementById(id), norm = a => Math.hypot(...a), near3 = (a, b, tol) => a.every((x, i) => Math.abs(x - b[i]) < tol), neg = a => a.map(x => -x);
+const fx = (x, n = 3) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n), v3 = (a, n = 3) => `(${a.map(x => fx(x, n)).join(', ')})`;   // fixed decimals: the numbers do not jump about while a slider moves
+const tv = (a, n = 3) => `(${a.map(x => dn(x, n)).join(',\\ ')})`, num = x => Math.abs(x) < 5e-10 ? '0' : fx(x);                                  // TeX: a row vector; a table cell
+const Pp = T => RB.Tp(T), Dd = (T, j) => RB.col(RB.TR(T), j), pOf = c => c.arm.map((x, i) => x + c.p[i]);                                         // origin and axis j of a frame; the tool point p_n behind a column
+const PUR = 'style="color:var(--purple)"', HL = ' style="background:color-mix(in srgb,var(--warn) 22%,transparent)"', hl = on => on ? HL : '';
+const kind = c => c.kind === 'R' ? t('ข้อต่อหมุน', 'turning joint') : t('ข้อต่อเลื่อน', 'sliding joint');
+/* the column of the chosen joint under a picture: linear part (the pink arrow) and angular part (the purple one) */
+const colLine = c => c ? `<div class="term">${t('คอลัมน์', 'Column')} ${c.k} (${kind(c)}): ${t('ส่วนเชิงเส้น', 'linear part')} <b class="ax-p">${v3(c.lin)}</b> · ${t('ส่วนเชิงมุม', 'angular part')} <b ${PUR}>${v3(c.ang)}</b></div>`
+  : `<div class="term">${t('เลือกข้อต่อเพื่อดูคอลัมน์ของข้อต่อนั้น', 'Choose a joint to see its column')}</div>`;
+/* a 6 × n Jacobian as a compact table; column j (1…n) shaded */
+const ROW = ['v<sub>x</sub>', 'v<sub>y</sub>', 'v<sub>z</sub>', 'ω<sub>x</sub>', 'ω<sub>y</sub>', 'ω<sub>z</sub>'], HG = [...SUB].map(c => 'θ̇' + c), HS = HG.map((h, i) => i === 2 ? 'ḋ₃' : h);
+const jtab = (J, heads, j = 0) => `<div class="tscroll"><table class="dhtab sols"><tr><th>J₀</th>${heads.map((h, i) => `<th${hl(i === j - 1)}>${h}</th>`).join('')}</tr>${J.map((r, i) => `<tr><th>${ROW[i]}</th>${r.map((x, c) => `<td${hl(c === j - 1)}>${num(x)}</td>`).join('')}</tr>`).join('')}</table></div>`;
+/* sliders: a joint angle M.q[i] shown in degrees, or a sliding joint M.q[i] in metres */
+const angS = (box, id, label, M, i, lo, hi, onch) => ui.slider(box, { id, label, min: lo, max: hi, step: 1, value: Math.round(deg(M.q[i])), fmt: v => `${v}°`, oninput: v => { M.q[i] = rad(v); onch(); } });
+const lenS = (box, id, label, M, i, lo, hi, onch) => ui.slider(box, { id, label, min: lo, max: hi, step: 0.01, value: M.q[i], fmt: v => `${v.toFixed(2)} m`, oninput: v => { M.q[i] = v; onch(); } });
+/* the joint whose column is drawn: 0 (the axes only), 1 … 6 */
+const jsel = (box, pre, M, onch) => ui.radio(box, [0, 1, 2, 3, 4, 5, 6].map(k => ({ id: pre + k, label: k ? t('ข้อต่อ ', 'joint ') + k : t('เฉพาะแกน', 'axes only'), on: k === M.j })), id => { M.j = +id.slice(pre.length); onch(); });
+const xyz = (a, tol, unit) => ['x', 'y', 'z'].map((c, i) => ({ label: `${c}${unit ? ` (${unit})` : ''} =`, ok: x => Math.abs(x - a[i]) < tol, w: 5 }));
+/* step overlays (the frames s.F are in world coordinates, the columns s.info.cols in {0}; the two differ by a shift only) */
+/* the short purple arrow at the tool point is the angular part of the chosen joint: its name (turning joints only) */
+const angName = (s, st) => { const c = st.j ? s.info.cols[st.j - 1] : null; if (c && c.kind === 'R') OV.name(s, OV.v(Pp(s.F[s.F.length - 1]), c.z, 0.16), 'p', 'Z', { sub: String(c.k), s: 24, a: 'l', dx: 14, dy: 14 }); };
+/* P_in = p_n − p_i: the origins of {i} and {n} as seen from the origin of {0} */
+const tri = (s, st) => { const F = s.F, j = st.j; if (!j) return; const O = Pp(F[0]), A = Pp(F[j]), E = Pp(F[F.length - 1]);
+  if (norm(OV.sub(A, O)) > 0.012) OV.dist(s, O, A, 'o', 'p', { sub: String(j), s: 24, dy: -18 }); if (norm(OV.sub(E, O)) > 0.012) OV.dist(s, O, E, 'gr', 'p', { sub: 'n', s: 24, dy: 24 }); };
+/* the three wrist axes carried back through the tool point, where they meet */
+const wrist = (s, tx) => { const F = s.F, E = Pp(F[F.length - 1]); [4, 5, 6].forEach(i => OV.ref(s, E, neg(Dd(F[i], 2)), 0.16)); OV.name(s, E, 'pk', tx, { m: 0, s: 20, a: 'r', dx: -24, dy: 34 }); };
+
+/* ---------- 1: one column per joint (a Stanford arm; the first three joints on sliders) ---------- */
+const ST = CH6.stan, XS = X.stan, RS = XS.rows, K = XS.cols, C2 = K[1], C3 = K[2], pnS = pOf(K[0]), sval = (q, i) => i === 2 ? q[i] : Math.round(deg(q[i]));   // a Stanford joint value as its slider shows it
+const M1 = { ex: 'stan', j: 1, fit: true, xyz: true, q: [rad(-40), rad(100), 0.35, ...ST.q.slice(3)] }, ro1 = el('ro1'), c1 = el('ctl1');
+const read1 = () => { const C = CH6.cols(RS, M1.q), c = M1.j ? C[M1.j - 1] : null;
+  ro1.innerHTML = c ? `<div class="term">${t('ข้อต่อ', 'Joint')} ${c.k}: <b>${kind(c)}</b> · <b class="ax-z">Z${SUB[c.k - 1]} = ${v3(c.z)}</b> · ${c.kind === 'R' ? `<b class="ax-a">P<sub>${c.k}n</sub> = ${v3(c.arm)} m</b>` : t('ไม่ต้องใช้ P', 'no P needed')}</div>` + colLine(c)
+    : `<div class="term">${t('แกนของข้อต่อทั้งหก: ข้อต่อ 3 เลื่อน อีกห้าข้อต่อหมุน', 'The axes of the six joints: joint 3 slides, the other five turn')}</div>` + colLine(null); };
+const rd1 = jsel(el('sel1'), 'j1-', M1, read1), s1 = [angS(c1, 'p1a', 'θ₁', M1, 0, -180, 180, read1), angS(c1, 'p1b', 'θ₂', M1, 1, 10, 170, read1), lenS(c1, 'p1c', 'd₃', M1, 2, 0.2, 0.7, read1)];
+/* back to the pose of the example with joint j chosen (the picture, the sliders and the joint buttons) */
+const put1 = j => { M1.q = ST.q.slice(); M1.j = j; s1.forEach((s, i) => s.set(sval(M1.q, i))); rd1.set('j1-' + j); read1(); }; read1();
+/* the open step: 1 a turning joint (joint 2), its purple arrow named; 2 the sliding joint 3: nothing turns; 3 the six axes, one column each;
+   4 joint 2 again with p₂ and p_n drawn from the origin of {0}: their difference is the dashed P₂n */
+M1.ov = (s, st) => { const k = st.step, F = s.F; if (!k || !F) return; const c = st.j ? s.info.cols[st.j - 1] : null;
+  if (k === 1) angName(s, st);
+  if (k === 2 && c && c.kind === 'P') OV.name(s, Pp(F[F.length - 1]), 'p', t('ไม่มีการหมุนเพิ่ม: ส่วนเชิงมุม = 0', 'no turning added: angular part = 0'), { m: 0, s: 20, a: 'r', dx: -24, dy: 34 });
+  if (k === 4) { tri(s, st); angName(s, st); } };
+CH2.sim('cv1', M1, 'explicit', { aspect: 0.8, maxH: 520 });
+LS.ask(el('ask1a'), { fields: xyz(C3.lin, 0.002),
+  check: v => near3(v, [0, 0, 0], 0.002) ? t('ศูนย์คือส่วนเชิงมุม: ข้อต่อเลื่อนพาปลายแขนไปตามแกนของมัน ส่วนเชิงเส้นจึงไม่เป็นศูนย์', 'zero is the angular part: a sliding joint carries the tool along its axis, so the linear part is not zero')
+    : near3(v, pnS, 0.002) ? t('นั่นคือตำแหน่งของจุดข้อมือ: คอลัมน์ของข้อต่อเลื่อนต้องการทิศของแกน ซึ่งเป็นเวกเตอร์หนึ่งหน่วย', 'that is the position of the wrist point; the column of a sliding joint wants the direction of its axis, a unit vector')
+    : near3(v, C3.lin.map(x => x * XS.q[2]), 0.002) ? t('ไม่ต้องคูณด้วย d₃: ส่วนเชิงเส้นของข้อต่อเลื่อนคือเวกเตอร์หนึ่งหน่วย Z₃', 'do not multiply by d₃: the linear part of a sliding joint is the unit vector Z₃') : '' });
+LS.choose(el('ask1b'), { options: ['Z<sub>i</sub>', 'Z<sub>i</sub> × P<sub>in</sub>', t('ศูนย์ (0, 0, 0)', 'zero, (0, 0, 0)')], answer: 2 });
+const J1 = [2, 2, 3, 0, 2];   // the joint chosen while step k is open
+LS.stepper(el('st1'), { onStep: k => { const was = M1.step; M1.step = k; if (k || was) put1(J1[k]); }, steps: [
+  { why: t(`<b>ข้อต่อหมุน i</b>: ทุกก้านที่อยู่ถัดจากข้อต่อนี้หมุนรอบแกน Z<sub>i</sub> ด้วยอัตรา q̇<sub>i</sub> จึงได้ความเร็วเชิงมุมเพิ่มขึ้น Ω<sub>i</sub> = Z<sub>i</sub>q̇<sub>i</sub> จุดปลายแขนอยู่ห่างจากจุดกำเนิดของเฟรม {i} เป็นเวกเตอร์ P<sub>in</sub> จึงได้ความเร็วเชิงเส้น Ω<sub>i</sub> × P<sub>in</sub> (ส่วน Ω × Q ของหน้า 6.1) ซึ่งตั้งฉากกับทั้งแกนของข้อต่อและ P<sub>in</sub> ในรูปคือข้อต่อ 2: ลูกศรสีชมพู Z₂ × P₂ₙ ตั้งฉากกับก้านเลื่อนและมีขนาด ${fx(norm(C2.lin), 2)} m เท่ากับ d₃ พอดี ลูกศรสีม่วงคือ Z₂`, `<b>Turning joint i</b>: every link after this joint turns about the axis Z<sub>i</sub> at the rate q̇<sub>i</sub>, which adds the angular velocity Ω<sub>i</sub> = Z<sub>i</sub>q̇<sub>i</sub>. The tool point lies at the vector P<sub>in</sub> from the origin of frame {i}, so it gets the linear velocity Ω<sub>i</sub> × P<sub>in</sub> (the Ω × Q part of page 6.1), square to both the joint axis and P<sub>in</sub>. The picture shows joint 2: the pink arrow Z₂ × P₂ₙ is square to the sliding link and its size is ${fx(norm(C2.lin), 2)} m, exactly d₃. The purple arrow is Z₂`),
+    tex: '\\begin{aligned} \\Omega_i &= Z_i\\,\\dot q_i \\\\ v &= \\Omega_i \\times P_{in} = (Z_i \\times P_{in})\\,\\dot q_i \\\\ \\omega &= \\Omega_i = Z_i\\,\\dot q_i \\end{aligned}' },
+  { why: t('<b>ข้อต่อเลื่อน i</b>: ทุกก้านที่อยู่ถัดไปเลื่อนตามแกน Z<sub>i</sub> ด้วยอัตรา q̇<sub>i</sub> ทุกจุดจึงได้ความเร็วเชิงเส้นเท่ากันคือ V<sub>i</sub> = Z<sub>i</sub>q̇<sub>i</sub> ไม่ขึ้นกับ P<sub>in</sub> และไม่มีการหมุนเพิ่ม <b>(ก)</b> ข้อต่อ 3 ของแขน Stanford: ส่วนเชิงเส้นของคอลัมน์ 3 คือ Z₃ เอง ซึ่งเป็นเวกเตอร์หนึ่งหน่วยตามแนวเลื่อน ในรูปลูกศรสีชมพูชี้ตามก้านเลื่อน และไม่มีลูกศรสีม่วง', '<b>Sliding joint i</b>: every link after it slides along the axis Z<sub>i</sub> at the rate q̇<sub>i</sub>, so every point gets the same linear velocity V<sub>i</sub> = Z<sub>i</sub>q̇<sub>i</sub>, whatever P<sub>in</sub> is, and no turning is added. <b>(a)</b> Joint 3 of the Stanford arm: the linear part of column 3 is Z₃ itself, a unit vector along the slide. In the picture the pink arrow points along the sliding link and there is no purple arrow'),
+    tex: `\\begin{aligned} V_i &= Z_i\\,\\dot q_i: \\qquad v = Z_i\\,\\dot q_i, \\quad \\omega = 0 \\\\ {}^0Z_3 &= (c_1s_2,\\ s_1s_2,\\ c_2) = ${tv(C3.lin)} \\end{aligned}` },
+  { why: t('<b>(ข) สองกฎ</b>: ทุกข้อต่อให้หนึ่งคอลัมน์ สามแถวบนคือส่วนเชิงเส้น สามแถวล่างคือส่วนเชิงมุม ข้อต่อเลื่อนไม่ทำให้ปลายแขนหมุน ส่วนเชิงมุมจึงเป็นศูนย์ ความเร็วของปลายแขนคือผลรวมของทุกคอลัมน์คูณกับอัตราของข้อต่อนั้น (R: ข้อต่อหมุน, revolute · P: ข้อต่อเลื่อน, prismatic) ในรูป: แกนทั้งหกของแขน Stanford ให้หกคอลัมน์', '<b>(b) Two rules</b>: every joint gives one column; its upper three rows are the linear part, its lower three the angular part. A sliding joint does not turn the tool, so its angular part is zero. The velocity of the tool is the sum of every column times the rate of its joint (R: a turning, revolute joint · P: a sliding, prismatic joint). In the picture: the six axes of the Stanford arm give six columns'),
+    tex: '\\begin{aligned} \\begin{bmatrix} v \\\\ \\omega \\end{bmatrix} &= J_1\\,\\dot q_1 + J_2\\,\\dot q_2 + \\dots + J_n\\,\\dot q_n \\\\ \\text{R:}\\quad J_i &= \\begin{bmatrix} Z_i \\times P_{in} \\\\ Z_i \\end{bmatrix} \\qquad \\text{P:}\\quad J_i = \\begin{bmatrix} Z_i \\\\ 0 \\end{bmatrix} \\end{aligned}',
+    body: () => `<div class="tscroll"><table class="dhtab"><tr><th></th><th>${t('ข้อต่อหมุน i', 'turning joint i')}</th><th>${t('ข้อต่อเลื่อน i', 'sliding joint i')}</th></tr><tr><th>${t('ส่วนเชิงเส้น (3 แถว)', 'linear part (3 rows)')}</th><td>Z<sub>i</sub> × P<sub>in</sub></td><td>Z<sub>i</sub></td></tr><tr><th>${t('ส่วนเชิงมุม (3 แถว)', 'angular part (3 rows)')}</th><td>Z<sub>i</sub></td><td>0</td></tr></table></div>` },
+  { why: t('<b>หา Z<sub>i</sub> และ P<sub>in</sub> จากไหน</b>: เขียนทุกเวกเตอร์ในเฟรม {0} จากเมทริกซ์การแปลงสะสม \\({}^0_iT = {}^0_1T\\,{}^1_2T \\cdots {}^{i-1}_iT\\) ของบทที่ 3 <b>คอลัมน์ 3</b> คือแกน \\({}^0Z_i\\) และ<b>คอลัมน์ 4</b> คือจุดกำเนิด p<sub>i</sub> ของเฟรม {i} ในรูปคือข้อต่อ 2: เส้นประจากจุดกำเนิดของ {0} ไปถึง p₂ (ที่ไหล่) และ p<sub>n</sub> (จุดข้อมือ) ผลต่างของสองเวกเตอร์นี้คือเส้นประสีเหลือง P₂ₙ', '<b>Where Z<sub>i</sub> and P<sub>in</sub> come from</b>: write every vector in frame {0}, from the compound transform \\({}^0_iT = {}^0_1T\\,{}^1_2T \\cdots {}^{i-1}_iT\\) of chapter 3. <b>Column 3</b> is the axis \\({}^0Z_i\\) and <b>column 4</b> the origin p<sub>i</sub> of frame {i}. The picture shows joint 2: dashed lines run from the origin of {0} to p₂ (at the shoulder) and to p<sub>n</sub> (the wrist point); their difference is the dashed yellow P₂ₙ'),
+    tex: `\\begin{aligned} {}^0_iT &= \\begin{bmatrix} \\cdot & \\cdot & Z_x & p_x \\\\ \\cdot & \\cdot & Z_y & p_y \\\\ \\cdot & \\cdot & Z_z & p_z \\\\ 0 & 0 & 0 & 1 \\end{bmatrix}, \\qquad P_{in} = p_n - p_i \\\\ P_{2n} &= ${tv(pnS)} - ${tv(C2.p)} \\\\ &= ${tv(C2.arm)}\\ \\text{m} \\end{aligned}`,
+    body: () => `<div class="why">${t('ส่วนเชิงเส้นหาได้อีกทางหนึ่งด้วยการหาอนุพันธ์ของตำแหน่งปลายแขนโดยตรง (บทที่ 5) ซึ่งมักเร็วกว่าการคูณไขว้ และได้คำตอบเดียวกัน', 'The linear part can also be found by differentiating the position of the tool point (chapter 5): often quicker than the cross products, and the same answer')}</div>` }],
+  answer: t(`(ก) ส่วนเชิงเส้นของคอลัมน์ 3 คือ Z₃ = ${v3(C3.lin)} (ข) ศูนย์ · ข้อต่อหมุน: (Z<sub>i</sub> × P<sub>in</sub>; Z<sub>i</sub>) · ข้อต่อเลื่อน: (Z<sub>i</sub>; 0) · ทุกเวกเตอร์เขียนในเฟรม {0}`, `(a) the linear part of column 3 is Z₃ = ${v3(C3.lin)} (b) zero · a turning joint: (Z<sub>i</sub> × P<sub>in</sub>; Z<sub>i</sub>) · a sliding joint: (Z<sub>i</sub>; 0) · every vector written in frame {0}`) });
+
+/* ---------- 2: a Stanford arm, its six axes and its 6 × 6 Jacobian ---------- */
+const M2 = { ex: 'stan', j: 2, fit: true, xyz: true, q: [rad(-50), rad(80), 0.4, rad(-60), rad(70), rad(30)] }, ro2 = el('ro2'), c2 = el('ctl2');
+el('tab2').innerHTML = CH3.dhTable(ST.sym);
+/* the six axes of the pose as a table (the chosen joint shaded), then the column of the chosen joint */
+const ztab = (C, j) => `<div class="tscroll"><table class="dhtab sols"><tr><th><sup>0</sup>Z<sub>i</sub></th>${C.map(c => `<th${hl(c.k === j)}>Z${SUB[c.k - 1]}</th>`).join('')}</tr>${['x', 'y', 'z'].map((a, r) => `<tr><th>${a}</th>${C.map(c => `<td${hl(c.k === j)}>${num(c.z[r])}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const read2 = () => { const C = CH6.cols(RS, M2.q); ro2.innerHTML = ztab(C, M2.j) + colLine(M2.j ? C[M2.j - 1] : null); };
+const rd2 = jsel(el('sel2'), 'j2-', M2, read2), SL2 = [['θ₁', -180, 180], ['θ₂', 10, 170], ['d₃', 0.2, 0.7], ['θ₄', -180, 180], ['θ₅', -120, 120], ['θ₆', -180, 180]];
+const s2 = SL2.map(([n, lo, hi], i) => (i === 2 ? lenS : angS)(c2, 'p2q' + i, n, M2, i, lo, hi, read2));
+const put2 = j => { M2.q = ST.q.slice(); M2.j = j; s2.forEach((s, i) => s.set(sval(M2.q, i))); rd2.set('j2-' + j); read2(); }; read2();
+/* the open step: 2 column 1, its purple arrow named; 3 column 2 with p₂ and p_n from the origin of {0}; 5 the wrist axes carried back through the wrist point;
+   8 the wrist point is the x_P that page 5.3 differentiated */
+M2.ov = (s, st) => { const k = st.step, F = s.F; if (!k || !F) return;
+  if (k === 2) angName(s, st);
+  if (k === 3) { tri(s, st); angName(s, st); }
+  if (k === 5) wrist(s, t('แกน 4, 5, 6 ตัดกันที่จุดข้อมือ: P = 0', 'axes 4, 5, 6 meet at the wrist point: P = 0'));
+  if (k === 8) OV.name(s, Pp(F[F.length - 1]), 'pk', 'x', { sub: 'P', s: 28, a: 'r', dx: -22, dy: 32 }); };
+CH2.sim('cv2', M2, 'explicit', { aspect: 0.8, maxH: 520 });
+const c1v = Math.cos(XS.q[0]), s1v = Math.sin(XS.q[0]), noOff = CH5.stan.Jv(0, XS.q).map(r => r[0]);   // column 1 without the shoulder offset: a known slip
+LS.ask(el('ask2a'), { fields: xyz(XS.Z[1], 0.002),
+  check: v => near3(v, [c1v, s1v, 0], 0.002) ? t('นั่นคือแกน X₁ = (c₁, s₁, 0): Z₂ ตั้งฉากกับมัน', 'that is the axis X₁ = (c₁, s₁, 0); Z₂ is square to it')
+    : near3(v, neg(XS.Z[1]), 0.002) ? t('ทิศกลับด้าน: α₁ = −90° ทำให้ Z₂ ชี้ไปทาง +Y ของเฟรม {1}', 'the other way round: with α₁ = −90°, Z₂ points along +Y of frame {1}')
+    : near3(v, [0, 0, 1], 0.002) ? t('นั่นคือ Z₁: แกน Z₂ ถูกบิดไป α₁ = −90° จึงอยู่ในแนวราบ', 'that is Z₁; the axis Z₂ is twisted by α₁ = −90°, so it is horizontal') : '' });
+LS.ask(el('ask2b'), { fields: xyz(K[0].lin, 0.002, 'm'),
+  check: v => near3(v, neg(K[0].lin), 0.002) ? t('ลำดับของผลคูณไขว้: Z₁ × P₁ₙ ไม่ใช่ P₁ₙ × Z₁', 'the order of the cross product: Z₁ × P₁ₙ, not P₁ₙ × Z₁')
+    : near3(v, noOff, 0.002) ? t('P₁ₙ ต้องรวมระยะเยื้องของไหล่ d₂ ด้วย: จุดข้อมืออยู่ที่ (c₁s₂d₃ − s₁d₂, s₁s₂d₃ + c₁d₂, c₂d₃)', 'P₁ₙ must include the shoulder offset d₂: the wrist point is at (c₁s₂d₃ − s₁d₂, s₁s₂d₃ + c₁d₂, c₂d₃)')
+    : near3(v, pnS, 0.002) ? t('นั่นคือ P₁ₙ เอง: ยังไม่ได้คูณไขว้กับ Z₁ = (0, 0, 1)', 'that is P₁ₙ itself: it has not been crossed with Z₁ = (0, 0, 1) yet') : '' });
+/* the axes in closed form as the slide lists them (CH6.stan.Z; the tests check them against the link transforms) */
+const ZF = [['Z₁', '(0, 0, 1)', 0], ['Z₂', '(−s₁, c₁, 0)', 1], ['Z₃ = Z₄', '(c₁s₂, s₁s₂, c₂)', 2], ['Z₅', '(−c₁c₂s₄ − s₁c₄,<br>−s₁c₂s₄ + c₁c₄,<br>s₂s₄)', 4], ['Z₆', '(c₁c₂c₄s₅ − s₁s₄s₅ + c₁s₂c₅,<br>s₁c₂c₄s₅ + c₁s₄s₅ + s₁s₂c₅,<br>−s₂c₄s₅ + c₂c₅)', 5]];
+const zform = () => `<div class="tscroll"><table class="dhtab sols"><tr><th>${t('แกน', 'axis')}</th><th>${t('เขียนในเฟรม {0} (คอลัมน์ 3 ของ <sup>0</sup><sub>i</sub>T)', 'written in frame {0} (column 3 of <sup>0</sup><sub>i</sub>T)')}</th><th>${t('ที่ท่าของตัวอย่าง', 'at the pose of the example')}</th></tr>${ZF.map(([n, f, i]) => `<tr><th>${n}</th><td>${f}</td><td>${v3(XS.Z[i])}</td></tr>`).join('')}</table></div>`;
+const QD = XS.qd, qdTxt = HS.map((h, i) => `${h} = ${fx(QD[i], 1)} ${i === 2 ? 'm/s' : 'rad/s'}`).join(', '), J2 = [0, 0, 1, 2, 3, 5, 0, 0, 0];
+LS.stepper(el('st2'), { onStep: k => { const was = M2.step; M2.step = k; if (k || was) put2(J2[k]); }, steps: [
+  { why: t('<b>แกนทั้งหก</b>: คูณเมทริกซ์การแปลงของก้านสะสมไปทีละตัว \\({}^0_1T,\\ {}^0_2T = {}^0_1T\\,{}^1_2T,\\ \\dots\\) แล้วอ่านคอลัมน์ 3 (s₁ = sin θ₁, c₂ = cos θ₂ และตัวอื่นทำนองเดียวกัน) Z₄ = Z₃ เพราะ α₃ = 0: ข้อต่อ 4 หมุนรอบแนวเดียวกับที่ก้านเลื่อน <b>(ก)</b> Z₂ = (−s₁, c₁, 0) อยู่ในแนวราบและขึ้นกับ θ₁ เท่านั้น', '<b>The six axes</b>: multiply the link transforms one after another, \\({}^0_1T,\\ {}^0_2T = {}^0_1T\\,{}^1_2T,\\ \\dots\\), and read column 3 (s₁ = sin θ₁, c₂ = cos θ₂ and so on). Z₄ = Z₃ because α₃ = 0: joint 4 turns about the line the link slides along. <b>(a)</b> Z₂ = (−s₁, c₁, 0) is horizontal and depends on θ₁ only'),
+    body: zform },
+  { why: t('<b>คอลัมน์ 1</b> (ข้อต่อหมุน): จุดกำเนิดของ {1} ทับจุดกำเนิดของ {0} ดังนั้น P₁ₙ คือตำแหน่งของจุดข้อมือ p<sub>n</sub> (คอลัมน์ 4 ของ \\({}^0_3T\\)) <b>(ข)</b> คูณไขว้กับ Z₁ = (0, 0, 1) ได้ (−p<sub>y</sub>, p<sub>x</sub>, 0): ลูกศรอยู่ในแนวราบและตั้งฉากกับรัศมีจากแกนตั้ง ส่วนเชิงมุมคือ Z₁', '<b>Column 1</b> (a turning joint): the origin of {1} sits on the origin of {0}, so P₁ₙ is the position p<sub>n</sub> of the wrist point (column 4 of \\({}^0_3T\\)). <b>(b)</b> Crossed with Z₁ = (0, 0, 1) it gives (−p<sub>y</sub>, p<sub>x</sub>, 0): a horizontal arrow, square to the radius from the vertical axis. The angular part is Z₁'),
+    tex: `\\begin{aligned} P_{1n} &= p_n = \\begin{bmatrix} c_1s_2d_3 - s_1d_2 \\\\ s_1s_2d_3 + c_1d_2 \\\\ c_2d_3 \\end{bmatrix} = ${CH2.texV(pnS, 3)}\\ \\text{m} \\\\ Z_1 \\times P_{1n} &= \\begin{bmatrix} 0 \\\\ 0 \\\\ 1 \\end{bmatrix} \\times \\begin{bmatrix} p_x \\\\ p_y \\\\ p_z \\end{bmatrix} = \\begin{bmatrix} -p_y \\\\ p_x \\\\ 0 \\end{bmatrix} = ${CH2.texV(K[0].lin, 3)} \\end{aligned}` },
+  { why: t(`<b>คอลัมน์ 2</b> (ข้อต่อหมุน): จุดกำเนิดของ {2} อยู่ที่ไหล่ p₂ ซึ่งเยื้องจากแกน 1 เป็น d₂ ดังนั้น P₂ₙ = p<sub>n</sub> − p₂ = d₃Z₃ คือเวกเตอร์ตามก้านเลื่อนยาว d₃ ผลคูณไขว้จึงตั้งฉากกับก้านและมีขนาด d₃ = ${fx(XS.q[2], 1)} m ส่วนเชิงมุมคือ Z₂`, `<b>Column 2</b> (a turning joint): the origin of {2} is at the shoulder p₂, offset d₂ from axis 1, so P₂ₙ = p<sub>n</sub> − p₂ = d₃Z₃, a vector d₃ long along the sliding link. The cross product is therefore square to the link and its size is d₃ = ${fx(XS.q[2], 1)} m. The angular part is Z₂`),
+    tex: `\\begin{aligned} p_2 &= (-s_1d_2,\\ c_1d_2,\\ 0) = ${tv(C2.p)}\\ \\text{m} \\\\ P_{2n} &= p_n - p_2 = d_3\\,Z_3 = ${tv(C2.arm)}\\ \\text{m} \\\\ Z_2 \\times P_{2n} &= \\begin{bmatrix} -s_1 \\\\ c_1 \\\\ 0 \\end{bmatrix} \\times d_3 \\begin{bmatrix} c_1s_2 \\\\ s_1s_2 \\\\ c_2 \\end{bmatrix} = \\begin{bmatrix} c_1c_2d_3 \\\\ s_1c_2d_3 \\\\ -s_2d_3 \\end{bmatrix} = ${CH2.texV(C2.lin, 3)} \\end{aligned}` },
+  { why: t('<b>คอลัมน์ 3</b> (ข้อต่อเลื่อน): ไม่ต้องคูณไขว้ ส่วนเชิงเส้นคือ Z₃ เอง และส่วนเชิงมุมเป็นศูนย์', '<b>Column 3</b> (the sliding joint): no cross product. The linear part is Z₃ itself and the angular part is zero'),
+    tex: `J_3 = \\begin{bmatrix} Z_3 \\\\ 0 \\end{bmatrix}, \\qquad Z_3 = \\begin{bmatrix} c_1s_2 \\\\ s_1s_2 \\\\ c_2 \\end{bmatrix} = ${CH2.texV(C3.lin, 3)}` },
+  { why: t('<b>คอลัมน์ 4–6</b> (ข้อมือ): แกน 4, 5, 6 ผ่านจุดข้อมือ ซึ่งเป็นจุดปลายแขนของตัวอย่างนี้ จุดกำเนิดของ {4}, {5}, {6} อยู่ที่จุดเดียวกันนั้น จึงได้ P₄ₙ = P₅ₙ = P₆ₙ = 0: หมุนข้อมือแล้วจุดข้อมือไม่ขยับ เหลือแต่ส่วนเชิงมุม ในรูปคือข้อต่อ 5: ไม่มีเส้นประ P และไม่มีลูกศรสีชมพู', '<b>Columns 4–6</b> (the wrist): axes 4, 5 and 6 pass through the wrist point, the tool point of this example. The origins of {4}, {5} and {6} are at that same point, so P₄ₙ = P₅ₙ = P₆ₙ = 0: turning the wrist does not move the wrist point, and only the angular part is left. The picture shows joint 5: no dashed P and no pink arrow'),
+    tex: 'P_{4n} = P_{5n} = P_{6n} = 0: \\qquad J_i = \\begin{bmatrix} Z_i \\times 0 \\\\ Z_i \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ Z_i \\end{bmatrix}, \\quad i = 4, 5, 6' },
+  { why: t('<b>รวมหกคอลัมน์</b>: แถวบนคือส่วนเชิงเส้น แถวล่างคือส่วนเชิงมุม (แต่ละช่องคือเวกเตอร์ 3 แถว จึงเป็นเมทริกซ์ 6 × 6)', '<b>The six columns together</b>: the upper row holds the linear parts, the lower row the angular parts (every entry is a vector of 3 rows, so the matrix is 6 × 6)'),
+    tex: '{}^0J = \\begin{bmatrix} Z_1 \\times P_{1n} & Z_2 \\times P_{2n} & Z_3 & 0 & 0 & 0 \\\\ Z_1 & Z_2 & 0 & Z_4 & Z_5 & Z_6 \\end{bmatrix}' },
+  { why: t('<b>แทนค่า</b>ที่ท่าของตัวอย่าง: ครึ่งล่างคือแกน Z ของแต่ละข้อต่อเรียงกัน ยกเว้นคอลัมน์ 3 ของข้อต่อเลื่อนซึ่งเป็นศูนย์ เมทริกซ์นี้เท่ากับจาโคเบียนที่ได้จากการส่งต่อความเร็วทุกตัว (ตรวจในชุดทดสอบของเว็บ)', '<b>Put in the numbers</b> of the example pose: the lower half lists the Z axis of every joint, except column 3 of the sliding joint, which is zero. This matrix equals the Jacobian from velocity propagation, number for number (checked in the tests of this site)'),
+    body: () => jtab(XS.J0, HS) },
+  { why: t('<b>บล็อก 3 × 3 ที่มุมซ้ายบน</b>: ส่วนเชิงเส้นของคอลัมน์ 1–3 ในรูปตัวแปรคือเมทริกซ์นี้ ซึ่งเป็นจาโคเบียนของตำแหน่ง J<sub>v</sub> ที่หน้า 5.3 โจทย์ 1 หาด้วยการหาอนุพันธ์ของตำแหน่ง x<sub>P</sub> ของจุดข้อมือ (ที่นั่นเรียก d₂ ว่า L₂) รูปชัดแจ้งกับการหาอนุพันธ์จึงเป็นสองทางไปสู่คำตอบเดียวกัน', '<b>The 3 × 3 block at the upper left</b>: in symbols, the linear parts of columns 1–3 are this matrix. It is the position Jacobian J<sub>v</sub> that page 5.3, problem 1, found by differentiating the position x<sub>P</sub> of the wrist point (d₂ was called L₂ there). The explicit form and differentiation are two ways to the same answer'),
+    tex: `\\begin{aligned} J_v &= \\begin{bmatrix} -s_1s_2d_3 - c_1d_2 & c_1c_2d_3 & c_1s_2 \\\\ c_1s_2d_3 - s_1d_2 & s_1c_2d_3 & s_1s_2 \\\\ 0 & -s_2d_3 & c_2 \\end{bmatrix} \\\\ &= ${CH2.texM(CH5.stan.Jv(XS.L2, XS.q), 3)} \\end{aligned}` }],
+  answer: t(`(ก) Z₂ = ${v3(XS.Z[1])} (ข) Z₁ × P₁ₙ = ${v3(K[0].lin)} m · ตัวอย่างการใช้: ที่ ${qdTxt} ได้ v = ${v3(XS.vw.slice(0, 3))} m/s และ ω = ${v3(XS.vw.slice(3))} rad/s เขียนในเฟรม {0}`, `(a) Z₂ = ${v3(XS.Z[1])} (b) Z₁ × P₁ₙ = ${v3(K[0].lin)} m · in use: ${qdTxt} give v = ${v3(XS.vw.slice(0, 3))} m/s and ω = ${v3(XS.vw.slice(3))} rad/s, written in frame {0}`) });
+
+/* ---------- 3: the GP8 in explicit form ---------- */
+const XG = X.gp8, KG = XG.cols, G2 = KG[1], RG = G.rows(), pnG = pOf(KG[0]);
+const M3 = { ex: 'gp8', j: 1, fit: true, xyz: true, q: [-40, -45, -10, 60, -45, 20].map(a => rad(a)) }, ro3 = el('ro3'), c3 = el('ctl3');
+const read3 = () => { ro3.innerHTML = jtab(CH5.J0(RG, M3.q), HG, M3.j); };
+const rd3 = jsel(el('sel3'), 'j3-', M3, read3), s3 = [0, 1, 2, 3, 4, 5].map(i => angS(c3, 'p3q' + i, 'θ' + SUB[i], M3, i, G.lim[i][0], G.lim[i][1], read3));
+const put3 = j => { M3.q = G.q.slice(); M3.j = j; s3.forEach((s, i) => s.set(Math.round(deg(M3.q[i])))); rd3.set('j3-' + j); read3(); }; read3();
+/* the open step: 2 column 2 with p₂ and p_n from the origin of {0}; 3 and 5 the wrist axes carried back through the wrist centre */
+M3.ov = (s, st) => { const k = st.step, F = s.F; if (!k || !F) return;
+  if (k === 2) { tri(s, st); angName(s, st); }
+  if (k === 3) wrist(s, t('จุดกำเนิดของ {4}, {5}, {6}: P = 0', 'the origin of {4}, {5}, {6}: P = 0'));
+  if (k === 5) wrist(s, t('θ₄–θ₆ หมุนรอบจุดนี้: จุดนี้ไม่ขยับ', 'θ₄–θ₆ turn about this point: it stays put')); };
+CH2.sim('cv3', M3, 'explicit', { aspect: 0.8, maxH: 520 });
+const fromO = RB.cross(G2.z, pnG);   // a known slip: P measured from the origin of {0} instead of the origin of {2}
+LS.ask(el('ask3a'), { fields: xyz(G2.lin, 0.002, 'm'),
+  check: v => near3(v, neg(G2.lin), 0.002) ? t('ลำดับของผลคูณไขว้: Z₂ × P₂ₙ ไม่ใช่ P₂ₙ × Z₂', 'the order of the cross product: Z₂ × P₂ₙ, not P₂ₙ × Z₂')
+    : near3(v, fromO, 0.002) ? t('P₂ₙ วัดจากจุดกำเนิดของเฟรม {2} ที่ไหล่ ไม่ใช่จาก {0}: ลบ p₂ ออกจาก pₙ ก่อน (ไหล่ห่างจากแกน 1 เป็น a₁ = 0.04 m)', 'P₂ₙ starts at the origin of frame {2}, at the shoulder, not at {0}: subtract p₂ from pₙ first (the shoulder is a₁ = 0.04 m from axis 1)') : '' });
+LS.choose(el('ask3b'), { options: [t('แกน 4, 5, 6 ขนานกัน', 'axes 4, 5, 6 are parallel'), t('แกน 4, 5, 6 ผ่านจุดศูนย์กลางข้อมือ จึงได้ P<sub>in</sub> = 0', 'axes 4, 5, 6 pass through the wrist centre, so P<sub>in</sub> = 0'), t('ข้อต่อ 4–6 เป็นข้อต่อเลื่อน', 'joints 4–6 are sliding joints')], answer: 1 });
+const ctab = C => `<div class="tscroll"><table class="dhtab sols"><tr><th>i</th><th>Z<sub>i</sub></th><th>P<sub>in</sub> = p<sub>n</sub> − p<sub>i</sub> (m)</th><th>Z<sub>i</sub> × P<sub>in</sub></th></tr>${C.map(c => `<tr><th>${c.k}</th><td>${v3(c.z)}</td><td>${v3(c.arm)}</td><td>${v3(c.lin)}</td></tr>`).join('')}</table></div>`;
+const J3 = [0, 0, 2, 5, 0, 4];
+LS.stepper(el('st3'), { onStep: k => { const was = M3.step; M3.step = k; if (k || was) put3(J3[k]); }, steps: [
+  { why: t(`<b>ทั้งหกข้อต่อหมุน</b>: ทุกคอลัมน์จึงเป็น (Z<sub>i</sub> × P<sub>in</sub>; Z<sub>i</sub>) จุดปลายแขนของตาราง DH นี้คือจุดศูนย์กลางข้อมือ ซึ่งเป็นจุดกำเนิดของเฟรม {4}, {5} และ {6} ที่ท่าของตัวอย่าง p<sub>n</sub> = ${v3(pnG)} m ในรูป: แกนทั้งหก โดย Z₂ ขนานกับ Z₃`, `<b>All six joints turn</b>, so every column is (Z<sub>i</sub> × P<sub>in</sub>; Z<sub>i</sub>). The tool point of this DH table is the wrist centre, the origin of frames {4}, {5} and {6}; at the pose of the example p<sub>n</sub> = ${v3(pnG)} m. In the picture: the six axes, with Z₂ parallel to Z₃`),
+    tex: 'J_i = \\begin{bmatrix} Z_i \\times P_{in} \\\\ Z_i \\end{bmatrix}, \\qquad P_{in} = p_n - p_i, \\qquad i = 1, \\dots, 6' },
+  { why: t('<b>คอลัมน์ 1–3</b>: อ่าน Z<sub>i</sub> และ p<sub>i</sub> จากคอลัมน์ 3 และ 4 ของ \\({}^0_iT\\) แล้วคูณไขว้ <b>(ก)</b> ข้อต่อ 2: จุดกำเนิดของ {2} อยู่ที่ไหล่ ห่างจากแกน 1 เป็น a₁ = 0.04 m จึงต้องลบ p₂ ออกจาก p<sub>n</sub> ก่อน ในรูป: เส้นประจากจุดกำเนิดของ {0} ไปถึง p₂ และ p<sub>n</sub>', '<b>Columns 1–3</b>: read Z<sub>i</sub> and p<sub>i</sub> from columns 3 and 4 of \\({}^0_iT\\), then take the cross product. <b>(a)</b> Joint 2: the origin of {2} is at the shoulder, a₁ = 0.04 m from axis 1, so p₂ must be subtracted from p<sub>n</sub> first. In the picture: dashed lines from the origin of {0} to p₂ and to p<sub>n</sub>'),
+    tex: `\\begin{aligned} P_{2n} &= p_n - p_2 = ${tv(pnG)} - ${tv(G2.p)} \\\\ &= ${tv(G2.arm)}\\ \\text{m} \\\\ Z_2 \\times P_{2n} &= ${CH2.texV(G2.z, 3)} \\times ${CH2.texV(G2.arm, 3)} = ${CH2.texV(G2.lin, 3)} \\end{aligned}`,
+    body: () => ctab(KG.slice(0, 3)) },
+  { why: t('<b>คอลัมน์ 4–6</b>: จุดกำเนิดของ {4}, {5}, {6} คือจุดศูนย์กลางข้อมือ ซึ่งเป็นจุดปลายแขน จึงได้ P<sub>in</sub> = 0 ส่วนเชิงเส้นเป็นศูนย์ เหลือแต่แกน Z<sub>i</sub> ในส่วนเชิงมุม ในรูปคือข้อต่อ 5', '<b>Columns 4–6</b>: the origin of {4}, {5} and {6} is the wrist centre, which is the tool point, so P<sub>in</sub> = 0. The linear part is zero and only the axis Z<sub>i</sub> is left, in the angular part. The picture shows joint 5'),
+    tex: `\\begin{aligned} J_i &= \\begin{bmatrix} Z_i \\times 0 \\\\ Z_i \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ Z_i \\end{bmatrix}, \\quad i = 4, 5, 6 \\\\ Z_4 &= ${tv(KG[3].z)} \\\\ Z_5 &= ${tv(KG[4].z)} \\\\ Z_6 &= ${tv(KG[5].z)} \\end{aligned}` },
+  { why: t('<b>เมทริกซ์ที่ท่าของตัวอย่าง</b>: ครึ่งล่างคือแกน Z₁…Z₆ เรียงกัน คอลัมน์ 2 และ 3 มีส่วนเชิงมุมเท่ากันเพราะแกน 2 ขนานกับแกน 3', '<b>The matrix at the pose of the example</b>: the lower half lists the axes Z₁…Z₆. Columns 2 and 3 have the same angular part, because axis 2 is parallel to axis 3'),
+    body: () => jtab(XG.J0, HG) },
+  { why: t('<b>(ข) บล็อกศูนย์ที่มุมขวาบน</b>: ข้อต่อข้อมือไม่ทำให้จุดศูนย์กลางข้อมือขยับ ตำแหน่งและความเร็วเชิงเส้นของจุดนี้จึงขึ้นกับข้อต่อ 1–3 เท่านั้น นี่คือเหตุผลที่บทที่ 4 แก้จลนศาสตร์ผกผันได้เป็นสองตอน: หาตำแหน่งก่อน (θ₁–θ₃) แล้วจึงหาทิศ (θ₄–θ₆)', '<b>(b) The block of zeros at the upper right</b>: the wrist joints do not move the wrist centre, so its position and its linear velocity depend on joints 1–3 only. That is why chapter 4 could solve the inverse kinematics in two parts: position first (θ₁–θ₃), orientation second (θ₄–θ₆)'),
+    tex: '{}^0J = \\begin{bmatrix} J_v\\ (3 \\times 3) & 0\\ (3 \\times 3) \\\\ Z_1\\ \\ Z_2\\ \\ Z_3 & Z_4\\ \\ Z_5\\ \\ Z_6 \\end{bmatrix} \\quad \\Rightarrow \\quad v = J_v \\begin{bmatrix} \\dot\\theta_1 \\\\ \\dot\\theta_2 \\\\ \\dot\\theta_3 \\end{bmatrix}' }],
+  answer: t(`(ก) Z₂ × P₂ₙ = ${v3(G2.lin)} m (ข) แกน 4, 5, 6 ผ่านจุดศูนย์กลางข้อมือ จึงได้ P<sub>in</sub> = 0 · เมทริกซ์นี้ตรงกับ J₀ ของหน้า 5.3 โจทย์ 3 ทุกตัว (ท่าเดียวกัน)`, `(a) Z₂ × P₂ₙ = ${v3(G2.lin)} m (b) axes 4, 5, 6 pass through the wrist centre, so P<sub>in</sub> = 0 · this matrix agrees number for number with the J₀ of page 5.3, problem 3 (the same pose)`) });
+
+/* ---------- 4: homework 6 (answer checks only: no velocity arrows, no x, y, z readout, no worked numbers) ---------- */
+const HW = X.hw, M4 = { ex: 'rpr', q: HW.q.slice(), qd: [0, 0, 0], frames: [0, 1, 2, 3], fit: true }, c4 = el('ctl4'), idle = () => {};
+el('tab4').innerHTML = CH3.dhTable(CH3.EX.rpr.sym);
+angS(c4, 'p4a', 'θ₁', M4, 0, -180, 180, idle); lenS(c4, 'p4b', 'd₂', M4, 1, 0.1, 0.6, idle); angS(c4, 'p4c', 'θ₃', M4, 2, -180, 180, idle);
+/* the two lengths named on the picture, as in the DH table: the slide d₂ ({1} → {2}) and the fixed L₂ ({2} → {3}) */
+M4.ov = s => { const F = s.F; if (!F || F.length < 4) return; const O = F.map(Pp), mid = (a, b) => OV.v(a, OV.sub(b, a), 0.5);
+  OV.name(s, mid(O[1], O[2]), 'b', 'd', { sub: '2', s: 28, dy: -28 }); OV.name(s, mid(O[2], O[3]), 'p', 'L', { sub: '2', s: 28, dy: -28 }); };
+CH2.sim('cv4', M4, 'prop', { aspect: 0.8, maxH: 420 });
+const hwAsk = (id, lab, unit, a, other, msg) => LS.ask(el(id), { fields: ['x', 'y', 'z'].map((c, i) => ({ label: (i ? '' : `${lab} (${unit}): `) + `${c} =`, ok: x => Math.abs(x - a[i]) < 0.002, w: 5 })), check: v => near3(v, other, 0.002) ? msg : '' });
+const in0 = t('ตัวเลขชุดนี้เขียนในเฟรม {0}: ช่องนี้ถามในเฟรม {3}', 'these numbers are written in frame {0}; this box asks for frame {3}'), in3 = t('ตัวเลขชุดนี้เขียนในเฟรม {3}: ช่องนี้ถามในเฟรม {0}', 'these numbers are written in frame {3}; this box asks for frame {0}');
+hwAsk('ask4a', '(a) ³ω₃', 'rad/s', HW.w3, HW.w0, in0); hwAsk('ask4b', '(a) ³v₃', 'm/s', HW.v3, HW.v0, in0);
+hwAsk('ask4c', '(b) ⁰v₃', 'm/s', HW.v0, HW.v3, in3); hwAsk('ask4d', '(b) ⁰ω₃', 'rad/s', HW.w0, HW.w3, in3);
+});
+</script>
+</body>
+</html>

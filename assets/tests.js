@@ -52,6 +52,7 @@ global.RBTESTS = T => {
   if (global.CH3) ch3(T);
   if (global.CH4) ch4(T);
   if (global.CH5) ch5(T);
+  if (global.CH6) ch6(T);
 };
 /* ---------------- chapter 3: forward kinematics (Craig ch. 3) ---------------- */
 function ch3(T) {
@@ -254,5 +255,40 @@ function ch5(T) { const RB = global.RB, CH3 = global.CH3, CH4 = global.CH4, CH5 
   T('static force: τ1 is the moment of F about joint 1, τ2 about joint 2', (() => { const L = X.two.L, q = X.two.q, p = X.two.p, e = [L[0] * Math.cos(q[0]), L[0] * Math.sin(q[0])], F = X.force.F; return Math.abs(X.force.tau[0] - (p[0] * F[1] - p[1] * F[0])) + Math.abs(X.force.tau[1] - ((p[0] - e[0]) * F[1] - (p[1] - e[1]) * F[0])); })(), 0, 1e-12);
   T('Craig example 5.6: τ1 = l1 s2 fx + (l2 + l1 c2) fy, τ2 = l2 fy (force written in {3})', (() => { const L = [0.5, 0.4], q = [0.3, 0.9], f = [3, -2], t = CH5.mul(CH5.tr(CH5.two.J3(L, q)), f); return Math.abs(t[0] - (L[0] * Math.sin(q[1]) * f[0] + (L[1] + L[0] * Math.cos(q[1])) * f[1])) + Math.abs(t[1] - L[1] * f[1]); })(), 0, 1e-12);
   T('power is the same on both sides: F · v = τ · θ̇', (() => { const v = X.two.v, t = CH5.two.tau(X.two.L, X.two.q, [3, -2]); return Math.abs(3 * v[0] - 2 * v[1] - (t[0] * X.two.qd[0] + t[1] * X.two.qd[1])); })(), 0, 1e-12);
+}
+/* ---------------- chapter 6: velocity propagation and the explicit form ---------------- */
+function ch6(T) { const RB = global.RB, CH3 = global.CH3, CH4 = global.CH4, CH5 = global.CH5, CH6 = global.CH6, X = CH6.EX, d2r = RB.rad;
+  const near = (A, B) => { let e = 0; A.forEach((r, i) => r.forEach((x, j) => { e = Math.max(e, Math.abs(x - B[i][j])); })); return e; }, dd = (p, q) => Math.hypot(...p.map((x, i) => x - q[i]));
+  let seed = 23; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }, ang = () => d2r(-170 + 340 * rnd()), rate = () => 2 * rnd() - 1;
+  /* rigid body: the cross product as a matrix, and Craig 5.13 against a numerical derivative of the point's position */
+  let es = 0, er = 0; for (let k = 0; k < 100; k++) { const w = [rate(), rate(), rate()], p = [rate(), rate(), rate()]; es = Math.max(es, dd(RB.mv(CH6.skew(w), p), RB.cross(w, p)));
+    const ax = RB.unit([rate(), rate(), rate()]), om = 0.5 + rnd(), th0 = ang(), vB = [rate(), rate(), rate()], vQ = [rate(), rate(), rate()], Q = [rate(), rate(), rate()], O = [rate(), rate(), rate()];
+    const pos = t => RB.add(RB.add(O, RB.sc(vB, t)), RB.mv(RB.Rk(ax, th0 + om * t), RB.add(Q, RB.sc(vQ, t)))), h = 1e-6, num = pos(h).map((x, i) => (x - pos(-h)[i]) / (2 * h)); er = Math.max(er, dd(CH6.vQ(RB.Rk(ax, th0), vB, vQ, RB.sc(ax, om), Q).v, num)); }
+  T('skew matrix: S(Ω) p = Ω × p', es, 0, 1e-12); T('rigid body (Craig 5.13): translation + relative + Ω × Q = numerical derivative of the point (100 motions)', er, 0, 1e-7);
+  T('ex rigid body: the three parts add up to ^AV_Q', dd(RB.add(RB.add(X.rigid.trans, X.rigid.rel), X.rigid.rot), X.rigid.v), 0, 1e-12);
+  /* propagation = basic Jacobian × rates, for every arm of the course, in {0} and in the last frame */
+  const arms = [['two-link', L => CH6.two.rows([0.3 + rnd(), 0.3 + rnd()]), () => [ang(), ang()]], ['planar 3R with tool', () => [...CH3.EX.p3r.rows(CH3.EX.p3r.L), CH3.EX.p3r.tool(CH3.EX.p3r.L)], () => [ang(), ang(), ang()]],
+    ['RRP', () => CH4.rrp.rows(CH4.rrp.L), () => [ang(), ang(), 0.1 + rnd()]], ['RPR', () => CH3.EX.rpr.rows(CH3.EX.rpr.L), () => [ang(), 0.1 + rnd(), ang()]], ['SCARA', () => CH3.EX.scara.rows(CH3.EX.scara.L), () => [ang(), ang(), 0.3 * rnd(), ang()]],
+    ['Stanford (6 joints)', () => CH6.stan.rows(0.15), () => [ang(), ang(), 0.2 + rnd(), ang(), ang(), ang()]], ['GP8', () => CH3.EX.gp8.rows(), () => [ang(), ang(), ang(), ang(), ang(), ang()]]];
+  arms.forEach(([name, mk, mq]) => { let e0 = 0, en = 0, ej = 0; for (let k = 0; k < 40; k++) { const rows = mk(), q = mq(), qd = q.map(rate), P = CH6.prop(rows, q, qd), n = P.length - 1, J0 = CH5.J0(rows, q), vw = CH5.mul(J0, qd);
+      e0 = Math.max(e0, dd(P[n].v0, vw.slice(0, 3)), dd(P[n].w0, vw.slice(3))); const Jn = CH6.Jn(rows, q), vn = CH5.mul(Jn, qd); en = Math.max(en, dd(P[n].v, vn.slice(0, 3)), dd(P[n].w, vn.slice(3)));
+      const C = CH6.cols(rows, q); ej = Math.max(ej, near(J0, [0, 1, 2, 3, 4, 5].map(m => C.map(c => m < 3 ? c.lin[m] : c.ang[m - 3])))); }
+    T(name + ': propagated v and ω = J0 q̇ (written in {0})', e0, 0, 1e-10); T(name + ': propagated ^nv_n and ^nω_n = ^nJ q̇ (written in the last frame)', en, 0, 1e-10); T(name + ': explicit-form columns = the basic Jacobian', ej, 0, 1e-12); });
+  /* closed forms */
+  let e3 = 0, er3 = 0, eh = 0, ez = 0; for (let k = 0; k < 60; k++) { const L = [0.3 + rnd(), 0.3 + rnd()], q = [ang(), ang()], qd = [rate(), rate()], P = CH6.prop(CH6.two.rows(L), q, qd)[3];
+    e3 = Math.max(e3, dd(P.v, CH6.two.v3(L, q, qd)), dd(P.w, CH6.two.w3(qd)), dd(P.v0, CH6.two.v0(L, q, qd)));
+    const rq = [ang(), ang(), 0.1 + rnd()], rqd = [rate(), rate(), rate()], PR = CH6.prop(CH4.rrp.rows(CH4.rrp.L), rq, rqd)[3]; er3 = Math.max(er3, dd(PR.v, CH6.rrp.v3(CH4.rrp.L, rq, rqd)), dd(PR.w, CH6.rrp.w3(rq, rqd)), near(CH6.Jn(CH4.rrp.rows(CH4.rrp.L), rq).slice(0, 3), CH6.rrp.J3(CH4.rrp.L, rq)));
+    const hq = [ang(), 0.1 + rnd(), ang()], hqd = [rate(), rate(), rate()], LH = CH3.EX.rpr.L, PH = CH6.prop(CH3.EX.rpr.rows(LH), hq, hqd)[3]; eh = Math.max(eh, dd(PH.v, CH6.rpr.v3(LH, hq, hqd)), dd(PH.w, CH6.rpr.w3(hq, hqd)), dd(PH.v0, CH6.rpr.v0(LH, hq, hqd)), dd(PH.w0, CH6.rpr.w0(hq, hqd)));
+    const sq = [ang(), ang(), 0.2 + rnd(), ang(), ang(), ang()], Zs = CH6.stan.Z(sq), C = CH6.cols(CH6.stan.rows(0.15), sq); ez = Math.max(ez, ...C.map((c, i) => dd(c.z, Zs[i]))); }
+  T('Craig example 5.3: ^3v_3, ^3ω_3 and ^0v_3 of the two-link arm (closed forms)', e3, 0, 1e-12); T('class exercise RRP: ^3v_3 = (−d3θ̇2, (L2 + d3c2)θ̇1, ḋ3), ^3ω_3, and ^3J', er3, 0, 1e-12);
+  T('HW 6 (RPR): ^3v_3, ^3ω_3, ^0v_3, ^0ω_3 in closed form', eh, 0, 1e-12); T('Stanford arm: the six joint axes Z_1 … Z_6 of the old slides', ez, 0, 1e-12);
+  T('two-link: det ^3J = det ^0J = l1 l2 s2 (a frame change does not change the determinant)', Math.abs(CH5.det2(X.two.J3v) - CH5.det2(X.two.J0v)) + Math.abs(CH5.det2(X.two.J3v) - CH5.EX.two.det), 0, 1e-12);
+  T('two-link: ^3J = [l1 s2, 0; l1 c2 + l2, l2] (Craig 5.66)', near(X.two.J3v, CH5.two.J3(X.two.L, X.two.q)), 0, 1e-12);
+  T('Jacobian in a frame and back: ^0J → ^3J → ^0J', near(CH6.Jin(RB.TR(RB.fkDH(X.two.rows, X.two.q).pop()), X.two.J3), X.two.J0), 0, 1e-12);
+  /* the worked numbers */
+  T('ex two-link: ^3v_3 = (0.1768, −0.0232, 0) m/s', dd(X.two.v3, [0.1768, -0.0232, 0]), 0, 1e-4); T('ex two-link: ^3ω_3 = (0, 0, −0.5) rad/s', dd(X.two.w3, [0, 0, -0.5]), 0, 1e-12); T('ex two-link: ^0v_3 = the v of chapter 5', dd(X.two.v0.slice(0, 2), CH5.EX.two.v), 0, 1e-12);
+  T('ex RRP: ^0v_3 = the v of homework 5.2', dd(X.rrp.v0, CH5.EX.rrp.v), 0, 1e-12); T('ex GP8: propagated v, ω = chapter 5', dd(X.gp8.prop[6].v0, CH5.EX.gp8.v6) + dd(X.gp8.prop[6].w0, CH5.EX.gp8.w6), 0, 1e-12);
+  T('ex Stanford: joints 4–6 add no linear velocity to the wrist point', Math.max(...X.stan.cols.slice(3).map(c => Math.hypot(...c.lin))), 0, 1e-12); T('ex Stanford: the sliding joint 3 adds no angular velocity', Math.hypot(...X.stan.cols[2].ang), 0, 1e-12);
+  T('ex Stanford: linear part of J0 = chapter 5\'s position Jacobian', near(X.stan.J0.slice(0, 3).map(r => r.slice(0, 3)), CH5.stan.Jv(X.stan.L2, X.stan.q)), 0, 1e-12);
 }
 })(typeof window !== 'undefined' ? window : globalThis);
