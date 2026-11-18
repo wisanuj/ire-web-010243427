@@ -53,6 +53,7 @@ global.RBTESTS = T => {
   if (global.CH4) ch4(T);
   if (global.CH5) ch5(T);
   if (global.CH6) ch6(T);
+  if (global.CH7) ch7(T);
 };
 /* ---------------- chapter 3: forward kinematics (Craig ch. 3) ---------------- */
 function ch3(T) {
@@ -290,5 +291,49 @@ function ch6(T) { const RB = global.RB, CH3 = global.CH3, CH4 = global.CH4, CH5 
   T('ex RRP: ^0v_3 = the v of homework 5.2', dd(X.rrp.v0, CH5.EX.rrp.v), 0, 1e-12); T('ex GP8: propagated v, ω = chapter 5', dd(X.gp8.prop[6].v0, CH5.EX.gp8.v6) + dd(X.gp8.prop[6].w0, CH5.EX.gp8.w6), 0, 1e-12);
   T('ex Stanford: joints 4–6 add no linear velocity to the wrist point', Math.max(...X.stan.cols.slice(3).map(c => Math.hypot(...c.lin))), 0, 1e-12); T('ex Stanford: the sliding joint 3 adds no angular velocity', Math.hypot(...X.stan.cols[2].ang), 0, 1e-12);
   T('ex Stanford: linear part of J0 = chapter 5\'s position Jacobian', near(X.stan.J0.slice(0, 3).map(r => r.slice(0, 3)), CH5.stan.Jv(X.stan.L2, X.stan.q)), 0, 1e-12);
+}
+/* ---------------- chapter 7: trajectory generation ---------------- */
+function ch7(T) { const RB = global.RB, CH5 = global.CH5, CH7 = global.CH7, X = CH7.EX, d2r = RB.rad, dg = RB.deg;
+  let seed = 31; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }, R = (a, b) => a + (b - a) * rnd();
+  /* the polynomials meet their boundary conditions */
+  let ec = 0, eq = 0; for (let k = 0; k < 200; k++) { const th0 = R(-90, 90), thf = R(-90, 90), tf = R(0.5, 5), v0 = R(-30, 30), vf = R(-30, 30), q0 = R(-50, 50), qf = R(-50, 50);
+    const c = CH7.cubic(th0, thf, tf, v0, vf), s0 = CH7.poly(c, 0), s1 = CH7.poly(c, tf); ec = Math.max(ec, Math.abs(s0[0] - th0), Math.abs(s1[0] - thf), Math.abs(s0[1] - v0), Math.abs(s1[1] - vf));
+    const q = CH7.quintic(th0, thf, tf, v0, vf, q0, qf), u0 = CH7.poly(q, 0), u1 = CH7.poly(q, tf); eq = Math.max(eq, Math.abs(u0[0] - th0), Math.abs(u1[0] - thf), Math.abs(u0[1] - v0), Math.abs(u1[1] - vf), Math.abs(u0[2] - q0), Math.abs(u1[2] - qf)); }
+  T('cubic: θ and θ̇ at both ends as asked (200 random cases)', ec, 0, 1e-8); T('quintic: θ, θ̇, θ̈ at both ends as asked (200 random cases)', eq, 0, 1e-7);
+  T('poly: derivatives = numerical derivatives', (() => { const a = [1, -2, 0.5, 0.3, -0.07, 0.01], t = 1.3, h = 1e-5, f = x => CH7.poly(a, x); return Math.abs(f(t)[1] - (f(t + h)[0] - f(t - h)[0]) / (2 * h)) + Math.abs(f(t)[2] - (f(t + h)[1] - f(t - h)[1]) / (2 * h)); })(), 0, 1e-6);
+  /* via points */
+  /* the largest jump of θ, θ̇, θ̈ across any instant (sampled 2·10⁻⁷ s apart: a smooth function changes by far less than 0.01, a real jump by much more) */
+  const contin = (tr, n = 6000) => { let jp = 0, jv = 0, ja = 0; for (let i = 1; i < n; i++) { const t = tr.T * i / n, a = tr.at(t - 1e-7), b = tr.at(t + 1e-7); jp = Math.max(jp, Math.abs(a[0] - b[0])); jv = Math.max(jv, Math.abs(a[1] - b[1])); ja = Math.max(ja, Math.abs(a[2] - b[2])); } return [jp, jv, ja]; };
+  let ev = 0, es = 0; for (let k = 0; k < 60; k++) { const n = 3 + Math.floor(rnd() * 4), pts = Array.from({ length: n }, () => R(-60, 60)), durs = Array.from({ length: n - 1 }, () => R(0.5, 3));
+    const ch = CH7.cubics(pts, durs, CH7.viaHeuristic(pts, durs)), cs = CH7.cubics(pts, durs, CH7.viaSpline(pts, durs)), j1 = contin(ch, 3000), j2 = contin(cs, 3000);
+    ev = Math.max(ev, j1[0], j1[1], ...ch.ts.map((t, i) => Math.abs(ch.at(t)[0] - pts[i]))); es = Math.max(es, j2[0], j2[1], j2[2], ...cs.ts.map((t, i) => Math.abs(cs.at(t)[0] - pts[i]))); }
+  T('cubics through via points: pass every path point, θ and θ̇ continuous (heuristic velocities)', ev, 0, 1e-2); T('cubic spline: θ, θ̇ and θ̈ continuous at the via points', es, 0, 1e-2);
+  T('heuristic: zero where the slope changes sign, the average where it does not', X.via.heur.map(v => +v.toFixed(4)).join(','), '0,0,-7.5,0');
+  /* parabolic blends */
+  let el = 0, elv = 0; for (let k = 0; k < 100; k++) { const th0 = R(-90, 90), thf = R(-90, 90), tf = R(0.5, 4), acc = CH7.lspbMin(th0, thf, tf) * R(1, 4), L = CH7.lspb(th0, thf, tf, acc), j = contin(L, 2000);
+    el = Math.max(el, j[0], j[1], Math.abs(L.at(tf / 2)[0] - (th0 + thf) / 2), Math.abs(L.at(tf)[0] - thf)); if (!L.ok) elv = 1; }
+  T('one segment with blends: θ and θ̇ continuous, the middle point halfway, ends reached (100 cases)', el, 0, 1e-2); T('one segment: every acceleration above the minimum works', elv, 0, 0);
+  T('below the minimum acceleration there is no solution', CH7.lspb(15, 75, 3, 20).ok ? 'yes' : 'no', 'no'); T('at the minimum the straight part has shrunk to nothing', CH7.lspb(15, 75, 3, CH7.lspbMin(15, 75, 3)).tl, 0, 1e-9);
+  let eb = 0, ebt = 0; for (let k = 0; k < 60; k++) { const n = 3 + Math.floor(rnd() * 4), pts = Array.from({ length: n }, () => R(-60, 60)), durs = Array.from({ length: n - 1 }, () => R(1.5, 3)), lv = CH7.lspbVia(pts, durs, 400), j = contin(lv, 4000);
+    if (!lv.ok) continue; eb = Math.max(eb, j[0], j[1], Math.abs(lv.at(lv.T)[0] - pts[n - 1]), Math.abs(lv.at(0)[0] - pts[0]));
+    ebt = Math.max(ebt, Math.abs(lv.tb[0] + lv.tl[0] + lv.tb[1] / 2 - durs[0]), Math.abs(lv.tb[n - 1] + lv.tl[n - 2] + lv.tb[n - 2] / 2 - durs[n - 2])); }
+  T('blends through via points: θ and θ̇ continuous, the ends reached (random paths)', eb, 0, 1e-2); T('blends through via points: blend and straight times add up to each segment', ebt, 0, 1e-9);
+  /* the worked numbers */
+  T('ex 7.1 cubic: a = (15, 0, 20, −4.44)', Math.abs(X.cubic.a[2] - 20) + Math.abs(X.cubic.a[3] + 40 / 9), 0, 1e-12); T('ex 7.1: top speed 30 °/s at t = 1.5 s, θ̈ = ±40 °/s² at the ends', Math.abs(X.cubic.vmax - 30) + Math.abs(X.cubic.acc0 - 40) + Math.abs(X.cubic.accf + 40), 0, 1e-9);
+  T('quintic 15° → 75° in 3 s: a3, a4, a5 = 22.22, −11.11, 1.481', Math.abs(X.quintic.a[3] - 200 / 9) + Math.abs(X.quintic.a[4] + 100 / 9) + Math.abs(X.quintic.a[5] - 40 / 27), 0, 1e-9); T('quintic: top speed 37.5 °/s', X.quintic.vmax, 37.5, 1e-9);
+  T('cubic leaving at 10 °/s: a = (15, 10, 13.33, −3.33)', Math.abs(X.cubicV.a[1] - 10) + Math.abs(X.cubicV.a[2] - 40 / 3) + Math.abs(X.cubicV.a[3] + 10 / 3), 0, 1e-9);
+  T('spline via velocities (0, 0.714, −13.393, 0) °/s', Math.abs(X.via.spline[1] - 5 / 7) + Math.abs(X.via.spline[2] + 375 / 28), 0, 1e-9);
+  T('blends at 40 °/s²: tb = 0.634 s, straight at 25.36 °/s', Math.abs(X.lspb.a40.tb - 0.6340) + Math.abs(X.lspb.a40.v - 25.359), 0, 2e-4); T('blends: minimum acceleration 26.67 °/s²', X.lspb.amin, 80 / 3, 1e-9);
+  const lv = X.lspbVia; T('via example: blends 0.268, 0.468, 0.098, 0.102 s', Math.abs(lv.tb[0] - 0.2679) + Math.abs(lv.tb[1] - 0.4679) + Math.abs(lv.tb[2] - 0.0983) + Math.abs(lv.tb[3] - 0.1017), 0, 4e-4);
+  T('via example: velocities 13.40, −10, −5.09 °/s', Math.abs(lv.v[0] - 13.3975) + Math.abs(lv.v[1] + 10) + Math.abs(lv.v[2] + 5.0862), 0, 4e-4); T('via example: straight times 1.498, 0.717, 2.849 s', Math.abs(lv.tl[0] - 1.4981) + Math.abs(lv.tl[1] - 0.7169) + Math.abs(lv.tl[2] - 2.8491), 0, 4e-4);
+  T('via example: the arm passes near 35°, not through it (33.63° at t = 2 s)', lv.at(2)[0], 33.631, 1e-3);
+  T('HW 7: v12 = 5.109, v23 = −13.229 °/s', Math.abs(X.hw.v[0] - 5.1087) + Math.abs(X.hw.v[1] + 13.2292), 0, 4e-4); T('HW 7: t1, t2, t3 = 0.085, 0.306, 0.221 s', Math.abs(X.hw.tb[0] - 0.0851) + Math.abs(X.hw.tb[1] - 0.3056) + Math.abs(X.hw.tb[2] - 0.2205), 0, 4e-4);
+  /* Cartesian paths */
+  const two = X.two; let el2 = 0; two.line.forEach(s => { if (!s.ok) { el2 = 1; return; } const f = RB.fk2(two.L[0], two.L[1], s.q[0], s.q[1]), u = [two.B[0] - two.A[0], two.B[1] - two.A[1]]; el2 = Math.max(el2, Math.abs(u[0] * (f.y - two.A[1]) - u[1] * (f.x - two.A[0])) / Math.hypot(...u)); });
+  T('straight line: inverse kinematics keeps the tool on the line', el2, 0, 1e-12); T('straight line: starts at the pose of A and ends at the pose of B', Math.hypot(...two.line[0].q.map((x, i) => x - two.qA[i])) + Math.hypot(...two.line[two.line.length - 1].q.map((x, i) => x - two.qB[i])), 0, 1e-9);
+  T('joint-space move: the tool leaves the straight line by more than 0.3 m', (() => { let m = 0; const u = [two.B[0] - two.A[0], two.B[1] - two.A[1]]; two.joint.forEach(s => { m = Math.max(m, Math.abs(u[0] * (s.p[1] - two.A[1]) - u[1] * (s.p[0] - two.A[0])) / Math.hypot(...u)); }); return m > 0.3 ? 'yes' : 'no'; })(), 'yes');
+  T('the line through the hole has points out of reach', X.hole.line.some(s => !s.ok) ? 'yes' : 'no', 'yes'); T('the line 0.26 m from the base (just outside the hole) is reachable everywhere', X.near.line.every(s => s.ok) ? 'yes' : 'no', 'yes');
+  T('near the singularity joint 1 must turn more than twice as fast as on the far line', CH7.peakRates(X.near.line)[0] > 2 * CH7.peakRates(X.far.line)[0] ? 'yes' : 'no', 'yes');
+  T('joint rates along the line = J⁻¹ v (chapter 5)', (() => { const s = two.line[25], J = CH5.two.J(two.L, s.q), v = CH5.mul(J, s.qd), sd = CH7.sOf(s.t, two.T)[1]; return Math.hypot(v[0] - sd * (two.B[0] - two.A[0]), v[1] - sd * (two.B[1] - two.A[1])); })(), 0, 1e-12);
 }
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -262,8 +262,9 @@ const label = (c, L, x0, y, size, col, bg) => { const f = fonts(size); c.save();
   if (L.pre) put(L.pre, f.fP, x0, y - size * 0.4); put(L.t, f.fM, x0 + wp, y); if (L.sub) put(L.sub, f.fS, x0 + wp + wm + 0.5, y + size * 0.24); if (L.post) put(L.post, f.fM, x0 + wp + wm + ws, y); c.restore(); };
 /* the picture, then its labels: each label is moved off the picture and off the other labels when it has to be (S3.place), with a leader line back */
 const paint = CH2.paint = (c, W, H, s, P, st, res) => { if (global.R3 && global.R3.ok()) global.R3.draw(c, W, H, s); else if (global.R3) global.R3.flat(c, W, H, s);
-  const k = W / s.ow, items = s.labels.map(L => { const q = S3.proj(s.cam, W, H, L.p), size = max(11, L.s * 1.3 * k), w = lw(c, L, size), x = q[0] + L.dx * k;
-    return { L, size, w, x: L.a === 'c' ? x - w / 2 : L.a === 'r' ? x - w : x, y: q[1] + L.dy * k, ax: q[0], ay: q[1] }; });
+  /* a label never gets smaller than 11 px; its offset from its anchor grows with it (r), so the lines of a block (the x, y, z readout) do not run into each other on a small canvas */
+  const k = W / s.ow, items = s.labels.map(L => { const q = S3.proj(s.cam, W, H, L.p), f = L.s * 1.3 * k, size = max(11, f), r = size / f, w = lw(c, L, size), x = q[0] + L.dx * k * r;
+    return { L, size, w, x: L.a === 'c' ? x - w / 2 : L.a === 'r' ? x - w : x, y: q[1] + L.dy * k * r, ax: q[0], ay: q[1] }; });
   S3.place(c, W, H, items, P.bg, st ? (st._lm || (st._lm = [])) : null, res);
   items.forEach(it => { if (it.lead) S3.leader(c, it, P.muted); }); items.forEach(it => label(c, it.L, it.X, it.Y, it.size, P[KEY[it.L.c]] || P.ink, P.bg)); };
 /* scenes of any chapter: CH2.S3, then CH3.S3, CH4.S3 … */

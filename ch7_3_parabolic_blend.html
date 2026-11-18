@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="7.3 — Linear segments with parabolic blends">7.3 — เส้นตรงต่อด้วยพาราโบลา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=20">
+<script src="assets/stops.js?v=20"></script><script src="assets/shell.js?v=20"></script>
+<script src="assets/robot.js?v=20"></script><script src="assets/lesson.js?v=20"></script><script src="assets/ch2.js?v=20"></script><script src="assets/ch3.js?v=20"></script><script src="assets/ch4.js?v=20"></script><script src="assets/ch5.js?v=20"></script><script src="assets/ch7.js?v=20"></script><script src="assets/scene3d.js?v=20"></script><script src="assets/gl3d.js?v=20"></script><script src="assets/ch2_3d.js?v=20"></script><script src="assets/ch3_3d.js?v=20"></script><script src="assets/ch7_3d.js?v=20"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">เส้นตรงต่อด้วยพาราโบลา <span class="en">Linear segments with parabolic blends — a straight part between two blends</span></h1>
+<h1 data-l="en">Linear segments with parabolic blends <span class="en">A constant velocity in the middle, a constant acceleration at each end</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch7/s17.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 17: a straight line from 15 to 75 degrees in 3 seconds; its velocity is 20 degrees per second all the way and jumps at both ends, which means an infinite acceleration">
+    <figcaption data-l="th">สไลด์บทที่ 7 หน้า 17 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 17 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หน้า 7.2 ใช้พหุนามกำลังสามและกำลังห้าพาข้อต่อจากมุมเริ่มไปยังมุมเป้าหมาย ทางเลือกที่ง่ายกว่าคือ<b>เส้นตรง</b>: ข้อต่อหมุนด้วยความเร็วคงที่ตลอดทาง แต่เส้นตรงล้วนต้องออกตัวและหยุดด้วยความเร็วที่กระโดด ซึ่งต้องใช้ความเร่งไม่จำกัด มอเตอร์จริงทำไม่ได้ หน้านี้แก้ปัญหานั้นด้วย<b>เส้นตรงต่อด้วยพาราโบลา</b> หรือ LSPB (linear segment with parabolic blends): เก็บเส้นตรงไว้ตรงกลาง แล้วเติม<b>ช่วงผสม</b> (blend) ที่มีความเร่งคงที่ไว้ที่ปลายทั้งสองข้าง ความเร็วจึงค่อย ๆ เพิ่มขึ้นแล้วค่อย ๆ ลดลง กราฟความเร็วเป็นรูปสี่เหลี่ยมคางหมู ทุกโจทย์ใช้ข้อต่อหมุนข้อเดียวของ Craig ตัวอย่าง 7.1 ซึ่งหมุนจาก 15° ไป 75° ใน 3 วินาที ภาพซ้ายคือข้อต่อ ภาพขวาคือกราฟ θ, θ̇, θ̈ เทียบกับเวลา กด ▶ เพื่อเล่นการเคลื่อนที่ หน้านี้ครอบคลุมสไลด์หน้า 17–19 มี <b>3 โจทย์</b></p>
+    <p class="sub" data-l="en">Page 7.2 moved a joint from its start angle to its goal with cubic and quintic polynomials. A simpler choice is a <b>straight line</b>: the joint turns at one constant velocity all the way. But a pure straight line must start and stop with a jump in velocity, which takes an unbounded acceleration that no real motor can give. This page fixes that with a <b>linear segment with parabolic blends</b>, LSPB: keep the straight line in the middle and add a <b>blend</b> of constant acceleration at each end, so that the velocity ramps up and then down; the velocity plot becomes a trapezoid. Every problem uses the single turning joint of Craig's example 7.1, which turns from 15° to 75° in 3 s. On the left is the joint, on the right its θ, θ̇ and θ̈ against time; press ▶ to play the motion. The page covers slides pp. 17–19, with <b>3 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>LSPB</b>: ช่วงกลางเป็นเส้นตรง (ความเร็วคงที่) ปลายทั้งสองข้างเป็นพาราโบลา (ความเร่งคงที่ \(\ddot\theta\)) กราฟความเร็วเป็นรูปสี่เหลี่ยมคางหมู ส่วนความเร่งเป็น \(+\ddot\theta\), 0, \(-\ddot\theta\) ตามลำดับ</li><li><b>สมมาตร</b>: ช่วงผสมทั้งสองยาว \(t_b\) เท่ากัน การเคลื่อนที่จึงสมมาตรรอบจุดกึ่งกลาง \((t_h,\ \theta_h) = \big(t/2,\ (\theta_0+\theta_f)/2\big)\) ที่ปลายช่วงผสม ความเร็ว \(\ddot\theta\,t_b\) ต้องเท่ากับความชันของส่วนตรง (Craig สมการ 7.19–7.21)</li><li><b>เวลาผสม</b> (สมการ 7.22): \(t_b = \dfrac{t}{2} - \dfrac{\sqrt{\ddot\theta^2t^2 - 4\ddot\theta(\theta_f-\theta_0)}}{2\ddot\theta}\) ใช้รากที่เล็กกว่า ส่วนตรงมีความเร็ว \(\ddot\theta\,t_b\) และกินเวลา \(t - 2t_b\)</li><li><b>ความเร่งต่ำสุด</b> (สมการ 7.23): \(\ddot\theta \ge 4(\theta_f-\theta_0)/t^2\) ถ้าเท่ากันพอดี \(t_b = t/2\) ส่วนตรงหายไป ถ้าเพิ่ม \(\ddot\theta\) ขึ้นเรื่อย ๆ การเคลื่อนที่จะเข้าใกล้เส้นตรงล้วน</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>LSPB</b>: a straight part in the middle (constant velocity) and a parabola at each end (constant acceleration \(\ddot\theta\)). The velocity plot is a trapezoid; the acceleration is \(+\ddot\theta\), 0, \(-\ddot\theta\) in turn.</li><li><b>Symmetry</b>: the two blends last the same \(t_b\), so the motion is symmetric about the halfway point \((t_h,\ \theta_h) = \big(t/2,\ (\theta_0+\theta_f)/2\big)\). At the end of a blend the velocity \(\ddot\theta\,t_b\) must equal the slope of the straight part (Craig, equations 7.19–7.21).</li><li><b>Blend time</b> (equation 7.22): \(t_b = \dfrac{t}{2} - \dfrac{\sqrt{\ddot\theta^2t^2 - 4\ddot\theta(\theta_f-\theta_0)}}{2\ddot\theta}\), the smaller root. The straight part moves at \(\ddot\theta\,t_b\) for \(t - 2t_b\).</li><li><b>Smallest acceleration</b> (equation 7.23): \(\ddot\theta \ge 4(\theta_f-\theta_0)/t^2\). At equality \(t_b = t/2\) and the straight part is gone; as \(\ddot\theta\) grows the motion tends to the pure straight line.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>เส้นตรงล้วนยังไม่พอ</a><a href="#ex2"><b>2</b>ตัวอย่าง: ช่วงผสม 40 °/s²</a><a href="#ex3"><b>3</b>ความเร่งมากขึ้นหรือน้อยลง</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>A straight line is not enough</a><a href="#ex2"><b>2</b>Example: blends of 40 °/s²</a><a href="#ex3"><b>3</b>More or less acceleration</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">เส้นตรงล้วนยังไม่พอ</h2><h2 data-l="en">A straight line alone is not enough</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 17–18 · Craig 7.3 (สมการ 7.19–7.23) · กด ▶ เพื่อเล่น · ลากในภาพข้อต่อเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 17–18 · Craig 7.3 (equations 7.19–7.23) · press ▶ to play · drag in the joint picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><canvas id="pl1" style="margin-top:4px"></canvas>
+      <div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">ซ้าย: ข้อต่อหมุน เงาจาง ๆ คือมุมเริ่ม θ₀ และมุมเป้าหมาย θ<sub>f</sub> ขวา: θ, θ̇ และ θ̈ เทียบกับเวลา แถบสีเหลืองอ่อนคือช่วงผสม เส้นประแนวตั้งสีชมพูคือเวลาขณะนั้น เลือก “เส้นตรงล้วน” หรือ “LSPB” แล้วลองเลื่อน θ̈ ลง: ถ้าน้อยเกินไป ช่วงผสมจากจุดเริ่มกับช่วงผสมที่เข้าหาเป้าหมายจะไปไม่ถึงกัน (เส้น<b style="color:var(--bad)">สีแดง</b>) และไม่มี LSPB ที่ใช้ได้</div>
+      <div class="simnote" data-l="en">Left: the turning joint; the faint ghosts are the start angle θ₀ and the goal θ<sub>f</sub>. Right: θ, θ̇ and θ̈ against time; the pale yellow bands are the blends and the pink dashed upright line is the present time. Choose “straight line” or “LSPB”, then try moving θ̈ down: when it is too small, the blend out of the start and the blend into the goal no longer meet (the <b style="color:var(--bad)">red</b> curves) and there is no usable LSPB.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s18.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 18: a linear segment with parabolic blends from 15 to 75 degrees beside the cubic, the equations of the blend, the formula of the blend time and the condition on the smallest acceleration">
+      <figcaption data-l="th">สไลด์หน้า 18 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 18 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ข้อต่อหมุนข้อเดียวต้องหมุนจาก \(\theta_0 = 15^\circ\) ไป \(\theta_f = 75^\circ\) ใน \(t = 3\ \text{s}\) โดยเริ่มและจบที่หยุดนิ่ง <b>(ก)</b> ทำไมเส้นตรงล้วนจึงใช้ไม่ได้ <b>(ข)</b> ถ้าใช้ LSPB ที่ช่วงผสมทั้งสองมีความเร่งขนาด \(\ddot\theta\) เท่ากัน ความเร่ง \(\ddot\theta\) ที่<b>น้อยที่สุด</b>ที่ยังพาข้อต่อไปถึงเป้าหมายได้ทันเวลาคือเท่าไร</div>
+        <div data-l="en">A single turning joint must turn from \(\theta_0 = 15^\circ\) to \(\theta_f = 75^\circ\) in \(t = 3\ \text{s}\), starting and ending at rest. <b>(a)</b> Why will a pure straight line not do? <b>(b)</b> With an LSPB whose two blends have the same size of acceleration \(\ddot\theta\), what is the <b>smallest</b> \(\ddot\theta\) that still brings the joint to the goal on time?</div></div>
+      <div id="ask1"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ตัวอย่าง: ช่วงผสม 40 °/s²</h2><h2 data-l="en">Example: blends of 40 °/s²</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 19 · Craig 7.3 ตัวอย่าง 7.3 (สมการ 7.20, 7.22) · การเคลื่อนที่ของ Craig ตัวอย่าง 7.1 · กด ▶ เพื่อเล่น</div><div class="src" data-l="en">Chapter 7 slides, p. 19 · Craig 7.3, example 7.3 (equations 7.20, 7.22) · the move of Craig's example 7.1 · press ▶ to play</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><canvas id="pl2" style="margin-top:4px"></canvas>
+      <div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">ภาพเริ่มที่การเคลื่อนที่อื่น <b>ยังไม่ใช่</b>ของโจทย์ เมื่อเปิดเฉลย ค่าทุกตัวจะกลับไปที่ค่าของโจทย์ ใต้ภาพบอกความเร่งต่ำสุดของการเคลื่อนที่ที่ตั้งไว้และค่าของ LSPB ที่ได้ ถ้าตั้ง θ<sub>f</sub> น้อยกว่า θ₀ ข้อต่อจะหมุนกลับ และความเร่งในช่วงผสมกลับเครื่องหมาย</div>
+      <div class="simnote" data-l="en">The picture starts with another move, <b>not yet</b> the one of the problem; opening the solution puts every value back to the problem. Under the picture are the smallest acceleration of the move you set and the numbers of its LSPB. Set θ<sub>f</sub> below θ₀ and the joint turns back; the blend accelerations swap sign.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s19.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 19: the example; move the joint from 15 to 75 degrees in 3 seconds with parabolic blends of 40 degrees per second squared; find the smallest usable acceleration, the blend time, the speed of the straight part and how long it lasts">
+      <figcaption data-l="th">โจทย์จากสไลด์หน้า 19 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 19 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ข้อต่อเดิมหมุนจาก \(15^\circ\) ไป \(75^\circ\) ใน \(3\ \text{s}\) ด้วย LSPB ที่ช่วงผสมมีความเร่ง \(\ddot\theta = 40\ ^\circ/\text{s}^2\) หาเวลาผสม \(t_b\) ความเร็วของส่วนตรง และส่วนตรงกินเวลานานเท่าไร แล้วหามุม \(\theta_b\) ที่ปลายช่วงผสมแรก</div>
+        <div data-l="en">The same joint turns from \(15^\circ\) to \(75^\circ\) in \(3\ \text{s}\) with an LSPB whose blends use \(\ddot\theta = 40\ ^\circ/\text{s}^2\). Find the blend time \(t_b\), the velocity of the straight part and how long the straight part lasts; then find the angle \(\theta_b\) at the end of the first blend.</div></div>
+      <div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">ความเร่งมากขึ้นหรือน้อยลง</h2><h2 data-l="en">More or less acceleration</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 7 และ 19 · Craig 7.3 · เทียบกับพหุนามกำลังสามของหน้า 7.2 · กด ▶ เพื่อเล่น</div><div class="src" data-l="en">Chapter 7 slides, pp. 7 and 19 · Craig 7.3 · compared with the cubic of page 7.2 · press ▶ to play</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><canvas id="pl3" style="margin-top:4px"></canvas>
+      <div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">เส้นหนา<b style="color:var(--accent)">สีน้ำเงิน</b>คือ LSPB ที่ความเร่งตามแถบเลื่อน (ข้อต่อในภาพซ้ายเคลื่อนที่ตามเส้นนี้) เส้นบางสีส้มและสีม่วงคือ LSPB ที่ 40 และ 80 °/s² เส้นประสีเทาคือพหุนามกำลังสามของหน้า 7.2 สำหรับการเคลื่อนที่เดียวกัน เลื่อน θ̈ ขึ้นแล้วดูว่าช่วงผสมสั้นลงและความเร็วของส่วนตรงลดลงอย่างไร แล้วเลื่อนลงจนต่ำกว่าค่าต่ำสุดของโจทย์ 1</div>
+      <div class="simnote" data-l="en">The thick <b style="color:var(--accent)">blue</b> curve is the LSPB with the acceleration of the slider (the joint on the left follows it). The thin orange and purple curves are the LSPBs with 40 and 80 °/s²; the grey dashed curve is the cubic of page 7.2 for the same move. Move θ̈ up and watch the blends get shorter and the straight part get slower; then move it below the smallest acceleration of problem 1.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s07.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 7: three shapes for the same move from 15 to 75 degrees in 3 seconds: a straight line, a cubic and a quintic; the straight line starts and stops with a jump in velocity">
+      <figcaption data-l="th">สไลด์หน้า 7 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 7 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">การเคลื่อนที่เดิม \(15^\circ \to 75^\circ\) ใน \(3\ \text{s}\) ให้ \(\Delta = \theta_f - \theta_0\) <b>(ก)</b> ถ้าเพิ่มความเร่งของช่วงผสม \(\ddot\theta\) ขึ้นเรื่อย ๆ โดยไม่มีขีดจำกัด ความเร็วของส่วนตรงจะเข้าใกล้ค่าใด <b>(ข)</b> หา \(t_b\) เมื่อ \(\ddot\theta = 80\ ^\circ/\text{s}^2\) แล้วเทียบกับ \(40\ ^\circ/\text{s}^2\) ของโจทย์ 2</div>
+        <div data-l="en">The same move, \(15^\circ \to 75^\circ\) in \(3\ \text{s}\); let \(\Delta = \theta_f - \theta_0\). <b>(a)</b> If the blend acceleration \(\ddot\theta\) grows without limit, what does the velocity of the straight part tend to? <b>(b)</b> Find \(t_b\) for \(\ddot\theta = 80\ ^\circ/\text{s}^2\) and compare it with the \(40\ ^\circ/\text{s}^2\) of problem 2.</div></div>
+      <div id="ask3a"></div><div id="ask3b"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ความเร่งต่ำสุด</h3>
+    <ol><li>โจทย์ 1: ตั้ง θ̈ ให้เท่ากับค่าต่ำสุดพอดี (ลากช้า ๆ หรือกดปุ่มลูกศรบนแป้นพิมพ์ทีละ 0.01): ส่วนตรงหายไป กราฟความเร็วกลายเป็นสามเหลี่ยม ลดลงอีกเพียง 0.01 °/s² กราฟจะเป็นเส้นสีแดงที่ไม่บรรจบกันตรงกลาง</li><li>โจทย์ 2: เพิ่มเวลา t<sub>f</sub> เป็นสองเท่า: ความเร่งต่ำสุดเหลือหนึ่งในสี่ เพราะความเร่งต่ำสุดแปรผกผันกับ t² ถ้าต้องการให้การเคลื่อนที่เร็วขึ้นเป็นสองเท่า มอเตอร์ต้องเร่งได้มากขึ้นสี่เท่า</li><li>โจทย์ 2: ตั้ง θ<sub>f</sub> ให้น้อยกว่า θ₀: ข้อต่อหมุนกลับ ความเร่งต่ำสุดใช้ |θ<sub>f</sub> − θ₀| และช่วงผสมแรกมีความเร่งติดลบ ช่วงผสมสุดท้ายมีความเร่งเป็นบวก</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — ความเร็วสูงสุด</h3>
+    <ol><li>เทียบความเร็วสูงสุดของการเคลื่อนที่เดียวกัน: พหุนามกำลังสาม 1.5Δ/t = <b data-n="cv"></b> °/s พหุนามกำลังห้า 1.875Δ/t = <b data-n="qv"></b> °/s ส่วน LSPB อยู่ระหว่าง Δ/t (θ̈ มากมาก) ถึง 2Δ/t (θ̈ ต่ำสุด) โจทย์ 3: หา θ̈ ที่ทำให้ LSPB มีความเร็วสูงสุดเท่ากับพหุนามกำลังสาม แล้วเทียบกับความเร่ง <b data-n="ca"></b> °/s² ที่พหุนามกำลังสามใช้ตอนออกตัว</li><li>โจทย์ 3: ดูแถวความเร่งขณะเลื่อน θ̈ ขึ้น: ช่วงผสมสั้นลงแต่สูงขึ้น พื้นที่ใต้กราฟความเร่งในช่วงผสมแรก (θ̈ t<sub>b</sub>) คือความเร็วสูงสุด ซึ่งลดลงเข้าใกล้ Δ/t</li><li>โจทย์ 1: เล่น “เส้นตรงล้วน” แล้วเล่น “LSPB” ดูข้อต่อตอนออกตัว: เส้นตรงล้วนออกตัวด้วยความเร็วเต็มที่ทันที ส่วน LSPB ค่อย ๆ เร่ง</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 7 หน้า 7, 17–19 (ภาพอยู่ในหน้านี้แล้ว) · Craig 7.3 (สมการ 7.19–7.23) · สไลด์เดิม Part I หน้า 18–21 และ Part II หน้า 2–3</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the smallest acceleration</h3>
+    <ol><li>Problem 1: put θ̈ exactly at the minimum (drag slowly, or press the arrow keys, 0.01 at a time): the straight part is gone and the velocity becomes a triangle. Just 0.01 °/s² lower, the plot turns into red curves that do not meet in the middle.</li><li>Problem 2: double the time t<sub>f</sub>: the smallest acceleration falls to a quarter, because it goes as 1/t². To make a move twice as fast, the motor must accelerate four times as hard.</li><li>Problem 2: set θ<sub>f</sub> below θ₀: the joint turns back, the minimum uses |θ<sub>f</sub> − θ₀|, the first blend has a negative acceleration and the last a positive one.</li></ol></div>
+  <div class="card"><h3>Try this 2 — the top speed</h3>
+    <ol><li>Compare the top speeds for the same move: the cubic 1.5Δ/t = <b data-n="cv"></b> °/s, the quintic 1.875Δ/t = <b data-n="qv"></b> °/s, and the LSPB anywhere from Δ/t (a very large θ̈) to 2Δ/t (θ̈ at the minimum). Problem 3: find the θ̈ that gives the LSPB the top speed of the cubic, and compare it with the <b data-n="ca"></b> °/s² the cubic needs as it sets off.</li><li>Problem 3: watch the acceleration row while θ̈ goes up: the blends get shorter and taller. The area under the first blend, θ̈ t<sub>b</sub>, is the top speed, and it shrinks towards Δ/t.</li><li>Problem 1: play the “straight line”, then the “LSPB”, and watch the joint as it sets off: the straight line starts at full speed at once, the LSPB speeds up gradually.</li></ol>
+    <div class="book">Source: chapter 7 slides, pp. 7, 17–19 (the pictures are on this page) · Craig 7.3 (equations 7.19–7.23) · old slides part I pp. 18–21, part II pp. 2–3</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, dn = RB.d, rad = RB.rad, G = RB.G, EX = CH7.EX, OV = CH7.OV;
+const el = id => document.getElementById(id), near = (x, a, tol) => Math.abs(x - a) < tol;
+const fx = (x, n = 2) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n);   // fixed decimals: the numbers do not jump about while a slider moves
+/* the move of Craig's example 7.1 and the two worked LSPBs (ch7.js) */
+const X40 = EX.lspb.a40, X80 = EX.lspb.a80, AMIN = EX.lspb.amin, TH0 = X40.th0, THF = X40.thf, TF = X40.T, DL = THF - TH0, TH = (TH0 + THF) / 2;
+const A40 = X40.a, A80 = X80.a, VL = DL / TF;   // VL: the velocity of the pure straight line
+const cubT = CH7.polyTraj(EX.cubic.a, TF);
+const disc = A => A * A * TF * TF - 4 * A * DL, rootT = A => Math.sqrt(Math.max(0, disc(A))) / (2 * A);   // what is under the square root of 7.22, and the term it gives
+document.querySelectorAll('[data-n]').forEach(e => { e.textContent = { cv: dn(EX.cubic.vmax, 2), qv: dn(EX.quintic.vmax, 2), ca: dn(EX.cubic.acc0, 2) }[e.dataset.n]; });
+
+/* ---- motions ---- */
+const lineF = (a, b, T) => tt => tt <= 0 ? [a, 0, 0] : tt >= T ? [b, 0, 0] : [a + (b - a) * tt / T, (b - a) / T, 0];   // the pure straight line: the velocity jumps at both ends
+/* an acceleration below the minimum: the blend out of the start and the blend into the goal, each for half the time; they meet at the same velocity but not at the same angle */
+const halves = (a0, af, T, A) => { const a = (af >= a0 ? 1 : -1) * A, N = [NaN, NaN, NaN];
+  return [tt => tt > T / 2 + 1e-9 ? N : tt <= 0 ? [a0, 0, a] : [a0 + a * tt * tt / 2, a * tt, a], tt => tt < T / 2 - 1e-9 ? N : tt >= T ? [af, 0, -a] : [af - a * (T - tt) ** 2 / 2, a * (T - tt), -a]]; };
+const posOf = (L, tt) => { if (L.ok) return L.at(tt)[0]; const h = halves(L.th0, L.thf, L.T, Math.abs(L.a)); return (tt <= L.T / 2 ? h[0] : h[1])(tt)[0]; };
+
+/* ---- drawing on the plots. The layout below copies the one of CH7.plots (ch7.js: margins, the time axis and the scale of every row), so that a page can
+   mark times, levels and labels on its panels ---- */
+const nice = (lo, hi, n = 4) => { if (hi - lo < 1e-9) { lo -= 1; hi += 1; } const raw = (hi - lo) / n, m = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / m, st = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * m; return { lo: Math.floor(lo / st - 1e-9) * st, hi: Math.ceil(hi / st + 1e-9) * st, st }; };
+const geo = (W, H, o) => { const rows = o.rows || ['p', 'v', 'a'], nR = rows.length, T = o.T, t0 = o.t0 || 0, ml = 52, mr = 14, mt = 8, mb = 30, gap = 14, ph = (H - mt - mb - gap * (nR - 1)) / nR, pw = W - ml - mr, idx = { p: 0, v: 1, a: 2 }, R = {};
+  rows.forEach((r, ri) => { const j = idx[r], y0 = mt + ri * (ph + gap); let lo = Infinity, hi = -Infinity;
+    o.curves.forEach(cu => { for (let i = 0; i <= 240; i++) { const y = cu.f(t0 + (T - t0) * i / 240)[j]; if (isFinite(y)) { lo = Math.min(lo, y); hi = Math.max(hi, y); } } });
+    if (r === 'p' && o.marks) o.marks.forEach(m => { lo = Math.min(lo, m.y); hi = Math.max(hi, m.y); });
+    if (o.yr && o.yr[r]) { lo = Math.min(lo, o.yr[r][0]); hi = Math.max(hi, o.yr[r][1]); }
+    const sc = nice(lo, hi, ph > 90 ? 4 : 3); R[r] = { y0, ph, ys: y => y0 + ph - (y - sc.lo) / (sc.hi - sc.lo) * ph }; });
+  return { xs: tt => ml + (tt - t0) / (T - t0) * pw, R, ml, x1: ml + pw, top: mt, bot: H - mb }; };
+/* a label of plain words and symbols with a subscript: parts = ['text', ['t', 'b'], …]; o.align left | right | center */
+const lab = (c, parts, x, y, o = {}) => { const draw = x0 => parts.reduce((w, p) => w + (typeof p === 'string' ? G.text(c, p, x0 + w, y, { size: o.size || 12, color: o.color, halo: o.halo, weight: 600 }) : G.sym(c, p[0], p[1], x0 + w, y, { size: (o.size || 12) + 2, color: o.color, halo: o.halo })), 0);
+  c.save(); c.globalAlpha = 0; const w = draw(x); c.restore(); return draw(o.align === 'right' ? x - w : o.align === 'center' ? x - w / 2 : x); };
+/* a time marked on every row, its name at the top (side +1: right of the line) or the bottom (side −1: left of it) of the acceleration row */
+const vline = (c, g, P, tt, parts, col, side = 1) => { const X = g.xs(tt), a = g.R.a || g.R.v; G.line(c, X, g.top, X, g.bot, col, 1.3, [5, 4]); if (parts) lab(c, parts, X + 5 * side, side > 0 ? a.y0 + 14 : a.y0 + a.ph - 6, { color: col, halo: P.bg, align: side > 0 ? 'left' : 'right' }); };
+/* a level in one row, named at its right end (o.t: named from that time on instead; o.below: under the line) */
+const hline = (c, g, P, r, y, parts, col, o = {}) => { const R = g.R[r], Y = R.ys(y); G.line(c, g.ml, Y, g.x1, Y, col, 1.3, [5, 4]);
+  if (parts) lab(c, parts, o.t === undefined ? g.x1 - 4 : g.xs(o.t), o.below || Y - R.y0 < 18 ? Y + 15 : Y - 5, { color: col, halo: P.bg, align: o.t === undefined ? 'right' : 'left' }); };
+/* an infinite acceleration: an arrow from the zero line to the edge of the acceleration row */
+const impulse = (c, g, P, tt, sign, col) => { const R = g.R.a, X = g.xs(tt) + (sign > 0 ? 3 : -3), Y0 = R.ys(0), Y1 = sign > 0 ? R.y0 + 3 : R.y0 + R.ph - 3; G.arrow(c, X, Y0, X, Y1, col, 2.4, 9); G.text(c, sign > 0 ? '+∞' : '−∞', X + (sign > 0 ? 7 : -7), sign > 0 ? Y0 - 5 : Y0 + 15, { size: 13, color: col, halo: P.bg, weight: 700, align: sign > 0 ? 'left' : 'right' }); };
+/* below the minimum: the gap between the two blends at the middle, in the position row */
+const gapMark = (c, g, P, L) => { const h = halves(L.th0, L.thf, L.T, Math.abs(L.a)), X = g.xs(L.T / 2), R = g.R.p, y1 = R.ys(h[0](L.T / 2)[0]), y2 = R.ys(h[1](L.T / 2)[0]), d = Math.abs(L.thf - L.th0) - Math.abs(L.a) * L.T * L.T / 4;
+  G.line(c, X, y1, X, y2, P.bad, 2.2); [y1, y2].forEach(y => G.line(c, X - 5, y, X + 5, y, P.bad, 2.2)); G.text(c, t(`ขาดไป ${fx(d, 2)}°`, `${fx(d, 2)}° short`), X + 9, (y1 + y2) / 2 + 4, { size: 12.5, color: P.bad, halo: P.bg, weight: 700 }); };
+/* a warning pill in the corner of the position row that the curve leaves free */
+const warnPill = (c, g, P, up, txt) => { const R = g.R.p; G.pill(c, txt, g.x1 - 6, up ? R.y0 + R.ph - 14 : R.y0 + 14, { align: 'right', fill: RB.rgba(P.bad, 0.14), stroke: P.bad, color: P.bad, size: 12 }); };
+/* the names of the curves, in the free corner of the position row */
+const legend = (c, g, P, items, up) => { const R = g.R.p, n = items.length, y0 = up ? R.y0 + R.ph - 8 - 15 * (n - 1) : R.y0 + 14;
+  items.forEach((it, i) => { const y = y0 + 15 * i, w = lab(c, [it.txt], g.x1 - 6, y + 4, { color: P.ink, halo: P.bg, align: 'right', size: 11.5 }); G.line(c, g.x1 - 30 - w, y, g.x1 - 10 - w, y, P[it.col] || it.col, it.w || 2, it.dash); }); };
+
+/* the camera of the joint picture: a fixed view framed on the part of the circle the move sweeps (the base, and the arm with its gripper between θ0 and θf),
+   so that the arm fills the picture and the view stays still while the motion plays. The picture is wide (J.asp = height/width): the 28° field of view
+   spans its width, the floor is seen at 62°, so a depth y takes about 0.88 y of the height */
+const frameJ = (J, a0, a1) => { const k = a0 + ',' + a1; if (J._fr === k) return; J._fr = k; const lo = Math.min(a0, a1), hi = Math.max(a0, a1), P = [[-0.17, -0.17], [0.17, 0.17], [-0.17, 0.17], [0.17, -0.17]];
+  for (let i = 0; i <= 24; i++) { const a = rad(lo + (hi - lo) * i / 24); P.push([0.62 * Math.cos(a), 0.62 * Math.sin(a)]); }
+  const xs = P.map(p => p[0]), ys = P.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), span = 2 * Math.tan(rad(14)) * 0.86;
+  J.fit = false; J.tgt = [(x0 + x1) / 2, (y0 + y1) / 2, 0.08]; J.dist = Math.max((x1 - x0) / span, (0.88 * (y1 - y0) + 0.12) / (span * J.asp)); };
+/* ---- one problem: the joint picture cvN, the plots plN, a time slider and a play button. S: { t, play, step, T(), L() (the LSPB now), pos(t), plot(), ann(), read(), live() } ---- */
+const PL = on => on ? t('❚❚ หยุด', '❚❚ pause') : t('▶ เล่น', '▶ play');
+const run = (n, S, J) => {
+  const ctl = el('ctl' + n), ro = el('ro' + n); ro.innerHTML = '<div></div><div class="term"></div>'; S.roD = ro.children[0]; S.roL = ro.children[1];
+  const tsl = ui.slider(ctl, { id: 't' + n, label: t('เวลา t', 'time t'), min: 0, max: S.T(), step: 0.01, value: S.t, fmt: v => `${fx(v, 2)} s`, oninput: v => { S.t = v; S.stop(); S.live(); } });
+  const btn = ui.buttons(ctl, [{ id: 'b' + n, label: PL(false), onclick: b => { S.play = !S.play; if (S.play && S.t >= S.T() - 1e-6) S.t = 0; b.textContent = PL(S.play); } }])['b' + n];
+  S.stop = () => { S.play = false; btn.textContent = PL(false); };
+  S.setT = () => { tsl.el.max = S.T(); if (S.t > S.T()) S.t = S.T(); tsl.set(S.t); };
+  S.goT = tt => { S.stop(); S.t = Math.min(S.T(), Math.max(0, tt)); tsl.set(S.t); };
+  /* both canvases call tick in the same pass of the animation loop (lesson.js): only the first call moves the time on; the lock opens again once the pass is over */
+  let lock = false; const tick = dt => { if (lock) return; lock = true; Promise.resolve().then(() => { lock = false; });
+    if (S.play) { S.t = Math.min(S.T(), S.t + dt); tsl.set(S.t); if (S.t >= S.T()) S.stop(); S.live(); }
+    J.th = rad(S.pos(S.t)); J.th0 = rad(S.a0()); J.thf = rad(S.af()); frameJ(J, S.a0(), S.af()); J.marks = S.ghosts ? S.ghosts().map(rad) : []; };
+  const narrow = el('cv' + n).parentElement.clientWidth < 560; J.asp = narrow ? 0.8 : 0.4;   // a wide strip above the plots; taller pictures on a phone
+  CH2.sim('cv' + n, J, 'joint1', { aspect: J.asp, maxH: 270, tick, after: (c, W, H, P) => { const w = S.warn3d && S.warn3d(); if (w) CH2.pillAt(c, w[0], w[1] === 'bad' ? P.bad : P.l1, H - 18); } });
+  RB.stage(el('pl' + n), narrow ? 0.95 : 0.5, (c, W, H, dt, P) => { tick(dt); G.clear(c, W, H, P); const o = S.plot(); CH7.plots(c, W, H, P, o); if (S.ann) S.ann(c, W, H, P, o, geo(W, H, o)); }, { maxH: 320 });
+  S.read = () => { S.design(); S.live(); }; };
+/* the live line of a readout: the time and θ, θ̇, θ̈ of the motion the joint follows */
+const liveTx = (tt, e, inf) => `t = ${fx(tt, 2)} s: θ = ${fx(e[0], 2)}° · θ̇ = ${fx(e[1], 2)} °/s · θ̈ = ${inf ? '∞' : fx(e[2], 2) + ' °/s²'}`;
+const accS = (box, id, S, lo, hi, after) => ui.slider(box, { id, label: t('θ̈ ของช่วงผสม', 'blend θ̈'), min: lo, max: hi, step: 0.01, value: S.acc, fmt: v => `${fx(v, 2)} °/s²`, oninput: v => { S.acc = v; after(); } });
+const badTx = () => t('θ̈ น้อยเกินไป: ช่วงผสมสองข้างไปไม่ถึงกัน ไม่มี LSPB ที่ใช้ได้', 'θ̈ is too small: the two blends do not meet; there is no LSPB');
+const lspbTx = L => `${t('ช่วงผสม', 'blends')} t<sub>b</sub> = ${fx(L.tb, 3)} s · ${t('ส่วนตรง', 'straight part')} θ̇ = ${fx(L.v, 2)} °/s ${t('นาน', 'for')} t − 2t<sub>b</sub> = ${fx(L.tl, 3)} s`;
+
+/* ---------- 1: a straight line alone is not enough ---------- */
+const ILL = 60, LOW = 20;   // problem 1: the blend acceleration of the picture in steps 2–4 (also where the slider starts, away from the asked minimum), and one below the minimum for step 6
+const S1 = { t: 1.2, play: false, step: 0, acc: ILL, mode: 'lspb' }, J1 = { xyz: true };
+S1.T = () => TF; S1.a0 = () => TH0; S1.af = () => THF; S1.L = () => CH7.lspb(TH0, THF, TF, S1.acc);
+const line1 = lineF(TH0, THF, TF);
+S1.pos = tt => S1.mode === 'line' ? line1(tt)[0] : posOf(S1.L(), tt);
+S1.ghosts = () => { const L = S1.L(); return S1.step === 3 && L.ok ? [L.thb] : []; };
+J1.ov = (s, st) => { if (S1.step === 3) { const L = S1.L(), a = rad(L.thb); OV.name(s, [0.54 * Math.cos(a), 0.54 * Math.sin(a), 0.11], 'b', 'θ', { sub: 'b', m: 1, s: 26 }); } };
+S1.warn3d = () => S1.mode === 'line' ? [t('เส้นตรงล้วน: ความเร็วกระโดดที่ต้นและปลาย', 'straight line: the velocity jumps at both ends'), 'o'] : S1.L().ok ? null : [t('เป็นไปไม่ได้: θ̈ น้อยเกินไป', 'impossible: θ̈ too small'), 'bad'];
+S1.plot = () => { const L = S1.L(), k = S1.step, o = { T: TF, now: S1.t, yr: { a: [-S1.acc, S1.acc] }, marks: [], blends: [] };
+  if (S1.mode === 'line') o.curves = [{ f: line1, col: 'l1', w: 2.6 }].concat(L.ok ? [{ f: L.at, col: 'l2', w: 1.3, dash: [5, 4] }] : []);
+  else if (L.ok) { o.curves = [{ f: L.at, col: 'l2', w: 2.6 }, { f: line1, col: 'muted', w: 1.3, dash: [5, 4] }]; o.blends = [[0, L.tb], [TF - L.tb, TF]]; }
+  else { const h = halves(TH0, THF, TF, S1.acc); o.curves = [{ f: h[0], col: 'bad', w: 2.4 }, { f: h[1], col: 'bad', w: 2.4 }, { f: line1, col: 'muted', w: 1.3, dash: [5, 4] }]; }
+  if (S1.mode !== 'line' && L.ok) { if (k === 2 || k === 3 || k === 5) o.marks.push({ t: TF / 2, y: TH }); if (k === 3) o.marks.push({ t: L.tb, y: L.thb }); }
+  return o; };
+S1.ann = (c, W, H, P, o, g) => { const L = S1.L(), k = S1.step;
+  if (S1.mode === 'line') { impulse(c, g, P, 0, 1, P.l1); impulse(c, g, P, TF, -1, P.l1); if (k === 1) hline(c, g, P, 'v', VL, [`${fx(VL, 2)} °/s = Δ/t`], P.l1); return; }
+  if (!L.ok) { const h = halves(TH0, THF, TF, S1.acc); gapMark(c, g, P, L); if (S1.t > TF / 2) G.circle(c, g.xs(S1.t), g.R.p.ys(h[1](S1.t)[0]), 4.2, { fill: P.bad }); warnPill(c, g, P, true, t('ไม่มี LSPB', 'no LSPB')); return; }
+  if (k === 2) { const X = g.xs(TF / 2), Y = g.R.p.ys(TH); lab(c, ['(', ['t', 'h'], ', ', ['θ', 'h'], ')'], X + 9, Y + 16, { color: P.ink, halo: P.bg }); vline(c, g, P, L.tb, [['t', 'b']], P.sel); vline(c, g, P, TF - L.tb, ['t − ', ['t', 'b']], P.sel, -1); }
+  if (k === 3) { const R = g.R.p; lab(c, ['(', ['t', 'b'], ', ', ['θ', 'b'], ')'], g.xs(L.tb) + 9, R.ys(L.thb) + 16, { color: P.ink, halo: P.bg }); lab(c, ['(', ['t', 'h'], ', ', ['θ', 'h'], ')'], g.xs(TF / 2) + 9, R.ys(TH) + 16, { color: P.ink, halo: P.bg }); hline(c, g, P, 'v', L.v, ['θ̈ ', ['t', 'b'], t(' = ความชันของส่วนตรง', ' = slope of the straight part')], P.sel); }
+  if (k === 4) { vline(c, g, P, L.tb, [t('รากที่เล็กกว่า ', 'smaller root '), ['t', 'b']], P.good); vline(c, g, P, TF - L.tb, [t('รากที่ใหญ่กว่า ', 'larger root '), 't − ', ['t', 'b']], P.bad, -1); }
+  if (k === 5) vline(c, g, P, TF / 2, [['t', 'b'], ' = t/2'], P.sel); };
+S1.design = () => { const L = S1.L();
+  S1.roD.innerHTML = S1.mode === 'line' ? `<div class="term"><b class="ax-a">${t('เส้นตรงล้วน', 'pure straight line')}</b>: θ̇ = Δ/t = ${fx(VL, 2)} °/s ${t('ตั้งแต่ต้นจนจบ', 'from start to end')} · ${t(`ที่ t = 0 และ t = ${TF} s ความเร็วกระโดด: θ̈ → ∞`, `at t = 0 and t = ${TF} s the velocity jumps: θ̈ → ∞`)}</div>`
+    : L.ok ? `<div class="term"><b style="color:var(--accent)">LSPB</b> · ${lspbTx(L)}</div>` + (S1.step >= 5 ? `<div class="term">${t('ความเร่งต่ำสุด', 'smallest acceleration')} 4Δ/t² = ${fx(AMIN, 2)} °/s²</div>` : '')
+    : `<div class="term"><b style="color:var(--bad)">${badTx()}</b></div>`; };
+S1.live = () => { const L = S1.L(), e = S1.mode === 'line' ? line1(S1.t) : L.ok ? L.at(S1.t) : (S1.t <= TF / 2 ? halves(TH0, THF, TF, S1.acc)[0] : halves(TH0, THF, TF, S1.acc)[1])(S1.t);
+  S1.roL.innerHTML = liveTx(S1.t, e, S1.mode === 'line' && (S1.t <= 0 || S1.t >= TF)); };
+const sa1 = accS(el('ctl1'), 'a1', S1, 10, 120, () => S1.read());
+const m1 = ui.radio(el('ctl1'), [{ id: 'm1l', label: t('เส้นตรงล้วน', 'straight line') }, { id: 'm1b', label: 'LSPB', on: true }], id => { S1.mode = id === 'm1l' ? 'line' : 'lspb'; S1.read(); });
+run(1, S1, J1); S1.read();
+/* back to the move of the example; the open step: 1 the straight line, 2–4 an LSPB of 60 °/s² (the halfway point, the end of a blend, the two roots),
+   5 θ̈ at the minimum (two parabolas), 6 θ̈ below it (the blends miss each other) */
+const put1 = k => { S1.mode = k === 1 ? 'line' : 'lspb'; m1.set(S1.mode === 'line' ? 'm1l' : 'm1b'); S1.acc = k === 6 ? LOW : k === 5 ? AMIN : ILL; sa1.set(S1.acc);
+  const L = S1.L(); S1.goT(k === 2 || k === 5 ? TF / 2 : k === 3 ? L.tb : k === 6 ? TF / 2 - 0.3 : S1.t); S1.read(); };
+LS.ask(el('ask1'), { fields: [{ label: t('θ̈ ต่ำสุด (°/s²) =', 'smallest θ̈ (°/s²) ='), ok: x => near(x, AMIN, 0.07), w: 6 }],
+  check: v => { const x = v[0]; return near(x, 4 * DL / TF, 0.1) ? t('ตัวส่วนต้องเป็น t² ไม่ใช่ t', 'the denominator is t², not t')
+    : near(x, 2 * DL / TF ** 2, 0.07) || near(x, DL / TF ** 2, 0.07) ? t('ช่วงผสมแต่ละช่วงต้องพาข้อต่อไปได้ครึ่งทาง Δ/2 ในครึ่งเวลา t/2: Δ/2 = ½ θ̈ (t/2)²', 'each blend must cover half the rise, Δ/2, in half the time, t/2: Δ/2 = ½ θ̈ (t/2)²')
+    : near(x, VL, 0.05) ? t('นั่นคือ Δ/t ความเร็วของเส้นตรงล้วน (°/s) ไม่ใช่ความเร่ง', 'that is Δ/t, the velocity of the straight line (°/s), not an acceleration')
+    : near(x, 4 * THF / TF ** 2, 0.07) ? t('ใช้ระยะที่หมุน θ<sub>f</sub> − θ₀ ไม่ใช่ θ<sub>f</sub>', 'use the rise θ<sub>f</sub> − θ₀, not θ<sub>f</sub>')
+    : near(x, rad(AMIN), 0.003) ? t('นั่นคือเรเดียน: ตอบเป็น °/s²', 'that is in radians: answer in °/s²') : ''; } });
+LS.stepper(el('st1'), { onStep: k => { const was = S1.step; S1.step = k; if (k || was) put1(k); }, steps: [
+  { why: t(`<b>(ก) เส้นตรงล้วน</b>: θ เพิ่มขึ้นในอัตราคงที่ ความเร็วจึงเท่ากับ Δ/t ตั้งแต่วินาทีแรกจนถึงวินาทีสุดท้าย แต่ข้อต่อเริ่มจากหยุดนิ่งและต้องจบที่หยุดนิ่ง ความเร็วจึงกระโดดจาก 0 เป็น ${dn(VL, 2)} °/s ทันทีที่ t = 0 และกระโดดกลับเป็น 0 ที่ t = ${TF} s การเปลี่ยนความเร็วในเวลาเป็นศูนย์ต้องใช้ความเร่งไม่จำกัด (ลูกศร ∞ ในแถวความเร่ง) ซึ่งมอเตอร์ให้ไม่ได้`, `<b>(a) The pure straight line</b>: θ grows at a constant rate, so the velocity is Δ/t from the first instant to the last. But the joint starts at rest and must end at rest, so the velocity jumps from 0 to ${dn(VL, 2)} °/s at t = 0 and back to 0 at t = ${TF} s. Changing a velocity in no time takes an unbounded acceleration (the ∞ arrows in the acceleration row), which no motor can give`),
+    tex: `\\dot\\theta = \\frac{\\theta_f - \\theta_0}{t} = \\frac{${THF} - ${TH0}}{${TF}} = ${dn(VL, 2)}\\ ^\\circ/\\text{s}\\ \\text{ for } 0 < t < ${TF}` },
+  { why: t(`<b>LSPB</b>: เก็บเส้นตรงไว้ตรงกลาง แล้วเติมช่วงผสมที่ความเร่งคงที่ θ̈ ไว้ที่ปลายทั้งสอง (θ เป็นพาราโบลา) ให้ช่วงผสมทั้งสองยาว t<sub>b</sub> เท่ากัน การเคลื่อนที่จึงสมมาตรรอบ<b>จุดกึ่งกลาง</b> (t<sub>h</sub>, θ<sub>h</sub>) ทั้งในเวลาและในมุม และส่วนตรงผ่านจุดนี้พอดี ในรูปใช้ θ̈ = ${ILL} °/s² เส้นประแนวตั้งคือปลายช่วงผสมแรกและต้นช่วงผสมหลัง`, `<b>LSPB</b>: keep the straight line in the middle and add a blend of constant acceleration θ̈ at each end (θ is a parabola there). Give both blends the same length t<sub>b</sub>: the motion is then symmetric about the <b>halfway point</b> (t<sub>h</sub>, θ<sub>h</sub>), in time and in angle, and the straight part passes right through it. The picture uses θ̈ = ${ILL} °/s²; the dashed upright lines are the end of the first blend and the start of the second`),
+    tex: `t_h = \\frac{t}{2} = ${dn(TF / 2, 2)}\\ \\text{s}, \\qquad \\theta_h = \\frac{\\theta_0 + \\theta_f}{2} = ${dn(TH, 2)}^\\circ` },
+  { why: t('<b>ความเร็วต้องต่อกัน</b>: ช่วงผสมแรกเริ่มจากหยุดนิ่ง ที่ปลายช่วงผสม (t<sub>b</sub>, θ<sub>b</sub>) ความเร็วเพิ่มขึ้นเป็น θ̈ t<sub>b</sub> ค่านี้ต้องเท่ากับความชันของส่วนตรง ซึ่งลากจาก (t<sub>b</sub>, θ<sub>b</sub>) ถึงจุดกึ่งกลาง (t<sub>h</sub>, θ<sub>h</sub>) ไม่เช่นนั้นความเร็วจะกระโดดอีก ส่วนมุมที่ปลายช่วงผสมได้จากความเร่งคงที่ (Craig สมการ 7.19 และ 7.20)', '<b>The velocities must join</b>: the first blend starts at rest, and at its end (t<sub>b</sub>, θ<sub>b</sub>) the velocity has grown to θ̈ t<sub>b</sub>. That must equal the slope of the straight part, which runs from (t<sub>b</sub>, θ<sub>b</sub>) to the halfway point (t<sub>h</sub>, θ<sub>h</sub>); otherwise the velocity would jump again. The angle at the end of the blend follows from the constant acceleration (Craig, equations 7.19 and 7.20)'),
+    tex: '\\begin{aligned} \\ddot\\theta\\,t_b &= \\frac{\\theta_h - \\theta_b}{t_h - t_b} \\\\ \\theta_b &= \\theta_0 + \\tfrac12\\,\\ddot\\theta\\,t_b^2 \\end{aligned}' },
+  { why: t(`<b>สมการกำลังสองของ t<sub>b</sub></b>: แทน θ<sub>b</sub>, t<sub>h</sub> = t/2 และ θ<sub>h</sub> = (θ₀ + θ<sub>f</sub>)/2 ลงไป แล้วคูณกระจาย (สมการ 7.21) รากสองตัวรวมกันได้ t พอดี: รากที่เล็กกว่าคือ t<sub>b</sub> ส่วนรากที่ใหญ่กว่า t − t<sub>b</sub> เลยจุดกึ่งกลางไปแล้ว คือเวลาที่ช่วงผสมหลังเริ่ม (เส้นประในรูป) สำหรับการเคลื่อนที่นี้ θ<sub>f</sub> − θ₀ = ${DL}° และ t = ${TF} s`, `<b>A quadratic in t<sub>b</sub></b>: put in θ<sub>b</sub>, t<sub>h</sub> = t/2 and θ<sub>h</sub> = (θ₀ + θ<sub>f</sub>)/2 and multiply out (equation 7.21). Its two roots add up to t: the smaller one is t<sub>b</sub>; the larger one, t − t<sub>b</sub>, lies past the middle: it is where the second blend starts (the dashed lines). For this move θ<sub>f</sub> − θ₀ = ${DL}° and t = ${TF} s`),
+    tex: `\\begin{aligned} \\ddot\\theta\\,t_b^2 - \\ddot\\theta\\,t\\,t_b + (\\theta_f - \\theta_0) &= 0 \\\\ \\ddot\\theta\\,t_b^2 - ${TF}\\,\\ddot\\theta\\,t_b + ${DL} &= 0 \\\\ t_b &= \\frac{t}{2} - \\frac{\\sqrt{\\ddot\\theta^2t^2 - 4\\ddot\\theta(\\theta_f - \\theta_0)}}{2\\ddot\\theta} \\end{aligned}` },
+  { why: t('<b>(ข) ความเร่งต่ำสุด</b>: t<sub>b</sub> เป็นจำนวนจริงได้เมื่อค่าใต้รากไม่ติดลบ (สมการ 7.23) ถ้าเท่ากันพอดี รากเป็นศูนย์ t<sub>b</sub> = t/2: ช่วงผสมสองข้างมาบรรจบกันที่จุดกึ่งกลาง ส่วนตรงหดหายไป เหลือพาราโบลาสองชิ้นต่อกัน และกราฟความเร็วเป็นสามเหลี่ยม (รูปตั้ง θ̈ ไว้ที่ค่านี้)', '<b>(b) The smallest acceleration</b>: t<sub>b</sub> is real only when the quantity under the square root is not negative (equation 7.23). At equality the root is zero and t<sub>b</sub> = t/2: the two blends meet at the halfway point, the straight part has shrunk to nothing, two parabolas are left, and the velocity plot is a triangle (the picture sets θ̈ to this value)'),
+    tex: `\\begin{aligned} \\ddot\\theta^2t^2 - 4\\ddot\\theta(\\theta_f - \\theta_0) &\\ge 0 \\\\ \\ddot\\theta &\\ge \\frac{4(\\theta_f - \\theta_0)}{t^2} = \\frac{4(${DL})}{${TF}^2} = ${dn(AMIN, 2)}\\ ^\\circ/\\text{s}^2 \\end{aligned}` },
+  { why: t(`<b>ต่ำกว่าค่าต่ำสุด</b> เช่น θ̈ = ${LOW} °/s²: ช่วงผสมจากจุดเริ่มและช่วงผสมที่เข้าหาเป้าหมายต่างกินเวลาครึ่งหนึ่ง พบกันตรงกลางด้วยความเร็วเท่ากัน แต่พื้นที่ใต้สามเหลี่ยมความเร็ว θ̈t²/4 คือมุมที่หมุนได้ น้อยกว่าระยะ θ<sub>f</sub> − θ₀ ที่ต้องหมุน: เส้นสีแดงสองเส้นจึงไม่บรรจบกัน ข้อต่อไปไม่ถึงเป้าหมายภายในเวลา`, `<b>Below the minimum</b>, for example θ̈ = ${LOW} °/s²: the blend out of the start and the blend into the goal take half the time each and meet in the middle at the same velocity, but the area under the velocity triangle, θ̈t²/4, is the angle turned, and it is less than the rise θ<sub>f</sub> − θ₀: the two red curves miss each other and the joint cannot reach the goal in time`),
+    tex: `\\frac{\\ddot\\theta\\,t^2}{4} = \\frac{${LOW} \\times ${TF}^2}{4} = ${dn(LOW * TF * TF / 4, 2)}^\\circ \\; < \\; \\theta_f - \\theta_0 = ${DL}^\\circ` }],
+  answer: t(`θ̈ ≥ 4(θ<sub>f</sub> − θ₀)/t² = ${dn(AMIN, 2)} °/s² · ที่ค่าต่ำสุด t<sub>b</sub> = t/2 = ${dn(TF / 2, 2)} s ส่วนตรงหายไป · เส้นตรงล้วนใช้ไม่ได้เพราะความเร็วกระโดดที่ต้นและปลาย`, `θ̈ ≥ 4(θ<sub>f</sub> − θ₀)/t² = ${dn(AMIN, 2)} °/s² · at the minimum t<sub>b</sub> = t/2 = ${dn(TF / 2, 2)} s and the straight part is gone · a pure straight line will not do: its velocity jumps at both ends`) });
+
+/* ---------- 2: blends of 40 °/s² ---------- */
+const S2 = { t: 1.0, play: false, step: 0, th0: 10, thf: 80, tf: 4, acc: 60 }, J2 = { xyz: true };   // starts away from the example: the readout must not show the asked answers
+S2.T = () => S2.tf; S2.a0 = () => S2.th0; S2.af = () => S2.thf; S2.L = () => CH7.lspb(S2.th0, S2.thf, S2.tf, S2.acc);
+S2.pos = tt => posOf(S2.L(), tt);
+S2.ghosts = () => { const L = S2.L(); return S2.step === 5 && L.ok ? [L.thb, L.thf - (L.thb - L.th0)] : []; };
+J2.ov = (s, st) => { if (S2.step === 5 && S2.L().ok) { const a = rad(S2.L().thb); OV.name(s, [0.54 * Math.cos(a), 0.54 * Math.sin(a), 0.11], 'b', 'θ', { sub: 'b', m: 1, s: 26 }); } };
+S2.warn3d = () => S2.L().ok ? null : [t('เป็นไปไม่ได้: θ̈ น้อยเกินไป', 'impossible: θ̈ too small'), 'bad'];
+S2.plot = () => { const L = S2.L(), k = S2.step, o = { T: S2.tf, now: S2.t, yr: { a: [-S2.acc, S2.acc] }, marks: [], blends: [] };
+  if (L.ok) { o.curves = [{ f: L.at, col: 'l2', w: 2.6 }]; o.blends = [[0, L.tb], [L.T - L.tb, L.T]]; if (k === 5) o.marks = [{ t: L.tb, y: L.thb }, { t: L.T - L.tb, y: L.thf - (L.thb - L.th0) }]; }
+  else { const h = halves(S2.th0, S2.thf, S2.tf, S2.acc); o.curves = [{ f: h[0], col: 'bad', w: 2.4 }, { f: h[1], col: 'bad', w: 2.4 }]; }
+  return o; };
+S2.ann = (c, W, H, P, o, g) => { const L = S2.L(), k = S2.step, up = L.thf >= L.th0;
+  if (!L.ok) { const h = halves(L.th0, L.thf, L.T, Math.abs(L.a)); gapMark(c, g, P, L); if (S2.t > L.T / 2) G.circle(c, g.xs(S2.t), g.R.p.ys(h[1](S2.t)[0]), 4.2, { fill: P.bad }); warnPill(c, g, P, up, t('ไม่มี LSPB', 'no LSPB')); return; }
+  if (k === 2) { vline(c, g, P, L.tb, [['t', 'b'], ` = ${fx(L.tb, 3)} s`], P.sel); vline(c, g, P, L.T - L.tb, ['t − ', ['t', 'b']], P.sel, -1); }
+  if (k === 3 || k === 6) hline(c, g, P, 'v', L.v, [`${fx(L.v, 2)} °/s = θ̈ `, ['t', 'b']], P.sel);
+  if (k === 4) { const R = g.R.v, Y = R.ys(L.v) + 12, x0 = g.xs(L.tb), x1 = g.xs(L.T - L.tb); G.arrow(c, x0, Y, x1, Y, P.good, 1.8, 8, true); lab(c, ['t − 2', ['t', 'b'], ` = ${fx(L.tl, 3)} s`], (x0 + x1) / 2, Y + 16, { color: P.good, halo: P.bg, align: 'center' }); vline(c, g, P, L.tb, null, P.good); vline(c, g, P, L.T - L.tb, null, P.good); }
+  if (k === 5) { const R = g.R.p; lab(c, [['θ', 'b'], ` = ${fx(L.thb, 2)}°`], g.xs(L.tb) + 9, R.ys(L.thb) + (up ? -8 : 18), { color: P.ink, halo: P.bg }); }
+  if (k === 6) { hline(c, g, P, 'a', L.a, [`${fx(L.a, 0)} °/s²`], P.l1); hline(c, g, P, 'a', -L.a, [`${fx(-L.a, 0)} °/s²`], P.l1); } };
+S2.design = () => { const L = S2.L(), m = CH7.lspbMin(S2.th0, S2.thf, S2.tf);
+  S2.roD.innerHTML = `<div class="term">${t('ความเร่งต่ำสุด', 'smallest acceleration')} 4|θ<sub>f</sub> − θ₀|/t² = ${fx(m, 2)} °/s² ${L.ok ? `<b class="ax-y">≤ ${fx(S2.acc, 2)} ✓</b>` : `<b style="color:var(--bad)">> ${fx(S2.acc, 2)} ✗</b>`}</div>` +
+    (L.ok ? `<div class="term">${lspbTx(L)} · θ<sub>b</sub> = ${fx(L.thb, 2)}°</div>` : `<div class="term"><b style="color:var(--bad)">${badTx()}</b></div>`); };
+S2.live = () => { const L = S2.L(), e = L.ok ? L.at(S2.t) : (S2.t <= S2.tf / 2 ? halves(S2.th0, S2.thf, S2.tf, S2.acc)[0] : halves(S2.th0, S2.thf, S2.tf, S2.acc)[1])(S2.t); S2.roL.innerHTML = liveTx(S2.t, e); };
+const c2 = el('ctl2'), up2 = () => { S2.setT(); S2.read(); };
+const s2 = [ui.slider(c2, { id: 'p2a', label: 'θ₀', min: -90, max: 90, step: 1, value: S2.th0, fmt: v => `${fx(v, 0)}°`, oninput: v => { S2.th0 = v; up2(); } }),
+  ui.slider(c2, { id: 'p2b', label: 'θ<sub>f</sub>', min: -90, max: 90, step: 1, value: S2.thf, fmt: v => `${fx(v, 0)}°`, oninput: v => { S2.thf = v; up2(); } }),
+  ui.slider(c2, { id: 'p2c', label: t('เวลา t<sub>f</sub>', 'time t<sub>f</sub>'), min: 1, max: 6, step: 0.1, value: S2.tf, fmt: v => `${fx(v, 1)} s`, oninput: v => { S2.tf = v; up2(); } }),
+  accS(c2, 'a2', S2, 5, 200, () => S2.read())];
+run(2, S2, J2); S2.read();
+/* back to the example (15° → 75° in 3 s with 40 °/s²); the open step: 2 the blend times, 3 the straight-part velocity, 4 its duration, 5 θ_b (the joint at the end of the first blend), 6 the plots */
+const put2 = k => { S2.th0 = X40.th0; S2.thf = X40.thf; S2.tf = X40.T; S2.acc = A40; [S2.th0, S2.thf, S2.tf, S2.acc].forEach((x, i) => s2[i].set(x)); S2.setT();
+  S2.goT(k === 2 || k === 5 ? X40.tb : k === 3 || k === 4 ? TF / 2 : S2.t); S2.read(); };
+LS.ask(el('ask2'), { fields: [{ label: 't<sub>b</sub> (s) =', ok: x => near(x, X40.tb, 0.002), w: 5 }, { label: t('θ̇ ส่วนตรง (°/s) =', 'straight θ̇ (°/s) ='), ok: x => near(x, X40.v, 0.03), w: 5 }, { label: t('ส่วนตรงนาน (s) =', 'straight part lasts (s) ='), ok: x => near(x, X40.tl, 0.003), w: 5 }],
+  check: v => { const [a, b, c] = v, big = TF - X40.tb;
+    if (!near(a, X40.tb, 0.002)) return near(a, big, 0.003) ? t(`นั่นคือรากที่ใหญ่กว่า ซึ่งเลยกึ่งกลาง t/2 = ${dn(TF / 2, 2)} s ไปแล้ว: ใช้เครื่องหมายลบหน้ารากที่สอง`, `that is the larger root, past the middle t/2 = ${dn(TF / 2, 2)} s: take the minus sign in front of the square root`)
+      : near(a, rootT(A40), 0.003) ? t('นั่นเป็นเพียงพจน์รากที่สองหารด้วย 2θ̈: t<sub>b</sub> = t/2 ลบด้วยพจน์นั้น', 'that is only the square-root term over 2θ̈: t<sub>b</sub> = t/2 minus it') : '';
+    if (!near(b, X40.v, 0.03)) return near(b, VL, 0.05) ? t('นั่นคือความเร็วเฉลี่ย Δ/t: ส่วนตรงต้องเร็วกว่านั้น เพื่อชดเชยช่วงผสมที่ยังช้าอยู่ θ̇ = θ̈ t<sub>b</sub>', 'that is the average velocity Δ/t: the straight part must be faster, to make up for the slow blends: θ̇ = θ̈ t<sub>b</sub>')
+      : near(b, A40 * big, 0.1) ? t('ใช้ t<sub>b</sub> จากรากที่เล็กกว่า', 'use t<sub>b</sub> from the smaller root') : near(b, rad(X40.v), 0.002) ? t('นั่นคือเรเดียน: ตอบเป็น °/s', 'that is in radians: answer in °/s') : '';
+    if (!near(c, X40.tl, 0.003)) return near(c, TF - X40.tb, 0.003) ? t('ส่วนตรงเสียเวลาให้ช่วงผสม<b>สองช่วง</b> ช่วงละ t<sub>b</sub>: t − 2t<sub>b</sub>', 'the straight part loses <b>two</b> blends of t<sub>b</sub> each: t − 2t<sub>b</sub>')
+      : near(c, 2 * X40.tb, 0.003) ? t('นั่นคือเวลาของช่วงผสมสองช่วงรวมกัน ส่วนตรงคือเวลาที่เหลือ', 'that is the two blends together; the straight part is the time left over') : '';
+    return ''; } });
+LS.stepper(el('st2'), { onStep: k => { const was = S2.step; S2.step = k; if (k || was) put2(k); }, steps: [
+  { why: t(`<b>ตรวจความเร่งต่ำสุดก่อน</b> (สมการ 7.23): ${dn(A40, 2)} °/s² มากกว่าค่าต่ำสุด จึงมี LSPB ที่ใช้ได้`, `<b>Check the smallest acceleration first</b> (equation 7.23): ${dn(A40, 2)} °/s² is above the minimum, so an LSPB exists`),
+    tex: `\\ddot\\theta_{min} = \\frac{4(\\theta_f - \\theta_0)}{t^2} = \\frac{4(${THF} - ${TH0})}{${TF}^2} = ${dn(AMIN, 2)}\\ ^\\circ/\\text{s}^2 < ${dn(A40, 2)}\\ \\checkmark` },
+  { why: t('<b>เวลาผสม</b> (สมการ 7.22) ใช้เครื่องหมายลบ ได้รากที่เล็กกว่า เส้นประแนวตั้งในรูปคือ t<sub>b</sub> และ t − t<sub>b</sub>', '<b>The blend time</b> (equation 7.22), with the minus sign for the smaller root. The dashed upright lines in the picture are t<sub>b</sub> and t − t<sub>b</sub>'),
+    tex: `\\begin{aligned} t_b &= \\frac{t}{2} - \\frac{\\sqrt{\\ddot\\theta^2t^2 - 4\\ddot\\theta(\\theta_f - \\theta_0)}}{2\\ddot\\theta} \\\\ &= ${dn(TF / 2, 2)} - \\frac{\\sqrt{${dn(A40, 2)}^2 \\cdot ${TF}^2 - 4 \\cdot ${dn(A40, 2)} \\cdot ${DL}}}{2 \\cdot ${dn(A40, 2)}} \\\\ &= ${dn(TF / 2, 2)} - \\frac{\\sqrt{${dn(disc(A40), 2)}}}{${dn(2 * A40, 2)}} = ${dn(TF / 2, 2)} - ${dn(rootT(A40), 4)} = ${dn(X40.tb, 4)}\\ \\text{s} \\end{aligned}` },
+  { why: t('<b>ความเร็วของส่วนตรง</b> คือความเร็วที่ปลายช่วงผสมแรก (เส้นประในแถวความเร็ว) ความเร็วนี้มากกว่าความเร็วเฉลี่ย Δ/t เพราะช่วงผสมทั้งสองยังช้าอยู่ ส่วนตรงจึงต้องเร็วกว่าเพื่อชดเชย', '<b>The velocity of the straight part</b> is the velocity at the end of the first blend (the dashed line in the velocity row). It is above the average Δ/t: the blends are still slow, so the straight part must be faster to make up for them'),
+    tex: `\\dot\\theta = \\ddot\\theta\\,t_b = ${dn(A40, 2)} \\times ${dn(X40.tb, 4)} = ${dn(X40.v, 2)}\\ ^\\circ/\\text{s} \\; > \\; \\frac{\\Delta}{t} = ${dn(VL, 2)}\\ ^\\circ/\\text{s}` },
+  { why: t('<b>ส่วนตรงกินเวลานานเท่าไร</b>: เวลาทั้งหมดลบช่วงผสม<b>สองช่วง</b> (ลูกศรสีเขียวในแถวความเร็ว)', '<b>How long the straight part lasts</b>: the whole time less <b>two</b> blends (the green arrow in the velocity row)'),
+    tex: `t - 2t_b = ${TF} - 2(${dn(X40.tb, 4)}) = ${dn(X40.tl, 4)}\\ \\text{s}` },
+  { why: t(`<b>มุมที่ปลายช่วงผสมแรก</b> (สมการ 7.20) ข้อต่อในรูปหยุดอยู่ที่มุมนี้ เงาอีกอันคือมุมที่ช่วงผสมหลังเริ่ม ซึ่งอยู่ห่างจาก θ<sub>f</sub> เท่ากับที่ θ<sub>b</sub> ห่างจาก θ₀ (สมมาตร) ตรวจได้: เริ่มจาก θ<sub>b</sub> แล้วหมุนด้วย θ̇ นาน t − 2t<sub>b</sub> ต้องได้มุมนั้นพอดี`, `<b>The angle at the end of the first blend</b> (equation 7.20); the joint in the picture stops there. The other ghost is the angle where the second blend starts, as far from θ<sub>f</sub> as θ<sub>b</sub> is from θ₀ (symmetry). A check: from θ<sub>b</sub>, turning at θ̇ for t − 2t<sub>b</sub> must land exactly there`),
+    tex: `\\begin{aligned} \\theta_b &= \\theta_0 + \\tfrac12\\,\\ddot\\theta\\,t_b^2 = ${TH0} + \\tfrac12(${dn(A40, 2)})(${dn(X40.tb, 4)})^2 = ${dn(X40.thb, 2)}^\\circ \\\\ \\theta_b + \\dot\\theta\\,(t - 2t_b) &= ${dn(X40.thb, 2)} + ${dn(X40.v, 2)} \\times ${dn(X40.tl, 4)} = ${dn(X40.thb + X40.v * X40.tl, 2)}^\\circ = \\theta_f - (\\theta_b - \\theta_0) \\end{aligned}` },
+  { why: t(`<b>กราฟ</b>: ความเร็วเป็นรูปสี่เหลี่ยมคางหมู เพิ่มขึ้นด้วย +${dn(A40, 2)} °/s² นาน t<sub>b</sub> คงที่นาน t − 2t<sub>b</sub> แล้วลดลงด้วย −${dn(A40, 2)} °/s² ความเร่งจึงเป็น +${dn(A40, 2)}, 0, −${dn(A40, 2)} ตรวจคำตอบได้จากพื้นที่ใต้กราฟความเร็ว ซึ่งต้องเท่ากับมุมที่หมุนทั้งหมด`, `<b>The plots</b>: the velocity is a trapezoid: up at +${dn(A40, 2)} °/s² for t<sub>b</sub>, level for t − 2t<sub>b</sub>, down at −${dn(A40, 2)} °/s². The acceleration is +${dn(A40, 2)}, 0, −${dn(A40, 2)} in turn. A check: the area under the velocity must be the whole rise`),
+    tex: `\\text{area} = \\dot\\theta\\,(t - t_b) = ${dn(X40.v, 2)} \\times ${dn(TF - X40.tb, 4)} = ${dn(X40.v * (TF - X40.tb), 2)}^\\circ = \\theta_f - \\theta_0` }],
+  answer: t(`t<sub>b</sub> = ${dn(X40.tb, 3)} s · ส่วนตรง θ̇ = ${dn(X40.v, 2)} °/s นาน ${dn(X40.tl, 3)} s · θ<sub>b</sub> = ${dn(X40.thb, 2)}° · ความเร่งต่ำสุด ${dn(AMIN, 2)} °/s² < ${dn(A40, 2)}`, `t<sub>b</sub> = ${dn(X40.tb, 3)} s · the straight part moves at θ̇ = ${dn(X40.v, 2)} °/s for ${dn(X40.tl, 3)} s · θ<sub>b</sub> = ${dn(X40.thb, 2)}° · smallest acceleration ${dn(AMIN, 2)} °/s² < ${dn(A40, 2)}`) });
+
+/* ---------- 3: more or less acceleration ---------- */
+const S3s = { t: 1.0, play: false, step: 0, acc: 120 }, J3 = { xyz: true };   // starts away from the asked 80 °/s²
+S3s.T = () => TF; S3s.a0 = () => TH0; S3s.af = () => THF; S3s.L = () => CH7.lspb(TH0, THF, TF, S3s.acc);
+S3s.pos = tt => posOf(S3s.L(), tt);
+S3s.warn3d = () => S3s.L().ok ? null : [t('เป็นไปไม่ได้: θ̈ น้อยเกินไป', 'impossible: θ̈ too small'), 'bad'];
+S3s.plot = () => { const L = S3s.L(), k = S3s.step, o = { T: TF, now: S3s.t, yr: { a: [-Math.max(S3s.acc, A80), Math.max(S3s.acc, A80)] }, blends: [] }, ref = [{ f: X40.at, col: 'l1', w: 1.3 }, { f: X80.at, col: 'l3', w: 1.3 }, { f: cubT.at, col: 'muted', w: 1.4, dash: [6, 4] }];
+  if (k === 3) ref.push({ f: lineF(TH0, THF, TF), col: 'muted', w: 1.2, dash: [2, 3] });
+  if (L.ok) { o.curves = [{ f: L.at, col: 'l2', w: 2.6 }].concat(ref); o.blends = [[0, L.tb], [TF - L.tb, TF]]; }
+  else { const h = halves(TH0, THF, TF, S3s.acc); o.curves = [{ f: h[0], col: 'bad', w: 2.4 }, { f: h[1], col: 'bad', w: 2.4 }].concat(ref); }
+  return o; };
+S3s.ann = (c, W, H, P, o, g) => { const L = S3s.L(), k = S3s.step;
+  legend(c, g, P, [{ txt: L.ok ? `LSPB ${fx(S3s.acc, 2)} °/s²` : t('ไม่มี LSPB', 'no LSPB'), col: L.ok ? 'l2' : 'bad', w: 2.6 }, { txt: `LSPB ${dn(A40, 0)} °/s²`, col: 'l1' }, { txt: `LSPB ${dn(A80, 0)} °/s²`, col: 'l3' }, { txt: t('พหุนามกำลังสาม', 'cubic'), col: 'muted', dash: [6, 4] }], true);
+  if (!L.ok) { const h = halves(TH0, THF, TF, S3s.acc); gapMark(c, g, P, L); if (S3s.t > TF / 2) G.circle(c, g.xs(S3s.t), g.R.p.ys(h[1](S3s.t)[0]), 4.2, { fill: P.bad }); return; }
+  if (k === 1 || k === 2) { vline(c, g, P, L.tb, [['t', 'b'], ` = ${fx(L.tb, 3)} s`], P.sel); hline(c, g, P, 'v', L.v, [`${fx(L.v, 2)} °/s`], P.sel); }
+  if (k === 2) { const R = g.R.v; G.text(c, `${fx(X40.v, 2)}`, g.xs(X40.tb) - 4, R.ys(X40.v) - 5, { size: 11.5, color: P.l1, halo: P.bg, align: 'right', weight: 700 }); }
+  if (k === 3) hline(c, g, P, 'v', VL, [`Δ/t = ${fx(VL, 2)} °/s`], P.muted);
+  if (k === 4) { hline(c, g, P, 'v', 2 * VL, [`2Δ/t = ${fx(2 * VL, 2)} °/s`], P.sel, { t: 0.2 * TF, below: true }); hline(c, g, P, 'v', EX.cubic.vmax, [t('กำลังสาม ', 'cubic ') + `1.5Δ/t = ${fx(EX.cubic.vmax, 2)}`], P.muted); } };
+S3s.design = () => { const L = S3s.L(); S3s.roD.innerHTML = L.ok ? `<div class="term"><b style="color:var(--accent)">θ̈ = ${fx(S3s.acc, 2)} °/s²</b> · ${lspbTx(L)}</div>` : `<div class="term"><b style="color:var(--bad)">${badTx()}</b></div>`; };
+S3s.live = () => { const L = S3s.L(), e = L.ok ? L.at(S3s.t) : (S3s.t <= TF / 2 ? halves(TH0, THF, TF, S3s.acc)[0] : halves(TH0, THF, TF, S3s.acc)[1])(S3s.t); S3s.roL.innerHTML = liveTx(S3s.t, e); };
+const sa3 = accS(el('ctl3'), 'a3', S3s, 10, 300, () => S3s.read()); run(3, S3s, J3); S3s.read();
+/* the open step: 1–2 θ̈ = 80 (compared with 40), 3 θ̈ at the top of the slider (towards the straight line), 4 θ̈ at the minimum (two parabolas), 5 back to 80 */
+const put3 = k => { S3s.acc = k === 3 ? 300 : k === 4 ? AMIN : A80; sa3.set(S3s.acc); S3s.goT(k === 1 ? X80.tb : S3s.t); S3s.read(); };
+const why3 = ['', t('∞ ไม่ได้: ความเร่งยิ่งมาก ช่วงผสมยิ่งสั้น แต่ส่วนตรงไม่ได้เร็วขึ้น ลองเลื่อน θ̈ ขึ้นแล้วดูความเร็ว', 'not ∞: more acceleration makes the blends shorter, not the straight part faster; move θ̈ up and watch the velocity'),
+  t('2Δ/t เป็นอีกด้านหนึ่ง: ความเร็วนี้เกิดเมื่อ θ̈ เท่ากับค่าต่ำสุด', '2Δ/t is the other end: it comes with θ̈ at the minimum'), t('1.5Δ/t คือความเร็วสูงสุดของพหุนามกำลังสาม', '1.5Δ/t is the top speed of the cubic'), '', t('ข้อต่อต้องหมุนให้ครบ Δ ในเวลา t ความเร็วจึงเป็นศูนย์ไม่ได้', 'the joint must still cover Δ in the time t, so the velocity cannot go to zero')];
+LS.choose(el('ask3a'), { options: ['∞', '2Δ/t', '1.5Δ/t', 'Δ/t', '0'], answer: 3, labels: ['(1)', '(2)', '(3)', '(4)', '(5)'],
+  onPick: (i, ok) => { if (!ok && why3[i + 1]) el('ask3a').querySelector('.askres').innerHTML = `<span class="pill bad">✗</span> ${why3[i + 1]}`; } });
+LS.ask(el('ask3b'), { fields: [{ label: t('(ข) t<sub>b</sub> ที่ 80 °/s² (s) =', '(b) t<sub>b</sub> at 80 °/s² (s) ='), ok: x => near(x, X80.tb, 0.002), w: 5 }],
+  check: v => { const x = v[0]; return near(x, TF - X80.tb, 0.003) ? t('นั่นคือรากที่ใหญ่กว่า เลยกึ่งกลางไปแล้ว', 'that is the larger root, past the middle') : near(x, rootT(A80), 0.003) ? t('นั่นเป็นเพียงพจน์รากที่สอง: t<sub>b</sub> = t/2 ลบด้วยพจน์นั้น', 'that is only the square-root term: t<sub>b</sub> = t/2 minus it')
+    : near(x, X40.tb, 0.003) ? t('นั่นคือ t<sub>b</sub> ของ 40 °/s² (โจทย์ 2): แทนค่าด้วย 80', 'that is t<sub>b</sub> for 40 °/s² (problem 2): work it out again with 80') : near(x, X40.tb / 2, 0.003) ? t('t<sub>b</sub> ไม่ได้ลดลงครึ่งหนึ่งเมื่อ θ̈ เพิ่มเป็นสองเท่า: แทนค่าในสูตรอีกครั้ง', 't<sub>b</sub> does not simply halve when θ̈ doubles: put the numbers into the formula') : ''; } });
+LS.stepper(el('st3'), { onStep: k => { const was = S3s.step; S3s.step = k; if (k || was) put3(k); }, steps: [
+  { why: t(`<b>(ข) ความเร่ง ${dn(A80, 2)} °/s²</b>: ใช้สมการ 7.22 แบบเดียวกับโจทย์ 2`, `<b>(b) An acceleration of ${dn(A80, 2)} °/s²</b>: equation 7.22 as in problem 2`),
+    tex: `\\begin{aligned} t_b &= ${dn(TF / 2, 2)} - \\frac{\\sqrt{${dn(A80, 2)}^2 \\cdot ${TF}^2 - 4 \\cdot ${dn(A80, 2)} \\cdot ${DL}}}{2 \\cdot ${dn(A80, 2)}} = ${dn(TF / 2, 2)} - ${dn(rootT(A80), 4)} = ${dn(X80.tb, 4)}\\ \\text{s} \\\\ \\dot\\theta &= ${dn(A80, 2)} \\times ${dn(X80.tb, 4)} = ${dn(X80.v, 2)}\\ ^\\circ/\\text{s}, \\qquad t - 2t_b = ${dn(X80.tl, 4)}\\ \\text{s} \\end{aligned}` },
+  { why: t('<b>เทียบกับ 40 °/s²</b>: เมื่อความเร่งเพิ่มเป็นสองเท่า ช่วงผสมสั้นลง (แต่ไม่ถึงครึ่ง) ส่วนตรงยาวขึ้น และความเร็วของส่วนตรงลดลง ในแถวความเร็ว เส้นสีน้ำเงินต่ำกว่าเส้นสีส้ม', '<b>Compared with 40 °/s²</b>: with twice the acceleration the blends are shorter (though not half as long), the straight part is longer and slower. In the velocity row the blue trapezoid sits below the orange one'),
+    tex: `\\begin{array}{c|ccc} \\ddot\\theta\\ (^\\circ/\\text{s}^2) & t_b\\ (\\text{s}) & \\dot\\theta\\ (^\\circ/\\text{s}) & t - 2t_b\\ (\\text{s}) \\\\ \\hline ${dn(A40, 0)} & ${dn(X40.tb, 3)} & ${dn(X40.v, 2)} & ${dn(X40.tl, 3)} \\\\ ${dn(A80, 0)} & ${dn(X80.tb, 3)} & ${dn(X80.v, 2)} & ${dn(X80.tl, 3)} \\end{array}` },
+  { why: t(`<b>(ก) θ̈ → ∞</b>: เขียน t<sub>b</sub> ใหม่โดยดึง t/2 ออกมา เมื่อ θ̈ ใหญ่มาก ค่าในรากเข้าใกล้ 1 ใช้ √(1 − x) ≈ 1 − x/2 ได้ t<sub>b</sub> ≈ Δ/(θ̈ t) → 0 แต่ความเร็ว θ̈ t<sub>b</sub> เข้าใกล้ Δ/t คือเส้นตรงล้วนของโจทย์ 1 (เส้นประจุดในรูป) และความเร็วก็กลับไปกระโดดที่ปลายทั้งสอง รูปตั้ง θ̈ ไว้ที่ปลายบนของแถบเลื่อน`, `<b>(a) θ̈ → ∞</b>: write t<sub>b</sub> with t/2 taken out. For a very large θ̈ the quantity under the root is close to 1, and √(1 − x) ≈ 1 − x/2 gives t<sub>b</sub> ≈ Δ/(θ̈ t) → 0, while the velocity θ̈ t<sub>b</sub> tends to Δ/t: the pure straight line of problem 1 (the dotted line in the picture), with its velocity jumps back at both ends. The picture sets θ̈ to the top of the slider`),
+    tex: `\\begin{aligned} t_b &= \\frac{t}{2}\\Big(1 - \\sqrt{1 - \\tfrac{4\\Delta}{\\ddot\\theta\\,t^2}}\\Big) \\approx \\frac{t}{2}\\cdot\\frac{2\\Delta}{\\ddot\\theta\\,t^2} = \\frac{\\Delta}{\\ddot\\theta\\,t} \\to 0 \\\\ \\dot\\theta &= \\ddot\\theta\\,t_b \\to \\frac{\\Delta}{t} = ${dn(VL, 2)}\\ ^\\circ/\\text{s} \\end{aligned}` },
+  { why: t(`<b>อีกด้านหนึ่ง: θ̈ เท่ากับค่าต่ำสุด</b> t<sub>b</sub> = t/2 ความเร็วสูงสุดคือ 2Δ/t ความเร็วของส่วนตรงของ LSPB จึงอยู่ระหว่าง Δ/t ถึง 2Δ/t ความเร็วสูงสุดของพหุนามกำลังสาม (1.5Δ/t) และกำลังห้า (1.875Δ/t) ก็อยู่ในช่วงนี้`, `<b>The other end: θ̈ at the minimum</b>: t<sub>b</sub> = t/2 and the top speed is 2Δ/t. So the straight part of an LSPB moves somewhere between Δ/t and 2Δ/t; the top speeds of the cubic (1.5Δ/t) and the quintic (1.875Δ/t) lie in the same range`),
+    tex: `\\begin{aligned} \\dot\\theta_{max} &= \\ddot\\theta_{min}\\,\\frac{t}{2} = \\frac{4\\Delta}{t^2}\\cdot\\frac{t}{2} = \\frac{2\\Delta}{t} = ${dn(2 * VL, 2)}\\ ^\\circ/\\text{s} \\\\ \\frac{\\Delta}{t} &< \\dot\\theta_{LSPB} \\le \\frac{2\\Delta}{t} \\end{aligned}` },
+  { why: t('<b>ในงานจริง</b> ตัวควบคุมเลือก θ̈ จากขีดจำกัดของมอเตอร์และชุดเฟือง (ความเร่งที่ทำได้เมื่อมีภาระ) แล้วตรวจว่าความเร็วของส่วนตรงไม่เกินความเร็วสูงสุดของข้อต่อ ถ้าเกิน ต้องยืดเวลา t ออก กราฟความเร็วรูปสี่เหลี่ยมคางหมูนี้ (trapezoidal velocity profile) เป็นแบบที่ตัวควบคุมหุ่นยนต์อุตสาหกรรมใช้มากที่สุดในการเคลื่อนที่จากจุดไปจุด ข้อเสียคือความเร่งยังกระโดดจาก 0 เป็น θ̈ ทันทีที่ต้นช่วงผสม ตัวควบคุมหลายรุ่นจึงทำให้ขอบของความเร่งลาดลงเล็กน้อย (S-curve) เพื่อลดการกระตุก', '<b>In practice</b> the controller picks θ̈ from the limits of the motor and gearbox (the acceleration they can give with the load), then checks that the velocity of the straight part stays under the joint speed limit; if not, the time t is stretched. This trapezoidal velocity profile is what industrial robot controllers use most for point-to-point moves. Its weak spot: the acceleration still jumps from 0 to θ̈ at the start of a blend, so many controllers round off the edges of the acceleration (an S-curve) to reduce the jerk') }],
+  answer: t(`(ก) θ̈ → ∞: θ̇ ของส่วนตรง → Δ/t = ${dn(VL, 2)} °/s คือเส้นตรงล้วน · (ข) ${dn(A80, 0)} °/s²: t<sub>b</sub> = ${dn(X80.tb, 3)} s, θ̇ = ${dn(X80.v, 2)} °/s (${dn(A40, 0)} °/s²: ${dn(X40.tb, 3)} s, ${dn(X40.v, 2)} °/s)`, `(a) θ̈ → ∞: the straight-part θ̇ → Δ/t = ${dn(VL, 2)} °/s, the pure straight line · (b) ${dn(A80, 0)} °/s²: t<sub>b</sub> = ${dn(X80.tb, 3)} s, θ̇ = ${dn(X80.v, 2)} °/s (${dn(A40, 0)} °/s²: ${dn(X40.tb, 3)} s, ${dn(X40.v, 2)} °/s)`) });
+});
+</script>
+</body>
+</html>

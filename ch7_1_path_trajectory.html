@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="7.1 — Path and trajectory">7.1 — เส้นทางและแนววิถี</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=20">
+<script src="assets/stops.js?v=20"></script><script src="assets/shell.js?v=20"></script>
+<script src="assets/robot.js?v=20"></script><script src="assets/lesson.js?v=20"></script><script src="assets/ch2.js?v=20"></script><script src="assets/ch3.js?v=20"></script><script src="assets/ch4.js?v=20"></script><script src="assets/ch5.js?v=20"></script><script src="assets/ch7.js?v=20"></script><script src="assets/scene3d.js?v=20"></script><script src="assets/gl3d.js?v=20"></script><script src="assets/ch2_3d.js?v=20"></script><script src="assets/ch3_3d.js?v=20"></script><script src="assets/ch7_3d.js?v=20"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">เส้นทางและแนววิถี <span class="en">Path and trajectory — how the arm gets from one pose to another, in time</span></h1>
+<h1 data-l="en">Path and trajectory <span class="en">How a joint, and a whole arm, gets from one pose to another in time</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch7/s05.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 5: a Yaskawa GP8 with a soft gripper passing a start pose, a via pose and a goal pose, with the path of its tool point; a path says where the tool goes, a trajectory gives position, velocity and acceleration of every joint against time">
+    <figcaption data-l="th">สไลด์บทที่ 7 หน้า 5 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 5 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">บทที่ 3–6 บอกว่าแขนอยู่ที่ไหน (จลนศาสตร์) และเคลื่อนที่เร็วแค่ไหน (จาโคเบียน) บทที่ 7 ตอบคำถามถัดไป: จะพาแขนจากท่าหนึ่งไปอีกท่า<b>อย่างนุ่มนวล</b>ได้อย่างไร คำตอบคือ<b>แนววิถี (trajectory)</b>: มุม θ ความเร็ว θ̇ และความเร่ง θ̈ ของทุกข้อต่อ<b>เป็นฟังก์ชันของเวลา</b> ส่วน<b>เส้นทาง (path)</b> บอกเพียงว่าผ่านที่ไหน ผู้ใช้กำหนดเพียง<b>จุดบนเส้นทาง</b> คือจุดเริ่ม จุดผ่าน (via point) และเป้าหมาย ระบบเป็นผู้เลือกรูปร่างระหว่างจุด เวลาที่ใช้ และโพรไฟล์ความเร็ว หน้านี้ดูว่าฟังก์ชันของเวลาแบบไหนใช้ได้ การวางแผนในปริภูมิข้อต่อ (joint space) กับในปริภูมิคาร์ทีเซียน (Cartesian space) และปัญหาของการให้ปลายเครื่องมือเดินเป็นเส้นตรง หน้านี้ครอบคลุมสไลด์หน้า 5–7, 24 และ 26–29 มี <b>4 โจทย์</b></p>
+    <p class="sub" data-l="en">Chapters 3–6 told where the arm is (kinematics) and how fast it moves (the Jacobian). Chapter 7 answers the next question: how to take the arm from one pose to another <b>smoothly</b>. The answer is a <b>trajectory</b>: the angle θ, the velocity θ̇ and the acceleration θ̈ of every joint <b>as functions of time</b>. A <b>path</b> only says where the arm passes. The user gives the <b>path points</b> (the start, the via points and the goal); the system picks the shape between them, the duration and the velocity profile. This page looks at which functions of time will do, at planning in joint space or in Cartesian space, and at what goes wrong when the tool must follow a straight line. It covers slides pp. 5–7, 24 and 26–29, with <b>4 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>เส้นทางกับแนววิถี</b>: เส้นทางคือเส้นที่ปลายเครื่องมือผ่าน ไม่มีเวลา แนววิถีบอก \(\theta(t),\ \dot\theta(t),\ \ddot\theta(t)\) ของทุกข้อต่อ: อยู่ที่ไหน <b>เมื่อไร</b> และเร็วเท่าไร</li><li><b>ฟังก์ชันต้องเรียบ</b>: ถ้า θ(t) เป็นเส้นตรง ความเร็วจะกระโดดที่ต้นและปลาย ความเร่งจึงไม่มีขอบเขต (อิมพัลส์) ซึ่งมอเตอร์ทำไม่ได้ พหุนามกำลังสามและกำลังห้า (หน้า 7.2) และเส้นตรงต่อด้วยพาราโบลา (หน้า 7.3) เริ่มและหยุดอย่างนิ่ง</li><li><b>ปริภูมิข้อต่อ</b>: หาจลนศาสตร์ผกผัน (IK, inverse kinematics) เฉพาะที่จุดบนเส้นทาง แต่ละข้อต่อมีฟังก์ชันเรียบของตัวเองโดยใช้เวลาเท่ากัน ทุกข้อต่อจึงถึงพร้อมกัน ปลายเครื่องมือเดินเป็นเส้นโค้งที่เราไม่ได้เลือก</li><li><b>ปริภูมิคาร์ทีเซียน</b>: \(p(t) = A + s(t)\,(B - A)\) แล้วหา IK ทุกขณะ ปลายเครื่องมือเดินบนเส้นตรงที่เลือก แต่มีปัญหาเชิงเรขาคณิต: จุดที่ไปไม่ถึง ความเร็วข้อต่อที่สูงมากใกล้ภาวะเอกฐาน และจุดต้นกับจุดปลายที่อยู่คนละคำตอบของ IK (Craig 7.5) บนชุดควบคุมของ Yaskawa สองแบบนี้คือคำสั่ง MOVJ (move, joint interpolation) และ MOVL (move, linear interpolation)</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>Path and trajectory</b>: a path is the curve the tool passes along, with no time in it. A trajectory gives \(\theta(t),\ \dot\theta(t),\ \ddot\theta(t)\) of every joint: where, <b>when</b> and how fast.</li><li><b>The function must be smooth</b>: if θ(t) is a straight line, the velocity jumps at both ends and the acceleration is unbounded (an impulse), which no motor can give. Cubic and quintic polynomials (page 7.2) and straight lines with parabolic blends (page 7.3) start and stop at rest.</li><li><b>Joint space</b>: inverse kinematics (IK) only at the path points; every joint gets its own smooth function with the same duration, so all joints arrive together. The tool follows a curve nobody chose.</li><li><b>Cartesian space</b>: \(p(t) = A + s(t)\,(B - A)\), then the IK at every instant. The tool follows the chosen straight line, but there are geometric problems: points out of reach, very high joint rates near a singularity, and start and goal in different IK solutions (Craig 7.5). On a Yaskawa controller the two are the instructions MOVJ (move, joint interpolation) and MOVL (move, linear interpolation).</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>แนววิถีคือฟังก์ชันของเวลา</a><a href="#ex2"><b>2</b>ปริภูมิข้อต่อหรือคาร์ทีเซียน</a><a href="#ex3"><b>3</b>จุดที่ไปไม่ถึง</a><a href="#ex4"><b>4</b>ความเร็วข้อต่อใกล้ภาวะเอกฐาน</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>A function of time</a><a href="#ex2"><b>2</b>Joint or Cartesian space</a><a href="#ex3"><b>3</b>Points out of reach</a><a href="#ex4"><b>4</b>Joint rates near a singularity</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">แนววิถีคือฟังก์ชันของเวลา</h2><h2 data-l="en">A trajectory is a function of time</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 5 และ 7 · Craig 7.1–7.2 (ตัวอย่าง 7.1) · กด ▶ เพื่อเล่น · ลากในภาพเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 5 and 7 · Craig 7.1–7.2 (example 7.1) · press ▶ to play · drag in the picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv1"></canvas><canvas id="pl1" style="margin-top:6px"></canvas><div class="ctl" id="sel1"></div><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">ข้อต่อหมุนตัวเดียว ก้านยาว <span data-k="L1"></span> m ภาพจางคือท่าเริ่มต้น θ₀ และท่าเป้าหมาย θ<sub>f</sub> ปุ่มด้านบนเลือกรูปร่างของฟังก์ชัน กด ▶ เพื่อเล่น หรือเลื่อนเวลา t กราฟสามแถวคือมุม θ ความเร็ว θ̇ และความเร่ง θ̈ ของรูปร่างที่เลือก (เส้นทึบ มีจุดบอกเวลาปัจจุบัน) เทียบกับอีกสองแบบ (เส้นประจาง): สีเทาคือเส้นตรง สีน้ำเงินคือพหุนามกำลังสาม สีส้มคือพหุนามกำลังห้า</div>
+      <div class="simnote" data-l="en">One turning joint with a link <span data-k="L1"></span> m long; the faint links are the start θ₀ and the goal θ<sub>f</sub>. The buttons pick the shape of the function; press ▶ to play or move the time t. The three plots are the angle θ, the velocity θ̇ and the acceleration θ̈ of the chosen shape (solid, with a dot at the present time) against the other two (faint, dashed): grey is the straight line, blue the cubic, orange the quintic.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s07.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 7: three functions that take one joint from 15 to 75 degrees in 3 seconds, a straight line, a cubic and a quintic; they start and end at the same points but differ in between">
+      <figcaption data-l="th">สไลด์บทที่ 7 หน้า 7 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 7 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ข้อต่อหมุนตัวเดียวต้องหมุนจาก θ₀ = <span data-k="th0"></span>° ไป θ<sub>f</sub> = <span data-k="thf"></span>° ในเวลา t<sub>f</sub> = <span data-k="tf"></span> s โดยเริ่มจากหยุดนิ่งและจบที่หยุดนิ่ง (Craig ตัวอย่าง 7.1) แผนที่ง่ายที่สุดคือให้มุมเพิ่มขึ้นในอัตราคงที่ คือ θ(t) เป็นเส้นตรงตามเวลา <b>(ก)</b> บนแผนนี้ข้อต่อหมุนเร็วเท่าไร (°/s) <b>(ข)</b> ที่ t = 0 ความเร่งของข้อต่อเป็นเท่าไร</div>
+        <div data-l="en">One turning joint must go from θ₀ = <span data-k="th0"></span>° to θ<sub>f</sub> = <span data-k="thf"></span>° in t<sub>f</sub> = <span data-k="tf"></span> s, starting and ending at rest (Craig, example 7.1). The simplest plan lets the angle grow at a constant rate: θ(t) is a straight line in time. <b>(a)</b> On this plan, how fast does the joint turn (°/s)? <b>(b)</b> What is its acceleration at t = 0?</div></div>
+      <div id="ask1a"></div><div id="ask1b"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ปริภูมิข้อต่อหรือปริภูมิคาร์ทีเซียน</h2><h2 data-l="en">Joint space or Cartesian space</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 6, 24 และ 26 · Craig 7.2 และ 7.4 · กด ▶ เพื่อเล่น · ลากในภาพเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 6, 24 and 26 · Craig 7.2 and 7.4 · press ▶ to play · drag in the picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv2"></canvas><canvas id="pl2" style="margin-top:6px"></canvas><div class="ctl" id="sel2"></div><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">แขนสองก้านของบทที่ 5 (l₁ = <span data-k="l1"></span> m, l₂ = <span data-k="l2"></span> m) เส้นประคือเส้นตรงจาก A ไป B ปุ่มด้านบนเลือกวิธีวางแผน: เส้น<b class="ax-a">สีส้ม</b>คือทางของปลายแขนเมื่อแต่ละข้อต่อเป็นพหุนามกำลังสาม (ปริภูมิข้อต่อ) เส้น<b class="ax-y">สีเขียว</b>คือเส้นตรง (ปริภูมิคาร์ทีเซียน) ทางของอีกวิธีแสดงไว้จาง ๆ กราฟบนคือ θ₁ (สีส้ม ข้อต่อของก้านที่ 1) และ θ₂ (สีน้ำเงิน ข้อต่อของก้านที่ 2) กราฟล่างคืออัตราของทั้งสอง เส้นทึบคือวิธีที่เลือก เส้นประจางคืออีกวิธี</div>
+      <div class="simnote" data-l="en">The two-link arm of chapter 5 (l₁ = <span data-k="l1"></span> m, l₂ = <span data-k="l2"></span> m); the dashed line is the straight line from A to B. The buttons pick the plan: <b class="ax-a">orange</b> is the path of the tool when every joint moves on a cubic (joint space), <b class="ax-y">green</b> the straight line (Cartesian space); the other plan's path is drawn faint. The upper plot shows θ₁ (orange, the joint of link 1) and θ₂ (blue, the joint of link 2), the lower one their rates: solid for the chosen plan, faint dashed for the other.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s06.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 6: the two-link arm moving from A to B twice; with every joint on a smooth function its tool point follows an orange curve, with the tool kept on the straight line it follows the green line; a table compares the two">
+      <figcaption data-l="th">สไลด์บทที่ 7 หน้า 6 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 6 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขนสองก้าน l₁ = <span data-k="l1"></span> m, l₂ = <span data-k="l2"></span> m ต้องเคลื่อนที่จากท่า A, θ = <span data-k="qA"></span> ไปท่า B, θ = <span data-k="qB"></span> ในเวลา T = <span data-k="T2"></span> s ปลายแขนอยู่ที่ A = <span data-k="A2"></span> m และ B = <span data-k="B2"></span> m ทั้งสองวิธีใช้จังหวะเวลาเดียวกัน s(t) = 3(t/T)² − 2(t/T)³ ซึ่งไปจาก 0 ถึง 1 โดยเริ่มและหยุดนิ่ง (พหุนามกำลังสามของหน้า 7.2) <b>(ก)</b> ปริภูมิข้อต่อ: แต่ละข้อต่อเคลื่อนที่ตาม θ<sub>i</sub>(t) = θ<sub>i,A</sub> + s(t)(θ<sub>i,B</sub> − θ<sub>i,A</sub>) มุมของข้อต่อทั้งสองที่ t = <span data-k="tq"></span> s เป็นเท่าไร <b>(ข)</b> ปริภูมิคาร์ทีเซียน: ปลายแขนเดินบนเส้นตรง p(t) = A + s(t)(B − A) ที่ t = <span data-k="tq"></span> s ปลายแขนอยู่ที่ไหน (m ทศนิยม 3 ตำแหน่ง)</div>
+        <div data-l="en">A two-link arm, l₁ = <span data-k="l1"></span> m, l₂ = <span data-k="l2"></span> m, must move from pose A, θ = <span data-k="qA"></span>, to pose B, θ = <span data-k="qB"></span>, in T = <span data-k="T2"></span> s. The tool point is at A = <span data-k="A2"></span> m and B = <span data-k="B2"></span> m. Both plans use the same timing s(t) = 3(t/T)² − 2(t/T)³, which goes from 0 to 1 starting and ending at rest (the cubic of page 7.2). <b>(a)</b> Joint space: every joint moves as θ<sub>i</sub>(t) = θ<sub>i,A</sub> + s(t)(θ<sub>i,B</sub> − θ<sub>i,A</sub>). What are the two joint angles at t = <span data-k="tq"></span> s? <b>(b)</b> Cartesian space: the tool follows the straight line p(t) = A + s(t)(B − A). Where is the tool at t = <span data-k="tq"></span> s (in m, 3 decimals)?</div></div>
+      <div id="ask2a"></div><div id="ask2b"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">จุดที่ไปไม่ถึง</h2><h2 data-l="en">Points out of reach</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 27 · Craig 7.5 (ปัญหาข้อ 1) · กด ▶ เพื่อเล่น · ลากในภาพเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, p. 27 · Craig 7.5 (problem 1) · press ▶ to play · drag in the picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv3"></canvas><div class="ctl" id="sel3"></div><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">แขนที่ก้านที่สองสั้น (l₁ = <span data-k="hl1"></span> m, l₂ = <span data-k="hl2"></span> m) พื้นสีฟ้าคือปริภูมิทำงาน: วงแหวนที่มีรูตรงกลาง (ขอบในสีชมพู) เส้นประคือเส้นตรงแนวนอนจาก A ไป B เลื่อนความสูง y ของเส้นได้ จุด<b style="color:var(--bad)">สีแดง</b>คือส่วนของเส้นที่ IK ไม่มีคำตอบ กด ▶ แล้วดูว่าแขนทำอะไรเมื่อถึงรู: แขนค้างอยู่ที่ขอบ (จุดแดงใหญ่คือที่ที่ปลายแขนควรจะอยู่) แล้วกระโดดข้ามไปเมื่อเส้นกลับเข้ามาในปริภูมิทำงาน เส้นสีเขียวคือส่วนที่ปลายแขนไปถึงจริง ปุ่ม “ปริภูมิข้อต่อ” เล่นการเคลื่อนที่จาก A ไป B แบบโจทย์ 2 แทน (เส้นสีส้ม)</div>
+      <div class="simnote" data-l="en">An arm with a short second link (l₁ = <span data-k="hl1"></span> m, l₂ = <span data-k="hl2"></span> m). The light blue floor is its workspace: a ring with a hole in the middle (the inner edge is pink). The dashed line is a horizontal straight line from A to B; move its height y. The <b style="color:var(--bad)">red</b> dots are the part of the line where the IK has no solution. Press ▶ and watch what the arm does at the hole: it stays at the edge (the big red dot is where the tool should be) and jumps across once the line is back in the workspace. The green line is where the tool really went. The button “joint space” plays the move from A to B as in problem 2 instead (orange).</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s27.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 27: an arm with a short second link, its ring-shaped workspace with a hole in the middle, and a straight line from A to B that crosses the hole; the part inside the hole is red">
+      <figcaption data-l="th">สไลด์บทที่ 7 หน้า 27 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 27 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขนสองก้านที่ก้านที่สองสั้น: l₁ = <span data-k="hl1"></span> m, l₂ = <span data-k="hl2"></span> m ปลายแขนต้องเดินเป็นเส้นตรงแนวนอนจาก A = <span data-k="hA"></span> m ไป B = <span data-k="hB"></span> m จุด A และ B อยู่ในปริภูมิทำงานทั้งคู่ ส่วนไหนของเส้นที่แขนไปไม่ถึง ตอบเป็นช่วงของ x (m)</div>
+        <div data-l="en">A two-link arm with a short second link: l₁ = <span data-k="hl1"></span> m, l₂ = <span data-k="hl2"></span> m. The tool must follow a horizontal straight line from A = <span data-k="hA"></span> m to B = <span data-k="hB"></span> m. A and B are both in the workspace. Which part of the line can the arm not reach? Give it as a range of x (m).</div></div>
+      <div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">ความเร็วข้อต่อใกล้ภาวะเอกฐาน</h2><h2 data-l="en">Joint rates near a singularity</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 28–29 · Craig 7.5 (ปัญหาข้อ 2) · ภาวะเอกฐานของบทที่ 5 · กด ▶ เพื่อเล่น · ลากในภาพเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 28–29 · Craig 7.5 (problem 2) · the singularities of chapter 5 · press ▶ to play · drag in the picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><canvas id="cv4"></canvas><canvas id="pl4" style="margin-top:6px"></canvas><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div>
+      <div class="simnote" data-l="th">แขนเดียวกับโจทย์ 3 เดินบนเส้นตรงแนวนอนจาก A ไป B ใน 2 s เลื่อนความสูง y ของเส้น (ทางของปลายแขนเป็น<b class="ax-p">สีชมพู</b>) เส้นจางสีน้ำเงินคือเส้นที่ y = <span data-k="yF"></span> m ไว้เทียบ กราฟบนคือมุมข้อศอก θ₂ กราฟล่างคืออัตราของข้อต่อ 1 คือ θ̇₁ สีชมพูเป็นของเส้นที่เลือก สีน้ำเงินเป็นของเส้นที่ y = <span data-k="yF"></span> m</div>
+      <div class="simnote" data-l="en">The arm of problem 3 follows a horizontal straight line from A to B in 2 s. Move the height y of the line (the tool's path is <b class="ax-p">pink</b>); the faint blue line is the line at y = <span data-k="yF"></span> m, for comparison. The upper plot is the elbow angle θ₂, the lower one the rate of joint 1, θ̇₁: pink for the chosen line, blue for the line at y = <span data-k="yF"></span> m.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s28.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 28: the short-link arm following a straight line just outside the hole of its workspace, and a chart of the rate of joint 1 along two lines: a sharp peak for the line near the hole, a low hump for the line far from it">
+      <figcaption data-l="th">สไลด์บทที่ 7 หน้า 28 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 28 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">แขนเดียวกับโจทย์ 3 ให้ปลายแขนเดินเป็นเส้นตรงแนวนอนจาก x = <span data-k="xA"></span> m ไป x = <span data-k="xB"></span> m ใน 2 s ด้วยจังหวะเวลา s(t) แบบโจทย์ 2 เทียบสองเส้น: เส้นที่ y = <span data-k="yN"></span> m (ห่างขอบในของปริภูมิทำงานเพียง <span data-k="gapcm"></span> cm) และเส้นที่ y = <span data-k="yF"></span> m เส้นไหนต้องการให้ข้อต่อ 1 หมุนเร็วกว่ามาก และเพราะอะไร</div>
+        <div data-l="en">The arm of problem 3 moves its tool along a horizontal straight line from x = <span data-k="xA"></span> m to x = <span data-k="xB"></span> m in 2 s, with the timing s(t) of problem 2. Compare two lines: one at y = <span data-k="yN"></span> m (only <span data-k="gapcm"></span> cm outside the inner edge of the workspace) and one at y = <span data-k="yF"></span> m. Which line needs joint 1 to turn much faster, and why?</div></div>
+      <div id="ask4"></div><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — รูปร่างและวิธีวางแผน</h3>
+    <ol><li>โจทย์ 1: เลือกเส้นตรงแล้วเลื่อน t ไปที่ 0 s และ <span data-k="tf"></span> s: ความเร็วกระโดด แล้วเลือกพหุนามกำลังห้า: ความเร่งก็เริ่มและจบที่ศูนย์ด้วย กราฟ θ̈ ไม่กระโดดเลย</li><li>โจทย์ 2: เล่นทั้งสองวิธีแล้วดูข้อศอก: ในปริภูมิข้อต่อ θ₂ ค่อย ๆ ลดจาก <span data-k="th2A"></span>° เป็น <span data-k="th2B"></span>° ส่วนบนเส้นตรง ข้อศอกต้องงอเพิ่มจนถึงประมาณ <span data-k="elb"></span>° ก่อนจะเหยียดออก</li><li>โจทย์ 2: ดูอัตราสูงสุดในช่องตัวเลขใต้ภาพ: บนเส้นตรงทั้งสองข้อต่อหมุนเร็วกว่า ทั้งที่ปลายแขนเดินทางสั้นกว่า</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — เมื่อเส้นตรงมีปัญหา</h3>
+    <ol><li>โจทย์ 3: ตั้ง y = <span data-k="R"></span> m: เส้นแตะขอบรูพอดีที่ x = 0 ตรงนั้น θ₂ = 180° (แขนพับสุด) จุดสีแดงหายไป แล้วไปดูอัตราของข้อต่อที่ความสูงเดียวกันในโจทย์ 4</li><li>โจทย์ 4: ลดเส้นจาก <span data-k="ymax"></span> m ลงมาที่ <span data-k="R"></span> m แล้วดูอัตราสูงสุดของข้อต่อ 1 ใต้ภาพเพิ่มขึ้นเรื่อย ๆ</li><li>ปัญหาข้อ 3 ของ Craig (7.5, สไลด์หน้า 29): จุดเริ่มไปถึงได้เฉพาะเมื่อข้อศอกงอทางหนึ่ง จุดปลายไปถึงได้เฉพาะเมื่อข้อศอกงออีกทาง (เพราะขีดจำกัดของข้อต่อ) ทั้งสองจุดไปถึงได้ แต่การเปลี่ยนท่าข้อศอกต้องผ่าน θ₂ = 0° หรือ 180° คือปลายแขนต้องไปแตะขอบของปริภูมิทำงาน เส้นตรงระหว่างสองจุดจึงทำไม่ได้โดยไม่ออกนอกเส้น ส่วนการเคลื่อนที่ในปริภูมิข้อต่อไม่มีปัญหานี้</li><li>เลือกแบบไหน: ปริภูมิข้อต่อ (MOVJ) เมื่อย้ายระหว่างงาน คำนวณง่ายและไม่มีปัญหาภาวะเอกฐาน ปริภูมิคาร์ทีเซียน (MOVL) เมื่องานต้องการรูปร่างของเส้นทาง เช่น เชื่อม ทาซีลแลนต์ หรือสอดชิ้นงาน ตารางเปรียบเทียบอยู่ในขั้นสุดท้ายของโจทย์ 2</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 7 หน้า 5–7, 24, 26–29 (ภาพอยู่ในหน้านี้แล้ว) · Craig 7.1–7.2, 7.4–7.5</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — shapes and plans</h3>
+    <ol><li>Problem 1: choose the straight line and move t to 0 s and <span data-k="tf"></span> s: the velocity jumps. Then choose the quintic: its acceleration also starts and ends at zero, so the θ̈ plot does not jump at all.</li><li>Problem 2: play both plans and watch the elbow. In joint space θ₂ goes steadily from <span data-k="th2A"></span>° down to <span data-k="th2B"></span>°; on the straight line the elbow first bends further, up to about <span data-k="elb"></span>°, before it opens out.</li><li>Problem 2: read the peak rates under the picture: on the straight line both joints turn faster, although the tool travels a shorter way.</li></ol></div>
+  <div class="card"><h3>Try this 2 — where straight lines fail</h3>
+    <ol><li>Problem 3: set y = <span data-k="R"></span> m: the line just touches the hole at x = 0, where θ₂ = 180° (the arm folded back). The red dots are gone; now look at the joint rates at the same height in problem 4.</li><li>Problem 4: lower the line from <span data-k="ymax"></span> m to <span data-k="R"></span> m and watch the peak rate of joint 1 under the picture keep growing.</li><li>Craig’s problem 3 (7.5, slide p. 29): the start can be reached only with the elbow bent one way, the goal only with it bent the other way (because of joint limits). Both are reachable, but changing the elbow means passing θ₂ = 0° or 180°, that is, touching the edge of the workspace, so the straight line between them cannot be followed without leaving it. A joint-space move has no such trouble.</li><li>Which to choose: joint space (MOVJ) for moving between jobs, as it is easy to compute and free of singularity trouble; Cartesian space (MOVL) when the job needs the shape of the path, such as welding, sealing or inserting parts. The comparison table is in the last step of problem 2.</li></ol>
+    <div class="book">Source: chapter 7 slides, pp. 5–7, 24, 26–29 (the pictures are on this page) · Craig 7.1–7.2, 7.4–7.5</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, u = RB.u, dn = RB.d, rad = RB.rad, deg = RB.deg, X = CH7.EX, OV = CH7.OV, G = RB.G, S3 = window.S3, Z0 = 0.11;   // Z0: the plane the planar arms of ch7_3d.js move in
+const el = id => document.getElementById(id), near = (a, b, tol) => Math.abs(a - b) < tol;
+const fx = (x, n = 3) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n);   // fixed decimals: the numbers do not jump about while a slider moves or the motion plays
+const xy = (p, n = 3) => `(${fx(p[0], n)}, ${fx(p[1], n)})`, txy = (p, n = 3) => `(${dn(p[0], n)},\\ ${dn(p[1], n)})`;
+const dgs = q => `(${u(deg(q[0]), 1)}°, ${u(deg(q[1]), 1)}°)`, tdgs = q => `(${dn(deg(q[0]), 1)}^\\circ,\\ ${dn(deg(q[1]), 1)}^\\circ)`;
+const p3 = (p, z = Z0 + 0.012) => [p[0], p[1], z], lerp = (a, b, s) => [a[0] + s * (b[0] - a[0]), a[1] + s * (b[1] - a[1])], polar = (r, a) => [r * Math.cos(a), r * Math.sin(a)];
+const tipOf = (L, q) => { const f = RB.fk2(L[0], L[1], q[0], q[1]); return [f.x, f.y]; };
+/* the distance of the point p from the straight line through A and B, and the foot of the perpendicular */
+const offLine = (p, A, B) => { const d = [B[0] - A[0], B[1] - A[1]]; return Math.abs((p[0] - A[0]) * d[1] - (p[1] - A[1]) * d[0]) / Math.hypot(d[0], d[1]); };
+const foot = (p, A, B) => { const d = [B[0] - A[0], B[1] - A[1]]; return lerp(A, B, ((p[0] - A[0]) * d[0] + (p[1] - A[1]) * d[1]) / (d[0] * d[0] + d[1] * d[1])); };
+/* a slide of this chapter inside a solution step */
+const fig = (n, alt) => `<figure class="slide q"><img src="slides/ch7/s${String(n).padStart(2, '0')}.webp" width="1600" height="900" loading="lazy" decoding="async" alt="${alt}"><figcaption>${t(`สไลด์บทที่ 7 หน้า ${n} · แตะรูปเพื่อขยาย`, `Chapter 7 slides, p. ${n} · tap to enlarge`)}</figcaption></figure>`;
+/* a polynomial a0 + a1 t + … as TeX */
+const polyTex = (a, n = 3) => a.map((c, i) => [c, i]).filter(([c]) => Math.abs(c) > 1e-9).map(([c, i], j) => (c < 0 ? ' - ' : j ? ' + ' : '') + dn(Math.abs(c), n) + (i ? 't' + (i > 1 ? '^' + i : '') : '')).join('');
+
+/* a motion that plays: S.t runs from 0 to S.T while S.play, with a play/pause button and a time slider. Every canvas of a problem calls S.adv each frame;
+   the clock runs on real time, so the motion has the same speed whichever of the canvases are on screen */
+const player = (S, box, id, upd) => {
+  const lab = () => { B.textContent = S.play ? t('⏸ หยุด', '⏸ Pause') : t('▶ เล่น', '▶ Play'); };
+  const B = ui.buttons(box, [{ id: id + 'b', label: '', onclick: () => { if (S.play) S.play = false; else { if (S.t >= S.T - 1e-6) S.t = 0; S.play = true; S._at = performance.now(); } lab(); sl.set(S.t); upd(); } }])[id + 'b'];
+  const sl = ui.slider(box, { id: id + 's', label: t('เวลา t', 'time t'), min: 0, max: S.T, step: 0.01, value: S.t, fmt: v => v.toFixed(2) + ' s', oninput: v => { S.t = v; S.play = false; lab(); upd(); } });
+  lab();
+  S.adv = () => { const now = performance.now(), dt = Math.min(0.05, Math.max(0, (now - (S._at || now)) / 1000)); S._at = now; if (!S.play || dt === 0) return;
+    S.t = Math.min(S.T, S.t + dt); if (S.t >= S.T) { S.play = false; lab(); } sl.set(S.t); upd(); };
+  return { set: v => { S.t = v; S.play = false; lab(); sl.set(v); } };
+};
+/* a plot canvas (CH7.plots) of state S: S.plot(P) gives the options (P: the palette, for faint colours); o.after draws on top */
+const plotStage = (id, S, o = {}) => RB.stage(el(id), o.aspect || 0.5, (c, W, H, dt, P) => { if (S.adv) S.adv(); G.clear(c, W, H, P); const opt = S.plot(P); CH7.plots(c, W, H, P, opt); if (o.after) o.after(c, W, H, P, opt); }, { maxH: o.maxH || 280 });
+
+/* ---------- the numbers of the problem statements (filled into the page) ---------- */
+const C1 = X.cubic, Q1 = X.quintic, T1 = C1.tf, V1 = (C1.thf - C1.th0) / T1;   // problem 1; the straight line turns at V1 = 20 °/s all the way
+const TW = X.two, L2 = TW.L, T2 = TW.T, A2 = TW.A, B2 = TW.B, tq = T2 / 2;   // problem 2, asked at t = T/2 = 1 s
+const H3 = X.hole, L3 = H3.L, R3 = Math.abs(L3[0] - L3[1]), RO = L3[0] + L3[1], y3 = H3.A[1], xr3 = Math.sqrt(R3 * R3 - y3 * y3);   // problem 3: the hole and the out-of-reach half-width
+const NE = X.near, FA = X.far, L4 = NE.L, R4 = Math.abs(L4[0] - L4[1]);   // problem 4
+const TL = TW.line.find(s => near(s.t, tq, 1e-9)), ELB = Math.max(...TW.line.map(s => s.q[1]));
+const V = { L1: u(0.5, 1), th0: u(C1.th0, 0), thf: u(C1.thf, 0), tf: u(T1, 0), l1: u(L2[0], 1), l2: u(L2[1], 1), qA: dgs(TW.qA), qB: dgs(TW.qB), T2: u(T2, 0), tq: u(tq, 0),
+  A2: xy(A2), B2: xy(B2), hl1: u(L3[0], 2), hl2: u(L3[1], 2), hA: `(${u(H3.A[0], 2)}, ${u(H3.A[1], 2)})`, hB: `(${u(H3.B[0], 2)}, ${u(H3.B[1], 2)})`,
+  xA: u(NE.A[0], 2), xB: u(NE.B[0], 2), yN: u(NE.A[1], 2), yF: u(FA.A[1], 2), gapcm: u((NE.gap.r - R4) * 100, 1), R: u(R3, 2), ymax: u(0.55, 2),
+  th2A: u(deg(TW.qA[1]), 0), th2B: u(deg(TW.qB[1]), 0), elb: u(deg(ELB), 0) };
+document.querySelectorAll('[data-k]').forEach(e => { if (e.dataset.k in V) e.textContent = V[e.dataset.k]; else console.error('page 7.1: no value for', e.dataset.k); });
+
+/* ---------- 1: a trajectory is a function of time ---------- */
+const SH = { line: { f: tt => tt <= 0 ? [C1.th0, 0, 0] : tt >= T1 ? [C1.thf, 0, 0] : [C1.th0 + V1 * tt, V1, 0], col: 'muted', name: t('เส้นตรง', 'straight line') },
+  cubic: { f: CH7.polyTraj(C1.a, T1).at, col: 'l2', name: t('พหุนามกำลังสาม', 'cubic') },
+  quintic: { f: CH7.polyTraj(Q1.a, T1).at, col: 'l1', name: t('พหุนามกำลังห้า', 'quintic') } };
+/* starts with the cubic, away from the straight line whose rate the box asks for (the stepper puts the example back) */
+const M1 = { w: 1000, h: 560, L: 0.5, th0: rad(C1.th0), thf: rad(C1.thf), th: rad(C1.th0), xyz: true, shape: 'cubic', t: 1.2, T: T1, play: false, step: 0 }, ro1 = el('ro1');
+const read1 = () => { const e = SH[M1.shape].f(M1.t), jump = M1.shape === 'line' && (M1.t <= 0 || M1.t >= T1); M1.th = rad(e[0]);
+  ro1.innerHTML = `<div class="term">${SH[M1.shape].name} · t = ${M1.t.toFixed(2)} s</div><div class="term"><b>θ = ${fx(e[0], 1)}°</b> · θ̇ = ${fx(e[1], 1)} °/s · θ̈ = ${jump ? `<b style="color:var(--bad)">${t('ไม่มีขอบเขต (ความเร็วกระโดด)', 'unbounded (the velocity jumps)')}</b>` : fx(e[2], 1) + ' °/s²'}</div>`; };
+const rd1 = ui.radio(el('sel1'), Object.keys(SH).map(k => ({ id: 'sh-' + k, label: SH[k].name, on: k === M1.shape })), id => { M1.shape = id.slice(3); read1(); });
+const pl1 = player(M1, el('ctl1'), 'p1', read1); read1();
+/* the chosen shape solid (it carries the dot at the present time), the other two faint. The θ̈ range is kept symmetric about zero, so the zero line
+   sits in the middle of that panel, where the impulse arrows of the straight line start */
+M1.plot = P => { const ks = [M1.shape, ...Object.keys(SH).filter(k => k !== M1.shape)];
+  return { T: T1, now: M1.t, rows: ['p', 'v', 'a'], yr: { a: [-45, 45] }, marks: M1.step === 1 ? [{ t: 0, y: C1.th0 }, { t: T1, y: C1.thf }] : null,
+    curves: ks.map((k, i) => i ? { f: SH[k].f, col: RB.rgba(P[SH[k].col], 0.45), w: 1.5, dash: [5, 4] } : { f: SH[k].f, col: SH[k].col, w: 2.6 }) }; };
+/* the straight line's accelerations at t = 0 and t = tf: impulses, drawn as arrows off the panel (the layout of CH7.plots: margins 52, 14, 8, 30, gap 14) */
+const impulse = (c, W, H, P) => { if (M1.shape !== 'line' && M1.step !== 3) return; const ph = (H - 8 - 30 - 2 * 14) / 3, y0 = 8 + 2 * (ph + 14), ym = y0 + ph / 2, xa = 55, xb = W - 17, col = M1.shape === 'line' ? P.bad : RB.rgba(P.bad, 0.5);
+  G.arrow(c, xa, ym, xa, y0 + 2, col, 2.4, 9); G.arrow(c, xb, ym, xb, y0 + ph - 2, col, 2.4, 9);
+  G.text(c, '+∞', xa + 7, ym - 6, { size: 13.5, color: col, halo: P.bg, weight: 600 }); G.text(c, '−∞', xb - 7, ym + 16, { size: 13.5, color: col, align: 'right', halo: P.bg, weight: 600 }); };
+/* the open step: 1 the path, the arc from θ0 to θf */
+M1.ov = (s, st) => { if (st.step === 1) OV.ang(s, [0, 0, Z0], [Math.cos(st.th0), Math.sin(st.th0), 0], [Math.cos(st.thf), Math.sin(st.thf), 0], st.L, 'gr', t('เส้นทาง', 'path'), { m: 0, s: 24, a: 'r', dx: -30, dy: -34, tr: 0.007 }); };
+CH2.sim('cv1', M1, 'joint1', { aspect: 0.56, maxH: 330, tick: () => M1.adv() });
+plotStage('pl1', M1, { aspect: 0.8, maxH: 300, after: impulse });
+const D1 = C1.thf - C1.th0;
+LS.ask(el('ask1a'), { fields: [{ label: t('(ก) θ̇ ของเส้นตรง (°/s) =', '(a) θ̇ of the straight line (°/s) ='), ok: x => near(x, V1, 0.05), w: 5 }],
+  check: v => { const x = v[0]; return near(x, D1, 0.3) ? t(`${u(D1, 0)}° คือมุมที่ต้องหมุน: หารด้วยเวลา ${u(T1, 0)} s`, `${u(D1, 0)}° is the angle to turn: divide it by the time, ${u(T1, 0)} s`)
+    : near(x, C1.thf / T1, 0.1) ? t(`ใช้ ${u(C1.thf, 0)}° ทั้งหมด แต่ข้อต่อเริ่มที่ ${u(C1.th0, 0)}°: มุมที่ต้องหมุนคือ θ<sub>f</sub> − θ₀`, `that uses all ${u(C1.thf, 0)}°, but the joint starts at ${u(C1.th0, 0)}°: the angle to turn is θ<sub>f</sub> − θ₀`)
+    : near(x, C1.vmax, 0.1) ? t(`${u(C1.vmax, 0)} °/s คือความเร็วสูงสุดของพหุนามกำลังสาม เส้นตรงมีความเร็วเท่ากันตลอดทาง`, `${u(C1.vmax, 0)} °/s is the peak of the cubic; the straight line has the same rate all the way`)
+    : near(x, rad(V1), 0.005) ? t('นั่นคือหน่วย rad/s ช่องนี้ถามเป็น °/s', 'that is in rad/s: the box asks for °/s')
+    : near(x, D1 * T1, 0.5) ? t('หารด้วยเวลา ไม่ใช่คูณ', 'divide by the time, do not multiply') : ''; } });
+LS.choose(el('ask1b'), { labels: ['', '', '', ''], answer: 2, options: [t('(ข) ศูนย์ เพราะความเร็วคงที่', '(b) zero, because the velocity is constant'), t('(ข) ค่าจำกัดค่าหนึ่งที่มอเตอร์ให้ได้', '(b) some finite value the motor can give'),
+  t('(ข) ไม่มีขอบเขต (อิมพัลส์): ความเร็วกระโดดจากศูนย์เป็นค่าเต็มทันที', '(b) unbounded (an impulse): the velocity jumps from zero to its full value at once'), t('(ข) เท่ากับความเร่งตรงกลางทาง', '(b) the same as in the middle of the move')] });
+/* back to the example: the straight line in steps 2–3 (the cubic in steps 1 and 4), at the middle of the move (step 3: at t = 0) */
+const put1 = k => { const sh = k === 2 || k === 3 ? 'line' : 'cubic'; M1.shape = sh; rd1.set('sh-' + sh); pl1.set(k === 3 ? 0 : T1 / 2); read1(); };
+const QA0 = CH7.poly(Q1.a, 0)[2];
+LS.stepper(el('st1'), { onStep: k => { const was = M1.step; M1.step = k; if (k || was) put1(k); }, steps: [
+  { why: t('<b>เส้นทางหรือแนววิถี</b>: <b>เส้นทาง</b>ของปลายก้านคือส่วนโค้งจาก θ₀ ถึง θ<sub>f</sub> (เส้นสีเขียวในรูป) ซึ่งบอกเพียงว่าผ่านที่ไหน ไม่มีเวลา <b>แนววิถี</b>บอกว่าข้อต่ออยู่ที่มุมเท่าไร<b>ทุกขณะ</b> คือ θ(t) และจากนั้นได้ θ̇(t) และ θ̈(t) จุดสองจุดบนกราฟ θ คือจุดบนเส้นทาง (จุดเริ่มและเป้าหมาย) ผู้ใช้กำหนดเพียงเท่านี้ ส่วนรูปร่างระหว่างสองจุด เวลาที่ใช้ และโพรไฟล์ความเร็ว ระบบเป็นผู้เลือก ทุกรูปร่างบนกราฟผ่านสองจุดนี้', '<b>Path or trajectory</b>: the <b>path</b> of the end of the link is the arc from θ₀ to θ<sub>f</sub> (green in the picture); it says where, not when. The <b>trajectory</b> says where the joint is <b>at every instant</b>: θ(t), and with it θ̇(t) and θ̈(t). The two dots on the θ plot are the path points (the start and the goal). That is all the user gives; the shape between them, the duration and the velocity profile are the system’s choice. Every shape on the plot passes through the same two dots'),
+    tex: `\\theta(0) = \\theta_0 = ${dn(C1.th0, 0)}^\\circ, \\qquad \\theta(t_f) = \\theta_f = ${dn(C1.thf, 0)}^\\circ, \\qquad t_f = ${dn(T1, 0)}\\ \\text{s}` },
+  { why: t('<b>เส้นตรง</b>: มุมเพิ่มขึ้นในอัตราคงที่ อัตรานั้นคือมุมที่ต้องหมุนหารด้วยเวลา ความเร็วจึงเท่ากันตลอดทาง (เส้นแนวนอนบนกราฟ θ̇)', '<b>The straight line</b>: the angle grows at a constant rate, the angle to turn divided by the time, so the velocity is the same all the way (the flat line on the θ̇ plot)'),
+    tex: `\\begin{aligned} \\theta(t) &= \\theta_0 + \\frac{\\theta_f - \\theta_0}{t_f}\\,t = ${dn(C1.th0, 0)} + ${dn(V1, 3)}\\,t \\\\ \\dot\\theta &= \\frac{${dn(C1.thf, 0)} - ${dn(C1.th0, 0)}}{${dn(T1, 0)}} = ${dn(V1, 3)}^\\circ/\\text{s} \\end{aligned}` },
+  { why: t(`<b>ความเร็วกระโดด</b>: ก่อน t = 0 ข้อต่ออยู่นิ่ง (θ̇ = 0) แต่หลัง t = 0 เพียงนิดเดียว θ̇ = ${u(V1, 1)} °/s ความเร็วเปลี่ยนไปในเวลาเป็นศูนย์ ความเร่งจึง<b>ไม่มีขอบเขต</b> (อิมพัลส์ ลูกศรสีแดงในกราฟ θ̈) ที่ t = ${u(T1, 0)} s ก็เช่นกันแต่ในทิศตรงข้าม แรงบิดที่ต้องใช้ τ = I θ̈ จึงไม่มีขอบเขตด้วย มอเตอร์จริงให้แรงบิดได้จำกัด ข้อต่อจึงตามแผนนี้ไม่ทัน ตัวควบคุมตามไม่ทันและแขนกระตุก`, `<b>The velocity jumps</b>: just before t = 0 the joint is at rest (θ̇ = 0), just after it θ̇ = ${u(V1, 1)} °/s. The velocity changes in no time, so the acceleration is <b>unbounded</b> (an impulse: the red arrows on the θ̈ plot); at t = ${u(T1, 0)} s the same happens the other way. The torque needed, τ = I θ̈, is unbounded too. A real motor gives a limited torque, so the joint cannot follow this plan: the controller lags behind and the arm jerks`),
+    tex: `\\ddot\\theta(0) = \\lim_{\\Delta t \\to 0} \\frac{\\dot\\theta(\\Delta t) - \\dot\\theta(0)}{\\Delta t} = \\lim_{\\Delta t \\to 0} \\frac{${dn(V1, 3)} - 0}{\\Delta t} = \\infty` },
+  { why: t(`<b>ฟังก์ชันที่เรียบ</b> (บรรทัดบน: พหุนามกำลังสาม บรรทัดล่าง: พหุนามกำลังห้า): พหุนามกำลังสามเริ่มและหยุดด้วยความเร็วศูนย์ ความเร่งที่ต้นมีค่าจำกัด (${u(C1.acc0, 1)} °/s²) ราคาที่จ่ายคือความเร็วกลางทางสูงกว่าเส้นตรง (${u(C1.vmax, 1)} °/s) พหุนามกำลังห้าทำให้ความเร่งที่ต้นและปลายเป็นศูนย์ด้วย จึงนุ่มนวลกว่าอีก (ความเร็วสูงสุด ${u(Q1.vmax, 1)} °/s ความเร่งสูงสุด ${u(Q1.accMax, 1)} °/s²) หน้า 7.2 หาสัมประสิทธิ์ของทั้งสองแบบ หน้า 7.3 ใช้เส้นตรงที่ต่อด้วยพาราโบลาที่ปลายทั้งสอง (LSPB, linear segment with parabolic blends)`, `<b>Smooth functions</b> (upper lines: the cubic, lower lines: the quintic): the cubic starts and stops at zero velocity, with a finite acceleration at the start (${u(C1.acc0, 1)} °/s²); the price is a higher speed in the middle than the straight line’s (${u(C1.vmax, 1)} °/s). The quintic also makes the acceleration zero at both ends, which is smoother still (peak velocity ${u(Q1.vmax, 1)} °/s, peak acceleration ${u(Q1.accMax, 1)} °/s²). Page 7.2 finds the coefficients of both; page 7.3 uses a straight line with a parabola at each end (LSPB, linear segment with parabolic blends)`),
+    tex: `\\begin{aligned} \\theta(t) &= ${polyTex(C1.a)} \\\\ & \\dot\\theta_{max} = ${dn(C1.vmax, 1)}^\\circ/\\text{s},\\quad \\ddot\\theta(0) = ${dn(C1.acc0, 1)}^\\circ/\\text{s}^2 \\\\ \\theta(t) &= ${polyTex(Q1.a)} \\\\ & \\dot\\theta_{max} = ${dn(Q1.vmax, 1)}^\\circ/\\text{s},\\quad \\ddot\\theta(0) = ${dn(QA0, 1)} \\end{aligned}` }],
+  answer: t(`(ก) θ̇ = ${u(V1, 1)} °/s คงที่ตลอดทาง · (ข) ที่ t = 0 และ t = ${u(T1, 0)} s ความเร็วกระโดด ความเร่งจึงไม่มีขอบเขต (อิมพัลส์) มอเตอร์ทำไม่ได้ จึงต้องใช้ฟังก์ชันที่เรียบซึ่งเริ่มและหยุดอย่างนิ่ง`, `(a) θ̇ = ${u(V1, 1)} °/s, constant all the way · (b) at t = 0 and t = ${u(T1, 0)} s the velocity jumps, so the acceleration is unbounded (an impulse): no motor can do that, hence smooth functions that start and stop at rest`) });
+
+/* ---------- 2: joint space or Cartesian space ---------- */
+const dq = [0, 1].map(j => TW.qB[j] - TW.qA[j]);
+/* per joint [θ, θ̇, θ̈] (rad) at time tt: joint space (every joint the rest-to-rest cubic s(t)), and the straight line (IK at every instant, rates J⁻¹v) */
+const jointAt = tt => { const e = CH7.sOf(tt, T2); return [0, 1].map(j => [TW.qA[j] + e[0] * dq[j], e[1] * dq[j], e[2] * dq[j]]); };
+const memo = new Map(), lineAt = tt => { const key = Math.round(tt * 1e6); let r = memo.get(key); if (r) return r;
+  const e = CH7.sOf(tt, T2), p = lerp(A2, B2, e[0]), k = RB.ik2(L2[0], L2[1], p[0], p[1], 1), q = [k.t1, k.t2], qd = CH5.two.rates(L2, q, [e[1] * (B2[0] - A2[0]), e[1] * (B2[1] - A2[1])]) || [0, 0];
+  r = [0, 1].map(j => [q[j], qd[j], 0]); if (memo.size < 4000) memo.set(key, r); return r; };
+const PJ = TW.joint.map(s => s.p), PL = TW.line.map(s => s.p);
+/* every elbow and tool point of both motions: the camera keeps them all in view and stays still while the arm moves */
+const KEEP2 = [...TW.joint, ...TW.line].flatMap(s => { const f = RB.fk2(L2[0], L2[1], s.q[0], s.q[1]); return [[f.x1, f.y1], [f.x, f.y]]; });
+const pkJ = [0, 1].map(j => Math.max(...TW.joint.map(s => Math.abs(CH7.sOf(s.t, T2)[1] * dq[j])))), pkL = CH7.peakRates(TW.line);
+const DEV = TW.joint.reduce((m, s) => { const d = offLine(s.p, A2, B2); return d > m.d ? { d, s } : m; }, { d: -1, s: null });
+const qMid = jointAt(tq).map(e => e[0]), pJmid = tipOf(L2, qMid), sMid = CH7.sOf(tq, T2)[0], pMid = lerp(A2, B2, sMid);
+const M2 = { w: 1000, h: 620, L: L2, q: TW.qA.slice(), scheme: 'joint', t: 0.4, T: T2, play: false, line: [A2, B2], pts: [A2, B2], ptNames: ['A', 'B'], keep: KEEP2, xyz: true, step: 0, ghosts: null }, ro2 = el('ro2');   // starts at t = 0.4 s, away from the asked t = 1 s
+const read2 = () => { const J = M2.scheme === 'joint', e = (J ? jointAt : lineAt)(M2.t); M2.q = [e[0][0], e[1][0]]; const p = tipOf(L2, M2.q), path = J ? TW.joint : TW.line, pk = J ? pkJ : pkL;
+  M2.trace = M2.t > 0.01 ? path.filter(s => s.t <= M2.t + 1e-9).map(s => s.p).concat([p]) : null; M2.traceKey = J ? 'o' : 'gr'; M2.trace2 = J ? PL : PJ; M2.trace2Key = J ? 'gr' : 'o';
+  ro2.innerHTML = `<div class="term">${J ? t('ปริภูมิข้อต่อ', 'joint space') : t('เส้นตรงในปริภูมิคาร์ทีเซียน', 'straight line in Cartesian space')} · t = ${M2.t.toFixed(2)} s · s(t) = ${fx(CH7.sOf(M2.t, T2)[0])}</div>` +
+    `<div class="term"><b>θ₁ = ${fx(deg(M2.q[0]), 1)}°, θ₂ = ${fx(deg(M2.q[1]), 1)}°</b> · ${t('ปลายแขน', 'tool')} (x, y) = ${xy(p)} m · ${t('ห่างจากเส้นตรง AB', 'off the line AB by')} ${fx(offLine(p, A2, B2))} m</div>` +
+    `<div class="term">${t('อัตราสูงสุดของข้อต่อตลอดการเคลื่อนที่นี้', 'peak joint rates of this move')}: |θ̇₁| ${fx(deg(pk[0]), 1)} °/s, |θ̇₂| ${fx(deg(pk[1]), 1)} °/s</div>`; };
+const rd2 = ui.radio(el('sel2'), [{ id: 's2-joint', label: t('ปริภูมิข้อต่อ (MOVJ)', 'joint space (MOVJ)'), on: true }, { id: 's2-line', label: t('เส้นตรงในปริภูมิคาร์ทีเซียน (MOVL)', 'straight line in Cartesian space (MOVL)') }], id => { M2.scheme = id.slice(3); read2(); });
+const pl2 = player(M2, el('ctl2'), 'p2', read2); read2();
+const dgc = (fn, j) => tt => fn(tt)[j].map(deg);
+M2.plot = P => { const J = M2.scheme === 'joint', a = J ? jointAt : lineAt, b = J ? lineAt : jointAt;
+  return { T: T2, now: M2.t, rows: ['p', 'v'], marks: M2.step === 1 || M2.step === 2 ? qMid.map(x => ({ t: tq, y: deg(x) })) : null,
+    curves: [{ f: dgc(a, 0), col: 'l1', w: 2.4 }, { f: dgc(a, 1), col: 'l2', w: 2.4 }, { f: dgc(b, 0), col: RB.rgba(P.l1, 0.42), w: 1.4, dash: [5, 4] }, { f: dgc(b, 1), col: RB.rgba(P.l2, 0.42), w: 1.4, dash: [5, 4] }] }; };
+/* the open step: 2 how far the tool is off the line; 3 the midpoint of A and B */
+M2.ov = (s, st) => { const k = st.step; if (!k) return; const p = tipOf(L2, st.q);
+  if (k === 2) OV.dist(s, p3(p), p3(foot(p, A2, B2)), 'pk', fx(offLine(p, A2, B2)) + ' m', { m: 0, s: 24, a: 'l', dx: 14, dy: 6 });
+  if (k === 3) OV.pt(s, p3(pMid, Z0 + 0.02), 'gr', t('จุดกึ่งกลาง s = 0.5', 'midpoint, s = 0.5'), { r: 0.012, m: 0, s: 22, a: 'l', dx: 22, dy: 26 }); };
+CH2.sim('cv2', M2, 'arm2', { aspect: 0.62, maxH: 340, tick: () => M2.adv() });
+plotStage('pl2', M2, { aspect: 0.66, maxH: 250 });
+const qL = TL.q, ABs = [A2[0] + B2[0], A2[1] + B2[1]];
+LS.ask(el('ask2a'), { fields: [{ label: t('(ก) θ₁ (°) =', '(a) θ₁ (°) ='), ok: (x, v) => near(v[0], deg(qMid[0]), 0.2) && near(v[1], deg(qMid[1]), 0.2), w: 4.5 }, { label: 'θ₂ (°) =', ok: (x, v) => near(v[0], deg(qMid[0]), 0.2) && near(v[1], deg(qMid[1]), 0.2), w: 4.5 }],
+  check: v => { const is = (a, b) => near(v[0], a, 0.3) && near(v[1], b, 0.3), qa = TW.qA.map(deg), qb = TW.qB.map(deg);
+    return is(qa[0] + qb[0], qa[1] + qb[1]) ? t('นั่นคือ θ<sub>A</sub> + θ<sub>B</sub>: ครึ่งทางคือค่าเฉลี่ย หารด้วย 2', 'that is θ<sub>A</sub> + θ<sub>B</sub>: halfway is their average, divide by 2')
+      : is(qb[0] - qa[0], qb[1] - qa[1]) ? t('นั่นคือมุมที่ต้องหมุน θ<sub>B</sub> − θ<sub>A</sub>: เอาครึ่งหนึ่งไปบวกกับ θ<sub>A</sub>', 'that is the change θ<sub>B</sub> − θ<sub>A</sub>: add half of it to θ<sub>A</sub>')
+      : is((qb[0] - qa[0]) / 2, (qb[1] - qa[1]) / 2) ? t('นั่นคือครึ่งหนึ่งของมุมที่ต้องหมุน: บวกกับ θ<sub>A</sub> ด้วย', 'that is half the change: add θ<sub>A</sub> to it')
+      : is(qb[0], qb[1]) ? t(`นั่นคือท่า B (s = 1): ใส่ t/T = ${u(tq / T2, 1)} ไม่ใช่ t = ${u(tq, 0)} ลงใน s`, `that is pose B (s = 1): put t/T = ${u(tq / T2, 1)} into s, not t = ${u(tq, 0)}`)
+      : is(deg(qL[0]), deg(qL[1])) ? t('นั่นคือมุมบนเส้นตรงที่เวลาเดียวกัน: ในปริภูมิข้อต่อแต่ละข้อต่อเคลื่อนที่ตามพหุนามกำลังสามของตัวเอง', 'those are the angles on the straight line at that time: in joint space every joint moves on its own cubic') : ''; } });
+LS.ask(el('ask2b'), { fields: [{ label: t('(ข) x (m) =', '(b) x (m) ='), ok: (x, v) => near(v[0], pMid[0], 0.002) && near(v[1], pMid[1], 0.002), w: 5 }, { label: 'y (m) =', ok: (x, v) => near(v[0], pMid[0], 0.002) && near(v[1], pMid[1], 0.002), w: 5 }],
+  check: v => { const is = (p, tol = 0.004) => near(v[0], p[0], tol) && near(v[1], p[1], tol);
+    return is(pJmid) ? t('นั่นคือตำแหน่งของปลายแขนเมื่อเคลื่อนที่ในปริภูมิข้อต่อ: บนเส้นตรงใช้ p = A + s(B − A)', 'that is where the joint-space move puts the tool: on the straight line use p = A + s(B − A)')
+      : is(ABs) ? t('นั่นคือ A + B: หารด้วย 2', 'that is A + B: divide it by 2') : is([B2[0] - A2[0], B2[1] - A2[1]]) ? t('B − A คือทิศของเส้น: เอาครึ่งหนึ่งไปบวกกับ A', 'B − A is the direction of the line: add half of it to A')
+      : is(lerp(A2, B2, tq / T2 * tq / T2)) ? t('s(t) ไม่ใช่ (t/T)²: แทนค่าในสูตร 3(t/T)² − 2(t/T)³', 's(t) is not (t/T)²: put the numbers into 3(t/T)² − 2(t/T)³') : ''; } });
+/* back to the example at t = 1 s: steps 1–2 joint space (1 with the ghosts of the poses A and B), steps 3–4 the straight line */
+const put2 = k => { const sc = k >= 3 ? 'line' : 'joint'; M2.scheme = sc; rd2.set('s2-' + sc); M2.ghosts = k === 1 ? [TW.qA, TW.qB] : null; pl2.set(tq); read2(); };
+const f2 = (x, n = 3) => dn(x, n), cmpTab = t(
+  `<div style="overflow-x:auto"><table class="tbl"><tr><th></th><th>ปริภูมิข้อต่อ</th><th>ปริภูมิคาร์ทีเซียน (เส้นตรง)</th></tr><tr><td>คำนวณ</td><td>IK เฉพาะที่จุดบนเส้นทาง</td><td>IK ทุกขณะ</td></tr><tr><td>ทางของปลายเครื่องมือ</td><td>เส้นโค้งที่ไม่ได้เลือก</td><td>เส้นตรง (หรือรูปร่างที่เลือก)</td></tr><tr><td>อัตราสูงสุด |θ̇₁|, |θ̇₂| ในตัวอย่างนี้</td><td>${u(deg(pkJ[0]), 1)}, ${u(deg(pkJ[1]), 1)} °/s</td><td>${u(deg(pkL[0]), 1)}, ${u(deg(pkL[1]), 1)} °/s</td></tr><tr><td>ปัญหา</td><td>ไม่มีปัญหาจากภาวะเอกฐาน</td><td>จุดที่ไปไม่ถึง ภาวะเอกฐาน (โจทย์ 3–4)</td></tr><tr><td>ใช้เมื่อ</td><td>ย้ายระหว่างงาน</td><td>เชื่อม ทาซีลแลนต์ สอดชิ้นงาน</td></tr><tr><td>คำสั่งบนชุดควบคุม Yaskawa</td><td>MOVJ</td><td>MOVL</td></tr></table></div>`,
+  `<div style="overflow-x:auto"><table class="tbl"><tr><th></th><th>Joint space</th><th>Cartesian space (straight line)</th></tr><tr><td>computed</td><td>IK only at the path points</td><td>IK at every instant</td></tr><tr><td>tool path</td><td>a curve nobody chose</td><td>the straight line (or another chosen shape)</td></tr><tr><td>peak |θ̇₁|, |θ̇₂| in this example</td><td>${u(deg(pkJ[0]), 1)}, ${u(deg(pkJ[1]), 1)} °/s</td><td>${u(deg(pkL[0]), 1)}, ${u(deg(pkL[1]), 1)} °/s</td></tr><tr><td>trouble</td><td>none from singularities</td><td>points out of reach, singularities (problems 3–4)</td></tr><tr><td>used for</td><td>moving between jobs</td><td>welding, sealing, inserting parts</td></tr><tr><td>Yaskawa instruction</td><td>MOVJ</td><td>MOVL</td></tr></table></div>`);
+LS.stepper(el('st2'), { onStep: k => { const was = M2.step; M2.step = k; if (k || was) put2(k); }, steps: [
+  { why: t(`<b>แผนในปริภูมิข้อต่อ</b>: หา IK เฉพาะที่ A และ B (โจทย์ให้มาแล้ว) แต่ละข้อต่อเคลื่อนที่ด้วยพหุนามกำลังสามของตัวเองจากหยุดนิ่งถึงหยุดนิ่ง ทั้งสองข้อต่อใช้ s(t) ตัวเดียวกัน จึงออกตัวพร้อมกันและถึง B พร้อมกัน (ภาพจางคือท่า A และ B) GP8 หกข้อต่อในสไลด์หน้า 24 ก็ทำแบบเดียวกัน ที่ t = ${u(tq, 0)} s = T/2 พหุนามกำลังสามสมมาตรรอบกึ่งกลาง ครึ่งทางของเวลาจึงเป็นครึ่งทางของมุม (จุดบนกราฟ)`, `<b>The joint-space plan</b>: the IK only at A and B (the problem gives them). Every joint moves on its own rest-to-rest cubic; both use the same s(t), so they set off together and arrive at B together (the faint arms are poses A and B). The six-joint GP8 on slide p. 24 does the same. At t = ${u(tq, 0)} s = T/2 the cubic is symmetric about its middle, so halfway in time is halfway in angle (the dots on the plot)`),
+    tex: `\\begin{aligned} s(${dn(tq, 0)}) &= 3(${dn(tq / T2, 1)})^2 - 2(${dn(tq / T2, 1)})^3 = ${dn(sMid, 3)} \\\\ \\theta_1 &= ${dn(deg(TW.qA[0]), 1)}^\\circ + ${dn(sMid, 1)}\\,(${dn(deg(TW.qB[0]), 1)}^\\circ - (${dn(deg(TW.qA[0]), 1)}^\\circ)) = ${dn(deg(qMid[0]), 1)}^\\circ \\\\ \\theta_2 &= ${dn(deg(TW.qA[1]), 1)}^\\circ + ${dn(sMid, 1)}\\,(${dn(deg(TW.qB[1]), 1)}^\\circ - ${dn(deg(TW.qA[1]), 1)}^\\circ) = ${dn(deg(qMid[1]), 1)}^\\circ \\end{aligned}`,
+    body: fig(24, 'Slide 24: the six-joint GP8 through three poses; every joint moves on its own cubic, all with the same segment times, so they reach each pose together') },
+  { why: t(`<b>ปลายแขนอยู่ที่ไหน</b>: จลนศาสตร์ไปข้างหน้า (FK, forward kinematics) ของ ${dgs(qMid)} ให้ตำแหน่งที่ไม่ได้อยู่บนเส้นตรง ทางของปลายแขนโป่งออกจากเส้น ระยะมากที่สุดจากเส้น (หาจากจุดทั้งหมดของการเคลื่อนที่) คือ ${fx(DEV.d)} m ที่ t = ${u(DEV.s.t, 2)} s (เส้นประสีชมพู)`, `<b>Where the tool is</b>: the forward kinematics (FK) of ${dgs(qMid)} gives a point that is not on the straight line: the tool’s path bulges away from it. The largest distance from the line (over all the samples of the motion) is ${fx(DEV.d)} m, at t = ${u(DEV.s.t, 2)} s (the pink dashed line)`),
+    tex: `\\begin{aligned} x &= ${dn(L2[0], 1)}\\cos ${dn(deg(qMid[0]), 1)}^\\circ + ${dn(L2[1], 1)}\\cos ${dn(deg(qMid[0] + qMid[1]), 1)}^\\circ = ${f2(pJmid[0])}\\ \\text{m} \\\\ y &= ${dn(L2[0], 1)}\\sin ${dn(deg(qMid[0]), 1)}^\\circ + ${dn(L2[1], 1)}\\sin ${dn(deg(qMid[0] + qMid[1]), 1)}^\\circ = ${f2(pJmid[1])}\\ \\text{m} \\\\ d_{max} &= ${f2(DEV.d)}\\ \\text{m} \\end{aligned}` },
+  { why: t(`<b>แผนในปริภูมิคาร์ทีเซียน</b>: กำหนดตำแหน่งบนเส้นตรง p(t) = A + s(t)(B − A) ที่ t = ${u(tq, 0)} s ได้ s = ${u(sMid, 1)} คือจุดกึ่งกลางของ A กับ B จากนั้นหา IK ทุกขณะเพื่อได้มุมของข้อต่อ (ท่าข้อศอกเดียวกับที่ A) ตัวควบคุมจริงคำนวณแบบนี้หลายร้อยครั้งต่อวินาที (สไลด์หน้า 26)`, `<b>The Cartesian plan</b>: put the tool on the straight line, p(t) = A + s(t)(B − A). At t = ${u(tq, 0)} s, s = ${u(sMid, 1)}: the midpoint of A and B. Then the IK at every instant gives the joint angles (the same elbow solution as at A). A real controller does this hundreds of times a second (slide p. 26)`),
+    tex: `\\begin{aligned} p(${dn(tq, 0)}) &= A + ${dn(sMid, 1)}\\,(B - A) = \\tfrac{1}{2}(A + B) \\\\ &= \\tfrac{1}{2}\\big(${txy(A2)} + ${txy(B2)}\\big) = ${txy(pMid)}\\ \\text{m} \\\\ \\theta(${dn(tq, 0)}) &= \\text{IK}\\big(p(${dn(tq, 0)})\\big) = ${tdgs(qL)} \\end{aligned}`,
+    body: fig(26, 'Slide 26: the two-link arm keeping its tool on the straight line from A to B; p of t equals A plus s of t times B minus A, and the inverse kinematics is solved at every instant') },
+  { why: t('<b>เทียบสองวิธี</b>: ในปริภูมิข้อต่อ แต่ละข้อต่อมีอัตราสูงสุดตรงกลางทาง (1.5 เท่าของมุมที่ต้องหมุนหารด้วย T) บนเส้นตรงทั้งสองข้อต่อต้องหมุนเร็วกว่า เพราะข้อศอกต้องงอเข้าแล้วเหยียดออกเพื่อให้ปลายแขนอยู่บนเส้น (ดูกราฟ: เส้นทึบกับเส้นประ) ตัวควบคุมอุตสาหกรรมมีทั้งสองแบบ:', '<b>Compare the two</b>: in joint space every joint has its peak rate in the middle (1.5 times its change of angle divided by T). On the straight line both joints must turn faster, because the elbow has to bend in and open out again to keep the tool on the line (see the plots: solid against dashed). Industrial controllers offer both:'),
+    body: cmpTab }],
+  answer: t(`(ก) θ(${u(tq, 0)} s) = ${dgs(qMid)} · (ข) p(${u(tq, 0)} s) = ${xy(pMid)} m · ในปริภูมิข้อต่อ ปลายแขนอยู่ที่ ${xy(pJmid)} m ซึ่งห่างจากเส้นตรง ${fx(DEV.d)} m`, `(a) θ(${u(tq, 0)} s) = ${dgs(qMid)} · (b) p(${u(tq, 0)} s) = ${xy(pMid)} m · in joint space the tool is at ${xy(pJmid)} m then, ${fx(DEV.d)} m off the line`) });
+
+/* ---------- 3: points out of reach ---------- */
+const T3 = 2, N3 = 240;
+/* starts with the line at y = 0.1 m (the example is y = 0.15 m) */
+const M3 = { w: 1000, h: 720, fit: false, tgt: [0.05, 0.03, Z0], dist: 3.1, L: L3, ring: true, y: 0.1, mode: 'line', t: 0, T: T3, play: false, ptNames: ['A', 'B'], traceKey: 'o', trace2Key: 'o', xyz: true, step: 0, ghosts: null }, ro3 = el('ro3');
+/* the samples of the straight line at height y (CH7.lineMove2: ok false where the IK has no solution), the red dots (every other sample out of reach),
+   and the joint-space move between the same two points (IK at A and B, the elbow as in RB.ik2 +1) */
+const geom3 = () => { const A = [H3.A[0], M3.y], B = [H3.B[0], M3.y], a = RB.ik2(L3[0], L3[1], A[0], A[1], 1), b = RB.ik2(L3[0], L3[1], B[0], B[1], 1);
+  Object.assign(M3, { A, B, line: [A, B], pts: [A, B], S: CH7.lineMove2(L3, A, B, T3, 1, N3), qA: [a.t1, a.t2], qB: [b.t1, b.t2] });
+  M3.bad = M3.S.filter((s, i) => !s.ok && i % 2 === 0).map(s => s.p); M3.J = CH7.jointMove2(L3, M3.qA, M3.qB, T3, 120); };
+/* where the arm is at time t. On the line: the IK of the point it should be at; where there is none, the arm waits at the last pose it reached
+   and jumps when the line comes back into reach (what a real arm told to follow the line would have to do) */
+const pose3 = () => { const e = CH7.sOf(M3.t, T3);
+  if (M3.mode === 'joint') { M3.q = [0, 1].map(j => M3.qA[j] + e[0] * (M3.qB[j] - M3.qA[j])); M3.miss = false; M3.cmd = tipOf(L3, M3.q);
+    M3.trace = M3.t > 0.01 ? M3.J.filter(s => s.t <= M3.t).map(s => s.p).concat([M3.cmd]) : null; M3.trace2 = M3.J.map(s => s.p); return; }
+  const p = lerp(M3.A, M3.B, e[0]), r = RB.ik2(L3[0], L3[1], p[0], p[1], 1); M3.cmd = p; M3.trace = null; M3.trace2 = null;
+  if (r.ok) { M3.q = [r.t1, r.t2]; M3.miss = false; } else { let q = M3.qA; M3.S.forEach(s => { if (s.ok && s.t <= M3.t) q = s.q; }); M3.q = q; M3.miss = true; } };
+/* the part of the line the tool really followed: the reachable samples up to now, broken where the line is out of reach */
+const runs3 = st => { const out = []; let cur = []; st.S.forEach(s => { if (s.t > st.t + 1e-9) return; if (s.ok) cur.push(s.p); else if (cur.length) { out.push(cur); cur = []; } });
+  if (!st.miss && st.t > 0) cur.push(st.cmd); if (cur.length) out.push(cur); return out; };
+const read3 = () => { const y = M3.y, g = CH7.lineGap(M3.A, M3.B), inH = g.r < R3 - 1e-9, xr = inH ? Math.sqrt(R3 * R3 - y * y) : 0;
+  const reach = inH ? `<b style="color:var(--bad)">${t('ไปไม่ถึง', 'out of reach')}: ${fx(-xr)} &lt; x &lt; ${fx(xr)} m</b> ${t('(จุดสีแดง)', '(the red dots)')}` : near(g.r, R3, 0.005) ? t('เส้นแตะขอบรูที่ x = 0: ตรงนั้น θ₂ = 180°', 'the line touches the hole at x = 0: there θ₂ = 180°') : t('ไปถึงได้ทุกจุดบนเส้น', 'every point of the line can be reached');
+  const now = M3.mode === 'joint' ? `${t('ปริภูมิข้อต่อ', 'joint space')} · t = ${M3.t.toFixed(2)} s · θ = (${fx(deg(M3.q[0]), 1)}°, ${fx(deg(M3.q[1]), 1)}°) · ${t('ปลายแขน', 'tool')} ${xy(M3.cmd)} m`
+    : M3.miss ? `<b style="color:var(--bad)">t = ${M3.t.toFixed(2)} s · ${t('ปลายแขนควรอยู่ที่', 'the tool should be at')} ${xy(M3.cmd)} m: ${t('ไปไม่ถึง (IK ไม่มีคำตอบ) แขนรออยู่ที่ท่าสุดท้ายที่ไปถึง', 'out of reach (no IK solution); the arm waits at the last pose it reached')}</b>`
+    : `t = ${M3.t.toFixed(2)} s · ${t('ปลายแขน', 'tool')} ${xy(M3.cmd)} m · θ = (${fx(deg(M3.q[0]), 1)}°, ${fx(deg(M3.q[1]), 1)}°)`;
+  ro3.innerHTML = `<div class="term">${t('เส้นที่', 'line at')} y = ${fx(y, 2)} m · ${t('ห่างจากฐานน้อยที่สุด', 'closest to the base')} ${fx(g.r)} m · ${t('รัศมีของรู', 'hole radius')} |l₁ − l₂| = ${fx(R3)} m</div><div class="term">${reach}</div><div class="term">${now}</div>`; };
+const upd3 = () => { pose3(); read3(); };
+const rd3 = ui.radio(el('sel3'), [{ id: 'm3-line', label: t('เส้นตรง (MOVL)', 'straight line (MOVL)'), on: true }, { id: 'm3-joint', label: t('ปริภูมิข้อต่อ (MOVJ)', 'joint space (MOVJ)') }], id => { M3.mode = id.slice(3); upd3(); });
+const ys3 = ui.slider(el('ctl3'), { id: 'y3', label: t('ความสูงของเส้น y', 'height of the line y'), min: 0, max: 0.55, step: 0.01, value: M3.y, fmt: v => fx(v, 2) + ' m', oninput: v => { M3.y = v; geom3(); upd3(); } });
+const pl3 = player(M3, el('ctl3'), 'p3', upd3); geom3(); upd3();
+/* every frame: the part of the line the tool followed (green) and, while out of reach, where it should be. The open step: 1 the inner and outer edges
+   of the workspace (the faint arm folded back); 2 the height of the line; 3 the two ends of the out-of-reach part, on the edge of the hole */
+M3.ov = (s, st) => { if (st.mode === 'line') { runs3(st).forEach(r => { if (r.length > 1) S3.tube(s, r.map(p => [p[0], p[1], Z0 + 0.004]), S3.C.gr, 0.0055); });
+    if (st.miss) OV.pt(s, p3(st.cmd, Z0 + 0.045), 'rd', t('ควรอยู่ที่นี่', 'should be here'), { r: 0.015, m: 0, s: 22, dy: -26 }); }   // the wanted point sits above the links, which may pass over it
+  const k = st.step, O = [0, 0, Z0 + 0.012]; if (!k) return;
+  if (k === 1) { OV.dist(s, O, p3(polar(R3, rad(-135))), 'pk', t(`ขอบใน ${u(R3, 2)} m`, `inner edge ${u(R3, 2)} m`), { m: 0, s: 22, a: 'r', dx: -14, dy: 18 });
+    OV.dist(s, O, p3(polar(RO, rad(-45))), 'b', t(`ขอบนอก ${u(RO, 2)} m`, `outer edge ${u(RO, 2)} m`), { m: 0, s: 22, a: 'l', dx: 14, dy: 18 }); }
+  if (k === 2) { OV.dist(s, O, p3([0, st.y]), 'p', 'y = ' + u(st.y, 2) + ' m', { m: 0, s: 22, a: 'l', dx: 12 }); OV.pt(s, p3([0, st.y], Z0 + 0.008), 'p', null, { r: 0.01 }); }
+  if (k === 3) { const xr = Math.sqrt(Math.max(0, R3 * R3 - st.y * st.y)); OV.dist(s, O, p3([xr, st.y]), 'pk', u(R3, 2) + ' m', { m: 0, s: 22, a: 'l', dx: 14, dy: 20 });
+    [-1, 1].forEach(g => OV.pt(s, p3([g * xr, st.y], Z0 + 0.01), 'rd', 'x = ' + u(g * xr, 2), { r: 0.012, m: 0, s: 22, a: g < 0 ? 'r' : 'l', dx: g * 14, dy: -24 })); } };
+CH2.sim('cv3', M3, 'arm2', { aspect: 0.72, maxH: 420, tick: () => M3.adv(), after: (c, W, H, P) => { if (M3.mode === 'line' && M3.miss) CH2.pillAt(c, t('ไปไม่ถึง: IK ไม่มีคำตอบ', 'out of reach: no IK solution'), P.bad); } });
+const pair3 = v => near(Math.min(v[0], v[1]), -xr3, 0.003) && near(Math.max(v[0], v[1]), xr3, 0.003);
+LS.ask(el('ask3'), { fields: [{ label: t('ไปไม่ถึงตั้งแต่ x =', 'out of reach from x ='), ok: (x, v) => pair3(v), w: 5 }, { label: t('ถึง x = (m)', 'to x = (m)'), ok: (x, v) => pair3(v), w: 5 }],
+  check: v => { const a = Math.max(Math.abs(v[0]), Math.abs(v[1])), is = b => near(a, b, 0.004);
+    return is(xr3) && Math.min(v[0], v[1]) > 0 ? t('รูอยู่ทั้งสองข้างของ x = 0: ปลายข้างหนึ่งของช่วงต้องติดลบ', 'the hole lies on both sides of x = 0: one end of the range is negative')
+      : is(R3) ? t(`${u(R3, 2)} m คือรัศมีของรู แต่เส้นอยู่สูงจากฐาน ${u(y3, 2)} m จึงตัดรูเป็นช่วงที่สั้นกว่า: ใช้ทฤษฎีบทพีทาโกรัส`, `${u(R3, 2)} m is the radius of the hole, but the line runs ${u(y3, 2)} m above the base, so it cuts a shorter piece of it: use Pythagoras`)
+      : is(y3) ? t('นั่นคือความสูงของเส้น ไม่ใช่ x', 'that is the height of the line, not x')
+      : is(R3 - y3) ? t('ลบความยาวตรง ๆ ไม่ได้: ที่ขอบรู x² + y² = (l₁ − l₂)²', 'lengths do not subtract like that: on the edge of the hole x² + y² = (l₁ − l₂)²')
+      : is(Math.hypot(R3, y3)) ? t('เครื่องหมายใต้รากผิด: x² = (l₁ − l₂)² − y²', 'wrong sign under the root: x² = (l₁ − l₂)² − y²')
+      : is(xr3 * xr3) ? t('นั่นคือ x²: ถอดรากที่สองก่อน', 'that is x²: take the square root') : ''; } });
+/* back to the example y = 0.15 m: steps 1–3 the arm at A on the line, step 4 halfway through the joint-space move */
+const put3 = k => { M3.y = y3; ys3.set(y3); geom3(); M3.mode = k === 4 ? 'joint' : 'line'; rd3.set('m3-' + M3.mode); M3.ghosts = k === 1 ? [[rad(-135), Math.PI]] : null; pl3.set(k === 4 ? T3 / 2 : 0); upd3(); };
+const a3 = RB.ik2(L3[0], L3[1], H3.A[0], H3.A[1], 1), b3 = RB.ik2(L3[0], L3[1], H3.B[0], H3.B[1], 1), qA3 = [a3.t1, a3.t2], qB3 = [b3.t1, b3.t2];
+const J3min = Math.min(...CH7.jointMove2(L3, qA3, qB3, T3, 120).map(s => Math.hypot(s.p[0], s.p[1]))), D3 = (y3 * y3 - L3[0] * L3[0] - L3[1] * L3[1]) / (2 * L3[0] * L3[1]);
+LS.stepper(el('st3'), { onStep: k => { const was = M3.step; M3.step = k; if (k || was) put3(k); }, steps: [
+  { why: t(`<b>รูกลางปริภูมิทำงาน</b>: ปลายแขนอยู่ไกลฐานได้มากที่สุดเมื่อแขนเหยียดตรง (l₁ + l₂) และใกล้ที่สุดเมื่อแขนพับกลับ (θ₂ = 180° แขนจางในรูป) ซึ่งห่างฐาน |l₁ − l₂| จุดที่ใกล้ฐานกว่านั้นแขนไปไม่ถึง ปริภูมิทำงานจึงเป็นวงแหวนที่มีรูตรงกลาง`, `<b>The hole in the workspace</b>: the tool is farthest from the base with the arm stretched out (l₁ + l₂) and nearest with the arm folded back (θ₂ = 180°, the faint arm), |l₁ − l₂| from the base. Points nearer than that cannot be reached, so the workspace is a ring with a hole in the middle`),
+    tex: `\\begin{aligned} r_{min} &= |l_1 - l_2| = |${dn(L3[0], 2)} - ${dn(L3[1], 2)}| = ${dn(R3, 2)}\\ \\text{m} \\\\ r_{max} &= l_1 + l_2 = ${dn(RO, 2)}\\ \\text{m} \\end{aligned}` },
+  { why: t(`<b>เงื่อนไข</b>: จุด (x, ${u(y3, 2)}) บนเส้นไปไม่ถึงเมื่อมันอยู่ใกล้ฐานกว่ารัศมีของรู เส้นผ่านใกล้ฐานที่สุดที่ x = 0 ห่าง ${u(y3, 2)} m ซึ่งน้อยกว่า ${u(R3, 2)} m เส้นจึงตัดรูจริง ส่วน A และ B ห่างฐาน ${u(Math.hypot(...H3.A), 3)} และ ${u(Math.hypot(...H3.B), 3)} m อยู่ในวงแหวนทั้งคู่`, `<b>The condition</b>: a point (x, ${u(y3, 2)}) of the line is out of reach when it is nearer to the base than the radius of the hole. The line comes nearest to the base at x = 0, ${u(y3, 2)} m away, less than ${u(R3, 2)} m, so it does cut the hole. A and B are ${u(Math.hypot(...H3.A), 3)} and ${u(Math.hypot(...H3.B), 3)} m from the base: both in the ring`),
+    tex: `\\begin{aligned} x^2 + y^2 &< (l_1 - l_2)^2 \\\\ x^2 + ${dn(y3, 2)}^2 &< ${dn(R3, 2)}^2 \\end{aligned}` },
+  { why: t(`<b>แก้หา x</b>: ได้ช่วงที่สมมาตรรอบ x = 0 ปลายทั้งสองอยู่บนขอบรู (จุดสีแดงในรูป ห่างฐาน ${u(R3, 2)} m พอดี) ระหว่างสองจุดนี้ สูตรของ cos θ₂ ใน IK ให้ค่าน้อยกว่า −1 จึงไม่มี θ₂ กด ▶ แล้วดู: แขนค้างที่ขอบรู แล้วกระโดดข้ามไปอีกฝั่ง ซึ่งไม่ใช่เส้นตรงอีกต่อไป`, `<b>Solve for x</b>: the range is symmetric about x = 0, and its two ends lie on the edge of the hole (the red points, exactly ${u(R3, 2)} m from the base). Between them the cos θ₂ formula of the IK gives less than −1, so there is no θ₂. Press ▶ and watch: the arm stops at the edge and then jumps across, which is no longer a straight line`),
+    tex: `\\begin{aligned} x^2 &< ${dn(R3, 2)}^2 - ${dn(y3, 2)}^2 = ${dn(xr3 * xr3, 4)} \\\\ |x| &< \\sqrt{${dn(xr3 * xr3, 4)}} = ${dn(xr3, 3)}\\ \\text{m} \\\\ \\cos\\theta_2 &= \\frac{${dn(y3, 2)}^2 - ${dn(L3[0], 2)}^2 - ${dn(L3[1], 2)}^2}{2(${dn(L3[0], 2)})(${dn(L3[1], 2)})} = ${dn(D3, 2)} < -1 \\quad (x = 0) \\end{aligned}` },
+  { why: t(`<b>ปริภูมิข้อต่อไม่มีปัญหานี้</b>: หา IK เฉพาะที่ A และ B ซึ่งไปถึงได้ทั้งคู่ แล้วให้แต่ละข้อต่อเคลื่อนที่ด้วยพหุนามกำลังสาม ทุกท่าระหว่างทางเป็นท่าจริงของแขน ปลายแขนจึงไปถึงทุกจุดบนทางของมันเสมอ ทางนั้นอ้อมรู (เส้นสีส้ม ใกล้ฐานที่สุด ${u(J3min, 3)} m) แต่ไม่ได้เป็นเส้นตรง`, `<b>Joint space has no such trouble</b>: the IK only at A and B, both reachable, then every joint on a cubic. Every pose on the way is a real pose of the arm, so the tool always reaches every point of its own path. That path goes round the hole (orange, at least ${u(J3min, 3)} m from the base), but it is not a straight line`),
+    tex: `\\begin{aligned} \\theta_A &= \\text{IK}(A) = ${tdgs(qA3)} \\\\ \\theta_B &= \\text{IK}(B) = ${tdgs(qB3)} \\end{aligned}` }],
+  answer: t(`ไปไม่ถึงเมื่อ ${u(-xr3, 2)} m &lt; x &lt; ${u(xr3, 2)} m (|x| &lt; √(${u(R3, 2)}² − ${u(y3, 2)}²)) · การเคลื่อนที่ในปริภูมิข้อต่อจาก A ไป B อ้อมรูได้โดยไม่มีปัญหา`, `out of reach for ${u(-xr3, 2)} m &lt; x &lt; ${u(xr3, 2)} m (|x| &lt; √(${u(R3, 2)}² − ${u(y3, 2)}²)) · a joint-space move from A to B goes round the hole without trouble`) });
+
+/* ---------- 4: joint rates near a singularity ---------- */
+const T4 = 2, N4 = NE.line.length - 1, PKF = CH7.peakRates(FA.line);
+/* θ2 and θ̇1 (rad, rad/s) at time tt, read off the samples of a line (linear in between) */
+const sampAt = (S, tt) => { const n = S.length - 1, x = Math.max(0, Math.min(n, tt / T4 * n)), i = Math.min(n - 1, Math.floor(x)), f = x - i, a = S[i], b = S[i + 1];
+  const qa = a.q || b.q || [0, Math.PI], qb = b.q || qa, da = a.qd || [0, 0], db = b.qd || da; return [qa[1] + f * (qb[1] - qa[1]), da[0] + f * (db[0] - da[0])]; };
+const M4 = { w: 1000, h: 620, fit: false, tgt: [0.05, 0.08, Z0], dist: 3.0, L: L4, ring: true, y: 0.4, t: 0.4, T: T4, play: false, ptNames: ['A', 'B'], traceKey: 'pk', trace2Key: 'b', xyz: true, step: 0 }, ro4 = el('ro4');   // starts with the line at y = 0.4 m
+const geom4 = () => { const A = [NE.A[0], M4.y], B = [NE.B[0], M4.y]; Object.assign(M4, { A, B, line: [A, B], pts: [A, B], trace2: [FA.A, FA.B], S: CH7.lineMove2(L4, A, B, T4, 1, N4) });
+  M4.pk = CH7.peakRates(M4.S); M4.th2max = Math.max(...M4.S.filter(s => s.ok).map(s => s.q[1])); };
+const pose4 = () => { const e = CH7.sOf(M4.t, T4), p = lerp(M4.A, M4.B, e[0]), r = RB.ik2(L4[0], L4[1], p[0], p[1], 1); if (r.ok || !M4.q) M4.q = r.ok ? [r.t1, r.t2] : [0, Math.PI];
+  M4.v = [e[1] * (M4.B[0] - M4.A[0]), e[1] * (M4.B[1] - M4.A[1])]; M4.qd = CH5.two.rates(L4, M4.q, M4.v); M4.trace = M4.t > 0.01 ? [M4.A, p] : null; };
+const read4 = () => { const g = CH7.lineGap(M4.A, M4.B), d = CH5.two.det(L4, M4.q);
+  ro4.innerHTML = `<div class="term">${t('เส้นที่', 'line at')} y = ${fx(M4.y, 2)} m · ${t('ห่างจากฐานน้อยที่สุด', 'closest to the base')} ${fx(g.r)} m (${t('ขอบใน', 'inner edge')} ${fx(R4)} m) · ${t('θ₂ มากที่สุด', 'largest θ₂')} ${fx(deg(M4.th2max), 1)}°</div>` +
+    `<div class="term"><b class="ax-p">${t('อัตราสูงสุด', 'peak rates')}: |θ̇₁| ${fx(deg(M4.pk[0]), 1)} °/s, |θ̇₂| ${fx(deg(M4.pk[1]), 1)} °/s</b> · ${t('เส้นที่', 'line at')} y = ${fx(FA.A[1], 2)} m: |θ̇₁| ${fx(deg(PKF[0]), 1)} °/s, |θ̇₂| ${fx(deg(PKF[1]), 1)} °/s</div>` +
+    `<div class="term">t = ${M4.t.toFixed(2)} s · θ₂ = ${fx(deg(M4.q[1]), 1)}° · θ̇₁ = ${M4.qd ? fx(deg(M4.qd[0]), 1) + ' °/s' : '—'} · det J = l₁l₂ sin θ₂ = ${fx(d, 4)} m²</div>`; };
+const upd4 = () => { pose4(); read4(); };
+const ys4 = ui.slider(el('ctl4'), { id: 'y4', label: t('ความสูงของเส้น y', 'height of the line y'), min: 0.25, max: 0.55, step: 0.01, value: M4.y, fmt: v => fx(v, 2) + ' m', oninput: v => { M4.y = v; geom4(); upd4(); } });
+const pl4 = player(M4, el('ctl4'), 'p4', upd4); geom4(); upd4();
+const cv4 = S => tt => { const r = sampAt(S, tt); return [deg(r[0]), deg(r[1]), 0]; };
+M4.plot = P => ({ T: T4, now: M4.t, rows: ['p', 'v'], names: [['θ', '2'], ['θ̇', '1'], ['θ̈', '']], yr: { p: [90, 180] }, curves: [{ f: cv4(M4.S), col: 'sel', w: 2.4 }, { f: cv4(FA.line), col: RB.rgba(P.l2, 0.75), w: 1.8 }] });
+/* the numbers of the steps: the closest point of each line (θ2 and det J there) and the sample of the near line where θ̇1 peaks */
+const closeOf = L => { const c = lerp(L.A, L.B, L.gap.u), r = RB.ik2(L4[0], L4[1], c[0], c[1], 1), q = [r.t1, r.t2]; return { c, r: L.gap.r, D: r.D, q, det: CH5.two.det(L4, q) }; };
+const CN = closeOf(NE), CF = closeOf(FA);
+const tAt = s0 => { let lo = 0, hi = T4; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (CH7.sOf(m, T4)[0] < s0) lo = m; else hi = m; } return (lo + hi) / 2; }, tClose = tAt(NE.gap.u);
+const PK = NE.line.reduce((m, s) => s.qd && Math.abs(s.qd[0]) > Math.abs(m.qd[0]) ? s : m, NE.line[0]), PKN = CH7.peakRates(NE.line), detPK = CH5.two.det(L4, PK.q), sdPK = CH7.sOf(PK.t, T4)[1], vPK = [sdPK * (NE.B[0] - NE.A[0]), sdPK * (NE.B[1] - NE.A[1])];
+const vTop = CH7.sOf(T4 / 2, T4)[1] * Math.hypot(NE.B[0] - NE.A[0], NE.B[1] - NE.A[1]);
+/* the open step: 1 how close the line comes to the base, and the radius of the hole; 2 the elbow angle at the closest point; 3 det J there;
+   4 the tool velocity where θ̇1 peaks */
+M4.ov = (s, st) => { const k = st.step; if (!k) return; const f = RB.fk2(L4[0], L4[1], st.q[0], st.q[1]), E = [f.x1, f.y1, Z0 + 0.035], O = [0, 0, Z0 + 0.012];
+  if (k === 1) { const g = CH7.lineGap(st.A, st.B); OV.dist(s, O, p3(lerp(st.A, st.B, g.u)), 'p', u(g.r, 2) + ' m', { m: 0, s: 22, a: 'r', dx: -12, dy: 12 });
+    OV.dist(s, O, p3(polar(R4, rad(-135))), 'pk', t(`ขอบใน ${u(R4, 2)} m`, `inner edge ${u(R4, 2)} m`), { m: 0, s: 22, a: 'r', dx: -14, dy: 18 }); }
+  if (k === 2 || k === 3) { const u1 = [Math.cos(st.q[0]), Math.sin(st.q[0]), 0], u2 = [Math.cos(st.q[0] + st.q[1]), Math.sin(st.q[0] + st.q[1]), 0]; OV.ref(s, E, u1, 0.13);
+    OV.ang(s, E, u1, u2, 0.08, 'pk', k === 2 ? 'θ' : null, { sub: '2', post: ' = ' + u(deg(st.q[1]), 1) + '°', m: 1, s: 26, a: 'l', dx: 30, dy: -6 });
+    if (k === 3) OV.name(s, E, 'pk', 'det J = ' + u(CH5.two.det(L4, st.q), 4) + ' m²', { m: 0, s: 24, a: 'l', dx: 24, dy: -28 }); }
+  if (k === 4) { const T = [f.x, f.y, Z0 + 0.03]; OV.vec(s, T, [T[0] + 0.3 * st.v[0], T[1] + 0.3 * st.v[1], T[2]], 'gr', 'v = ' + u(Math.hypot(st.v[0], st.v[1]), 2) + ' m/s', { m: 0, s: 22, a: 'r', dx: -12, dy: -18 }); } };
+CH2.sim('cv4', M4, 'arm2', { aspect: 0.62, maxH: 340, tick: () => M4.adv() });
+plotStage('pl4', M4, { aspect: 0.66, maxH: 250 });
+LS.choose(el('ask4'), { labels: ['', '', ''], answer: 1, options: [
+  t(`เส้นที่ y = ${u(FA.A[1], 2)} m เพราะอยู่ไกลฐานกว่า ปลายแขนจึงต้องเคลื่อนที่เร็วกว่า`, `the line at y = ${u(FA.A[1], 2)} m: it is farther from the base, so the tool must move faster`),
+  t(`เส้นที่ y = ${u(NE.A[1], 2)} m เพราะผ่านใกล้ขอบในของปริภูมิทำงาน ที่นั่น θ₂ เข้าใกล้ 180° ซึ่งเป็นท่าภาวะเอกฐานของบทที่ 5`, `the line at y = ${u(NE.A[1], 2)} m: it passes close to the inner edge of the workspace, where θ₂ nears 180°, the singular pose of chapter 5`),
+  t(`เร็วเท่ากัน เพราะทั้งสองเส้นยาวเท่ากันและใช้เวลา ${u(T4, 0)} s เท่ากัน`, `the same: both lines are equally long and take the same ${u(T4, 0)} s`)] });
+/* back to the example y = 0.26 m: steps 1–3 the arm at the closest point of the line, steps 4–5 where θ̇1 peaks */
+const put4 = k => { M4.y = NE.A[1]; ys4.set(M4.y); geom4(); pl4.set(k && k <= 3 ? tClose : k ? PK.t : 0); upd4(); };
+LS.stepper(el('st4'), { onStep: k => { const was = M4.step; M4.step = k; if (k || was) put4(k); }, steps: [
+  { why: t(`<b>เส้นเข้าใกล้ฐานแค่ไหน</b>: ทั้งสองเส้นเป็นแนวนอน จุดที่ใกล้ฐานที่สุดอยู่ที่ x = 0 เส้นแรกห่างฐาน ${u(CN.r, 2)} m ห่างขอบในของปริภูมิทำงาน (รูของโจทย์ 3) เพียง ${u(CN.r - R4, 2)} m เส้นที่สองห่างฐาน ${u(CF.r, 2)} m`, `<b>How close the line comes to the base</b>: both lines are horizontal, so they come nearest to the base at x = 0. The first passes ${u(CN.r, 2)} m from the base, only ${u(CN.r - R4, 2)} m outside the inner edge of the workspace (the hole of problem 3); the second passes ${u(CF.r, 2)} m from it`),
+    tex: `r_{min} = |l_1 - l_2| = ${dn(R4, 2)}\\ \\text{m} \\;<\\; ${dn(CN.r, 2)}\\ \\text{m} \\;\\ll\\; ${dn(CF.r, 2)}\\ \\text{m}` },
+  { why: t(`<b>θ₂ ตรงนั้น</b>: ระยะจากฐาน r กำหนด θ₂ ผ่านกฎของโคไซน์ (IK ของบทที่ 4) ใกล้ขอบในแขนเกือบพับสุด θ₂ เข้าใกล้ 180° ซึ่งเป็นท่าภาวะเอกฐานของแขนสองก้าน (บทที่ 5)`, `<b>θ₂ there</b>: the distance r from the base sets θ₂ through the law of cosines (the IK of chapter 4). Near the inner edge the arm is almost folded back: θ₂ nears 180°, a singular pose of the two-link arm (chapter 5)`),
+    tex: `\\begin{aligned} \\cos\\theta_2 &= \\frac{r^2 - l_1^2 - l_2^2}{2\\,l_1l_2} \\\\ r = ${dn(CN.r, 2)}:\\ \\cos\\theta_2 &= ${dn(CN.D, 3)},\\ \\theta_2 = ${dn(deg(CN.q[1]), 1)}^\\circ \\\\ r = ${dn(CF.r, 2)}:\\ \\cos\\theta_2 &= ${dn(CF.D, 3)},\\ \\theta_2 = ${dn(deg(CF.q[1]), 1)}^\\circ \\end{aligned}` },
+  { why: t(`<b>det J เล็กลง</b>: สำหรับแขนสองก้าน det J = l₁l₂ sin θ₂ (บทที่ 5) บนเส้นแรก det J เล็กกว่าบนเส้นที่สองราว ${u(CF.det / CN.det, 1)} เท่า และจะเป็นศูนย์ที่ θ₂ = 180° ที่ท่านั้นปลายแขนเคลื่อนที่ในแนวเข้าหาหรือออกจากฐานไม่ได้เลย`, `<b>det J gets small</b>: for the two-link arm det J = l₁l₂ sin θ₂ (chapter 5). On the first line det J is about ${u(CF.det / CN.det, 1)} times smaller than on the second, and it would be zero at θ₂ = 180°, where the tool cannot move towards or away from the base at all`),
+    tex: `\\begin{aligned} \\det J &= l_1 l_2 \\sin\\theta_2 \\\\ &= ${dn(L4[0] * L4[1], 3)} \\sin ${dn(deg(CN.q[1]), 1)}^\\circ = ${dn(CN.det, 4)}\\ \\text{m}^2 \\\\ &\\text{vs}\\ \\ ${dn(L4[0] * L4[1], 3)} \\sin ${dn(deg(CF.q[1]), 1)}^\\circ = ${dn(CF.det, 4)}\\ \\text{m}^2 \\end{aligned}` },
+  { why: t(`<b>อัตราของข้อต่อ = J⁻¹v</b>: ปลายแขนเดินบนเส้นด้วยความเร็วสูงสุด ${u(vTop, 3)} m/s (กลางทาง) J⁻¹ มีตัวคูณ 1/det J เมื่อ det J เล็ก อัตราของข้อต่อจึงสูง บนเส้นแรก θ̇₁ สูงสุด ${u(deg(PKN[0]), 1)} °/s ที่ t = ${u(PK.t, 2)} s (ปลายแขนอยู่ที่ x = ${u(PK.p[0], 3)} m, θ₂ = ${u(deg(PK.q[1]), 1)}°) เทียบกับ ${u(deg(PKF[0]), 1)} °/s บนเส้นที่สอง ทั้งที่ปลายแขนเคลื่อนที่เร็วเท่ากัน (กราฟล่าง)`, `<b>Joint rates = J⁻¹v</b>: the tool moves along the line at up to ${u(vTop, 3)} m/s (in the middle). J⁻¹ carries the factor 1/det J, so a small det J makes the joint rates high. On the first line θ̇₁ peaks at ${u(deg(PKN[0]), 1)} °/s, at t = ${u(PK.t, 2)} s (the tool at x = ${u(PK.p[0], 3)} m, θ₂ = ${u(deg(PK.q[1]), 1)}°), against ${u(deg(PKF[0]), 1)} °/s on the second, although the tool moves just as fast (the lower plot)`),
+    tex: `\\begin{aligned} \\dot\\theta &= J^{-1}v, \\qquad J^{-1} = \\frac{1}{\\det J}\\begin{bmatrix} J_{22} & -J_{12} \\\\ -J_{21} & J_{11} \\end{bmatrix} \\\\ \\det J &= ${dn(detPK, 4)}\\ \\text{m}^2, \\qquad v = ${txy(vPK)}\\ \\text{m/s} \\\\ \\dot\\theta &= ${txy(PK.qd)}\\ \\text{rad/s} \\\\ &= ${txy(PK.qd.map(deg), 1)}\\ ^\\circ/\\text{s} \\end{aligned}` },
+  { why: t('<b>ตัวควบคุมทำอะไรได้</b>: มอเตอร์ทุกตัวมีความเร็วสูงสุด อัตราของข้อต่อแปรตาม v (θ̇ = J⁻¹v) ตัวควบคุมจึงต้องลดความเร็วของปลายแขนลงช่วงที่ผ่านใกล้ภาวะเอกฐาน หรือยอมออกนอกเส้น (เคลื่อนที่ในปริภูมิข้อต่อแทน) ยิ่งเส้นเข้าใกล้ขอบในเท่าไร อัตราสูงสุดยิ่งสูงขึ้น (ลองเลื่อน y ลงไปที่ขอบ) สไลด์หน้า 29 สรุปปัญหาข้อที่ 3 ของ Craig และการเลือกระหว่างสองปริภูมิ', '<b>What the controller can do</b>: every motor has a top speed. The joint rates scale with v (θ̇ = J⁻¹v), so the controller must slow the tool down where the line passes near the singularity, or give up the line (move in joint space instead). The closer the line comes to the inner edge, the higher the peak rate (move y down to the edge). Slide p. 29 sums up Craig’s third problem and the choice between the two spaces'),
+    body: fig(29, 'Slide 29: problem 3, a start and a goal reachable only in different elbow solutions so that no straight line joins them, and a table for choosing joint space (MOVJ) or Cartesian space (MOVL)') }],
+  answer: t(`เส้นที่ y = ${u(NE.A[1], 2)} m: ผ่านใกล้ขอบในของปริภูมิทำงาน θ₂ เข้าใกล้ 180° det J เล็ก อัตรา θ̇₁ สูงสุด ${u(deg(PKN[0]), 1)} °/s เทียบกับ ${u(deg(PKF[0]), 1)} °/s บนเส้นที่ y = ${u(FA.A[1], 2)} m`, `the line at y = ${u(NE.A[1], 2)} m: it passes close to the inner edge of the workspace, θ₂ nears 180°, det J is small, and θ̇₁ peaks at ${u(deg(PKN[0]), 1)} °/s against ${u(deg(PKF[0]), 1)} °/s on the line at y = ${u(FA.A[1], 2)} m`) });
+});
+</script>
+</body>
+</html>

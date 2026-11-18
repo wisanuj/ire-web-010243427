@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="7.4 — Blends through via points">7.4 — ช่วงผสมที่จุดผ่าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=20">
+<script src="assets/stops.js?v=20"></script><script src="assets/shell.js?v=20"></script>
+<script src="assets/robot.js?v=20"></script><script src="assets/lesson.js?v=20"></script><script src="assets/ch2.js?v=20"></script><script src="assets/ch3.js?v=20"></script><script src="assets/ch4.js?v=20"></script><script src="assets/ch5.js?v=20"></script><script src="assets/ch7.js?v=20"></script><script src="assets/scene3d.js?v=20"></script><script src="assets/gl3d.js?v=20"></script><script src="assets/ch2_3d.js?v=20"></script><script src="assets/ch3_3d.js?v=20"></script><script src="assets/ch7_3d.js?v=20"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">ช่วงผสมที่จุดผ่าน <span class="en">Blends through via points — straight lines between the points, a parabola at each</span></h1>
+<h1 data-l="en">Blends through via points <span class="en">Straight lines between the points, a parabola at each</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch7/s21.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 21: one joint through the path points 10, 35, 25 and 10 degrees; grey straight lines join the points and the blue blended trajectory rounds off every corner; a table names the symbols t_djk, the blend acceleration, the velocity of a straight part, the blend time and the straight time">
+    <figcaption data-l="th">สไลด์บทที่ 7 หน้า 21 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 21 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หน้า 7.3 พาข้อต่อจากจุดหนึ่งไปอีกจุดด้วยส่วนตรงที่มีช่วงผสมพาราโบลาที่ปลายทั้งสอง หน้านี้ใช้วิธีเดียวกันกับ<b>เส้นทางที่มีจุดผ่าน</b> (via points): ส่วนตรงเชื่อมจุดบนเส้นทางทีละคู่ และที่จุดแต่ละจุดมีช่วงผสมพาราโบลาที่ความเร่งคงที่ วิธีนี้เรียกว่า LSPB (linear segment with parabolic blends: ส่วนตรงต่อด้วยช่วงผสมพาราโบลา) ผู้ใช้กำหนดสามอย่าง: <b>จุดบนเส้นทาง</b> <b>เวลาของแต่ละช่วง</b> t<sub>djk</sub> และ<b>ขนาดของความเร่ง</b>ที่ช่วงผสม |θ̈<sub>k</sub>| ระบบคำนวณที่เหลือ: ความเร็วของส่วนตรง θ̇<sub>jk</sub> เวลาผสม t<sub>k</sub> และเวลาของส่วนตรง t<sub>jk</sub> สิ่งที่ต้องจำไว้ตลอดหน้า: ช่วงผสม<b>ตัดมุม</b> ข้อต่อจึงผ่าน<b>ใกล้</b>จุดผ่าน ไม่ได้ผ่านตรงจุด (ยกเว้นจุดต้นและจุดปลาย) หน้านี้ครอบคลุมสไลด์หน้า 21–24 และ 30 มี <b>4 โจทย์</b></p>
+    <p class="sub" data-l="en">Page 7.3 took a joint from one point to another along a straight part with a parabolic blend at each end. This page does the same along a <b>path with via points</b>: straight parts join the path points pair by pair, and at every point a parabolic blend of constant acceleration links one straight part to the next. The method is called LSPB (linear segment with parabolic blends). The user gives three things: the <b>path points</b>, the <b>duration of each segment</b> t<sub>djk</sub> and the <b>size of the blend acceleration</b> |θ̈<sub>k</sub>|. The system works out the rest: the velocity of each straight part θ̇<sub>jk</sub>, the blend times t<sub>k</sub> and the straight times t<sub>jk</sub>. Keep one fact in mind throughout: the blends <b>cut the corners</b>, so the joint passes <b>near</b> a via point, not through it (only the first and the last point are reached exactly). This page covers slides pp. 21–24 and 30, with <b>4 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul>
+  <li><b>ช่วงกลาง</b> (ระหว่างจุดผ่านสองจุด): ความเร็วคือความชันระหว่างจุด \(\dot\theta_{jk} = (\theta_k - \theta_j)/t_{djk}\) ช่วงผสมที่จุด k: \(\ddot\theta_k = \mathrm{SGN}(\dot\theta_{kl} - \dot\theta_{jk})\,|\ddot\theta_k|\) และ \(t_k = (\dot\theta_{kl} - \dot\theta_{jk})/\ddot\theta_k\) (SGN คือฟังก์ชันเครื่องหมาย ให้ +1 หรือ −1) ส่วนตรง \(t_{jk} = t_{djk} - \tfrac12 t_j - \tfrac12 t_k\)</li>
+  <li><b>ช่วงแรก</b>: ข้อต่อเริ่มจากหยุดนิ่ง ช่วงผสมแรกจึงอยู่ในช่วงแรกทั้งหมด \(\ddot\theta_1 = \mathrm{SGN}(\theta_2 - \theta_1)|\ddot\theta_1|\), \(t_1 = t_{d12} - \sqrt{t_{d12}^2 - 2(\theta_2 - \theta_1)/\ddot\theta_1}\), \(\dot\theta_{12} = (\theta_2 - \theta_1)/(t_{d12} - \tfrac12 t_1)\) และ \(t_{12} = t_{d12} - t_1 - \tfrac12 t_2\)</li>
+  <li><b>ช่วงสุดท้าย</b>: กลับทิศกัน \(\ddot\theta_n = \mathrm{SGN}(\theta_{n-1} - \theta_n)|\ddot\theta_n|\), \(t_n = t_{d(n-1)n} - \sqrt{t_{d(n-1)n}^2 + 2(\theta_n - \theta_{n-1})/\ddot\theta_n}\), \(\dot\theta_{(n-1)n} = (\theta_n - \theta_{n-1})/(t_{d(n-1)n} - \tfrac12 t_n)\)</li>
+  <li><b>ลำดับการคำนวณ</b>: ช่วงแรกและช่วงสุดท้ายก่อน (ได้ความเร็วของสองช่วงนั้น) แล้วช่วงผสมที่จุดผ่าน แล้วเวลาของส่วนตรงทุกช่วง</li>
+  <li><b>ช่วงผสมตัดมุม</b>: ที่เวลาของจุดผ่าน k ข้อต่ออยู่ที่ \(\theta_k + \tfrac18\ddot\theta_k t_k^2\) ไม่ใช่ \(\theta_k\) ถ้าต้องผ่านจุดใดตรงจุด ให้ใส่<b>จุดผ่านเทียม</b> (pseudo via points) สองจุดขนาบจุดนั้น</li>
+  <li><b>หลายข้อต่อ</b>: ทุกข้อต่อใช้เวลาของช่วงชุดเดียวกัน จึงถึงจุดผ่านพร้อมกัน และเวลาของช่วงต้องยาวพอสำหรับข้อต่อที่ช้าที่สุด</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul>
+  <li><b>Middle segment</b> (between two via points): the velocity is the slope between the points, \(\dot\theta_{jk} = (\theta_k - \theta_j)/t_{djk}\). The blend at point k: \(\ddot\theta_k = \mathrm{SGN}(\dot\theta_{kl} - \dot\theta_{jk})\,|\ddot\theta_k|\) and \(t_k = (\dot\theta_{kl} - \dot\theta_{jk})/\ddot\theta_k\) (SGN is the sign function, +1 or −1). The straight part: \(t_{jk} = t_{djk} - \tfrac12 t_j - \tfrac12 t_k\).</li>
+  <li><b>First segment</b>: the joint starts at rest, so the whole first blend lies in the first segment: \(\ddot\theta_1 = \mathrm{SGN}(\theta_2 - \theta_1)|\ddot\theta_1|\), \(t_1 = t_{d12} - \sqrt{t_{d12}^2 - 2(\theta_2 - \theta_1)/\ddot\theta_1}\), \(\dot\theta_{12} = (\theta_2 - \theta_1)/(t_{d12} - \tfrac12 t_1)\) and \(t_{12} = t_{d12} - t_1 - \tfrac12 t_2\).</li>
+  <li><b>Last segment</b>: the same, turned round: \(\ddot\theta_n = \mathrm{SGN}(\theta_{n-1} - \theta_n)|\ddot\theta_n|\), \(t_n = t_{d(n-1)n} - \sqrt{t_{d(n-1)n}^2 + 2(\theta_n - \theta_{n-1})/\ddot\theta_n}\), \(\dot\theta_{(n-1)n} = (\theta_n - \theta_{n-1})/(t_{d(n-1)n} - \tfrac12 t_n)\).</li>
+  <li><b>The order of the work</b>: first and last segments first (their velocities), then the blends at the via points, then every straight time.</li>
+  <li><b>The blends cut the corners</b>: at the time of via point k the joint is at \(\theta_k + \tfrac18\ddot\theta_k t_k^2\), not at \(\theta_k\). To pass a point exactly, put two <b>pseudo via points</b> either side of it.</li>
+  <li><b>Several joints</b>: every joint uses the same segment times, so all of them reach the via points together; the segment times must be long enough for the slowest joint.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>ช่วงแรกและช่วงสุดท้าย</a><a href="#ex2"><b>2</b>ช่วงกลาง ช่วงผสม และส่วนตรง</a><a href="#ex3"><b>3</b>หลายข้อต่อพร้อมกัน</a><a href="#ex4"><b>4</b>การบ้าน 7</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>First and last segments</a><a href="#ex2"><b>2</b>Middle segment, blends, straight times</a><a href="#ex3"><b>3</b>Several joints together</a><a href="#ex4"><b>4</b>Homework 7</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">ช่วงแรกและช่วงสุดท้าย</h2><h2 data-l="en">The first and last segments</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 22–23 · Craig 7.3 ตัวอย่าง 7.4 · ข้อต่อเดียวผ่าน 10°, 35°, 25°, 10° · ช่วงยาว 2, 1, 3 s · ช่วงผสมทุกจุด 50 °/s² · กด ▶ เพื่อเล่น · ลากในภาพ 3 มิติเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 22–23 · Craig 7.3, example 7.4 · one joint through 10°, 35°, 25°, 10° · segments of 2, 1, 3 s · 50 °/s² at every blend · press ▶ to play · drag in the 3-D picture to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch7/s23.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 23: the example; the path points of one joint are 10, 35, 25 and 10 degrees, the segments last 2, 1 and 3 seconds and every blend uses 50 degrees per second squared; find every velocity, blend time and straight time; an empty box for the working">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 23 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 23 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim" id="card1"><canvas id="cv1"></canvas><canvas id="pl1" style="margin-top:8px"></canvas><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">ภาพบน: ก้านเดียวหมุนรอบข้อต่อ (L = 0.5 m) เงาจาง ๆ คือมุมของจุดบนเส้นทาง กราฟล่าง: ตำแหน่ง ความเร็ว และความเร่งของข้อต่อ เส้นสีน้ำเงินคือแนววิถีที่มีช่วงผสม เส้นประสีเทาคือเส้นตรงที่เชื่อมจุดบนเส้นทาง แถบสีเหลืองคือช่วงผสม แถบเลื่อนเริ่มที่ 80 °/s² <b>ยังไม่ใช่</b>ค่าของโจทย์ เมื่อเปิดเฉลย ทุกอย่างจะกลับไปใช้ค่าของโจทย์ และกราฟจะแสดงเฉพาะสิ่งที่ขั้นนั้นใช้</div>
+      <div class="simnote" data-l="en">Top: one link turning about its joint (L = 0.5 m); the faint ghosts are the angles of the path points. Bottom: the position, velocity and acceleration of the joint. The blue curve is the blended trajectory, the grey dashed lines join the path points, and the yellow bands are the blends. The slider starts at 80 °/s², <b>not</b> the value of the problem. Once you open the solution, everything goes back to the values of the problem, and the plot shows only what that step uses.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ข้อต่อหนึ่งตัวต้องผ่านจุดบนเส้นทาง \(\theta_1 = 10^\circ\), \(\theta_2 = 35^\circ\), \(\theta_3 = 25^\circ\), \(\theta_4 = 10^\circ\) ช่วงทั้งสามยาว \(t_{d12} = 2\), \(t_{d23} = 1\), \(t_{d34} = 3\ \text{s}\) ช่วงผสมทุกจุดใช้ความเร่งขนาด \(|\ddot\theta_k| = 50\ {}^\circ/\text{s}^2\) ข้อต่อเริ่มและหยุดนิ่ง โจทย์ข้อนี้หาเฉพาะช่วงแรกและช่วงสุดท้าย: (ก) เวลาผสม \(t_1\) และความเร็วของส่วนตรง \(\dot\theta_{12}\) (ข) \(t_4\) และ \(\dot\theta_{34}\)</div>
+        <div data-l="en">One joint must pass the path points \(\theta_1 = 10^\circ\), \(\theta_2 = 35^\circ\), \(\theta_3 = 25^\circ\), \(\theta_4 = 10^\circ\). The three segments last \(t_{d12} = 2\), \(t_{d23} = 1\), \(t_{d34} = 3\ \text{s}\), and every blend uses an acceleration of size \(|\ddot\theta_k| = 50\ {}^\circ/\text{s}^2\). The joint starts and ends at rest. This problem asks for the first and last segments only: (a) the blend time \(t_1\) and the velocity of the straight part \(\dot\theta_{12}\); (b) \(t_4\) and \(\dot\theta_{34}\).</div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> ช่วงแรก</p><p class="lead" data-l="en"><b>(a)</b> The first segment</p>
+      <div id="ask1a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> ช่วงสุดท้าย</p><p class="lead" data-l="en"><b>(b)</b> The last segment</p>
+      <div id="ask1b"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">ช่วงกลาง ช่วงผสม และส่วนตรง</h2><h2 data-l="en">The middle segment, the blends and the straight times</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 22–23 · Craig 7.3 ตัวอย่าง 7.4 · เส้นทางเดียวกับโจทย์ 1 · ใช้ θ̇₁₂ และ θ̇₃₄ จากโจทย์ 1 · ลากในภาพ 3 มิติเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 22–23 · Craig 7.3, example 7.4 · the path of problem 1 · uses θ̇₁₂ and θ̇₃₄ from problem 1 · drag in the 3-D picture to turn the view</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim" id="card2"><canvas id="cv2"></canvas><canvas id="pl2" style="margin-top:8px"></canvas><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">ภาพและกราฟแบบเดียวกับโจทย์ 1 แต่เลื่อนมุมของจุดผ่านทั้งสอง (θ₂ และ θ₃) ได้ด้วย เวลาของช่วงคงที่ 2, 1, 3 s ตารางบอกความเร็ว เวลาผสม และเวลาของส่วนตรงทุกช่วงของค่าที่ตั้งไว้ ค่าเริ่มต้น (40°, 20°, 80 °/s²) <b>ยังไม่ใช่</b>ของโจทย์ เมื่อเปิดเฉลย ทุกอย่างกลับไปใช้ค่าของโจทย์</div>
+      <div class="simnote" data-l="en">The picture and plot of problem 1, but the two via angles (θ₂ and θ₃) can move too; the segment times stay 2, 1, 3 s. The table gives every velocity, blend time and straight time for the values set. The starting values (40°, 20°, 80 °/s²) are <b>not</b> those of the problem; once you open the solution, everything goes back to the values of the problem.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s22.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 22: three cards of formulas, the middle segment, the first segment and the last segment, each giving the velocity, the blend acceleration and time, and the straight time; a note on the order of the work: first and last segments, then the blends in between, then every straight part">
+      <figcaption data-l="th">สไลด์หน้า 22 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 22 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">เส้นทางของโจทย์ 1 (\(10^\circ, 35^\circ, 25^\circ, 10^\circ\) ใน \(2, 1, 3\ \text{s}\) ช่วงผสม \(50\ {}^\circ/\text{s}^2\)) ใช้ \(t_1, \dot\theta_{12}, t_4, \dot\theta_{34}\) ที่หาได้แล้ว หาความเร็วของช่วงกลาง \(\dot\theta_{23}\) เวลาผสมที่จุดผ่าน \(t_2\) และ \(t_3\) แล้วเวลาของส่วนตรงทั้งสาม \(t_{12}, t_{23}, t_{34}\) สุดท้าย: ที่ \(t = 2\ \text{s}\) (เวลาของจุดผ่าน \(\theta_2\)) ข้อต่ออยู่ที่มุมเท่าไร</div>
+        <div data-l="en">The path of problem 1 (\(10^\circ, 35^\circ, 25^\circ, 10^\circ\) in \(2, 1, 3\ \text{s}\), blends of \(50\ {}^\circ/\text{s}^2\)), with the \(t_1, \dot\theta_{12}, t_4, \dot\theta_{34}\) found there. Find the velocity of the middle segment \(\dot\theta_{23}\), the blend times at the via points \(t_2\) and \(t_3\), then the three straight times \(t_{12}, t_{23}, t_{34}\). Last: at \(t = 2\ \text{s}\) (the time of via point \(\theta_2\)), where is the joint?</div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> ความเร็วช่วงกลางและเวลาผสมที่จุดผ่าน</p><p class="lead" data-l="en"><b>(a)</b> The middle velocity and the blend times at the via points</p>
+      <div id="ask2a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> เวลาของส่วนตรง</p><p class="lead" data-l="en"><b>(b)</b> The straight times</p>
+      <div id="ask2b"></div>
+      <p class="lead" data-l="th"><b>(ค)</b> มุมของข้อต่อที่ t = 2 s</p><p class="lead" data-l="en"><b>(c)</b> The joint angle at t = 2 s</p>
+      <div id="ask2c"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">หลายข้อต่อพร้อมกัน</h2><h2 data-l="en">Several joints together</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 24 · Craig 7.2–7.3 · แขนสองก้าน l₁ = 0.5, l₂ = 0.4 m · กด ▶ เพื่อเล่น · ลากเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, p. 24 · Craig 7.2–7.3 · two-link arm l₁ = 0.5, l₂ = 0.4 m · press ▶ to play · drag to turn the view</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch7/s24.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 24: the Yaskawa GP8 shown in its start, via and goal poses with the green curve its tool follows; every joint gets its own function with the same segment times, set by the slowest joint">
+    <figcaption data-l="th">สไลด์หน้า 24 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 24 · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim" id="card3"><canvas id="cv3"></canvas><canvas id="pl3" style="margin-top:8px"></canvas><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">เงาจาง ๆ คือท่าเริ่ม ท่าที่จุดผ่าน และท่าปลาย เส้นสีเขียวจางคือทางเดินทั้งหมดของปลายแขน เส้นเข้มคือส่วนที่เดินมาแล้ว กราฟ: มุมของ<b>ข้อต่อ 1 (สีส้ม)</b>และ<b>ข้อต่อ 2 (สีน้ำเงิน)</b> แต่ละข้อต่อมีจุดบนเส้นทางของตัวเอง แต่ใช้เวลาของช่วง t<sub>d</sub> ชุดเดียวกัน ลองลด t<sub>d</sub> หรือความเร่งจนระบบบอกว่าเป็นไปไม่ได้</div>
+      <div class="simnote" data-l="en">The faint ghosts are the start, via and goal poses. The faint green line is the whole path of the tool point, the bold one the part covered so far. Plot: the angles of <b>joint 1 (orange)</b> and <b>joint 2 (blue)</b>. Each joint has its own path points but both use the same segment time t<sub>d</sub>. Try lowering t<sub>d</sub> or the acceleration until the system says it is impossible.</div></div>
+    <div class="card solve">
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div><div id="given3"></div></div>
+      <p class="lead" data-l="th"><b>(ก)</b> ทำไมทุกข้อต่อต้องใช้เวลาของช่วงชุดเดียวกัน</p><p class="lead" data-l="en"><b>(a)</b> Why must every joint use the same segment times?</p>
+      <div id="ask3a"></div>
+      <p class="lead" data-l="th"><b>(ข)</b> อะไรเป็นตัวกำหนดเวลาของช่วง</p><p class="lead" data-l="en"><b>(b)</b> What sets the segment time?</p>
+      <div id="ask3b"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">การบ้านชุดที่ 7: ช่องตรวจคำตอบ</h2><h2 data-l="en">Homework 7: answer checks</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 30 · สไลด์เดิม Part II หน้า 14 · หน้านี้มีเพียงโจทย์และช่องตรวจคำตอบ ไม่มีวิธีทำ</div><div class="src" data-l="en">Chapter 7 slides, p. 30 · old part II slides p. 14 · this page has only the problem and answer checks, no worked solution</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch7/s30.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 30: homework 7; a two-segment linear spline with parabolic blends through 5, 15 and minus 10 degrees, both segments 2 seconds, blends of 60 degrees per second squared; find the two velocities, the three blend times and the two straight times, and sketch theta of t">
+    <figcaption data-l="th">โจทย์จากสไลด์หน้า 30 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">The problem, slide p. 30 · tap to enlarge</figcaption></figure>
+  <div class="card solve" style="margin-top:10px">
+    <div class="given"><div class="gl" data-l="th">การบ้านชุดที่ 7 — ส่วนตรงสองช่วงต่อด้วยช่วงผสมพาราโบลา</div><div class="gl" data-l="en">Homework 7 — two straight segments with parabolic blends</div>
+      <div data-l="th">ข้อต่อหนึ่งตัวผ่าน \(\theta_1 = 5^\circ\), \(\theta_2 = 15^\circ\), \(\theta_3 = -10^\circ\) โดย \(t_{d12} = t_{d23} = 2\ \text{s}\) ช่วงผสมทุกจุดใช้ความเร่งขนาด \(60\ {}^\circ/\text{s}^2\) ข้อต่อเริ่มและหยุดนิ่ง หา \(\dot\theta_{12}, \dot\theta_{23}, t_1, t_2, t_3\) และเวลาของส่วนตรง \(t_{12}, t_{23}\) แล้วร่างกราฟ \(\theta(t)\)</div>
+      <div data-l="en">One joint passes \(\theta_1 = 5^\circ\), \(\theta_2 = 15^\circ\), \(\theta_3 = -10^\circ\) with \(t_{d12} = t_{d23} = 2\ \text{s}\); every blend uses an acceleration of size \(60\ {}^\circ/\text{s}^2\); the joint starts and ends at rest. Find \(\dot\theta_{12}, \dot\theta_{23}, t_1, t_2, t_3\) and the straight times \(t_{12}, t_{23}\), then sketch \(\theta(t)\).</div></div>
+    <p class="lead" data-l="th"><b>(ก)</b> ความเร็วของส่วนตรง (°/s)</p><p class="lead" data-l="en"><b>(a)</b> The velocities of the straight parts (°/s)</p>
+    <div id="ask4a"></div>
+    <p class="lead" data-l="th"><b>(ข)</b> เวลาผสม (s)</p><p class="lead" data-l="en"><b>(b)</b> The blend times (s)</p>
+    <div id="ask4b"></div>
+    <p class="lead" data-l="th"><b>(ค)</b> เวลาของส่วนตรง (s)</p><p class="lead" data-l="en"><b>(c)</b> The straight times (s)</p>
+    <div id="ask4c"></div>
+    <p class="lead" data-l="th">หน้านี้ตรวจให้เฉพาะตัวเลขของคำตอบ (ใส่ทศนิยม 3 ตำแหน่งสำหรับเวลา และ 2 ตำแหน่งสำหรับความเร็ว) วิธีทำและกราฟของการบ้านชุดนี้เฉลยในห้องเรียน ทำตามลำดับเดียวกับโจทย์ 1–2: ช่วงแรกและช่วงสุดท้ายก่อน แล้วช่วงผสมที่จุดกลาง แล้วส่วนตรง ข้อนี้ไม่มีช่วงกลาง: ช่วงที่ 2 เป็นช่วงสุดท้าย</p>
+    <p class="lead" data-l="en">This page checks the numbers only (give times to 3 decimals and velocities to 2). The worked solution and the plot of this homework are given in class. Work in the order of problems 1–2: first and last segments, then the blend at the middle point, then the straight parts. There is no middle segment here: segment 2 is the last one.</p></div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — ขนาดของความเร่งที่ช่วงผสม</h3>
+    <ol><li>โจทย์ 1: เลื่อน |θ̈| ขึ้นไปจนสุด แถบช่วงผสมในกราฟแคบลง เส้นสีน้ำเงินแนบเส้นประจนเกือบเป็นมุมแหลม ข้อต่อจึงผ่านใกล้จุดผ่านมากขึ้น และ θ̇₁₂ ลดลงเข้าหาความชันระหว่างจุด แต่ในแถวความเร่งเป็นแท่งสูงและแคบ: มอเตอร์ต้องออกแรงมากในเวลาสั้น ๆ</li><li>โจทย์ 1: ค่อย ๆ ลด |θ̈| ลง ช่วงผสมยาวขึ้นจนส่วนตรงหดเหลือศูนย์ แล้วช่องตัวเลขจะบอกว่าเป็นไปไม่ได้ (ช่วงผสมชนกัน) และบอกความเร่งที่น้อยที่สุดที่ยังใช้ได้ ลดต่ออีก ช่วงผสมแรกจะยาวเกินช่วงแรกเอง (ค่าในรากของ t₁ ติดลบ)</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — จุดผ่านและหลายข้อต่อ</h3>
+    <ol><li>โจทย์ 2: ตั้ง θ₂ = θ₃ ส่วนตรงตรงกลางจะนอนราบ (θ̇₂₃ = 0): ข้อต่อหยุดนิ่งอยู่ช่วงหนึ่งระหว่างสองช่วงผสม</li><li>โจทย์ 2: เลื่อน θ₃ หาค่าที่ทำให้ t₃ เกือบเป็นศูนย์ ความชันสองข้างของ θ₃ เกือบเท่ากัน ไม่มีมุมให้ตัด ข้อต่อจึงผ่าน θ₃ เกือบตรงจุด นี่คือหลักของจุดผ่านเทียม</li><li>โจทย์ 3: ลด t<sub>d</sub> ลงทีละน้อยจนระบบบอกว่าเป็นไปไม่ได้: ข้อต่อตัวไหนไม่ทันก่อน ดูคอลัมน์ "t<sub>d</sub> สั้นสุด" แล้วเพิ่ม |θ̈| และลองอีกครั้ง</li></ol></div>
+  <div class="card"><h3>ห้าจุดที่ผิดบ่อย</h3>
+    <ol><li><b>เครื่องหมายของ θ̈</b>: ช่วงสุดท้ายใช้ SGN(θ<sub>n−1</sub> − θ<sub>n</sub>) และที่จุดผ่านใช้ SGN ของการเปลี่ยนความเร็ว ไม่ใช่ทิศที่ข้อต่อกำลังไป</li><li><b>เลือกรากที่มากกว่า</b>: t₁ และ t<sub>n</sub> ใช้เครื่องหมายลบหน้ารากที่สองเสมอ</li><li><b>ใช้ความชันระหว่างจุดเป็น θ̇₁₂ หรือ θ̇₃₄</b>: ช่วงแรกและช่วงสุดท้ายหารด้วย t<sub>d</sub> − ½t ไม่ใช่ t<sub>d</sub></li><li><b>หักเวลาผสมผิด</b>: ช่วงผสมแรกและสุดท้ายหักทั้งหมด ช่วงผสมที่จุดผ่านหักครึ่งเดียวในแต่ละช่วง</li><li><b>คิดว่าข้อต่อผ่านจุดผ่านตรงจุด</b>: ช่วงผสมตัดมุมเสมอ</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 7 หน้า 21–24, 30 (ภาพอยู่ในหน้านี้แล้ว) · Craig 7.3 (สมการ 7.24–7.28 ตัวอย่าง 7.4) · สไลด์เดิม Part I หน้า 22, Part II หน้า 4–14</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — the size of the blend acceleration</h3>
+    <ol><li>Problem 1: move |θ̈| all the way up. The blend bands in the plot get narrow, the blue curve hugs the dashed lines until the corners are almost sharp, so the joint passes closer to the via points, and θ̇₁₂ drops towards the slope between the points. But the acceleration row shows tall, narrow blocks: the motor must push hard for a short time.</li><li>Problem 1: lower |θ̈| step by step. The blends grow until a straight part shrinks to nothing; then the readout says it is impossible (the blends overlap) and gives the smallest acceleration that still works. Lower still and the first blend no longer fits in the first segment at all (negative under the root of t₁).</li></ol></div>
+  <div class="card"><h3>Try this 2 — via points and several joints</h3>
+    <ol><li>Problem 2: set θ₂ = θ₃. The middle straight part lies flat (θ̇₂₃ = 0): the joint stands still for a while between the two blends.</li><li>Problem 2: move θ₃ to find a value that makes t₃ almost zero. The slopes on both sides of θ₃ are then almost equal, there is no corner to cut, and the joint passes almost exactly through θ₃. That is the idea behind pseudo via points.</li><li>Problem 3: lower t<sub>d</sub> step by step until the system says it is impossible. Which joint fails first? Look at the column "shortest t<sub>d</sub>", then raise |θ̈| and try again.</li></ol></div>
+  <div class="card"><h3>Five usual mistakes</h3>
+    <ol><li><b>The sign of θ̈</b>: the last segment uses SGN(θ<sub>n−1</sub> − θ<sub>n</sub>), and a via point uses the sign of the change in velocity, not the direction the joint is going.</li><li><b>The larger root</b>: t₁ and t<sub>n</sub> always take the minus sign before the square root.</li><li><b>The slope between the points as θ̇₁₂ or θ̇₃₄</b>: the first and last segments divide by t<sub>d</sub> − ½t, not by t<sub>d</sub>.</li><li><b>The wrong share of a blend</b>: the first and last blends are subtracted whole, a blend at a via point only half in each segment.</li><li><b>Expecting the joint to pass through the via points</b>: the blends always cut the corners.</li></ol>
+    <div class="book">Source: chapter 7 slides, pp. 21–24, 30 (the pictures are on this page) · Craig 7.3 (equations 7.24–7.28, example 7.4) · old slides part I p. 22, part II pp. 4–14</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, dn = RB.d, rad = RB.rad, deg = RB.deg, R = String.raw, G = RB.G, OV = CH7.OV, abs = Math.abs, sqrt = Math.sqrt;
+const X = CH7.EX, V = X.via, LV = X.lspbVia, P = V.pts, D = V.durs, TS = CH7.times(D), TT = LV.T, A0 = abs(LV.acc[0]);
+const el = id => document.getElementById(id), near = (x, y, tol) => abs(x - y) < tol;
+/* fixed decimals while a slider moves (Unicode minus; s: a plus sign too) */
+const fx = (x, n = 2, s) => (x < -0.5 * 10 ** -n ? '−' : (s && x > 0.5 * 10 ** -n ? '+' : '')) + abs(x).toFixed(n);
+/* TeX numbers with fixed decimals; tp puts a negative one in brackets (after an operator); sg the sign of a number as + or − */
+const tn = (x, n = 2) => (x < -0.5 * 10 ** -n ? '-' : '') + abs(x).toFixed(n), tp = (x, n = 2) => x < -0.5 * 10 ** -n ? `(${tn(x, n)})` : tn(x, n), sg = x => x >= 0 ? '+' : '-';
+const UV = R`\ {}^\circ/\text{s}`, UA = R`\ {}^\circ/\text{s}^2`, US = R`\ \text{s}`, SGN = R`\operatorname{SGN}`;
+/* a number box of LS.ask: right within tol */
+const fld = (label, ans, tol, w = 5) => ({ label, ok: x => abs(x - ans) < tol, w });
+
+/* ---------- shared: the plot canvas (CH7.plots) with a legend under it, and the play button + time slider ---------- */
+const legend = (c, W, H, Pl, items) => { const y = H - 6; let x = 54; c.save(); c.font = '500 11.5px ' + RB.FONT;
+  items.forEach(it => { const w = c.measureText(it.text).width; if (x + 22 + w > W - 4) return;
+    if (it.box) { c.fillStyle = RB.rgba(Pl.warn, 0.22); c.fillRect(x, y - 10, 16, 11); }
+    else if (it.dot) G.circle(c, x + 8, y - 4, 3.6, { fill: Pl.bg, stroke: Pl.ink, lw: 1.6 });
+    else G.line(c, x, y - 4, x + 16, y - 4, Pl[it.col] || it.col, it.w || 2.2, it.dash);
+    G.text(c, it.text, x + 21, y, { size: 11.5, color: Pl.muted }); x += 21 + w + 14; }); c.restore(); };
+const plotStage = (id, S, items, o = {}) => RB.stage(el(id), o.aspect || 0.7, (c, W, H, dt, Pl) => { G.clear(c, W, H, Pl); CH7.plots(c, W, H - 20, Pl, S.plot()); legend(c, W, H, Pl, items);
+  if (!S.ok) G.text(c, t('เป็นไปไม่ได้ด้วยค่านี้: ดูช่องตัวเลข', 'impossible with these values: see the readout'), W / 2 + 20, H * 0.55, { size: 14, weight: 600, align: 'center', color: Pl.bad, halo: Pl.bg }); }, { maxH: o.maxH || 400 });
+/* ▶ / ❚❚ and a time slider; the clock runs on the card (LS.anim), before the two canvases draw. onT(): the time changed */
+const player = (S, card, ctl, id, onT) => {
+  const lab = () => { bt.textContent = S.play ? t('❚❚ หยุด', '❚❚ Pause') : t('▶ เล่น', '▶ Play'); bt.classList.toggle('on', S.play); };
+  const bt = ui.buttons(ctl, [{ id: id + 'p', label: '', onclick: () => { if (!S.ok) return; if (S.play) S.play = false; else { if (S.t >= S.T - 1e-6) S.t = 0; S.play = true; } lab(); } }])[id + 'p'];
+  const sl = ui.slider(ctl, { id: id + 't', label: t('เวลา t', 'time t'), min: 0, max: S.T, step: 0.01, value: 0, fmt: v => `${v.toFixed(2)} s`, oninput: v => { S.t = Math.min(v, S.T); S.play = false; lab(); onT(); } });
+  LS.anim(card, dt => { if (!S.play) return; S.t = Math.min(S.T, S.t + dt); if (S.t >= S.T) { S.play = false; lab(); } sl.set(+S.t.toFixed(2)); onT(); });
+  lab(); return { lab, set: tt => { S.t = Math.min(tt, S.T); S.play = false; sl.el.max = S.T; sl.set(+S.t.toFixed(2)); lab(); onT(); }, max: () => { sl.el.max = S.T; if (S.t > S.T) S.t = S.T; sl.set(+S.t.toFixed(2)); } }; };
+
+/* ---------- shared by problems 1 and 2: one joint through four path points (durations D) ---------- */
+const NAMES = ['θ₁', 'θ₂', 'θ₃', 'θ₄'], ZL = 0.11, OA = [0, 0, 0.185], dirA = a => [Math.cos(rad(a)), Math.sin(rad(a)), 0], atA = (a, r, z = ZL) => [r * Math.cos(rad(a)), r * Math.sin(rad(a)), z];
+const J1 = (pts, acc) => { const S = { pts: pts.slice(), acc, t: 0, play: false, step: 0, spec: null, xyz: true, fit: false, tgt: [0.3, 0.13, 0.1], dist: 2.5 };   // a fixed camera on the quarter the link sweeps (the path angles stay within −10°…60°)
+  S.pose = () => { S.th = rad(S.ok ? S.tr.at(S.t)[0] : S.pts[0]); };
+  S.calc = () => { S.tr = CH7.lspbVia(S.pts, D, S.acc); S.ok = S.tr.ok; S.T = S.tr.T; S.marks = S.pts.map(rad); S.pose(); };
+  S.plot = () => plotJ(S); S.calc(); return S; };
+/* the names of the path points at their ghosts (points at the same angle share one name) */
+const pathLabs = (s, pts) => { const g = []; pts.forEach((a, i) => { const h = g.find(x => abs(x.a - a) < 0.6); if (h) h.n.push(NAMES[i]); else g.push({ a, n: [NAMES[i]] }); });
+  g.forEach(x => OV.name(s, atA(x.a, 0.64), 'mut', x.n.join(' = '), { m: 0, s: 21, a: 'c' })); };
+/* the smallest blend acceleration that works (bisection on ok), and why a value does not */
+const minAcc = pts => { let lo = 0.1, hi = 5000; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (CH7.lspbVia(pts, D, m).ok) hi = m; else lo = m; } return hi; };
+const fail = (pts, acc) => { const n = pts.length; return D[0] ** 2 - 2 * abs(pts[1] - pts[0]) / acc < 0 ? t('ช่วงผสมแรกยาวเกินช่วงแรก (ค่าในรากของ t₁ ติดลบ)', 'the first blend does not fit in the first segment (negative under the root of t₁)')
+  : D[n - 2] ** 2 - 2 * abs(pts[n - 1] - pts[n - 2]) / acc < 0 ? t('ช่วงผสมสุดท้ายยาวเกินช่วงสุดท้าย', 'the last blend does not fit in the last segment') : t('ช่วงผสมชนกัน: เวลาของส่วนตรงบางช่วงติดลบ', 'the blends overlap: a straight time comes out negative'); };
+const bad = (pts, acc) => `<span class="pill bad">✗</span> ${t('เป็นไปไม่ได้', 'impossible')}: ${fail(pts, acc)} · ${t('ต้องใช้', 'needs')} |θ̈| ≥ ${fx(minAcc(pts), 1)} °/s²`;
+/* the plot options of a single joint. S.spec(L) (the open step) may pick: b (which blends to shade), lines (the straight line of segment j, dashed pink,
+   with its velocity in the velocity row), mk (extra dots), straight (the straight parts in bold green) */
+const plotJ = S => { const L = S.tr, n = S.pts.length, ts = L.ts, sp = S.spec ? S.spec(L) : {}, NaNs = [NaN, NaN, NaN];
+  const faint = { f: tt => { let j = 0; while (j < n - 2 && tt > ts[j + 1]) j++; return [S.pts[j] + (S.pts[j + 1] - S.pts[j]) / D[j] * (tt - ts[j]), NaN, NaN]; }, col: 'muted', w: 1.4, dash: [5, 4] };
+  const marks = S.pts.map((y, k) => ({ t: ts[k], y }));
+  if (!S.ok) return { T: L.T, rows: ['p', 'v', 'a'], curves: [faint], marks, now: S.t };
+  const line = j => { const k = j === n - 2 ? j : j + 1; return { f: tt => tt >= ts[j] - 1e-9 && tt <= ts[j + 1] + 1e-9 ? [S.pts[k] + L.v[j] * (tt - ts[k]), L.v[j], NaN] : NaNs, col: 'sel', w: 1.8, dash: [7, 4] }; };
+  const inS = tt => { for (let j = 0; j < n - 1; j++) { const a = j ? ts[j] + L.tb[j] / 2 : L.tb[0], b = j === n - 2 ? L.T - L.tb[n - 1] : ts[j + 1] - L.tb[j + 1] / 2; if (tt >= a && tt <= b) return true; } return false; };
+  const curves = [{ f: L.at, col: 'l2', w: 2.4 }, faint, ...(sp.lines || []).map(line)];
+  if (sp.straight) curves.push({ f: tt => inS(tt) ? L.at(tt) : NaNs, col: 'good', w: 3.6 });
+  return { T: L.T, rows: ['p', 'v', 'a'], curves, marks: marks.concat(sp.mk || []), blends: sp.b ? sp.b.map(i => L.blends[i]) : L.blends, now: S.t }; };
+const LEG1 = [{ col: 'l2', text: t('แนววิถี', 'trajectory') }, { col: 'muted', w: 1.4, dash: [5, 4], text: t('เส้นตรงระหว่างจุด', 'lines between points') }, { box: true, text: t('ช่วงผสม', 'blends') }, { dot: true, text: t('จุดบนเส้นทาง', 'path points') }];
+const accS = (box, id, S, onch) => ui.slider(box, { id, label: t('ขนาดความเร่งที่ช่วงผสม |θ̈|', 'blend acceleration |θ̈|'), min: 10, max: 300, step: 1, value: S.acc, fmt: v => `${v} °/s²`, oninput: v => { S.acc = v; S.calc(); onch(); } });
+
+/* the worked numbers (CH7.EX.lspbVia) */
+const [t1, t2, t3, t4] = LV.tb, [v12, v23, v34] = LV.v, [a1, a2, a3, a4] = LV.acc, [l12, l23, l34] = LV.tl, d12 = P[1] - P[0], d34 = P[3] - P[2];
+const r1 = D[0] ** 2 - 2 * d12 / a1, r4 = D[2] ** 2 + 2 * d34 / a4, th2s = LV.at(TS[1])[0];
+
+/* ---------- 1: the first and last segments (starts away from the example: 80 °/s²) ---------- */
+const S1 = J1(P, 80), ro1 = el('ro1'), c1 = el('ctl1');
+const now1 = () => { const e = el('now1'); if (e) e.textContent = `t = ${S1.t.toFixed(2)} s · θ = ${fx(deg(S1.th))}°`; };
+const read1 = () => { const L = S1.tr;
+  ro1.innerHTML = (S1.ok ? `<div class="term">${t('ช่วงแรก', 'first segment')}: θ̈₁ = ${fx(L.acc[0], 0, 1)} °/s² · t₁ = ${fx(L.tb[0], 3)} s · θ̇₁₂ = ${fx(L.v[0])} °/s</div><div class="term">${t('ช่วงสุดท้าย', 'last segment')}: θ̈₄ = ${fx(L.acc[3], 0, 1)} °/s² · t₄ = ${fx(L.tb[3], 3)} s · θ̇₃₄ = ${fx(L.v[2])} °/s</div>`
+    : `<div class="term">${bad(S1.pts, S1.acc)}</div>`) + '<div class="term" id="now1"></div>'; now1(); };
+const pl1 = player(S1, el('card1'), c1, 'b1', () => { S1.pose(); now1(); });
+const sa1 = accS(c1, 'a1', S1, () => { if (!S1.ok) S1.play = false; pl1.lab(); S1.pose(); read1(); }); read1();
+/* what each step shows: the shaded blend, the dashed straight line, extra dots, and the moment the picture shows */
+const SP1 = [L => ({ b: [0], at: 0 }), L => ({ b: [0], lines: [0], mk: [{ t: L.tb[0] / 2, y: P[0] }], at: L.tb[0] }), L => ({ b: [0], lines: [0], at: L.tb[0] }), L => ({ b: [0], lines: [0], mk: [{ t: L.tb[0] / 2, y: P[0] }], at: L.tb[0] }),
+  L => ({ b: [3], at: L.T }), L => ({ b: [3], lines: [2], mk: [{ t: L.T - L.tb[3] / 2, y: P[3] }], at: L.T - L.tb[3] }), L => ({ b: [3], lines: [2], at: L.T - L.tb[3] })];
+const put1 = k => { S1.acc = A0; sa1.set(A0); S1.calc(); S1.spec = k ? SP1[k - 1] : null; read1(); pl1.set(k ? SP1[k - 1](S1.tr).at : 0); };
+S1.ov = (s, st) => { pathLabs(s, st.pts); const k = st.step; if (!k || !st.ok) return; const tip = atA(deg(st.th), 0.5, ZL + 0.03), o = { m: 0, s: 19, a: 'c', dy: 46 };
+  if (k === 1) OV.ang(s, OA, dirA(st.pts[0]), dirA(st.pts[1]), 0.3, 'am', 'θ₂ − θ₁', { m: 0, s: 20, a: 'l', dx: 12, dy: -6 });
+  if (k >= 2 && k <= 4) OV.name(s, tip, 'p', t('ปลายช่วงผสมแรก (t₁)', 'end of the first blend (t₁)'), o);
+  if (k === 5) OV.ang(s, OA, dirA(st.pts[2]), dirA(st.pts[3]), 0.3, 'am', 'θ₄ − θ₃', { m: 0, s: 20, a: 'l', dx: 12, dy: 10 });
+  if (k >= 6) OV.name(s, tip, 'p', t('ต้นช่วงผสมสุดท้าย', 'start of the last blend'), o); };
+CH2.sim('cv1', S1, 'joint1', { aspect: 0.7, maxH: 330 }); plotStage('pl1', S1, LEG1);
+LS.ask(el('ask1a'), { fields: [fld('t₁ (s) =', t1, 0.0015), fld('θ̇₁₂ (°/s) =', v12, 0.03)], check: ([a, b]) =>
+  near(a, D[0] + sqrt(r1), 0.01) ? t('นั่นคือรากที่มากกว่า: ช่วงผสมยาวเกินช่วงแรกทั้งช่วงไม่ได้ ใช้เครื่องหมายลบหน้ารากที่สอง', 'that is the larger root: a blend cannot be longer than the whole first segment, so take the minus sign before the square root')
+  : near(b, d12 / D[0], 0.03) ? t('นั่นคือความชันระหว่างจุด (θ₂ − θ₁)/t<sub>d12</sub>: ช่วงผสมใช้เวลาไปส่วนหนึ่ง ส่วนตรงจึงชันกว่า หารด้วย t<sub>d12</sub> − ½t₁', 'that is the slope between the points, (θ₂ − θ₁)/t<sub>d12</sub>: the blend uses up some of the time, so the straight part is steeper. Divide by t<sub>d12</sub> − ½t₁')
+  : near(b, d12 / (D[0] - t1), 0.03) ? t('หักเพียงครึ่งหนึ่งของ t₁: ส่วนตรงที่ต่อย้อนกลับไปจะถึงระดับ θ₁ ที่ t = ½t₁', 'subtract half of t₁ only: the straight line, extended back, reaches θ₁ at t = ½t₁')
+  : near(b, -v12, 0.03) ? t('ข้อต่อขึ้นจาก 10° ไป 35°: θ̇₁₂ เป็นบวก', 'the joint goes up from 10° to 35°: θ̇₁₂ is positive') : '' });
+LS.ask(el('ask1b'), { fields: [fld('t₄ (s) =', t4, 0.0015), fld('θ̇₃₄ (°/s) =', v34, 0.03)], check: ([a, b]) =>
+  near(a, D[2] - sqrt(D[2] ** 2 - 2 * d34 / a4), 0.0015) ? t('เครื่องหมายผิด: θ̈₄ = SGN(θ₃ − θ₄)|θ̈₄| = +50 (ข้อต่อลงมาหา 10° แล้วต้องเบรก ความเร่งจึงชี้ขึ้น) และในรากของช่วงสุดท้ายเป็นเครื่องหมายบวก', 'a sign is wrong: θ̈₄ = SGN(θ₃ − θ₄)|θ̈₄| = +50 (the joint comes down to 10° and must brake, so the acceleration points up), and the root of the last segment has a plus sign')
+  : near(a, D[2] + sqrt(r4), 0.01) ? t('นั่นคือรากที่มากกว่า: ใช้เครื่องหมายลบหน้ารากที่สอง', 'that is the larger root: take the minus sign before the square root')
+  : near(b, -v34, 0.03) ? t('ข้อต่อลงจาก 25° ไป 10°: θ̇₃₄ เป็นลบ', 'the joint goes down from 25° to 10°: θ̇₃₄ is negative')
+  : near(b, d34 / D[2], 0.03) ? t('นั่นคือความชันระหว่างจุด: หารด้วย t<sub>d34</sub> − ½t₄ ไม่ใช่ t<sub>d34</sub>', 'that is the slope between the points: divide by t<sub>d34</sub> − ½t₄, not by t<sub>d34</sub>')
+  : near(b, d34 / (D[2] - t4), 0.03) ? t('หักเพียงครึ่งหนึ่งของ t₄', 'subtract half of t₄ only') : '' });
+LS.stepper(el('st1'), { onStep: k => { const was = S1.step; S1.step = k; if (k || was) put1(k); }, steps: [
+  { why: t(`<b>ความเร่งของช่วงผสมแรก</b>: ข้อต่อเริ่มจากหยุดนิ่งที่ θ₁ เมื่อ t = 0 ก่อนหน้านั้นไม่มีอะไร ช่วงผสมแรกจึงอยู่ใน<b>ช่วงแรกทั้งหมด</b> (ยาว t₁ ตั้งแต่ t = 0) ไม่ได้แบ่งครึ่งอยู่สองข้างของจุดเหมือนช่วงผสมที่จุดผ่าน เครื่องหมายของความเร่งตามทิศที่ต้องไป: จาก ${P[0]}° ขึ้นไป ${P[1]}° จึงเป็นบวก ในรูป: มุมที่ข้อต่อต้องหมุนในช่วงแรก ในกราฟ: ช่วงผสมแรกที่แรเงา`, `<b>The acceleration of the first blend</b>: the joint starts at rest at θ₁ at t = 0, and nothing comes before. So the first blend lies <b>wholly in the first segment</b> (t₁ long, from t = 0); it is not split half and half about the point like a blend at a via point. The acceleration takes the sign of the move: from ${P[0]}° up to ${P[1]}°, positive. In the picture: the angle the joint must turn in the first segment; in the plot: the first blend, shaded`),
+    tex: R`\begin{aligned} \ddot\theta_1 &= ${SGN}(\theta_2 - \theta_1)\,|\ddot\theta_1| \\ &= ${SGN}(${P[1]} - ${P[0]})\,(${dn(A0)}) = ${sg(a1)}${dn(abs(a1))}${UA} \end{aligned}` },
+  { why: t(`<b>เงื่อนไขที่ปลายช่วงผสม</b>: เมื่อจบช่วงผสม ความเร็ว θ̈₁t₁ ต้องเท่ากับความชันของส่วนตรง ส่วนตรงของช่วงแรกผ่าน θ₂ ที่ t = t<sub>d12</sub> แล้วปลายอีกข้างอยู่ที่ไหน: ช่วงผสมที่เริ่มจากหยุดนิ่งเดินได้ระยะ ½θ̇₁₂t₁ ซึ่งเท่ากับระยะที่ส่วนตรงเดินในเวลา ½t₁ ส่วนตรงที่ต่อย้อนกลับไปจึงอยู่ที่ระดับ θ₁ เมื่อ t = ½t₁ (เส้นประสีชมพูและจุดที่เพิ่มในกราฟ) ความชันจึงเป็น (θ₂ − θ₁)/(t<sub>d12</sub> − ½t₁) ตั้งให้เท่ากันแล้วจัดรูปเป็นสมการกำลังสองของ t₁`, `<b>The condition at the end of the blend</b>: when the blend ends, its velocity θ̈₁t₁ must equal the slope of the straight part. The straight part of segment 1 passes θ₂ at t = t<sub>d12</sub>. At its start: a blend from rest covers ½θ̇₁₂t₁, as much as the straight line covers in ½t₁, so the straight line, extended back, reaches θ₁ at t = ½t₁ (the dashed pink line and the extra dot in the plot). Its slope is therefore (θ₂ − θ₁)/(t<sub>d12</sub> − ½t₁). Set the two equal and tidy up into a quadratic in t₁`),
+    tex: R`\begin{aligned} \ddot\theta_1 t_1 &= \frac{\theta_2 - \theta_1}{t_{d12} - \frac12 t_1} \\ \Rightarrow\quad \tfrac12\ddot\theta_1 t_1^2 - \ddot\theta_1 t_{d12}\,t_1 + (\theta_2 - \theta_1) &= 0 \end{aligned}` },
+  { why: t(`<b>แก้สมการ เลือกรากที่น้อยกว่า</b>: สูตรรากให้ t₁ = t<sub>d12</sub> ± √(…) รากที่มากกว่ายาวเกินทั้งช่วง (${tn(D[0] + sqrt(r1), 3)} s) จึงใช้เครื่องหมายลบ ในรูป: แขนอยู่ที่ปลายช่วงผสมแรก`, `<b>Solve; take the smaller root</b>: the quadratic formula gives t₁ = t<sub>d12</sub> ± √(…). The larger root is longer than the whole segment (${tn(D[0] + sqrt(r1), 3)} s), so take the minus sign. In the picture: the arm at the end of the first blend`),
+    tex: R`\begin{aligned} t_1 &= t_{d12} - \sqrt{t_{d12}^2 - \frac{2(\theta_2 - \theta_1)}{\ddot\theta_1}} \\ &= ${dn(D[0])} - \sqrt{${dn(D[0])}^2 - \frac{2(${dn(d12)})}{${dn(a1)}}} \\ &= ${dn(D[0])} - \sqrt{${dn(r1, 3)}} = ${tn(t1, 3)}${US} \end{aligned}` },
+  { why: t(`<b>ความเร็วของส่วนตรง</b>: แทน t₁ ลงในความชัน ตรวจด้วย θ̈₁t₁ ต้องได้ค่าเดียวกัน สังเกตว่า θ̇₁₂ มากกว่าความชันระหว่างจุด (θ₂ − θ₁)/t<sub>d12</sub> = ${dn(d12 / D[0], 2)} °/s เพราะช่วงผสมกินเวลาไปส่วนหนึ่ง ในกราฟแถวความเร็ว: ความเร็วขึ้นเป็นเส้นตรงจาก 0 จนแตะเส้นประที่ t₁`, `<b>The velocity of the straight part</b>: put t₁ into the slope, and check with θ̈₁t₁, which must give the same. Note that θ̇₁₂ is larger than the slope between the points, (θ₂ − θ₁)/t<sub>d12</sub> = ${dn(d12 / D[0], 2)} °/s, because the blend uses up some of the time. In the velocity row: the velocity rises in a straight line from 0 until it meets the dashed line at t₁`),
+    tex: R`\begin{aligned} \dot\theta_{12} &= \frac{\theta_2 - \theta_1}{t_{d12} - \frac12 t_1} = \frac{${dn(d12)}}{${dn(D[0])} - ${tn(t1 / 2, 3)}} = ${tn(v12)}${UV} \\ \ddot\theta_1 t_1 &= ${dn(a1)}(${tn(t1, 3)}) = ${tn(a1 * t1)}${UV} \end{aligned}` },
+  { why: t(`<b>ช่วงสุดท้าย: เครื่องหมาย</b>: ข้อต่อต้องหยุดนิ่งที่ θ₄ เมื่อ t = ${dn(TT)} s หลังจากนั้นไม่มีอะไร ช่วงผสมสุดท้ายจึงอยู่ในช่วงสุดท้ายทั้งหมด (ยาว t₄ จบที่ t = ${dn(TT)} s) ข้อต่อกำลังลงจาก ${P[2]}° ไป ${P[3]}° และต้องเบรกจนหยุด ความเร่งจึงชี้ขึ้น: ใช้ SGN(θ₃ − θ₄) ไม่ใช่ SGN(θ₄ − θ₃)`, `<b>The last segment: the sign</b>: the joint must be at rest at θ₄ at t = ${dn(TT)} s, and nothing comes after. So the last blend lies wholly in the last segment (t₄ long, ending at t = ${dn(TT)} s). The joint is going down from ${P[2]}° to ${P[3]}° and must brake to a stop, so the acceleration points up: use SGN(θ₃ − θ₄), not SGN(θ₄ − θ₃)`),
+    tex: R`\begin{aligned} \ddot\theta_4 &= ${SGN}(\theta_3 - \theta_4)\,|\ddot\theta_4| \\ &= ${SGN}(${P[2]} - ${P[3]})\,(${dn(A0)}) = ${sg(a4)}${dn(abs(a4))}${UA} \end{aligned}` },
+  { why: t(`<b>เวลาผสมสุดท้าย</b>: เงื่อนไขเดียวกันกลับทิศ ส่วนตรงของช่วงสุดท้ายผ่าน θ₃ ที่ต้นช่วง (t = ${dn(TS[2])} s) และถ้าต่อออกไปจะถึงระดับ θ₄ ที่ ½t₄ ก่อนจบ (เส้นประและจุดที่เพิ่ม) ในรากเป็นเครื่องหมาย<b>บวก</b>: θ₄ − θ₃ กับ θ̈₄ มีเครื่องหมายตรงข้ามกันเสมอ ค่าในรากจึงน้อยกว่า t<sub>d34</sub>²`, `<b>The last blend time</b>: the same condition, turned round. The straight part of the last segment passes θ₃ at its start (t = ${dn(TS[2])} s) and, extended on, reaches θ₄ ½t₄ before the end (dashed line and extra dot). The root has a <b>plus</b> sign: θ₄ − θ₃ and θ̈₄ always have opposite signs, so what is under the root is less than t<sub>d34</sub>²`),
+    tex: R`\begin{aligned} t_4 &= t_{d34} - \sqrt{t_{d34}^2 + \frac{2(\theta_4 - \theta_3)}{\ddot\theta_4}} \\ &= ${dn(D[2])} - \sqrt{${dn(D[2])}^2 + \frac{2(${dn(d34)})}{${dn(a4)}}} \\ &= ${dn(D[2])} - \sqrt{${dn(r4, 3)}} = ${tn(t4, 3)}${US} \end{aligned}` },
+  { why: t('<b>ความเร็วของส่วนตรงสุดท้าย</b>: เป็นลบเพราะข้อต่อกำลังลง ตรวจ: ขนาดของ θ̈₄t₄ ต้องเท่ากับขนาดของ θ̇₃₄ ในรูป: แขนอยู่ที่ต้นช่วงผสมสุดท้าย', '<b>The velocity of the last straight part</b>: negative, since the joint is going down. Check: θ̈₄t₄ must have the size of θ̇₃₄. In the picture: the arm at the start of the last blend'),
+    tex: R`\begin{aligned} \dot\theta_{34} &= \frac{\theta_4 - \theta_3}{t_{d34} - \frac12 t_4} = \frac{${dn(d34)}}{${dn(D[2])} - ${tn(t4 / 2, 3)}} = ${tn(v34)}${UV} \\ \ddot\theta_4 t_4 &= ${dn(a4)}(${tn(t4, 3)}) = ${tn(a4 * t4)}${UV} \end{aligned}` }],
+  answer: t(`t₁ = ${fx(t1, 3)} s, θ̇₁₂ = ${fx(v12)} °/s · t₄ = ${fx(t4, 3)} s, θ̇₃₄ = ${fx(v34)} °/s · ช่วงผสมแรกและสุดท้ายอยู่ในช่วงของมันทั้งหมด เพราะข้อต่อต้องเริ่มและหยุดนิ่งที่ θ₁ และ θ₄ พอดี ส่วนช่วงผสมที่จุดผ่านอยู่กึ่งกลางเวลาของจุด ครึ่งหนึ่งในแต่ละช่วง (โจทย์ 2)`, `t₁ = ${fx(t1, 3)} s, θ̇₁₂ = ${fx(v12)} °/s · t₄ = ${fx(t4, 3)} s, θ̇₃₄ = ${fx(v34)} °/s · the first and last blends lie wholly inside their segments because the joint must start and stop at rest exactly at θ₁ and θ₄; a blend at a via point is centred on the time of the point, half in each segment (problem 2)`) });
+
+/* ---------- 2: the middle segment, the blends and the straight times (starts away from the example: via points 40°, 20°, 80 °/s²) ---------- */
+const S2 = J1([P[0], 40, 20, P[3]], 80), ro2 = el('ro2'), c2 = el('ctl2');
+const now2 = () => { const e = el('now2'); if (e) e.textContent = `t = ${S2.t.toFixed(2)} s · θ = ${fx(deg(S2.th))}°`; };
+const read2 = () => { const L = S2.tr;
+  ro2.innerHTML = (S2.ok ? `<div class="tscroll"><table class="dhtab sols"><tr><th>${t('จุด', 'point')}</th>${S2.pts.map((p, k) => `<th>${NAMES[k]} = ${fx(p, 0)}°</th>`).join('')}</tr>` +
+    `<tr><th>θ̈<sub>k</sub> (°/s²)</th>${L.acc.map(a => `<td>${fx(a, 0, 1)}</td>`).join('')}</tr><tr><th>t<sub>k</sub> (s)</th>${L.tb.map(x => `<td>${fx(x, 3)}</td>`).join('')}</tr></table></div>` +
+    `<div class="tscroll"><table class="dhtab sols"><tr><th>${t('ช่วง', 'segment')}</th><th>1–2</th><th>2–3</th><th>3–4</th></tr><tr><th>θ̇<sub>jk</sub> (°/s)</th>${L.v.map(x => `<td>${fx(x)}</td>`).join('')}</tr><tr><th>t<sub>jk</sub> (s)</th>${L.tl.map(x => `<td>${fx(x, 3)}</td>`).join('')}</tr></table></div>`
+    : `<div class="term">${bad(S2.pts, S2.acc)}</div>`) + '<div class="term" id="now2"></div>'; now2(); };
+const pl2 = player(S2, el('card2'), c2, 'b2', () => { S2.pose(); now2(); });
+const ch2 = () => { if (!S2.ok) S2.play = false; pl2.lab(); S2.pose(); read2(); };
+const angS = (id, label, i) => ui.slider(c2, { id, label, min: -10, max: 60, step: 1, value: S2.pts[i], fmt: v => `${v}°`, oninput: v => { S2.pts[i] = v; S2.calc(); ch2(); } });
+const s2 = [angS('v2a', t('จุดผ่าน θ₂', 'via point θ₂'), 1), angS('v2b', t('จุดผ่าน θ₃', 'via point θ₃'), 2), accS(c2, 'a2', S2, ch2)]; read2();
+const SP2 = [L => ({ b: [], lines: [1], at: (TS[1] + TS[2]) / 2 }), L => ({ b: [1], lines: [0, 1], at: TS[1] }), L => ({ b: [2], lines: [1, 2], at: TS[2] }), L => ({ straight: true, at: TS[0] + D[0] / 2 }), L => ({ straight: true, at: 0 }),
+  L => ({ b: [1], lines: [0, 1], mk: [{ t: TS[1], y: L.at(TS[1])[0] }], at: TS[1] })];
+const put2 = k => { S2.pts = P.slice(); S2.acc = A0; [P[1], P[2], A0].forEach((x, i) => s2[i].set(x)); S2.calc(); S2.spec = k ? SP2[k - 1] : null; read2(); pl2.set(k ? SP2[k - 1](S2.tr).at : 0); };
+S2.ov = (s, st) => { pathLabs(s, st.pts); const k = st.step; if (!k || !st.ok) return; const tip = atA(deg(st.th), 0.5, ZL + 0.03), o = { m: 0, s: 19, a: 'c', dy: 46 };
+  if (k === 1) OV.ang(s, OA, dirA(st.pts[1]), dirA(st.pts[2]), 0.3, 'am', 'θ₃ − θ₂', { m: 0, s: 20, a: 'l', dx: 12, dy: 8 });
+  if (k === 2) OV.name(s, tip, 'p', t(`กลางช่วงผสมที่ θ₂ (t = ${dn(TS[1])} s)`, `mid-blend at θ₂ (t = ${dn(TS[1])} s)`), o);
+  if (k === 3) OV.name(s, tip, 'p', t(`กลางช่วงผสมที่ θ₃ (t = ${dn(TS[2])} s)`, `mid-blend at θ₃ (t = ${dn(TS[2])} s)`), o);
+  if (k === 6) OV.name(s, tip, 'p', `θ(${dn(TS[1])} s) = ${fx(deg(st.th))}° ≠ ${fx(st.pts[1], 0)}°`, o); };
+CH2.sim('cv2', S2, 'joint1', { aspect: 0.7, maxH: 330 }); plotStage('pl2', S2, LEG1);
+const sl12 = d12 / D[0], sl34 = d34 / D[2];
+LS.ask(el('ask2a'), { fields: [fld('θ̇₂₃ (°/s) =', v23, 0.03), fld('t₂ (s) =', t2, 0.0015), fld('t₃ (s) =', t3, 0.0015)], check: ([a, b, c]) =>
+  near(a, -v23, 0.03) ? t('ข้อต่อลงจาก 35° ไป 25°: θ̇₂₃ เป็นลบ', 'the joint goes down from 35° to 25°: θ̇₂₃ is negative')
+  : near(b, -t2, 0.0015) || near(c, -t3, 0.0015) ? t('เวลาผสมไม่มีวันติดลบ: θ̈<sub>k</sub> มีเครื่องหมายเดียวกับการเปลี่ยนความเร็ว θ̇<sub>kl</sub> − θ̇<sub>jk</sub>', 'a blend time is never negative: θ̈<sub>k</sub> takes the sign of the change in velocity θ̇<sub>kl</sub> − θ̇<sub>jk</sub>')
+  : near(b, (v23 - sl12) / a2, 0.0015) || near(c, (sl34 - v23) / a3, 0.0015) ? t('ใช้ θ̇₁₂ และ θ̇₃₄ ของโจทย์ 1 ไม่ใช่ความชันระหว่างจุด: ช่วงแรกและช่วงสุดท้ายชันกว่านั้น', 'use the θ̇₁₂ and θ̇₃₄ of problem 1, not the slopes between the points: the first and last straight parts are steeper')
+  : near(b, t2 / 2, 0.0015) || near(c, t3 / 2, 0.0015) ? t('t<sub>k</sub> คือความยาวทั้งหมดของช่วงผสม (ครึ่งหนึ่งก่อนและครึ่งหนึ่งหลังเวลาของจุด)', 't<sub>k</sub> is the whole length of the blend (half before and half after the time of the point)') : '' });
+LS.ask(el('ask2b'), { fields: [fld('t₁₂ (s) =', l12, 0.0015), fld('t₂₃ (s) =', l23, 0.0015), fld('t₃₄ (s) =', l34, 0.0015)], check: ([a, b, c]) =>
+  near(a, D[0] - t1 - t2, 0.0015) || near(b, D[1] - t2 - t3, 0.0015) || near(c, D[2] - t4 - t3, 0.0015) ? t('ช่วงผสมที่จุดผ่านอยู่ในแต่ละช่วงเพียงครึ่งเดียว: หัก ½t₂ และ ½t₃', 'only half of a blend at a via point lies in each segment: subtract ½t₂ and ½t₃')
+  : near(a, D[0] - t1 / 2 - t2 / 2, 0.0015) || near(c, D[2] - t4 / 2 - t3 / 2, 0.0015) ? t('ช่วงผสมแรกและสุดท้ายอยู่ในช่วงของมันทั้งหมด: หัก t₁ และ t₄ เต็ม ๆ', 'the first and last blends lie wholly in their segments: subtract all of t₁ and t₄') : '' });
+LS.ask(el('ask2c'), { fields: [fld('θ (°) =', th2s, 0.02)], check: ([a]) =>
+  near(a, P[1], 0.02) ? t(`${P[1]}° คือจุดผ่านเอง: ที่ t = ${dn(TS[1])} s ข้อต่ออยู่กลางช่วงผสม ซึ่งเลี้ยวก่อนถึงมุม`, `${P[1]}° is the via point itself: at t = ${dn(TS[1])} s the joint is in the middle of a blend, which turns before the corner`)
+  : near(a, 2 * P[1] - th2s, 0.02) ? t('ข้อต่ออยู่ใต้มุม ไม่ใช่เหนือ: θ̈₂ เป็นลบ', 'the joint stays below the corner, not above it: θ̈₂ is negative') : '' });
+const sum = t1 + l12 + t2 + l23 + t3 + l34 + t4;
+LS.stepper(el('st2'), { onStep: k => { const was = S2.step; S2.step = k; if (k || was) put2(k); }, steps: [
+  { why: t(`<b>ช่วงกลาง</b>: ระหว่างจุดผ่านสองจุด ส่วนตรงเชื่อมจุดทั้งสองตรง ๆ (เส้นประสีชมพูในกราฟ) ความเร็วจึงเป็นความชันระหว่างจุด ความเร็วของช่วงแรกและช่วงสุดท้ายได้แล้วจากโจทย์ 1: θ̇₁₂ = ${fx(v12)} และ θ̇₃₄ = ${fx(v34)} °/s`, `<b>The middle segment</b>: between two via points the straight part simply joins the two points (dashed pink in the plot), so its velocity is the slope between the points. The first and last velocities come from problem 1: θ̇₁₂ = ${fx(v12)} and θ̇₃₄ = ${fx(v34)} °/s`),
+    tex: R`\dot\theta_{23} = \frac{\theta_3 - \theta_2}{t_{d23}} = \frac{${P[2]} - ${P[1]}}{${dn(D[1])}} = ${tn(v23)}${UV}` },
+  { why: t(`<b>ช่วงผสมที่ θ₂</b>: ที่จุดผ่าน ช่วงผสมเปลี่ยนความเร็วจากส่วนตรงหนึ่งไปอีกส่วนหนึ่ง และอยู่<b>กึ่งกลาง</b>เวลาของจุด (ครึ่งหนึ่งก่อน ครึ่งหนึ่งหลัง t = ${dn(TS[1])} s) เครื่องหมายตามการเปลี่ยนความเร็ว: จาก ${fx(v12, 2, 1)} เป็น ${fx(v23)} °/s ความเร็วลดลง θ̈₂ จึงเป็นลบ ในกราฟ: ส่วนตรงสองเส้นที่มาพบกันที่จุด และแถวความเร็วที่ลดจากระดับหนึ่งไปอีกระดับในเวลา t₂`, `<b>The blend at θ₂</b>: at a via point the blend changes the velocity from one straight part to the next, and it is <b>centred</b> on the time of the point (half before, half after t = ${dn(TS[1])} s). The sign follows the change in velocity: from ${fx(v12, 2, 1)} to ${fx(v23)} °/s the velocity drops, so θ̈₂ is negative. In the plot: the two straight lines meeting at the point, and the velocity row stepping down from one level to the next in t₂`),
+    tex: R`\begin{aligned} \ddot\theta_2 &= ${SGN}(\dot\theta_{23} - \dot\theta_{12})\,|\ddot\theta_2| \\ &= ${SGN}(${tn(v23)} - ${tn(v12)})\,(${dn(A0)}) = ${tn(a2, 0)}${UA} \\ t_2 &= \frac{\dot\theta_{23} - \dot\theta_{12}}{\ddot\theta_2} = \frac{${tn(v23)} - ${tn(v12)}}{${tn(a2, 0)}} = ${tn(t2, 3)}${US} \end{aligned}` },
+  { why: t(`<b>ช่วงผสมที่ θ₃</b>: แบบเดียวกัน จาก ${fx(v23)} เป็น ${fx(v34)} °/s ความเร็วเพิ่มขึ้น (ลบน้อยลง) θ̈₃ จึงเป็นบวก ช่วงผสมนี้สั้นเพราะความเร็วสองข้างต่างกันไม่มาก`, `<b>The blend at θ₃</b>: the same way, from ${fx(v23)} to ${fx(v34)} °/s the velocity rises (less negative), so θ̈₃ is positive. This blend is short because the two velocities differ little`),
+    tex: R`\begin{aligned} \ddot\theta_3 &= ${SGN}(\dot\theta_{34} - \dot\theta_{23})\,|\ddot\theta_3| \\ &= ${SGN}\big(${tn(v34)} - ${tp(v23)}\big)\,(${dn(A0)}) = ${sg(a3)}${dn(abs(a3))}${UA} \\ t_3 &= \frac{\dot\theta_{34} - \dot\theta_{23}}{\ddot\theta_3} = \frac{${tn(v34)} - ${tp(v23)}}{${dn(a3)}} = ${tn(t3, 3)}${US} \end{aligned}` },
+  { why: t('<b>เวลาของส่วนตรง</b>: เวลาที่เหลือในแต่ละช่วงคือส่วนตรง ช่วงแรกหัก t₁ <b>ทั้งหมด</b> (ช่วงผสมแรกอยู่ในช่วงแรกทั้งหมด) และ<b>ครึ่งหนึ่ง</b>ของ t₂ ช่วงกลางหักครึ่งหนึ่งของช่วงผสมทั้งสองข้าง ช่วงสุดท้ายหัก t₄ ทั้งหมดและครึ่งหนึ่งของ t₃ ในกราฟ: ส่วนตรงเป็นเส้นสีเขียวหนา ความเร็วคงที่ ความเร่งเป็นศูนย์', '<b>The straight times</b>: what is left of each segment is straight. The first segment loses <b>all</b> of t₁ (the first blend lies wholly in it) and <b>half</b> of t₂; the middle one loses half of each blend on its two sides; the last loses all of t₄ and half of t₃. In the plot: the straight parts in bold green, with a constant velocity and no acceleration'),
+    tex: R`\begin{aligned} t_{12} &= t_{d12} - t_1 - \tfrac12 t_2 \\ &= ${dn(D[0])} - ${tn(t1, 3)} - ${tn(t2 / 2, 3)} = ${tn(l12, 3)}${US} \\ t_{23} &= t_{d23} - \tfrac12 t_2 - \tfrac12 t_3 \\ &= ${dn(D[1])} - ${tn(t2 / 2, 3)} - ${tn(t3 / 2, 3)} = ${tn(l23, 3)}${US} \\ t_{34} &= t_{d34} - t_4 - \tfrac12 t_3 \\ &= ${dn(D[2])} - ${tn(t4, 3)} - ${tn(t3 / 2, 3)} = ${tn(l34, 3)}${US} \end{aligned}` },
+  { why: t('<b>ลำดับการคำนวณและการตรวจ</b> (สไลด์หน้า 22): (1) ช่วงแรกและช่วงสุดท้ายก่อน เพราะความเร็วของสองช่วงนี้ขึ้นกับเวลาผสมของมันเอง (2) ความเร็วของช่วงกลางเป็นความชันธรรมดา (3) ช่วงผสมที่จุดผ่านต้องใช้ความเร็วทั้งสองข้าง (4) สุดท้ายคือเวลาของส่วนตรงทุกช่วง ตรวจ: ทุกชิ้นต่อกันต้องเต็มเวลาทั้งหมดพอดี', '<b>The order of the work, and a check</b> (slide p. 22): (1) first and last segments first, because their velocities depend on their own blend times; (2) the middle velocities are plain slopes; (3) a blend at a via point needs the velocities on both sides; (4) last, every straight time. Check: the pieces, end to end, must fill the whole time exactly'),
+    tex: R`\begin{aligned} & t_1 + t_{12} + t_2 + t_{23} + t_3 + t_{34} + t_4 \\ &= ${[t1, l12, t2, l23].map(x => tn(x, 3)).join(' + ')} \\ &\quad + ${[t3, l34, t4].map(x => tn(x, 3)).join(' + ')} = ${tn(sum, 3)}${US} \end{aligned}` },
+  { why: t(`<b>ที่ t = ${dn(TS[1])} s ข้อต่ออยู่ที่ไหน</b>: เวลานี้อยู่กลางช่วงผสมที่ θ₂ ส่วนตรงของช่วงแรกผ่าน ${P[1]}° ที่ t = ${dn(TS[1])} s พอดี แต่ช่วงผสมเริ่มเลี้ยวตั้งแต่ ½t₂ ก่อนหน้า ในเวลา ½t₂ นั้นความเร่ง θ̈₂ ดึงข้อต่อออกจากเส้นตรงไป ½θ̈₂(½t₂)² ข้อต่อจึง<b>ไม่ถึง ${P[1]}°</b>: ช่วงผสมตัดมุม ถ้าต้องผ่านจุดนั้นจริง (เช่นจุดที่ต้องหยิบชิ้นงาน) ให้ใส่<b>จุดผ่านเทียม</b> (pseudo via points) สองจุดขนาบข้าง บนเส้นตรงที่ผ่านจุดจริง จุดจริงจึงอยู่บนส่วนตรงระหว่างจุดเทียม และข้อต่อผ่านมันตรงจุด (Craig 7.3)`, `<b>Where is the joint at t = ${dn(TS[1])} s?</b> This is the middle of the blend at θ₂. The straight part of segment 1 passes ${P[1]}° exactly at t = ${dn(TS[1])} s, but the blend starts turning ½t₂ earlier, and in that ½t₂ the acceleration θ̈₂ pulls the joint ½θ̈₂(½t₂)² away from the line. So the joint <b>never reaches ${P[1]}°</b>: the blend cuts the corner. To pass a point exactly (say, where a part is picked up), put two <b>pseudo via points</b> either side of it, on a straight line through the real point: the real point then lies on the straight part between them, and the joint passes through it exactly (Craig 7.3)`),
+    tex: R`\begin{aligned} \theta(${dn(TS[1])}) &= \theta_2 + \tfrac12\ddot\theta_2\big(\tfrac12 t_2\big)^2 = \theta_2 + \tfrac18\ddot\theta_2 t_2^2 \\ &= ${P[1]} + \tfrac18(${tn(a2, 0)})(${tn(t2, 3)})^2 \\ &= ${P[1]} - ${tn(P[1] - th2s)} = ${tn(th2s)}^\circ \end{aligned}` }],
+  answer: t(`θ̇₂₃ = ${fx(v23)} °/s · t₂ = ${fx(t2, 3)} s, t₃ = ${fx(t3, 3)} s · t₁₂ = ${fx(l12, 3)}, t₂₃ = ${fx(l23, 3)}, t₃₄ = ${fx(l34, 3)} s · ที่ t = ${dn(TS[1])} s ข้อต่ออยู่ที่ ${fx(th2s)}° ไม่ใช่ ${P[1]}°: ข้อต่อผ่านใกล้จุดผ่าน ไม่ผ่านตรงจุด`, `θ̇₂₃ = ${fx(v23)} °/s · t₂ = ${fx(t2, 3)} s, t₃ = ${fx(t3, 3)} s · t₁₂ = ${fx(l12, 3)}, t₂₃ = ${fx(l23, 3)}, t₃₄ = ${fx(l34, 3)} s · at t = ${dn(TS[1])} s the joint is at ${fx(th2s)}°, not ${P[1]}°: it passes near the via point, not through it`) });
+
+/* ---------- 3: several joints together, the two-link arm (each joint through its own path points, the same segment times) ---------- */
+const PJ = [[-20, 60, 100], [70, 20, 40]], TD3 = 1, AC3 = 200, L2 = X.two.L, QP = [0, 1, 2].map(k => PJ.map(p => rad(p[k]))), tool = q => { const f = RB.fk2(L2[0], L2[1], q[0], q[1]); return [f.x, f.y]; };
+el('given3').innerHTML = t(`<div>แขนสองก้านในระนาบ (l₁ = ${dn(L2[0])}, l₂ = ${dn(L2[1])} m) ต้องผ่านสามท่า: ข้อต่อ 1 ผ่าน \\(${PJ[0].map(x => x + '^\\circ').join(',\\ ')}\\) และข้อต่อ 2 ผ่าน \\(${PJ[1].map(x => x + '^\\circ').join(',\\ ')}\\) ทั้งสองข้อต่อใช้ช่วงละ \\(${TD3}\\ \\text{s}\\) และช่วงผสมขนาด \\(${AC3}\\ {}^\\circ/\\text{s}^2\\) แต่ละข้อต่อคำนวณแบบโจทย์ 1–2 แยกกัน</div>`,
+  `<div>A planar two-link arm (l₁ = ${dn(L2[0])}, l₂ = ${dn(L2[1])} m) must pass three poses: joint 1 through \\(${PJ[0].map(x => x + '^\\circ').join(',\\ ')}\\) and joint 2 through \\(${PJ[1].map(x => x + '^\\circ').join(',\\ ')}\\). Both joints use segments of \\(${TD3}\\ \\text{s}\\) and blends of size \\(${AC3}\\ {}^\\circ/\\text{s}^2\\). Each joint is worked out as in problems 1–2, on its own.</div>`); MC.renderMath(el('given3'));
+const S3 = { L: L2, td: TD3, acc: AC3, t: 0, play: false, step: 0, xyz: true, traceKey: 'gr', trace2Key: 'gr', ghosts: QP, pts: QP.map(tool), ptNames: [t('เริ่ม', 'start'), t('จุดผ่าน', 'via'), t('ปลาย', 'goal')] }, ro3 = el('ro3'), c3 = el('ctl3');
+/* the shortest segment time (both segments the same) a joint's path allows at blend acceleration acc */
+const minT = (p, acc) => { let lo = 0.02, hi = 10; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (CH7.lspbVia(p, [m, m], acc).ok) hi = m; else lo = m; } return hi; };
+S3.pose = () => { S3.q = S3.ok ? S3.J.map(j => rad(j.at(S3.t)[0])) : QP[0].slice(); const tip = tool(S3.q); S3.trace = S3.ok ? S3.samp.filter(x => x.t <= S3.t).map(x => x.p).concat([tip]) : []; };
+S3.calc = () => { S3.J = PJ.map(p => CH7.lspbVia(p, [S3.td, S3.td], S3.acc)); S3.ok = S3.J.every(j => j.ok); S3.T = 2 * S3.td;
+  S3.samp = S3.ok ? Array.from({ length: 121 }, (_, i) => { const tt = S3.T * i / 120, q = S3.J.map(j => rad(j.at(tt)[0])), f = RB.fk2(L2[0], L2[1], q[0], q[1]); return { t: tt, p: [f.x, f.y], e: [f.x1, f.y1] }; }) : [];
+  S3.trace2 = S3.samp.map(x => x.p); S3.keep = S3.samp.flatMap(x => [x.p, x.e]).concat(QP.map(q => { const f = RB.fk2(L2[0], L2[1], q[0], q[1]); return [f.x1, f.y1]; })); S3.pose(); };
+S3.calc();
+const now3 = () => { const e = el('now3'); if (e) e.textContent = `t = ${S3.t.toFixed(2)} s · θ₁ = ${fx(deg(S3.q[0]), 1)}°, θ₂ = ${fx(deg(S3.q[1]), 1)}°`; };
+const read3 = () => { const rows = S3.J.map((j, i) => `<tr><th>${t('ข้อต่อ', 'joint')} ${i + 1}</th>${j.ok ? j.v.map(x => `<td>${fx(x, 1)}</td>`).join('') + j.tb.map(x => `<td>${fx(x, 3)}</td>`).join('') : `<td colspan="5">${t('เป็นไปไม่ได้', 'impossible')}</td>`}<td>${fx(minT(PJ[i], S3.acc), 3)}</td><td>${j.ok ? '<span class="pill good">✓</span>' : '<span class="pill bad">✗</span>'}</td></tr>`).join('');
+  ro3.innerHTML = `<div class="tscroll"><table class="dhtab sols"><tr><th></th><th>θ̇₁₂ (°/s)</th><th>θ̇₂₃ (°/s)</th><th>t₁ (s)</th><th>t₂ (s)</th><th>t₃ (s)</th><th>${t('t<sub>d</sub> สั้นสุด (s)', 'shortest t<sub>d</sub> (s)')}</th><th></th></tr>${rows}</table></div>` +
+    `<div class="term">${t(`ช่วงละ t<sub>d</sub> = ${S3.td.toFixed(2)} s · |θ̈| = ${S3.acc} °/s²`, `segments of t<sub>d</sub> = ${S3.td.toFixed(2)} s · |θ̈| = ${S3.acc} °/s²`)}${S3.ok ? '' : ' · ' + t('<b>ไม่ทัน</b>: แขนอยู่ที่ท่าเริ่ม', '<b>too short</b>: the arm stays at the start')}</div><div class="term" id="now3"></div>`; now3(); };
+const pl3 = player(S3, el('card3'), c3, 'b3', () => { S3.pose(); now3(); });
+const ch3 = () => { S3.calc(); if (!S3.ok) S3.play = false; pl3.lab(); pl3.max(); S3.pose(); read3(); };
+const s3 = [ui.slider(c3, { id: 'td3', label: t('เวลาของแต่ละช่วง t<sub>d</sub>', 'segment time t<sub>d</sub>'), min: 0.6, max: 2, step: 0.02, value: S3.td, fmt: v => `${v.toFixed(2)} s`, oninput: v => { S3.td = v; ch3(); } }),
+  ui.slider(c3, { id: 'ac3', label: t('ขนาดความเร่งที่ช่วงผสม |θ̈|', 'blend acceleration |θ̈|'), min: 100, max: 400, step: 10, value: S3.acc, fmt: v => `${v} °/s²`, oninput: v => { S3.acc = v; ch3(); } })]; read3();
+S3.plot = () => { const ts = CH7.times([S3.td, S3.td]), marks = PJ.flatMap(p => p.map((y, k) => ({ t: ts[k], y })));
+  if (!S3.ok) return { T: S3.T, rows: ['p', 'v'], curves: PJ.map((p, i) => ({ f: tt => { const j = tt > ts[1] ? 1 : 0; return [p[j] + (p[j + 1] - p[j]) / S3.td * (tt - ts[j]), NaN, NaN]; }, col: i ? 'l2' : 'l1', w: 1.4, dash: [5, 4] })), marks, now: S3.t };
+  return { T: S3.T, rows: ['p', 'v'], curves: S3.J.map((j, i) => ({ f: j.at, col: i ? 'l2' : 'l1', w: 2.4 })), marks, blends: S3.J.flatMap(j => j.blends), now: S3.t }; };
+const put3 = k => { S3.td = TD3; S3.acc = AC3; s3[0].set(TD3); s3[1].set(AC3); S3.calc(); read3(); pl3.set(k === 2 ? TD3 : 0); };
+const J3 = PJ.map(p => CH7.lspbVia(p, [TD3, TD3], AC3)), q3 = J3.map(j => j.at(TD3)[0]), gap3 = Math.hypot(...tool(q3.map(rad)).map((x, i) => x - S3.pts[1][i])), mT3 = PJ.map(p => minT(p, AC3)), slow = mT3[0] >= mT3[1] ? 0 : 1;
+S3.ov = (s, st) => { const k = st.step; if (k !== 2 || !st.ok) return; const p = tool(st.q);
+  const mm = fx(1000 * Math.hypot(p[0] - st.pts[1][0], p[1] - st.pts[1][1]), 0);
+  OV.name(s, [p[0], p[1], ZL + 0.03], 'p', t(`t = ${dn(TD3)} s: ห่างจุดผ่าน ${mm} mm`, `t = ${dn(TD3)} s: ${mm} mm from the via point`), { m: 0, s: 19, a: 'l', dx: 18, dy: 22 }); };
+CH2.sim('cv3', S3, 'arm2', { aspect: 0.7, maxH: 400 });
+plotStage('pl3', S3, [{ col: 'l1', text: t('ข้อต่อ 1', 'joint 1') }, { col: 'l2', text: t('ข้อต่อ 2', 'joint 2') }, { box: true, text: t('ช่วงผสม', 'blends') }, { dot: true, text: t('จุดบนเส้นทาง', 'path points') }], { aspect: 0.55, maxH: 320 });
+LS.choose(el('ask3a'), { options: [t('เพื่อให้ปลายแขนเดินเป็นเส้นตรง', 'so that the tool moves on a straight line'), t('เพื่อให้ทุกข้อต่อถึงจุดผ่านพร้อมกัน: จุดผ่านคือท่าของทั้งแขน', 'so that every joint reaches its via point at the same moment: a via point is a pose of the whole arm'), t('เพราะทุกข้อต่อมีขีดจำกัดความเร่งเท่ากัน', 'because every joint has the same acceleration limit'), t('เพื่อให้ทุกข้อต่อหมุนด้วยความเร็วเท่ากัน', 'so that every joint turns at the same speed')], answer: 1 });
+LS.choose(el('ask3b'), { options: [t('ข้อต่อที่ต้องใช้เวลามากที่สุดตามขีดจำกัดความเร็วและความเร่งของตัวเอง (ข้อต่อที่ช้าที่สุด)', 'the joint that needs the most time for its own speed and acceleration limits (the slowest joint)'), t('ข้อต่อที่เคลื่อนที่น้อยที่สุด', 'the joint that moves the least'), t('ค่าเฉลี่ยของเวลาที่ทุกข้อต่อต้องการ', 'the average of the times the joints need')], answer: 0 });
+LS.stepper(el('st3'), { onStep: k => { const was = S3.step; S3.step = k; if (k || was) put3(k); }, steps: [
+  { why: t(`<b>แต่ละข้อต่อมีแนววิถีของตัวเอง</b>: ข้อต่อ 1 ผ่าน ${PJ[0].map(x => fx(x, 0) + '°').join(', ')} และข้อต่อ 2 ผ่าน ${PJ[1].map(x => fx(x, 0) + '°').join(', ')} แต่ละตัวใช้สูตรของโจทย์ 1–2 แยกกัน (ช่วงแรกและช่วงสุดท้ายก่อน แล้วช่วงผสมที่จุดผ่าน) ด้วยเวลาของช่วงชุดเดียวกัน ${dn(TD3)} s และ ${dn(TD3)} s ได้ความเร็วและเวลาผสมคนละชุด ในกราฟ: เส้นสีส้มและสีน้ำเงิน`, `<b>Each joint has its own trajectory</b>: joint 1 passes ${PJ[0].map(x => fx(x, 0) + '°').join(', ')} and joint 2 passes ${PJ[1].map(x => fx(x, 0) + '°').join(', ')}. Each uses the formulas of problems 1–2 on its own (first and last segments first, then the blend at the via point), with the same segment times ${dn(TD3)} s and ${dn(TD3)} s. They get different velocities and blend times. In the plot: the orange and the blue curves`),
+    body: () => `<div class="tscroll"><table class="dhtab sols"><tr><th></th><th>θ̇₁₂ (°/s)</th><th>θ̇₂₃ (°/s)</th><th>t₁ (s)</th><th>t₂ (s)</th><th>t₃ (s)</th></tr>${J3.map((j, i) => `<tr><th>${t('ข้อต่อ', 'joint')} ${i + 1}</th>${j.v.map(x => `<td>${fx(x)}</td>`).join('')}${j.tb.map(x => `<td>${fx(x, 3)}</td>`).join('')}</tr>`).join('')}</table></div>` },
+  { why: t(`<b>เวลาของช่วงชุดเดียวกัน</b>: ทั้งสองข้อต่ออยู่ที่เวลาของจุดผ่าน (t = ${dn(TD3)} s) พร้อมกัน แขนจึงอยู่ที่ท่าของจุดผ่าน ซึ่งเป็นท่าของ<b>ทั้งแขน</b> (มุมของทุกข้อต่อพร้อมกัน) ถ้าข้อต่อ 2 ใช้เวลาของช่วงต่างออกไป มันจะผ่าน ${PJ[1][1]}° ขณะที่ข้อต่อ 1 ยังไม่ถึง ${PJ[0][1]}° แขนจะไม่เคยอยู่ในท่าของจุดผ่านเลย ในรูป (t = ${dn(TD3)} s): แขนอยู่ข้างเงาของท่าที่จุดผ่าน ปลายแขนห่างจุดผ่าน ${fx(1000 * gap3, 0)} mm ช่วงผสมตัดมุมที่นี่ด้วย`, `<b>The same segment times</b>: both joints are at the time of the via point (t = ${dn(TD3)} s) together, so the arm is at the via pose, which is a pose of the <b>whole arm</b> (the angles of all joints at once). If joint 2 used other segment times, it would pass ${PJ[1][1]}° while joint 1 had not yet reached ${PJ[0][1]}°, and the arm would never be in the via pose at all. In the picture (t = ${dn(TD3)} s): the arm next to the ghost of the via pose; the tool point is ${fx(1000 * gap3, 0)} mm from the via point: the blends cut the corner here too`),
+    tex: R`\begin{aligned} \big(\theta_1(${dn(TD3)}),\ \theta_2(${dn(TD3)})\big) &= (${tn(q3[0])}^\circ,\ ${tn(q3[1])}^\circ) \\ \text{via:}\quad &\phantom{=}\ (${PJ[0][1]}^\circ,\ ${PJ[1][1]}^\circ) \end{aligned}` },
+  { why: t(`<b>อะไรกำหนดเวลาของช่วง</b>: ที่ |θ̈| = ${AC3} °/s² ข้อต่อ 1 ต้องการช่วงละอย่างน้อย ${fx(mT3[0], 3)} s ข้อต่อ 2 อย่างน้อย ${fx(mT3[1], 3)} s (สั้นกว่านี้ช่วงผสมจะชนกันหรือยาวเกินช่วง) เวลาร่วมจึงต้องไม่น้อยกว่าค่าที่มากกว่า: ข้อต่อ ${slow + 1} ซึ่ง<b>ช้าที่สุด</b>เป็นตัวกำหนด ส่วนข้อต่ออีกตัวเคลื่อนที่ช้ากว่าที่มันทำได้ ตัวควบคุมจริง (สไลด์หน้า 24: GP8 หกข้อต่อ) ตรวจขีดจำกัดความเร็วและความเร่งของทุกข้อต่อ แล้วยืดเวลาของช่วงให้พอสำหรับข้อต่อที่ช้าที่สุด ลองเลื่อน t<sub>d</sub> ลงต่ำกว่า ${fx(mT3[slow], 2)} s ดู`, `<b>What sets the segment time</b>: at |θ̈| = ${AC3} °/s², joint 1 needs segments of at least ${fx(mT3[0], 3)} s and joint 2 at least ${fx(mT3[1], 3)} s (any shorter and the blends overlap or no longer fit). The common time must be at least the larger one, so joint ${slow + 1}, the <b>slowest</b>, sets it, and the other joint moves more slowly than it could. A real controller (slide p. 24: the six-joint GP8) checks the speed and acceleration limits of every joint and stretches the segment times until the slowest joint can make it. Try moving t<sub>d</sub> below ${fx(mT3[slow], 2)} s`),
+    tex: R`t_d \ge \max(${tn(mT3[0], 3)},\ ${tn(mT3[1], 3)}) = ${tn(mT3[slow], 3)}${US}` }],
+  answer: t(`ทุกข้อต่อใช้เวลาของช่วงชุดเดียวกัน จึงถึงจุดผ่านพร้อมกัน (จุดผ่านคือท่าของทั้งแขน) และเวลาของช่วงต้องยาวพอสำหรับข้อต่อที่ช้าที่สุด: ที่ ${AC3} °/s² คือข้อต่อ ${slow + 1} อย่างน้อย ${fx(mT3[slow], 3)} s · ในปริภูมิข้อต่อ ปลายแขนเดินเป็นเส้นโค้งที่ไม่มีใครเลือก (เส้นสีเขียว) ถ้าต้องการเส้นตรงดูหน้า 7.1`, `Every joint uses the same segment times, so all reach the via point together (a via point is a pose of the whole arm), and the segment time must be long enough for the slowest joint: at ${AC3} °/s² that is joint ${slow + 1}, at least ${fx(mT3[slow], 3)} s · in joint space the tool follows a curve nobody chose (the green line); for a straight line see page 7.1`) });
+
+/* ---------- 4: homework 7, answer checks only. The answers live in CH7.EX.hw and are never printed: the hints name the mistake, not the number ---------- */
+const HW = X.hw, hp = HW.pts, hd = HW.durs, ha = abs(HW.acc[0]), hs12 = (hp[1] - hp[0]) / hd[0], hs23 = (hp[2] - hp[1]) / hd[1];
+const HWNO = t('ยังไม่ใช่ ลองตรวจการคำนวณอีกครั้ง (การบ้านไม่มีเฉลยบนเว็บ เฉลยละเอียดให้ในชั้นเรียน)', 'Not yet: check your working again (homework has no solution on the web; the worked solution is given in class)');
+const H = { slope: t('นั่นคือความชันระหว่างจุด: ช่วงแรกและช่วงสุดท้ายหารด้วย t<sub>d</sub> − ½t ไม่ใช่ t<sub>d</sub> (หาเวลาผสมก่อน)', 'that is the slope between the points: the first and last segments divide by t<sub>d</sub> − ½t, not by t<sub>d</sub> (find the blend time first)'),
+  half: t('หักเพียงครึ่งหนึ่งของเวลาผสมแรกหรือสุดท้าย: ส่วนตรงที่ต่อออกไปถึงจุดปลายที่ ½t', 'subtract half of the first or last blend time only: the straight line, extended, reaches the end point at ½t'),
+  root: t('นั่นคือรากที่มากกว่า: ใช้เครื่องหมายลบหน้ารากที่สอง', 'that is the larger root: take the minus sign before the square root') };
+LS.ask(el('ask4a'), { fields: [fld('θ̇₁₂ =', HW.v[0], 0.03), fld('θ̇₂₃ =', HW.v[1], 0.03)], check: ([a, b]) =>
+  near(a, hs12, 0.03) || near(b, hs23, 0.03) ? H.slope : near(a, (hp[1] - hp[0]) / (hd[0] - HW.tb[0]), 0.03) || near(b, (hp[2] - hp[1]) / (hd[1] - HW.tb[2]), 0.03) ? H.half
+  : near(a, -HW.v[0], 0.03) ? t('ข้อต่อขึ้นจาก 5° ไป 15°: θ̇₁₂ เป็นบวก', 'the joint goes up from 5° to 15°: θ̇₁₂ is positive') : near(b, -HW.v[1], 0.03) ? t('ข้อต่อลงจาก 15° ไป −10°: θ̇₂₃ เป็นลบ', 'the joint goes down from 15° to −10°: θ̇₂₃ is negative') : HWNO });
+LS.ask(el('ask4b'), { fields: [fld('t₁ =', HW.tb[0], 0.0015), fld('t₂ =', HW.tb[1], 0.0015), fld('t₃ =', HW.tb[2], 0.0015)], check: ([a, b, c]) =>
+  near(a, hd[0] + sqrt(hd[0] ** 2 - 2 * abs(hp[1] - hp[0]) / ha), 0.01) || near(c, hd[1] + sqrt(hd[1] ** 2 - 2 * abs(hp[2] - hp[1]) / ha), 0.01) ? H.root
+  : near(c, hd[1] - sqrt(hd[1] ** 2 + 2 * abs(hp[2] - hp[1]) / ha), 0.0015) ? t('ดูเครื่องหมายของ θ̈₃ = SGN(θ₂ − θ₃)|θ̈₃|: ข้อต่อลงมาหา −10° แล้วต้องเบรก ความเร่งจึงเป็นบวก', 'mind the sign of θ̈₃ = SGN(θ₂ − θ₃)|θ̈₃|: the joint comes down to −10° and must brake, so the acceleration is positive')
+  : near(b, -HW.tb[1], 0.0015) ? t('เวลาผสมไม่มีวันติดลบ: θ̈₂ มีเครื่องหมายเดียวกับ θ̇₂₃ − θ̇₁₂', 'a blend time is never negative: θ̈₂ takes the sign of θ̇₂₃ − θ̇₁₂')
+  : near(b, (hs23 - hs12) / -ha, 0.0015) ? t('t₂ ใช้ความเร็วของส่วนตรง θ̇₁₂ และ θ̇₂₃ ไม่ใช่ความชันระหว่างจุด', 't₂ uses the velocities of the straight parts, θ̇₁₂ and θ̇₂₃, not the slopes between the points') : HWNO });
+LS.ask(el('ask4c'), { fields: [fld('t₁₂ =', HW.tl[0], 0.0015), fld('t₂₃ =', HW.tl[1], 0.0015)], check: ([a, b]) =>
+  near(a, hd[0] - HW.tb[0] - HW.tb[1], 0.0015) || near(b, hd[1] - HW.tb[2] - HW.tb[1], 0.0015) ? t('ช่วงผสมที่จุดกลางอยู่ในแต่ละช่วงเพียงครึ่งเดียว: หัก ½t₂', 'only half of the middle blend lies in each segment: subtract ½t₂')
+  : near(a, hd[0] - HW.tb[0] / 2 - HW.tb[1] / 2, 0.0015) || near(b, hd[1] - HW.tb[2] / 2 - HW.tb[1] / 2, 0.0015) ? t('ช่วงผสมแรกและสุดท้ายอยู่ในช่วงของมันทั้งหมด: หัก t₁ และ t₃ เต็ม ๆ', 'the first and last blends lie wholly in their segments: subtract all of t₁ and t₃') : HWNO });
+});
+</script>
+</body>
+</html>

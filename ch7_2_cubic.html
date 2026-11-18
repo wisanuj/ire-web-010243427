@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-en="7.2 — Cubic and quintic polynomials">7.2 — พหุนามกำลังสามและกำลังห้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="assets/ire.css?v=20">
+<script src="assets/stops.js?v=20"></script><script src="assets/shell.js?v=20"></script>
+<script src="assets/robot.js?v=20"></script><script src="assets/lesson.js?v=20"></script><script src="assets/ch2.js?v=20"></script><script src="assets/ch3.js?v=20"></script><script src="assets/ch4.js?v=20"></script><script src="assets/ch5.js?v=20"></script><script src="assets/ch7.js?v=20"></script><script src="assets/scene3d.js?v=20"></script><script src="assets/gl3d.js?v=20"></script><script src="assets/ch2_3d.js?v=20"></script><script src="assets/ch3_3d.js?v=20"></script><script src="assets/ch7_3d.js?v=20"></script>
+<style>
+/* page 7.2: the 3-D view of the joint beside its plots (one above the other on a narrow card), and the play button with the time slider */
+.cvrow{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.cvrow > div{min-width:0}
+.cvrow > .c3{flex:1 1 360px}
+.cvrow > .cp{flex:1.4 1 400px}
+.playrow{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;padding:4px 8px 0}
+.playrow .toggles{margin:0}
+.playrow .slider-block{flex:1 1 180px;margin:2px 0 4px}
+.ctl.modes .toggles{grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar" id="mc-top"></header>
+<h1 data-l="th">พหุนามกำลังสามและกำลังห้า <span class="en">Cubic and quintic polynomials — a smooth motion for one joint</span></h1>
+<h1 data-l="en">Cubic and quintic polynomials <span class="en">A smooth motion for one joint, from rest to rest and through via points</span></h1>
+
+<div class="intro-duo">
+  <figure class="slide"><img src="slides/ch7/s09.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 9: four conditions, the angle at the start and at the end and zero velocity at both ends, next to the cubic theta of t and its derivative; put the conditions in to get four linear equations">
+    <figcaption data-l="th">สไลด์บทที่ 7 หน้า 9 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Chapter 7 slides, p. 9 · tap to enlarge</figcaption></figure>
+  <div>
+    <p class="sub" data-l="th">หน้า 7.1 แยก<b>เส้นทาง</b> (path) ออกจาก<b>วิถีการเคลื่อนที่</b> (trajectory): วิถีบอกว่าข้อต่อแต่ละข้ออยู่ที่มุมเท่าไร ณ เวลาใด หน้านี้สร้างวิถีของข้อต่อหนึ่งข้อด้วยพหุนามของเวลา เริ่มจาก<b>พหุนามกำลังสาม</b> (cubic) ซึ่งมีสัมประสิทธิ์ 4 ตัว พอดีกับเงื่อนไข 4 ข้อ คือมุมและความเร็วที่ต้นและที่ปลาย จากนั้นให้ความเร็วที่ปลายไม่เป็นศูนย์ ต่อพหุนามหลายช่วงผ่าน<b>จุดผ่าน</b> (via point) และจบด้วย<b>พหุนามกำลังห้า</b> (quintic) ซึ่งกำหนดความเร่งที่ปลายได้ด้วย ทุกโจทย์มีภาพสามมิติของข้อต่อหมุนหนึ่งข้อ คู่กับกราฟตำแหน่ง ความเร็ว และความเร่งเทียบกับเวลา กด ▶ เพื่อดูข้อต่อเคลื่อนที่ หน้านี้ครอบคลุมสไลด์หน้า 9–15 มี <b>4 โจทย์</b></p>
+    <p class="sub" data-l="en">Page 7.1 told a <b>path</b> from a <b>trajectory</b>: a trajectory says where every joint is at every instant. This page builds the trajectory of one joint from polynomials in time. A <b>cubic</b> has four coefficients, just enough for four conditions: the angle and the velocity at the start and at the end. Then the end velocities are no longer zero, several cubics are joined through <b>via points</b>, and the <b>quintic</b> sets the accelerations at the ends as well. Every problem has a 3-D view of a single turning joint beside plots of its position, velocity and acceleration against time; press ▶ to watch the joint move. It covers slides pp. 9–15, with <b>4 problems</b>.</p>
+  </div>
+</div>
+
+<section class="keypoints" data-l="th"><h2>ประเด็นสำคัญของหน้านี้</h2><ul><li><b>พหุนามกำลังสาม</b> \(\theta(t) = a_0 + a_1t + a_2t^2 + a_3t^3\) มีสัมประสิทธิ์ 4 ตัว จึงทำให้ผ่านเงื่อนไขได้พอดี 4 ข้อ: \(\theta(0) = \theta_0,\ \theta(t_f) = \theta_f,\ \dot\theta(0) = \dot\theta_0,\ \dot\theta(t_f) = \dot\theta_f\) แทนเงื่อนไขแล้วได้สมการเชิงเส้น 4 สมการ</li><li><b>จากนิ่งถึงนิ่ง</b> (Craig สมการ 7.6): \(a_0 = \theta_0,\ a_1 = 0,\ a_2 = 3\Delta/t_f^2,\ a_3 = -2\Delta/t_f^3\) โดย \(\Delta = \theta_f - \theta_0\) ความเร็วเป็นพาราโบลาที่สูงสุดตรงกลางเวลา ความเร่งเป็นเส้นตรง และ<b>กระโดด</b>ที่ต้นและที่ปลาย</li><li><b>จุดผ่าน</b>: ข้อต่อไม่หยุดที่จุดผ่าน จึงต้องเลือกความเร็วที่นั่น วิธีง่ายของ Craig: ความเร็วเป็นศูนย์เมื่อความชันของเส้นตรงที่เชื่อมจุดเปลี่ยนเครื่องหมาย และเป็นค่าเฉลี่ยของความชันเมื่อเครื่องหมายเดิม หรือเลือกให้ความเร่งต่อเนื่อง แล้วใช้สูตรทั่วไป (Craig สมการ 7.11) ทีละช่วง</li><li><b>พหุนามกำลังห้า</b>: 6 เงื่อนไข (มุม ความเร็ว ความเร่ง ที่ปลายทั้งสอง) เมื่อเริ่มและจบอย่างนิ่งและความเร่งเป็นศูนย์: \(a_3 = 10\Delta/t_f^3,\ a_4 = -15\Delta/t_f^4,\ a_5 = 6\Delta/t_f^5\) ความเร่งไม่กระโดด แต่ความเร็วสูงสุดสูงขึ้น</li></ul></section>
+<section class="keypoints" data-l="en"><h2>Key points of this page</h2><ul><li><b>A cubic</b> \(\theta(t) = a_0 + a_1t + a_2t^2 + a_3t^3\) has four coefficients, so it can meet exactly four conditions: \(\theta(0) = \theta_0,\ \theta(t_f) = \theta_f,\ \dot\theta(0) = \dot\theta_0,\ \dot\theta(t_f) = \dot\theta_f\). Put in, they give four linear equations.</li><li><b>Rest to rest</b> (Craig, equation 7.6): \(a_0 = \theta_0,\ a_1 = 0,\ a_2 = 3\Delta/t_f^2,\ a_3 = -2\Delta/t_f^3\) with \(\Delta = \theta_f - \theta_0\). The velocity is a parabola with its top in the middle of the time; the acceleration is a straight line and <b>jumps</b> at the start and at the end.</li><li><b>Via points</b>: the joint does not stop at a via point, so a velocity must be chosen there. Craig's heuristic: zero where the slope of the straight lines joining the points changes sign, the average of the two slopes where it keeps its sign. Or choose the velocities that make the acceleration continuous. Then each segment uses the general formulas (Craig, equation 7.11).</li><li><b>The quintic</b>: six conditions (angle, velocity and acceleration at both ends). At rest and with zero acceleration at both ends: \(a_3 = 10\Delta/t_f^3,\ a_4 = -15\Delta/t_f^4,\ a_5 = 6\Delta/t_f^5\). The acceleration no longer jumps, but the top speed is higher.</li></ul></section>
+
+<nav class="toc" data-l="th"><span class="tl">ในหน้านี้:</span><a href="#ex1"><b>1</b>จากนิ่งถึงนิ่ง</a><a href="#ex2"><b>2</b>กำหนดความเร็วที่ปลาย</a><a href="#ex3"><b>3</b>จุดผ่าน</a><a href="#ex4"><b>4</b>พหุนามกำลังห้า</a></nav>
+<nav class="toc" data-l="en"><span class="tl">On this page:</span><a href="#ex1"><b>1</b>Rest to rest</a><a href="#ex2"><b>2</b>Given end velocities</a><a href="#ex3"><b>3</b>Via points</a><a href="#ex4"><b>4</b>The quintic</a></nav>
+
+<section class="prob" id="ex1">
+  <div class="prob-head"><span class="prob-no">1</span><div><h2 data-l="th">จากนิ่งถึงนิ่ง: เงื่อนไขสี่ข้อ พหุนามกำลังสาม</h2><h2 data-l="en">Rest to rest: four conditions, a cubic</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 10–11 · Craig 7.3 (สมการ 7.1–7.8, ตัวอย่าง 7.1) · กด ▶ เพื่อเล่น · ลากภาพสามมิติเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 10–11 · Craig 7.3 (equations 7.1–7.8, example 7.1) · press ▶ to play · drag the 3-D view to turn it</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><div class="cvrow"><div class="c3"><canvas id="cv1j"></canvas></div><div class="cp"><canvas id="cv1p"></canvas></div></div>
+      <div class="playrow" id="pl1"></div><div class="ctl" id="ctl1"></div><div class="readout" id="ro1"></div>
+      <div class="simnote" data-l="th">ก้านยาว 0.5 m หมุนรอบแกนตั้งที่ฐาน ก้านจางสองอันคือตำแหน่งต้น θ<sub>0</sub> และปลาย θ<sub>f</sub> กราฟสามแถวคือ θ, θ̇ และ θ̈ เทียบกับเวลา เส้นประแนวตั้งคือเวลาขณะนั้น กราฟแสดงช่วงก่อน t = 0 และหลัง t<sub>f</sub> ด้วย ซึ่งข้อต่ออยู่นิ่ง จะได้เห็นว่าความเร็วและความเร่งต่อกับช่วงที่นิ่งอย่างไร เลื่อนแถบเลื่อนเพื่อเปลี่ยนมุมต้น มุมปลาย และเวลา</div>
+      <div class="simnote" data-l="en">A link 0.5 m long turns about the upright axis at its base. The two faint links are the start θ<sub>0</sub> and the goal θ<sub>f</sub>. The three rows of plots are θ, θ̇ and θ̈ against time; the dashed upright line is the present time. The plots also show a little time before t = 0 and after t<sub>f</sub>, when the joint is at rest, so that you can see how the velocity and the acceleration join the parts at rest. Move the sliders to change the start, the goal and the time.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s10.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 10: a single turning link drawn at an angle theta between see-through copies at theta 0 and theta f; the problem asks for the cubic from 15 to 75 degrees in 3 seconds, its top speed and its accelerations at the ends">
+      <figcaption data-l="th">สไลด์หน้า 10 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 10 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">หุ่นยนต์ก้านเดียวที่มีข้อต่อหมุน อยู่นิ่งที่ \(\theta = 15^\circ\) ต้องการให้เคลื่อนที่อย่างนุ่มนวลไปที่ \(\theta = 75^\circ\) ในเวลา 3 s และหยุดนิ่งที่นั่น (Craig ตัวอย่าง 7.1) <b>(ก)</b> หาสัมประสิทธิ์ของพหุนามกำลังสาม <b>(ข)</b> หาความเร็วสูงสุด และความเร่งที่ต้นและที่ปลายของการเคลื่อนที่</div>
+        <div data-l="en">A single-link robot with a rotary joint is at rest at \(\theta = 15^\circ\). It is to move smoothly to \(\theta = 75^\circ\) in 3 s and come to rest there (Craig, example 7.1). <b>(a)</b> Find the coefficients of the cubic. <b>(b)</b> Find the top speed, and the accelerations at the start and at the end of the motion.</div></div>
+      <div id="ask1a"></div><div id="ask1b"></div><div id="st1"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex2">
+  <div class="prob-head"><span class="prob-no">2</span><div><h2 data-l="th">กำหนดความเร็วที่ปลาย</h2><h2 data-l="en">Given end velocities</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 12 · Craig 7.3 (สมการ 7.9–7.11) · กด ▶ เพื่อเล่น · ลากภาพสามมิติเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, p. 12 · Craig 7.3 (equations 7.9–7.11) · press ▶ to play · drag the 3-D view to turn it</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><div class="cvrow"><div class="c3"><canvas id="cv2j"></canvas></div><div class="cp"><canvas id="cv2p"></canvas></div></div>
+      <div class="playrow" id="pl2"></div><div class="ctl" id="ctl2"></div><div class="readout" id="ro2"></div>
+      <div class="simnote" data-l="th">การเคลื่อนที่เดิม 15° ไป 75° ใน 3 s แถบเลื่อนตั้งความเร็วที่ต้นและที่ปลาย ลูกศร<b class="ax-y">สีเขียว</b>ที่ปลายก้านคือความเร็วของข้อต่อขณะนั้น (ยาว 4 mm ต่อ 1 °/s) เมื่อเปิดเฉลย เส้นประจางในกราฟคือพหุนามกำลังสามจากนิ่งถึงนิ่งของโจทย์ 1 ไว้เทียบ กราฟเริ่มที่ t = 0 เพราะก่อนหน้านั้นข้อต่อกำลังเคลื่อนที่มาจากการเคลื่อนที่ช่วงก่อน ซึ่งโจทย์นี้ไม่ได้บอก</div>
+      <div class="simnote" data-l="en">The same move, 15° to 75° in 3 s. The sliders set the velocities at the start and at the end. The <b class="ax-y">green</b> arrow at the end of the link is the velocity of the joint at the moment (4 mm per 1 °/s). Once the solution is open, faint dashed curves show the rest-to-rest cubic of problem 1, for comparison. The plots start at t = 0, because before that the joint is coming from an earlier motion that the problem does not give.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s12.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 12: the general formulas for a0 to a3 with end velocities theta-dot 0 and theta-dot f; with both zero they are the rest-to-rest coefficients again; the example leaves 15 degrees at 10 degrees per second and stops at 75 degrees">
+      <figcaption data-l="th">สไลด์หน้า 12 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 12 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">การเคลื่อนที่เดิม 15° ไป 75° ใน 3 s แต่คราวนี้ข้อต่อ<b>ออกจาก 15° ด้วยความเร็ว \(\dot\theta_0 = 10\ ^\circ/\text{s}\)</b> (เช่น มาจากการเคลื่อนที่ช่วงก่อน) และหยุดนิ่งที่ 75° (\(\dot\theta_f = 0\)) หาพหุนามกำลังสาม โดยเฉพาะ \(a_2\) และ \(a_3\)</div>
+        <div data-l="en">The same move, 15° to 75° in 3 s, but now the joint <b>leaves 15° at \(\dot\theta_0 = 10\ ^\circ/\text{s}\)</b> (it comes from an earlier motion, say) and stops at 75° (\(\dot\theta_f = 0\)). Find the cubic, in particular \(a_2\) and \(a_3\).</div></div>
+      <div id="ask2"></div><div id="st2"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex3">
+  <div class="prob-head"><span class="prob-no">3</span><div><h2 data-l="th">จุดผ่าน: ความเร็วเท่าไรที่จุดผ่าน</h2><h2 data-l="en">Via points: which velocity there?</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 13–14 · Craig 7.3 (รูป 7.4 และตัวอย่าง 7.2) · กด ▶ เพื่อเล่น · ลากภาพสามมิติเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, pp. 13–14 · Craig 7.3 (figure 7.4 and example 7.2) · press ▶ to play · drag the 3-D view to turn it</div></div></div>
+  <figure class="slide q wide"><img src="slides/ch7/s13.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 13: the path points 10, 35, 25 and 10 degrees joined by straight lines and by cubics; three ways to choose the velocity at a via point, and the heuristic: zero where the slope changes sign, the average of the two slopes where it keeps its sign">
+    <figcaption data-l="th">สไลด์หน้า 13: สามวิธีเลือกความเร็วที่จุดผ่าน · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 13: three ways to choose the velocity at a via point · tap to enlarge</figcaption></figure>
+  <div class="duo wide-sim">
+    <div class="card sim"><div class="cvrow"><div class="c3"><canvas id="cv3j"></canvas></div><div class="cp"><canvas id="cv3p"></canvas></div></div>
+      <div class="playrow" id="pl3"></div><div class="ctl modes" id="sel3"></div><div class="ctl" id="ctl3"></div><div class="readout" id="ro3"></div>
+      <div class="simnote" data-l="th">ข้อต่อเริ่มที่ 10° ผ่าน 35° และ 25° แล้วกลับมาหยุดที่ 10° ก้านจางคือมุมของจุดบนเส้นทาง (10°, 35°, 25°) จุดกลมในกราฟตำแหน่งคือจุดบนเส้นทาง เส้นประจางคือเส้นตรงที่เชื่อมจุดเหล่านั้น (ในกราฟความเร็วคือความชันของเส้นตรงแต่ละเส้น) ปุ่มด้านบนเลือกวิธีกำหนดความเร็วที่จุดผ่าน แถบเลื่อนตั้งความเร็วเองได้ (ปุ่ม “กำหนดเอง”) ตัวเลขใต้ภาพบอกว่าความเร่งกระโดดเท่าไรที่จุดผ่าน</div>
+      <div class="simnote" data-l="en">The joint starts at 10°, passes 35° and 25°, and comes back to rest at 10°. The faint links are the angles of the path points (10°, 35°, 25°); the dots on the position plot are the path points and the faint dashed lines the straight lines that join them (on the velocity plot: the slope of each line). The buttons choose how the velocities at the via points are set; the sliders set them by hand (button “by hand”). The numbers under the picture say how much the acceleration jumps at the via points.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s14.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 14: the example; path points 10, 35, 25 and 10 degrees, segment times 2, 1 and 3 seconds, at rest at both ends; find the via velocities with the heuristic and the three cubics">
+      <figcaption data-l="th">สไลด์หน้า 14 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 14 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ข้อต่อต้องผ่านจุดบนเส้นทาง 10° → 35° → 25° → 10° ใช้เวลาแต่ละช่วง 2, 1 และ 3 s อยู่นิ่งที่ต้นและที่ปลาย แต่<b>ไม่หยุด</b>ที่จุดผ่าน 35° และ 25° แต่ละช่วงเป็นพหุนามกำลังสามหนึ่งตัว หาความเร็วที่จุดผ่านทั้งสองด้วยวิธีง่ายของ Craig (heuristic) แล้วหาพหุนามทั้งสามช่วง</div>
+        <div data-l="en">The joint must pass the path points 10° → 35° → 25° → 10°, with segment times 2, 1 and 3 s. It is at rest at both ends but does <b>not stop</b> at the via points 35° and 25°. Each segment is one cubic. Find the velocities at the two via points with Craig's heuristic, then the three cubics.</div></div>
+      <div id="ask3"></div><div id="st3"></div></div>
+  </div>
+</section>
+
+<section class="prob" id="ex4">
+  <div class="prob-head"><span class="prob-no">4</span><div><h2 data-l="th">พหุนามกำลังห้า</h2><h2 data-l="en">The quintic</h2>
+    <div class="src" data-l="th">สไลด์บทที่ 7 หน้า 15 · Craig 7.3 (สมการ 7.16–7.18) · กด ▶ เพื่อเล่น · ลากภาพสามมิติเพื่อหมุนมุมมอง</div><div class="src" data-l="en">Chapter 7 slides, p. 15 · Craig 7.3 (equations 7.16–7.18) · press ▶ to play · drag the 3-D view to turn it</div></div></div>
+  <div class="duo wide-sim">
+    <div class="card sim"><div class="cvrow"><div class="c3"><canvas id="cv4j"></canvas></div><div class="cp"><canvas id="cv4p"></canvas></div></div>
+      <div class="playrow" id="pl4"></div><div class="ctl" id="ctl4"></div><div class="readout" id="ro4"></div>
+      <div class="simnote" data-l="th">เส้นทึบสีส้มคือพหุนามกำลังห้า เส้นประจางคือพหุนามกำลังสามของการเคลื่อนที่เดียวกัน ในภาพสามมิติ ก้านสีคือพหุนามกำลังห้า ก้านจางที่เคลื่อนที่ตามไปคือพหุนามกำลังสาม (ก้านจางที่อยู่นิ่งคือตำแหน่งต้นและปลาย) กด ▶ แล้วดูว่าก้านไหนออกตัวก่อน และก้านไหนเร็วกว่าตอนกลาง</div>
+      <div class="simnote" data-l="en">The solid orange curves are the quintic, the faint dashed ones the cubic of the same move. In the 3-D view the coloured link follows the quintic and the faint link moving with it follows the cubic (the faint links that stay put are the start and the goal). Press ▶ and watch which link gets away first, and which is faster in the middle.</div></div>
+    <div class="card solve"><figure class="slide" style="margin-top:0"><img src="slides/ch7/s15.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Slide 15: the quintic with six conditions, its coefficients at rest with zero acceleration at both ends, and plots of position, velocity and acceleration of the cubic and the quintic for the same move">
+      <figcaption data-l="th">สไลด์หน้า 15 · แตะรูปเพื่อขยาย</figcaption><figcaption data-l="en">Slide p. 15 · tap to enlarge</figcaption></figure>
+      <div class="given"><div class="gl" data-l="th">โจทย์</div><div class="gl" data-l="en">Problem</div>
+        <div data-l="th">ถ้าต้องการให้ความเร่งที่ต้นและที่ปลายเป็นศูนย์ด้วย (แขนไม่กระตุกตอนออกตัวและตอนหยุด) พหุนามกำลังสามไม่พอ ต้องใช้พหุนามกำลังห้า การเคลื่อนที่เดิม 15° ไป 75° ใน 3 s เริ่มและจบอย่างนิ่ง และความเร่งเป็นศูนย์ที่ปลายทั้งสอง หา \(a_3,\ a_4,\ a_5\) แล้วเทียบความเร็วสูงสุดและความเร่งสูงสุดกับพหุนามกำลังสามของโจทย์ 1</div>
+        <div data-l="en">To have zero acceleration at the start and at the end as well (no jolt when the arm sets off and when it stops), a cubic is not enough: a quintic is needed. The same move, 15° to 75° in 3 s, at rest and with zero acceleration at both ends. Find \(a_3,\ a_4,\ a_5\), then compare the top speed and the top acceleration with the cubic of problem 1.</div></div>
+      <div id="ask4"></div><div id="st4"></div></div>
+  </div>
+</section>
+
+<section class="notes" data-l="th">
+  <div class="card"><h3>ลองทำดู 1 — เวลาและระยะ</h3>
+    <ol><li>โจทย์ 1: ตั้งค่าของตัวอย่าง (15°, 75°, 3 s) แล้วลด t<sub>f</sub> เหลือครึ่งหนึ่ง (1.5 s): ความเร็วสูงสุดเพิ่มเป็นสองเท่า (แปรผกผันกับ t<sub>f</sub>) แต่ความเร่งเพิ่มเป็นสี่เท่า (แปรผกผันกับ t<sub>f</sub>²) การทำให้เสร็จเร็วขึ้นจึงต้องจ่ายด้วยความเร่ง ซึ่งก็คือแรงบิดของมอเตอร์</li><li>โจทย์ 1: เพิ่มระยะ Δ = θ<sub>f</sub> − θ<sub>0</sub> เป็นสองเท่าโดยไม่เปลี่ยนเวลา: a<sub>2</sub>, a<sub>3</sub> ความเร็ว และความเร่งเพิ่มเป็นสองเท่าทั้งหมด (แปรผันตรงกับ Δ) แต่รูปร่างของกราฟเหมือนเดิม</li><li>โจทย์ 2: ตั้ง θ̇<sub>0</sub> เป็นลบ: ข้อต่อถอยห่างจากเป้าหมายก่อน (กราฟตำแหน่งลงต่ำกว่า 15° ในช่วงแรก) แล้วจึงเร่งกลับมาให้ถึง 75° ทันเวลา ความเร็วสูงสุดจึงสูงกว่าเดิม</li></ol></div>
+  <div class="card"><h3>ลองทำดู 2 — จุดผ่านและพหุนามกำลังห้า</h3>
+    <ol><li>โจทย์ 3: เลือก “กำหนดเอง” แล้วตั้งความเร็วที่ 35° เป็น +10 °/s: ข้อต่อยังขึ้นต่อหลังผ่าน 35° แล้วจึงกลับลง เลยยอดของเส้นทางไป ด้วยเหตุนี้วิธีง่ายจึงใช้ความเร็วศูนย์เมื่อความชันเปลี่ยนเครื่องหมาย</li><li>โจทย์ 3: สลับระหว่างวิธีง่ายกับความเร่งต่อเนื่อง แล้วดูกราฟความเร่ง: วิธีง่ายกระโดดที่ t = 2 s และ 3 s ส่วนแบบความเร่งต่อเนื่องไม่กระโดดที่จุดผ่าน (แต่ยังกระโดดที่ต้นและปลาย เพราะยังเป็นพหุนามกำลังสาม)</li><li>โจทย์ 4: เทียบกราฟความเร่งสีส้ม (กำลังห้า) กับเส้นประ (กำลังสาม): ที่ t = 0 พหุนามกำลังสามกระโดดขึ้นทันที พหุนามกำลังห้าค่อย ๆ เพิ่มจากศูนย์ แล้วลด t<sub>f</sub>: ความเร่งสูงสุดของทั้งสองแบบเพิ่มตาม 1/t<sub>f</sub>² เท่ากัน</li></ol>
+    <div class="book">ที่มา: สไลด์บทที่ 7 หน้า 9–15 (ภาพอยู่ในหน้านี้แล้ว) · Craig 7.3 · สไลด์เดิม Part I หน้า 7–17</div></div>
+</section>
+<section class="notes" data-l="en">
+  <div class="card"><h3>Try this 1 — time and size</h3>
+    <ol><li>Problem 1: set the example (15°, 75°, 3 s), then halve t<sub>f</sub> (1.5 s): the top speed doubles (it goes as 1/t<sub>f</sub>) but the acceleration grows four times (it goes as 1/t<sub>f</sub>²). Finishing sooner is paid for in acceleration, that is, in motor torque.</li><li>Problem 1: double the move Δ = θ<sub>f</sub> − θ<sub>0</sub> and keep the time: a<sub>2</sub>, a<sub>3</sub>, the velocity and the acceleration all double (they go as Δ), while the shape of the plots stays the same.</li><li>Problem 2: make θ̇<sub>0</sub> negative: the joint first backs away from the goal (the position plot dips below 15° at the start), then has to hurry back to reach 75° in time, so its top speed is higher.</li></ol></div>
+  <div class="card"><h3>Try this 2 — via points and the quintic</h3>
+    <ol><li>Problem 3: choose “by hand” and set the velocity at 35° to +10 °/s: the joint keeps rising after 35° and only then turns back, overshooting the top of the path. That is why the heuristic takes zero velocity where the slope changes sign.</li><li>Problem 3: switch between the heuristic and continuous acceleration and watch the acceleration plot: the heuristic jumps at t = 2 s and 3 s, continuous acceleration does not jump at the via points (it still jumps at the start and the end: these are still cubics).</li><li>Problem 4: compare the orange acceleration (quintic) with the dashed one (cubic): at t = 0 the cubic jumps at once, the quintic rises gently from zero. Then shorten t<sub>f</sub>: the top accelerations of both grow as 1/t<sub>f</sub>² alike.</li></ol>
+    <div class="book">Source: chapter 7 slides, pp. 9–15 (the pictures are on this page) · Craig 7.3 · old part I slides pp. 7–17</div></div>
+</section>
+
+<nav class="navbar" id="mc-nav"></nav>
+</div>
+
+<script>
+document.addEventListener('mc:ready', () => {
+'use strict';
+const t = MC.t, ui = MC.ui, dn = RB.d, rad = RB.rad, X = CH7.EX, OV = CH7.OV, poly = CH7.poly;
+const el = id => document.getElementById(id), near = (a, b, tol) => Math.abs(a - b) < tol, clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+const fx = (x, n = 2) => (x < -0.5 * 10 ** -n ? '−' : '') + Math.abs(x).toFixed(n);   // fixed decimals: the numbers do not jump about while a slider moves
+const ut = (x, n = 3) => RB.u(x, n);   // display text, Unicode minus
+const tn = (x, n = 3) => dn(x, n), par = (x, n = 3) => x < 0 ? `(${tn(x, n)})` : tn(x, n), pm = (x, n = 3) => (x < 0 ? '- ' : '+ ') + tn(Math.abs(x), n);   // TeX numbers
+const DS = '^\\circ/\\text{s}', DS2 = '^\\circ/\\text{s}^2';
+/* the link of scene joint1 (ch7_3d.js): 0.5 m long, 0.11 m above the floor. The velocity of the joint is drawn as the velocity of the end of the link,
+   4 mm of arrow per °/s, a little above the link. A rest-to-rest move is plotted with MG seconds of rest before and after it */
+const LL = 0.5, Z0 = 0.11, KV = 0.004, MG = 0.4;
+const tipAt = (th, r = LL) => [r * Math.cos(th), r * Math.sin(th), Z0 + 0.03], tang = th => [-Math.sin(th), Math.cos(th), 0];
+const velArrow = (s, th, thd, txt, key = 'gr') => { const a = tipAt(th); if (Math.abs(thd) < 0.05) { if (txt) OV.name(s, a, key, txt, { m: 0, s: 22, a: 'l', dx: 14, dy: -12 }); return; }
+  OV.vec(s, a, OV.v(a, tang(th), clamp(thd * KV, -0.3, 0.3)), key, txt, { m: 0, s: 22, at: 1, a: 'l', dx: 12, dy: -12, r: 0.005 }); };
+const ghostName = (s, deg, txt, key = 'ink', o = {}) => OV.name(s, tipAt(rad(deg), LL * 1.18), key, txt, { m: 0, s: 24, a: 'c', ...o });
+/* a rest-to-rest polynomial a of length T: the polynomial itself on the closed interval 0…T (so at t = 0 and t = T the readouts give the acceleration
+   just inside the motion), at rest outside it (the plots show the jump) */
+const rest = (a, T) => tt => tt < 0 ? [a[0], 0, 0] : tt > T ? [poly(a, T)[0], 0, 0] : poly(a, tt);
+/* the largest |θ̈| of a polynomial a on 0…T */
+const accTop = (a, T) => { let m = 0, tm = 0; for (let i = 0; i <= 600; i++) { const tt = T * i / 600, q = Math.abs(poly(a, tt)[2]); if (q > m) { m = q; tm = tt; } } return [m, tm]; };
+/* narrow shaded bands on the plots around the times ts (where the acceleration may jump) */
+const bands = ts => ts.map(x => [x - 0.07, x + 0.07]);
+
+/* ---- playing a motion: a play/pause button and a time slider (M.t, M.play); T() is the length of the motion. Both canvases of a problem call adv
+   every frame: time is taken from the clock, so the second call in the same frame adds nothing ---- */
+const player = (box, M, T, read) => {
+  const id = box.id + 'b', btn = ui.buttons(box, [{ id, label: '', onclick: () => { if (!M.play && M.t >= T() - 1e-6) M.t = 0; M.play = !M.play; M.last = null; lab(); } }])[id];
+  const lab = () => { btn.textContent = M.play ? t('⏸ หยุด', '⏸ Pause') : t('▶ เล่น', '▶ Play'); };
+  const sl = ui.slider(box, { id: box.id + 't', label: t('เวลา t', 'time t'), min: 0, max: T(), step: 0.01, value: 0, fmt: v => fx(v, 2) + ' s', oninput: v => { M.t = v; M.play = false; lab(); read(); } });
+  lab(); M.pl = { lab, sl, at: x => { M.play = false; lab(); sl.el.max = T(); M.t = clamp(x, 0, T()); sl.set(M.t); }, fit: () => { sl.el.max = T(); M.t = Math.min(M.t, T()); sl.set(M.t); } }; };
+const adv = (M, T, read) => { const now = performance.now();
+  if (M.play) { const dt = M.last === null ? 0 : Math.min(0.1, (now - M.last) / 1000); if (dt > 0) { M.t = Math.min(T(), M.t + dt); if (M.t >= T() - 1e-9) { M.play = false; M.pl.lab(); } M.pl.sl.set(M.t); read(); } }
+  M.last = now; };
+const degS = (box, id, label, M, key, lo, hi, step, read) => ui.slider(box, { id, label, min: lo, max: hi, step, value: M[key], fmt: v => `${fx(v, 0)}°`, oninput: v => { M[key] = v; read(); } });
+const numS = (box, id, label, M, key, lo, hi, step, unit, n, read) => ui.slider(box, { id, label, min: lo, max: hi, step, value: M[key], fmt: v => `${fx(v, n)} ${unit}`, oninput: v => { M[key] = v; read(); } });
+/* the live values at the present time */
+const nowTx = (M, e) => `<div class="term">${t('ขณะนี้', 'now')} t = ${fx(M.t, 2)} s: θ = ${fx(e[0], 1)}°, θ̇ = ${fx(e[1], 1)} °/s, θ̈ = ${fx(e[2], 1)} °/s²</div>`;
+/* a 3-D view of the joint and its plots, both drawing the state M. The scene is fitted to a frame of M.w × M.h, kept in the proportions of its canvas
+   (the height is capped, so they change with the width) */
+const twin = (n, M, T, read, sync, plot) => { const tick = () => { adv(M, T, read); sync(); }, cv = el('cv' + n + 'j'); M.w = 1100;
+  CH2.sim(cv, M, 'joint1', { aspect: 0.75, maxH: 300, tick: () => { if (cv.clientWidth) M.h = Math.round(M.w * cv.clientHeight / cv.clientWidth); tick(); } });
+  CH7.plotSim('cv' + n + 'p', { plot }, { aspect: 1.08, maxH: 400, tick }); };
+
+/* ================= 1: rest to rest, a cubic ================= */
+const C = X.cubic, CD = C.thf - C.th0, CA = C.a, CH = C.tf / 2;
+const M1 = { d0: 0, df: 90, tf: 4, t: 0, play: false, last: null, th: 0, th0: 0, thf: rad(90), L: LL, xyz: true };   // starts away from the example: the readout must not show what the boxes ask (the steps put the example back)
+const a1 = () => CH7.cubic(M1.d0, M1.df, M1.tf), T1 = () => M1.tf, ro1 = el('ro1'), c1 = el('ctl1');
+const sync1 = () => { const e = poly(a1(), M1.t); M1.th = rad(e[0]); M1.thd = e[1]; M1.thdd = e[2]; M1.th0 = rad(M1.d0); M1.thf = rad(M1.df); };
+const read1 = () => { const a = a1(), h = M1.tf / 2; M1.pl.fit(); sync1();
+  ro1.innerHTML = `<div class="term">a<sub>0</sub> = ${fx(a[0], 1)}°, a<sub>1</sub> = 0, <b>a<sub>2</sub> = ${fx(a[2], 3)} °/s², a<sub>3</sub> = ${fx(a[3], 3)} °/s³</b></div>` +
+    `<div class="term">${t('ความเร็วสูงสุด', 'top speed')} θ̇(${fx(h, 2)} s) = <b>${fx(poly(a, h)[1], 2)} °/s</b> · θ̈(0) = <b>${fx(poly(a, 0)[2], 2)}</b>, θ̈(t<sub>f</sub>) = <b>${fx(poly(a, M1.tf)[2], 2)} °/s²</b></div>` + nowTx(M1, poly(a, M1.t)); };
+player(el('pl1'), M1, T1, read1);
+const s1 = [degS(c1, 'p1a', 'θ<sub>0</sub>', M1, 'd0', -90, 90, 5, read1), degS(c1, 'p1b', 'θ<sub>f</sub>', M1, 'df', -90, 180, 5, read1), numS(c1, 'p1c', 't<sub>f</sub>', M1, 'tf', 1, 6, 0.5, 's', 1, read1)];
+read1();
+/* back to the example, with the time the open step looks at */
+const put1 = k => { M1.d0 = C.th0; M1.df = C.thf; M1.tf = C.tf; [C.th0, C.thf, C.tf].forEach((x, i) => s1[i].set(x)); M1.pl.at(k === 4 ? C.tf : k === 5 ? CH : 0); read1(); };
+/* the open step: 1, 3 the four conditions (zero velocity at both ends); 5 the velocity of the joint; 6 its acceleration */
+M1.ov = (s, st) => { const k = st.step; if (!k) return;
+  if (k === 1 || k === 3) { ghostName(s, st.d0, 'θ̇ = 0', 'gr', { dy: 22 }); ghostName(s, st.df, 'θ̇ = 0', 'gr', { dy: -22 }); }
+  if (k === 5) velArrow(s, st.th, st.thd, `θ̇ = ${fx(st.thd, 1)} °/s`);
+  if (k === 6) { velArrow(s, st.th, st.thd, null); OV.name(s, tipAt(st.th), 'p', `θ̈ = ${fx(st.thdd, 1)} °/s²`, { m: 0, s: 22, a: 'l', dx: 16, dy: 18 }); } };
+twin(1, M1, T1, read1, sync1, () => { const a = a1(), k = M1.step || 0;
+  return { T: M1.tf + MG, t0: -MG, now: M1.t, curves: [{ f: rest(a, M1.tf), col: 'l2' }], marks: k === 1 || k === 3 ? [{ t: 0, y: M1.d0 }, { t: M1.tf, y: M1.df }] : null, blends: k === 6 ? bands([0, M1.tf]) : null }; });
+const A2 = [{ label: 'a<sub>2</sub> (°/s²) =', ok: x => near(x, CA[2], 0.02), w: 5 }, { label: 'a<sub>3</sub> (°/s³) =', ok: x => near(x, CA[3], 0.01), w: 5 }];
+LS.ask(el('ask1a'), { fields: [{ ...A2[0], label: t('(ก) ', '(a) ') + A2[0].label }, A2[1]],
+  check: v => near(v[0], rad(CA[2]), 0.005) || near(v[1], rad(CA[3]), 0.005) ? t('ตอบเป็นองศา: มุมในโจทย์เป็นองศา a<sub>2</sub> จึงมีหน่วย °/s²', 'answer in degrees: the angles of the problem are in degrees, so a<sub>2</sub> is in °/s²')
+    : near(v[0], CA[3], 0.02) && near(v[1], CA[2], 0.02) ? t('สลับกัน: a<sub>2</sub> คูณ t² และ a<sub>3</sub> คูณ t³', 'swapped: a<sub>2</sub> goes with t², a<sub>3</sub> with t³')
+    : near(v[1], -CA[3], 0.01) ? t('a<sub>3</sub> ต้องเป็นลบ: ช่วงหลังข้อต่อต้องเบรกจนความเร็วกลับเป็นศูนย์', 'a<sub>3</sub> must be negative: in the second half the joint brakes until its velocity is back to zero')
+    : near(v[0], 3 * CD / C.tf, 0.02) || near(v[1], -2 * CD / (C.tf * C.tf), 0.02) ? t('ตรวจกำลังของ t<sub>f</sub>: a<sub>2</sub> = 3Δ/t<sub>f</sub>² และ a<sub>3</sub> = −2Δ/t<sub>f</sub>³', 'check the powers of t<sub>f</sub>: a<sub>2</sub> = 3Δ/t<sub>f</sub>² and a<sub>3</sub> = −2Δ/t<sub>f</sub>³')
+    : near(v[0], 3 * C.thf / (C.tf * C.tf), 0.02) ? t('ใช้ระยะที่เคลื่อนที่ Δ = θ<sub>f</sub> − θ<sub>0</sub> ไม่ใช่ θ<sub>f</sub>', 'use the move Δ = θ<sub>f</sub> − θ<sub>0</sub>, not θ<sub>f</sub>') : '' });
+LS.ask(el('ask1b'), { fields: [{ label: t('(ข) θ̇ สูงสุด (°/s) =', '(b) top θ̇ (°/s) ='), ok: x => near(x, C.vmax, 0.05), w: 4.5 }, { label: 'θ̈(0) =', ok: x => near(x, C.acc0, 0.05), w: 4.5 }, { label: 'θ̈(t<sub>f</sub>) (°/s²) =', ok: x => near(x, C.accf, 0.05), w: 4.5 }],
+  check: v => near(v[0], CD / C.tf, 0.05) ? t('นั่นคือความเร็วเฉลี่ย Δ/t<sub>f</sub>: ข้อต่อช้าที่ปลายทั้งสองและเร็วตรงกลาง แทน t = t<sub>f</sub>/2 ใน θ̇(t)', 'that is the average speed Δ/t<sub>f</sub>: the joint is slow at the ends and fast in the middle; put t = t<sub>f</sub>/2 into θ̇(t)')
+    : near(v[1], 0, 0.05) || near(v[2], 0, 0.05) ? t('พหุนามกำลังสามเริ่มด้วยความเร่งศูนย์ไม่ได้: θ̈(0) = 2a<sub>2</sub>', 'a cubic cannot start with zero acceleration: θ̈(0) = 2a<sub>2</sub>')
+    : near(v[1], CA[2], 0.05) ? t('θ̈ = 2a<sub>2</sub> + 6a<sub>3</sub>t: ที่ t = 0 คือ 2a<sub>2</sub> ไม่ใช่ a<sub>2</sub>', 'θ̈ = 2a<sub>2</sub> + 6a<sub>3</sub>t: at t = 0 that is 2a<sub>2</sub>, not a<sub>2</sub>')
+    : near(v[2], -C.accf, 0.05) ? t('ที่ปลาย ข้อต่อกำลังเบรก: θ̈(t<sub>f</sub>) ต้องเป็นลบ', 'at the end the joint is braking: θ̈(t<sub>f</sub>) must be negative') : '' });
+LS.stepper(el('st1'), { onStep: k => { const was = M1.step; M1.step = k; if (k || was) put1(k); }, steps: [
+  { why: t('<b>เงื่อนไขสี่ข้อ</b> (Craig สมการ 7.1–7.2): ข้อต่อเริ่มที่ \\(\\theta_0\\) และไปถึง \\(\\theta_f\\) ตอน \\(t = t_f\\) (สองข้อเรื่องตำแหน่ง: จุดกลมในกราฟตำแหน่ง) และอยู่นิ่งที่ปลายทั้งสอง (สองข้อเรื่องความเร็ว: ข้อความสีเขียวที่ก้านจางในภาพ)', '<b>Four conditions</b> (Craig, equations 7.1–7.2): the joint starts at \\(\\theta_0\\) and reaches \\(\\theta_f\\) at \\(t = t_f\\) (two on the position: the dots on the position plot), and it is at rest at both ends (two on the velocity: the green notes at the faint links in the picture)'),
+    tex: `\\begin{aligned} \\theta(0) &= \\theta_0 = ${C.th0}^\\circ, & \\theta(t_f) &= \\theta_f = ${C.thf}^\\circ \\\\ \\dot\\theta(0) &= 0, & \\dot\\theta(t_f) &= 0 \\end{aligned}` },
+  { why: t('<b>พหุนามกำลังสามและอนุพันธ์</b> (Craig สมการ 7.3–7.4): สัมประสิทธิ์ 4 ตัว \\(a_0 \\ldots a_3\\) พอดีกับเงื่อนไข 4 ข้อ ความเร็วเป็นพหุนามกำลังสอง (พาราโบลา) ความเร่งเป็นเส้นตรง', '<b>The cubic and its derivatives</b> (Craig, equations 7.3–7.4): four coefficients \\(a_0 \\ldots a_3\\), just right for four conditions. The velocity is a quadratic (a parabola), the acceleration a straight line'),
+    tex: '\\begin{aligned} \\theta(t) &= a_0 + a_1t + a_2t^2 + a_3t^3 \\\\ \\dot\\theta(t) &= a_1 + 2a_2t + 3a_3t^2 \\\\ \\ddot\\theta(t) &= 2a_2 + 6a_3t \\end{aligned}' },
+  { why: t('<b>แทนเงื่อนไข</b> (Craig สมการ 7.5): ได้สมการเชิงเส้น 4 สมการใน 4 ตัวไม่ทราบค่า สองสมการที่ \\(t = 0\\) ให้ \\(a_0\\) และ \\(a_1\\) ทันที', '<b>Put the conditions in</b> (Craig, equation 7.5): four linear equations in four unknowns. The two at \\(t = 0\\) give \\(a_0\\) and \\(a_1\\) at once'),
+    tex: '\\begin{aligned} \\theta_0 &= a_0 \\\\ \\theta_f &= a_0 + a_1t_f + a_2t_f^2 + a_3t_f^3 \\\\ 0 &= a_1 \\\\ 0 &= a_1 + 2a_2t_f + 3a_3t_f^2 \\end{aligned}' },
+  { why: t(`<b>แก้สมการ</b> (Craig สมการ 7.6): สมการสุดท้ายให้ \\(a_2 = -\\tfrac{3}{2}a_3t_f\\) แทนในสมการที่สองได้ \\(a_3\\) แล้วจึงได้ \\(a_2\\) ใส่ตัวเลข \\(\\Delta = \\theta_f - \\theta_0 = ${CD}^\\circ\\) และ \\(t_f = ${C.tf}\\) s (ในภาพ ข้อต่อถึง ${C.thf}° ตอน t = ${C.tf} s)`, `<b>Solve</b> (Craig, equation 7.6): the last equation gives \\(a_2 = -\\tfrac{3}{2}a_3t_f\\); put that into the second to get \\(a_3\\), then \\(a_2\\). With \\(\\Delta = \\theta_f - \\theta_0 = ${CD}^\\circ\\) and \\(t_f = ${C.tf}\\) s (in the picture the joint reaches ${C.thf}° at t = ${C.tf} s):`),
+    tex: `\\begin{aligned} a_0 &= \\theta_0 = ${tn(CA[0])}, \\quad a_1 = 0 \\\\ a_2 &= \\frac{3\\Delta}{t_f^2} = \\frac{3(${CD})}{${C.tf}^2} = ${tn(CA[2])}\\ ${DS2} \\\\ a_3 &= -\\frac{2\\Delta}{t_f^3} = -\\frac{2(${CD})}{${C.tf}^3} = ${tn(CA[3])}\\ ^\\circ/\\text{s}^3 \\\\ \\theta(t) &= ${tn(CA[0])} + ${tn(CA[2])}t^2 ${pm(CA[3])}t^3 \\end{aligned}` },
+  { why: t(`<b>ความเร็วสูงสุด</b>: \\(\\dot\\theta = 2a_2t + 3a_3t^2\\) เป็นพาราโบลาที่เป็นศูนย์ที่ \\(t = 0\\) และ \\(t = t_f\\) จึงสูงสุดตรงกลาง \\(t = t_f/2 = ${tn(CH)}\\) s (เส้นเวลาในกราฟ ลูกศรสีเขียวในภาพ) ได้ ${tn(C.vmax / (CD / C.tf))} เท่าของความเร็วเฉลี่ย \\(\\Delta/t_f = ${tn(CD / C.tf)}\\ ${DS}\\)`, `<b>Top speed</b>: \\(\\dot\\theta = 2a_2t + 3a_3t^2\\) is a parabola that is zero at \\(t = 0\\) and \\(t = t_f\\), so its top is in the middle, \\(t = t_f/2 = ${tn(CH)}\\) s (the time line on the plots, the green arrow in the picture): ${tn(C.vmax / (CD / C.tf))} times the average speed \\(\\Delta/t_f = ${tn(CD / C.tf)}\\ ${DS}\\)`),
+    tex: `\\begin{aligned} \\dot\\theta(${tn(CH)}) &= 2(${tn(CA[2])})(${tn(CH)}) + 3${par(CA[3])}(${tn(CH)})^2 \\\\ &= ${tn(2 * CA[2] * CH)} ${pm(3 * CA[3] * CH * CH)} = ${tn(C.vmax)}\\ ${DS} \\end{aligned}` },
+  { why: t(`<b>ความเร่ง</b>: \\(\\ddot\\theta = 2a_2 + 6a_3t\\) เป็นเส้นตรงจาก ${tn(C.acc0)} °/s² ที่ต้นถึง ${ut(C.accf)} °/s² ที่ปลาย ก่อน \\(t = 0\\) และหลัง \\(t_f\\) ข้อต่ออยู่นิ่ง \\(\\ddot\\theta = 0\\): ความเร่ง<b>กระโดด</b>ทันที ${tn(Math.abs(C.acc0))} °/s² ทั้งที่ต้นและที่ปลาย (แถบสีในกราฟ) แรงบิดของมอเตอร์ต้องเปลี่ยนในทันที แขนจึงกระตุกและสั่น โจทย์ 4 แก้เรื่องนี้ด้วยพหุนามกำลังห้า`, `<b>Acceleration</b>: \\(\\ddot\\theta = 2a_2 + 6a_3t\\) is a straight line from ${tn(C.acc0)} °/s² at the start to ${ut(C.accf)} °/s² at the end. Before \\(t = 0\\) and after \\(t_f\\) the joint is at rest, \\(\\ddot\\theta = 0\\): the acceleration <b>jumps</b> by ${tn(Math.abs(C.acc0))} °/s² at once, at the start and at the end (the shaded bands on the plots). The motor torque has to change in no time, so the arm jerks and shakes. Problem 4 cures this with a quintic`),
+    tex: `\\begin{aligned} \\ddot\\theta(t) &= 2(${tn(CA[2])}) + 6${par(CA[3])}t \\\\ &= ${tn(2 * CA[2])} ${pm(6 * CA[3], 2)}t \\\\ \\ddot\\theta(0) &= ${tn(C.acc0)}\\ ${DS2} \\\\ \\ddot\\theta(${C.tf}) &= ${tn(C.accf)}\\ ${DS2} \\end{aligned}` }],
+  answer: t(`a<sub>0</sub> = ${tn(CA[0])}, a<sub>1</sub> = 0, a<sub>2</sub> = ${tn(CA[2])} °/s², a<sub>3</sub> = ${fx(CA[3], 3)} °/s³ · ความเร็วสูงสุด ${tn(C.vmax)} °/s ที่ t = ${tn(CH)} s · ความเร่ง ${tn(C.acc0)} °/s² ที่ต้น และ ${fx(C.accf, 0)} °/s² ที่ปลาย ซึ่งกระโดดจากศูนย์`, `a<sub>0</sub> = ${tn(CA[0])}, a<sub>1</sub> = 0, a<sub>2</sub> = ${tn(CA[2])} °/s², a<sub>3</sub> = ${fx(CA[3], 3)} °/s³ · top speed ${tn(C.vmax)} °/s at t = ${tn(CH)} s · acceleration ${tn(C.acc0)} °/s² at the start and ${fx(C.accf, 0)} °/s² at the end, both jumps from zero`) });
+
+/* ================= 2: given end velocities ================= */
+const CV = X.cubicV, VA = CV.a, VF = 0;   // the joint leaves θ0 at CV.v0 and stops at θf (θ̇f = 0)
+const M2 = { v0: -8, vf: 4, t: 0, play: false, last: null, th: rad(C.th0), th0: rad(C.th0), thf: rad(C.thf), L: LL, xyz: true };   // starts away from the example (and from a₂, a₃ of problem 1)
+const a2 = () => CH7.cubic(C.th0, C.thf, C.tf, M2.v0, M2.vf), T2 = () => C.tf, ro2 = el('ro2'), c2 = el('ctl2');
+const sync2 = () => { const e = poly(a2(), M2.t); M2.th = rad(e[0]); M2.thd = e[1]; M2.thdd = e[2]; };
+const read2 = () => { const a = a2(), e = poly(a, C.tf); sync2();
+  ro2.innerHTML = `<div class="term">a<sub>0</sub> = ${fx(a[0], 1)}°, a<sub>1</sub> = θ̇<sub>0</sub> = ${fx(a[1], 1)} °/s, <b>a<sub>2</sub> = ${fx(a[2], 3)} °/s², a<sub>3</sub> = ${fx(a[3], 3)} °/s³</b></div>` +
+    `<div class="term">${t('ตรวจปลายทาง', 'check the end')}: θ(${C.tf} s) = ${fx(e[0], 2)}°, θ̇(${C.tf} s) = ${fx(e[1], 2)} °/s</div>` + nowTx(M2, poly(a, M2.t)); };
+player(el('pl2'), M2, T2, read2);
+const s2 = [numS(c2, 'p2a', 'θ̇<sub>0</sub>', M2, 'v0', -30, 30, 1, '°/s', 0, read2), numS(c2, 'p2b', 'θ̇<sub>f</sub>', M2, 'vf', -30, 30, 1, '°/s', 0, read2)];
+read2();
+/* back to the example (step 5: both end velocities zero, the rest-to-rest case) */
+const put2 = k => { M2.v0 = k === 5 ? 0 : CV.v0; M2.vf = VF; s2[0].set(M2.v0); s2[1].set(M2.vf); M2.pl.at(k === 4 ? C.tf : 0); read2(); };
+/* the velocity arrow is always drawn; step 1 also names the two end velocities */
+M2.ov = (s, st) => { const one = st.step === 1; velArrow(s, st.th, st.thd, one ? null : `θ̇ = ${fx(st.thd, 1)} °/s`);
+  if (one) { ghostName(s, C.th0, 'θ̇', 'gr', { m: 1, sub: '0', post: ` = ${fx(st.v0, 0)} °/s`, dy: 22 }); ghostName(s, C.thf, 'θ̇', 'gr', { m: 1, sub: 'f', post: ` = ${fx(st.vf, 0)} °/s`, dy: -22 }); } };
+twin(2, M2, T2, read2, sync2, () => { const a = a2(), k = M2.step || 0;
+  return { T: C.tf, t0: 0, now: M2.t, curves: [{ f: tt => poly(a, tt), col: 'l2' }].concat(k ? [{ f: rest(CA, C.tf), col: 'muted', w: 1.5, dash: [5, 4] }] : []), marks: k === 1 || k === 4 ? [{ t: 0, y: C.th0 }, { t: C.tf, y: C.thf }] : null }; });
+LS.ask(el('ask2'), { fields: [{ label: 'a<sub>2</sub> (°/s²) =', ok: x => near(x, VA[2], 0.02), w: 5 }, { label: 'a<sub>3</sub> (°/s³) =', ok: x => near(x, VA[3], 0.01), w: 5 }],
+  check: v => near(v[0], CA[2], 0.02) && near(v[1], CA[3], 0.02) ? t('นั่นคือพหุนามจากนิ่งถึงนิ่งของโจทย์ 1: ความเร็วตอนเริ่ม 10 °/s เพิ่มพจน์ของ θ̇<sub>0</sub> เข้าไปใน a<sub>2</sub> และ a<sub>3</sub>', 'that is the rest-to-rest cubic of problem 1: the start velocity of 10 °/s adds terms in θ̇<sub>0</sub> to a<sub>2</sub> and a<sub>3</sub>')
+    : near(v[0], 3 * CD / (C.tf * C.tf) + 2 * CV.v0 / C.tf, 0.02) ? t('เครื่องหมายของพจน์ θ̇<sub>0</sub> ใน a<sub>2</sub>: เป็น −(2/t<sub>f</sub>)θ̇<sub>0</sub>', 'the sign of the θ̇<sub>0</sub> term in a<sub>2</sub>: it is −(2/t<sub>f</sub>)θ̇<sub>0</sub>')
+    : near(v[0], 3 * CD / (C.tf * C.tf) - CV.v0 / C.tf, 0.02) ? t('พจน์ θ̇<sub>0</sub> ใน a<sub>2</sub> มีเลข 2: −(2/t<sub>f</sub>)θ̇<sub>0</sub>', 'the θ̇<sub>0</sub> term of a<sub>2</sub> has a 2 in it: −(2/t<sub>f</sub>)θ̇<sub>0</sub>')
+    : near(v[1], -2 * CD / C.tf ** 3 - CV.v0 / (C.tf * C.tf), 0.01) ? t('ใน a<sub>3</sub> พจน์ของความเร็วเป็นบวก: +(θ̇<sub>f</sub> + θ̇<sub>0</sub>)/t<sub>f</sub>²', 'in a<sub>3</sub> the velocity term is added: +(θ̇<sub>f</sub> + θ̇<sub>0</sub>)/t<sub>f</sub>²') : '' });
+LS.stepper(el('st2'), { onStep: k => { const was = M2.step; M2.step = k; if (k || was) put2(k); }, steps: [
+  { why: t('<b>เงื่อนไขสี่ข้อ</b> (Craig สมการ 7.9–7.10): ตำแหน่งที่ปลายทั้งสองเหมือนเดิม แต่ความเร็วที่ปลายเป็นค่าที่กำหนด \\(\\dot\\theta_0\\) และ \\(\\dot\\theta_f\\) แทนศูนย์ (ลูกศรสีเขียวในภาพคือ \\(\\dot\\theta_0\\) ตอน t = 0)', '<b>Four conditions</b> (Craig, equations 7.9–7.10): the positions at the ends are as before, but the end velocities are the given \\(\\dot\\theta_0\\) and \\(\\dot\\theta_f\\) instead of zero (the green arrow in the picture is \\(\\dot\\theta_0\\) at t = 0)'),
+    tex: '\\begin{aligned} \\theta_0 &= a_0, & \\theta_f &= a_0 + a_1t_f + a_2t_f^2 + a_3t_f^3 \\\\ \\dot\\theta_0 &= a_1, & \\dot\\theta_f &= a_1 + 2a_2t_f + 3a_3t_f^2 \\end{aligned}' },
+  { why: t('<b>สูตรทั่วไป</b> (Craig สมการ 7.11): สองสมการแรกให้ \\(a_0\\) และ \\(a_1\\) ทันที อีกสองสมการให้ \\(a_2\\) และ \\(a_3\\) ความเร็วที่ปลายเพิ่มพจน์ใหม่ต่อท้ายสูตรเดิม', '<b>The general formulas</b> (Craig, equation 7.11): the first two equations give \\(a_0\\) and \\(a_1\\) at once, the other two \\(a_2\\) and \\(a_3\\). The end velocities add new terms after the old formulas'),
+    tex: '\\begin{aligned} a_0 &= \\theta_0, \\quad a_1 = \\dot\\theta_0 \\\\ a_2 &= \\frac{3}{t_f^2}(\\theta_f - \\theta_0) - \\frac{2}{t_f}\\dot\\theta_0 - \\frac{1}{t_f}\\dot\\theta_f \\\\ a_3 &= -\\frac{2}{t_f^3}(\\theta_f - \\theta_0) + \\frac{1}{t_f^2}(\\dot\\theta_f + \\dot\\theta_0) \\end{aligned}' },
+  { why: t(`<b>ใส่ตัวเลข</b>: \\(\\Delta = ${CD}^\\circ,\\ t_f = ${C.tf}\\) s, \\(\\dot\\theta_0 = ${CV.v0}\\ ${DS},\\ \\dot\\theta_f = ${VF}\\)`, `<b>Put the numbers in</b>: \\(\\Delta = ${CD}^\\circ,\\ t_f = ${C.tf}\\) s, \\(\\dot\\theta_0 = ${CV.v0}\\ ${DS},\\ \\dot\\theta_f = ${VF}\\)`),
+    tex: `\\begin{aligned} a_0 &= ${tn(VA[0])}, \\quad a_1 = ${tn(VA[1])}\\ ${DS} \\\\ a_2 &= \\frac{3(${CD})}{${C.tf}^2} - \\frac{2(${CV.v0})}{${C.tf}} - 0 = ${tn(VA[2])}\\ ${DS2} \\\\ a_3 &= -\\frac{2(${CD})}{${C.tf}^3} + \\frac{0 + ${CV.v0}}{${C.tf}^2} = ${tn(VA[3])}\\ ^\\circ/\\text{s}^3 \\end{aligned}` },
+  { why: t(`<b>ตรวจปลายทาง</b>: แทน \\(t = t_f = ${C.tf}\\) s ต้องได้ \\(\\theta = ${C.thf}^\\circ\\) และ \\(\\dot\\theta = 0\\) (ในภาพ ข้อต่อหยุดที่ ${C.thf}° พอดี)`, `<b>Check the end</b>: at \\(t = t_f = ${C.tf}\\) s we must get \\(\\theta = ${C.thf}^\\circ\\) and \\(\\dot\\theta = 0\\) (in the picture the joint stops right at ${C.thf}°)`),
+    tex: (() => { const T = C.tf, p = [VA[0], VA[1] * T, VA[2] * T * T, VA[3] * T ** 3], q = [VA[1], 2 * VA[2] * T, 3 * VA[3] * T * T];
+      return `\\begin{aligned} \\theta(${T}) &= ${tn(p[0])} ${pm(p[1])} ${pm(p[2])} ${pm(p[3])} = ${tn(poly(VA, T)[0])}^\\circ \\\\ \\dot\\theta(${T}) &= ${tn(q[0])} ${pm(q[1])} ${pm(q[2])} = ${tn(poly(VA, T)[1])} \\end{aligned}`; })() },
+  { why: t('<b>เมื่อ \\(\\dot\\theta_0 = \\dot\\theta_f = 0\\)</b>: พจน์ของความเร็วหายไป เหลือ \\(a_2 = 3\\Delta/t_f^2\\) และ \\(a_3 = -2\\Delta/t_f^3\\) ของโจทย์ 1 สูตรของโจทย์ 1 จึงเป็นกรณีพิเศษของสูตรนี้ ในภาพ แถบเลื่อนกลับเป็นศูนย์ทั้งสองตัว เส้นสีน้ำเงินจึงทับเส้นประจางพอดี', '<b>With \\(\\dot\\theta_0 = \\dot\\theta_f = 0\\)</b> the velocity terms vanish, leaving \\(a_2 = 3\\Delta/t_f^2\\) and \\(a_3 = -2\\Delta/t_f^3\\) of problem 1: the formulas of problem 1 are a special case of these. In the picture both sliders are back at zero, and the blue curves lie right on the faint dashed ones'),
+    tex: '\\begin{aligned} a_1 &= \\dot\\theta_0 = 0 \\\\ a_2 &= \\frac{3\\Delta}{t_f^2} - 0 - 0 \\\\ a_3 &= -\\frac{2\\Delta}{t_f^3} + 0 \\end{aligned}' }],
+  answer: t(`a<sub>0</sub> = ${tn(VA[0])}, a<sub>1</sub> = ${tn(VA[1])} °/s, a<sub>2</sub> = ${tn(VA[2])} °/s², a<sub>3</sub> = ${fx(VA[3], 3)} °/s³ · θ(t) = ${tn(VA[0])} + ${tn(VA[1])}t + ${tn(VA[2])}t² − ${tn(-VA[3])}t³`, `a<sub>0</sub> = ${tn(VA[0])}, a<sub>1</sub> = ${tn(VA[1])} °/s, a<sub>2</sub> = ${tn(VA[2])} °/s², a<sub>3</sub> = ${fx(VA[3], 3)} °/s³ · θ(t) = ${tn(VA[0])} + ${tn(VA[1])}t + ${tn(VA[2])}t² − ${tn(-VA[3])}t³`) });
+
+/* ================= 3: via points ================= */
+const V = X.via, VP = V.pts, VD = V.durs, TS = CH7.times(VD), NV = VP.length, TT = TS[NV - 1], SLO = VD.map((d, i) => (VP[i + 1] - VP[i]) / d);
+const VEL = { zero: VP.map(() => 0), heur: V.heur, spline: V.spline };
+const M3 = { mode: 'zero', vv: VEL.zero.slice(), t: 0, play: false, last: null, th: rad(VP[0]), marks: [...new Set(VP)].map(rad), L: LL, xyz: true };   // starts with zero velocity at the via points: the heuristic (the asked answer) is one button away
+const cub3 = () => CH7.cubics(VP, VD, M3.vv), T3 = () => TT, ro3 = el('ro3'), c3 = el('ctl3');
+/* the straight lines between the path points: position and slope (no acceleration drawn) */
+const lin = tt => { if (tt <= 0) return [VP[0], NaN, NaN]; if (tt >= TT) return [VP[NV - 1], NaN, NaN]; let i = 0; while (i < NV - 2 && tt > TS[i + 1]) i++; return [VP[i] + SLO[i] * (tt - TS[i]), SLO[i], NaN]; };
+/* the acceleration just before and just after each via point */
+const jumps = cb => VP.slice(1, -1).map((_, j) => [poly(cb.segs[j].a, cb.segs[j].T)[2], poly(cb.segs[j + 1].a, 0)[2]]);
+const in3 = cb => tt => tt === 0 ? poly(cb.segs[0].a, 0) : tt === TT ? poly(cb.segs[NV - 2].a, VD[NV - 2]) : cb.at(tt);   // the first and last cubic at the very ends
+const sync3 = () => { const e = in3(cub3())(M3.t); M3.th = rad(e[0]); M3.thd = e[1]; M3.thdd = e[2]; };
+const read3 = () => { const cb = cub3(), J = jumps(cb); sync3();
+  ro3.innerHTML = `<div class="term">${t('ความเร็วที่จุดผ่าน', 'velocity at the via points')}: ${VP.slice(1, -1).map((p, j) => `<b>θ̇ = ${fx(M3.vv[j + 1], 2)} °/s</b> ${t('ที่', 'at')} ${p}° (t = ${TS[j + 1]} s)`).join(' · ')}</div>` +
+    `<div class="term">${t('θ̈ ก่อน → หลังจุดผ่าน', 'θ̈ before → after the via point')}: ${J.map((q, j) => `t = ${TS[j + 1]} s: ${fx(q[0], 2)} → ${fx(q[1], 2)} °/s²`).join(' · ')}</div>` + nowTx(M3, in3(cb)(M3.t)); };
+player(el('pl3'), M3, T3, read3);
+const MODES = [['zero', t('ศูนย์ทุกจุดผ่าน', 'zero at every via point')], ['heur', t('วิธีง่าย (heuristic)', 'heuristic')], ['spline', t('ความเร่งต่อเนื่อง', 'continuous acceleration')], ['hand', t('กำหนดเอง', 'by hand')]];
+const vS = j => numS(c3, 'p3' + j, `θ̇ ${t('ที่', 'at')} ${VP[j]}°`, { x: M3.vv[j] }, 'x', -20, 20, 0.01, '°/s', 2, () => {});
+const radio3 = ui.radio(el('sel3'), MODES.map(([id, label]) => ({ id: 'm3' + id, label, on: id === M3.mode })), id => setMode(id.slice(2)));
+const s3 = [1, 2].map(j => { const sl = vS(j); sl.el.addEventListener('input', () => { M3.vv[j] = sl.get(); M3.mode = 'hand'; radio3.set('m3hand'); read3(); }); return sl; });
+const setMode = m => { M3.mode = m; if (m !== 'hand') M3.vv = VEL[m].slice(); radio3.set('m3' + m); s3.forEach((sl, i) => sl.set(M3.vv[i + 1])); read3(); };
+read3();
+/* back to the example: the heuristic (step 6: continuous acceleration), and the time the open step looks at */
+const put3 = k => { setMode(k === 6 ? 'spline' : 'heur'); M3.pl.at(k === 2 || k === 5 || k === 6 ? TS[1] : k === 3 ? TS[2] : 0); read3(); };
+/* the angles of the path points are named (the faint links); steps 2, 3 show the velocity of the joint at the via point */
+M3.ov = (s, st) => { [...new Set(VP)].forEach(p => ghostName(s, p, `${p}°`, 'mut'));
+  if (st.step === 2 || st.step === 3) velArrow(s, st.th, st.thd, `θ̇ = ${fx(st.thd, 1)} °/s`); };
+twin(3, M3, T3, read3, sync3, () => { const cb = cub3(), k = M3.step || 0;
+  return { T: TT + MG, t0: -MG, now: M3.t, curves: [{ f: in3(cb), col: 'l2' }, { f: lin, col: k === 1 ? 'ink' : 'muted', w: k === 1 ? 2 : 1.4, dash: [5, 4] }], marks: VP.map((y, i) => ({ t: TS[i], y })),
+    blends: k === 4 ? [[TS[1], TS[2]]] : k === 5 || k === 6 ? bands(TS.slice(1, -1)) : null }; });
+const SPv = V.spline.slice(1, -1), HV = V.heur.slice(1, -1);
+LS.ask(el('ask3'), { fields: [{ label: `θ̇ ${t('ที่', 'at')} ${VP[1]}° (°/s) =`, ok: x => near(x, HV[0], 0.05), w: 4.5 }, { label: `θ̇ ${t('ที่', 'at')} ${VP[2]}° (°/s) =`, ok: x => near(x, HV[1], 0.05), w: 4.5 }],
+  check: v => near(v[0], SPv[0], 0.05) && near(v[1], SPv[1], 0.05) ? t('นั่นคือความเร็วแบบความเร่งต่อเนื่อง โจทย์ถามวิธีง่าย (heuristic)', 'those are the continuous-acceleration velocities; the question asks for the heuristic')
+    : !near(v[0], HV[0], 0.05) ? t(`ที่ ${VP[1]}° ความชันเปลี่ยนเครื่องหมาย (จาก ${ut(SLO[0])} เป็น ${ut(SLO[1])} °/s): วิธีง่ายใช้ความเร็วศูนย์`, `at ${VP[1]}° the slope changes sign (from ${ut(SLO[0])} to ${ut(SLO[1])} °/s): the heuristic takes zero velocity`)
+    : near(v[1], SLO[1] + SLO[2], 0.05) ? t('ค่าเฉลี่ย ไม่ใช่ผลรวม: หารด้วย 2', 'the average, not the sum: divide by 2')
+    : near(v[1], 0, 0.05) ? t(`ที่ ${VP[2]}° ความชันเครื่องหมายเดิม (ลงต่อไป): ใช้ค่าเฉลี่ยของสองความชัน ไม่ใช่ศูนย์`, `at ${VP[2]}° the slope keeps its sign (it goes on down): take the average of the two slopes, not zero`)
+    : near(v[1], SLO[1], 0.05) || near(v[1], SLO[2], 0.05) ? t(`ที่ ${VP[2]}° ใช้ค่าเฉลี่ยของความชันทั้งสองด้าน`, `at ${VP[2]}° take the average of the slopes on both sides`) : '' });
+const SG = V.cH.segs, HJ = jumps(V.cH);
+/* the equation of continuous acceleration at via point k (Craig 7.3; ch7.js viaSpline): θ̇(k−1)/T + 2θ̇k(1/T + 1/T′) + θ̇(k+1)/T′ = 3(Δ/T² + Δ′/T′²) */
+const SPE = VP.slice(1, -1).map((_, j) => { const T = VD[j], U = VD[j + 1], d0 = VP[j + 1] - VP[j], d1 = VP[j + 2] - VP[j + 1]; return { A: 1 / T, B: 2 * (1 / T + 1 / U), C: 1 / U, D: 3 * (d0 / (T * T) + d1 / (U * U)) }; });
+const cf = x => Math.abs(x - 1) < 1e-9 ? '' : tn(x, 3) + '\\,';   // a coefficient in TeX (1 left out)
+/* a cubic in TeX, the terms that are not zero */
+const polyTex = a => a.map((x, i) => [x, ['', 't', 't^2', 't^3'][i]]).filter(([x]) => Math.abs(x) > 1e-9).map(([x, p], i) => (i ? pm(x) : tn(x)) + p).join(' ') || '0';
+const segRow = (g, i) => `\\theta_${i + 1}(t) &= ${polyTex(g.a)}`;   // segment i + 1: from VP[i] to VP[i + 1] in VD[i] seconds
+LS.stepper(el('st3'), { onStep: k => { const was = M3.step; M3.step = k; if (k || was) put3(k); }, steps: [
+  { why: t('<b>ความชันของเส้นตรง</b>ที่เชื่อมจุดบนเส้นทาง (เส้นประในกราฟ ในกราฟความเร็วเป็นขั้นบันไดสามขั้น): มุมที่เปลี่ยนหารด้วยเวลาของช่วง', '<b>The slopes of the straight lines</b> joining the path points (the dashed lines on the plots; on the velocity plot they are three steps): the change of angle divided by the time of the segment'),
+    tex: `\\begin{aligned} ${SLO.map((m, i) => `\\frac{${VP[i + 1]} - ${VP[i]}}{${VD[i]}} &= ${tn(m)}\\ ${DS}`).join(' \\\\ ')} \\end{aligned}` },
+  { why: t(`<b>ที่ ${VP[1]}°</b>: ความชันเปลี่ยนจาก ${ut(SLO[0])} เป็น ${ut(SLO[1])} °/s เครื่องหมายเปลี่ยน (ข้อต่อขึ้นไปแล้วต้องกลับลง) วิธีง่ายของ Craig ให้ความเร็วเป็นศูนย์: ข้อต่อหยุดชั่วขณะที่ยอด (ภาพตอน t = ${TS[1]} s)`, `<b>At ${VP[1]}°</b> the slope goes from ${ut(SLO[0])} to ${ut(SLO[1])} °/s: it changes sign (the joint went up and must come back down), so Craig's heuristic takes zero velocity. The joint stops for an instant at the top (the picture at t = ${TS[1]} s)`),
+    tex: `\\dot\\theta(${TS[1]}\\ \\text{s}) = ${tn(V.heur[1])}` },
+  { why: t(`<b>ที่ ${VP[2]}°</b>: ความชันเป็น ${ut(SLO[1])} และ ${ut(SLO[2])} °/s เครื่องหมายเดียวกัน (ลงต่อไป) วิธีง่ายใช้ค่าเฉลี่ยของสองความชัน (ลูกศรสีเขียวในภาพตอน t = ${TS[2]} s)`, `<b>At ${VP[2]}°</b> the slopes are ${ut(SLO[1])} and ${ut(SLO[2])} °/s, both of one sign (it goes on down), so the heuristic takes the average of the two (the green arrow in the picture at t = ${TS[2]} s)`),
+    tex: `\\dot\\theta(${TS[2]}\\ \\text{s}) = \\frac{${tn(SLO[1])} + ${par(SLO[2])}}{2} = ${tn(V.heur[2])}\\ ${DS}` },
+  { why: t(`<b>พหุนามกำลังสามสามช่วง</b>: ตอนนี้ทุกช่วงรู้มุมและความเร็วที่ปลายทั้งสองแล้ว (ความเร็วที่ต้นและปลายของเส้นทางเป็นศูนย์) จึงใช้สูตรของโจทย์ 2 ได้ทีละช่วง (\\(\\theta_1, \\theta_2, \\theta_3\\) คือช่วงที่ 1, 2, 3) ความเร็วที่ปลายของช่วงที่ 1, 2, 3 คือ ${VD.map((_, j) => `${ut(V.heur[j])} → ${ut(V.heur[j + 1])}`).join(', ')} °/s เวลา t ของแต่ละช่วงนับจากต้นช่วงนั้น (แถบสีในกราฟคือช่วงที่ 2)`, `<b>Three cubics</b>: every segment now knows its angles and its velocities at both ends (the path starts and ends at rest), so the formulas of problem 2 give each one (\\(\\theta_1, \\theta_2, \\theta_3\\) are segments 1, 2, 3). The end velocities of segments 1, 2, 3 are ${VD.map((_, j) => `${ut(V.heur[j])} → ${ut(V.heur[j + 1])}`).join(', ')} °/s; the time t of each segment counts from the start of that segment (the shaded band on the plots is segment 2)`),
+    tex: `\\begin{aligned} ${SG.map(segRow).join(' \\\\ ')} \\end{aligned}` },
+  { why: t(`<b>ความเร่งกระโดดที่จุดผ่าน</b>: วิธีนี้กำหนดได้แค่มุมและความเร็วที่ปลายของแต่ละช่วง ความเร่งของสองช่วงที่มาต่อกันจึงไม่จำเป็นต้องเท่ากัน (แถบสีในกราฟความเร่ง) ความเร่งที่ปลายช่วงคือ \\(2a_2 + 6a_3t_f\\) ที่ต้นช่วงถัดไปคือ \\(2a_2\\)`, `<b>The acceleration jumps at the via points</b>: this way sets only the angles and the velocities at the ends of each segment, so the accelerations of two segments that meet need not agree (the shaded bands on the acceleration plot). At the end of a segment it is \\(2a_2 + 6a_3t_f\\), at the start of the next \\(2a_2\\)`),
+    tex: `\\begin{aligned} ${HJ.map((q, j) => `t = ${TS[j + 1]}\\ \\text{s}:&\\quad \\ddot\\theta = ${tn(q[0], 2)} \\to ${tn(q[1], 2)}\\ ${DS2}`).join(' \\\\ ')} \\end{aligned}` },
+  { why: t(`<b>ความเร่งต่อเนื่อง</b> (Craig 7.3 ตัวอย่าง 7.2): แทนที่จะเลือกความเร็วที่จุดผ่านเอง ให้ความเร่งที่ปลายช่วงหนึ่งเท่ากับความเร่งที่ต้นช่วงถัดไป เขียนความเร่งทั้งสองด้วยสูตรของโจทย์ 2 ได้สมการเชิงเส้น<b>หนึ่งสมการต่อจุดผ่านหนึ่งจุด</b> (T, T′ คือเวลาของช่วงก่อนและหลังจุดผ่าน Δ, Δ′ คือมุมที่เปลี่ยนในสองช่วงนั้น) แต่ละสมการมีเพียงความเร็วของจุดนั้นกับจุดข้างเคียง เมทริกซ์จึงเป็นแบบสามแนวทแยง (tridiagonal) ซึ่งแก้ได้ง่ายแม้มีจุดผ่านมาก ที่นี่มีจุดผ่านสองจุดและความเร็วที่ปลายเป็นศูนย์ จึงเหลือสองสมการ (ภาพเปลี่ยนเป็นแบบความเร่งต่อเนื่อง: ความเร่งไม่กระโดดที่จุดผ่านแล้ว)`, `<b>Continuous acceleration</b> (Craig 7.3, example 7.2): instead of choosing the via velocities, ask that the acceleration at the end of one segment equal the acceleration at the start of the next. Writing both with the formulas of problem 2 gives <b>one linear equation per via point</b> (T, T′ are the times of the segments before and after it, Δ, Δ′ their changes of angle). Each equation holds only the velocities of that point and its two neighbours, so the matrix is tridiagonal and easy to solve even for many via points. Here there are two via points and the end velocities are zero: two equations (the picture switches to continuous acceleration: no more jumps at the via points)`),
+    tex: `\\begin{aligned} &\\frac{\\dot\\theta_{k-1}}{T} + 2\\dot\\theta_k\\Big(\\frac{1}{T} + \\frac{1}{T'}\\Big) + \\frac{\\dot\\theta_{k+1}}{T'} \\\\ &\\qquad = 3\\Big(\\frac{\\Delta}{T^2} + \\frac{\\Delta'}{T'^2}\\Big) \\end{aligned}`,
+    body: () => MC.tex(`\\begin{aligned} ${cf(SPE[0].B)}\\dot\\theta_1 + ${cf(SPE[0].C)}\\dot\\theta_2 &= ${tn(SPE[0].D, 3)} \\\\ ${cf(SPE[1].A)}\\dot\\theta_1 + ${cf(SPE[1].B)}\\dot\\theta_2 &= ${tn(SPE[1].D, 3)} \\\\ \\Rightarrow\\ \\dot\\theta_1 &= ${tn(SPv[0], 2)}\\ ${DS} \\\\ \\dot\\theta_2 &= ${tn(SPv[1], 2)}\\ ${DS} \\end{aligned}`, true) }],
+  answer: t(`วิธีง่าย: θ̇ = ${tn(HV[0])} ที่ ${VP[1]}° และ ${fx(HV[1], 1)} °/s ที่ ${VP[2]}° · ความเร่งต่อเนื่อง: ${fx(SPv[0], 2)} และ ${fx(SPv[1], 2)} °/s`, `heuristic: θ̇ = ${tn(HV[0])} at ${VP[1]}° and ${fx(HV[1], 1)} °/s at ${VP[2]}° · continuous acceleration: ${fx(SPv[0], 2)} and ${fx(SPv[1], 2)} °/s`) });
+
+/* ================= 4: the quintic ================= */
+const Q = X.quintic, QA = Q.a, QT = accTop(QA, C.tf);
+const M4 = { d0: 0, df: 90, tf: 4, t: 0, play: false, last: null, th: 0, th0: 0, thf: rad(90), marks: [0], L: LL, xyz: true };   // starts away from the example
+const a4 = () => CH7.quintic(M4.d0, M4.df, M4.tf), a4c = () => CH7.cubic(M4.d0, M4.df, M4.tf), T4 = () => M4.tf, ro4 = el('ro4'), c4 = el('ctl4');
+const sync4 = () => { const e = poly(a4(), M4.t); M4.th = rad(e[0]); M4.thd = e[1]; M4.thdd = e[2]; M4.th0 = rad(M4.d0); M4.thf = rad(M4.df); M4.marks = [rad(poly(a4c(), M4.t)[0])]; };
+const read4 = () => { const a = a4(), c = a4c(), h = M4.tf / 2, aq = accTop(a, M4.tf), ac = accTop(c, M4.tf); M4.pl.fit(); sync4();
+  ro4.innerHTML = `<div class="term">a<sub>0</sub> = ${fx(a[0], 1)}°, a<sub>1</sub> = a<sub>2</sub> = 0, <b>a<sub>3</sub> = ${fx(a[3], 3)} °/s³, a<sub>4</sub> = ${fx(a[4], 3)} °/s⁴, a<sub>5</sub> = ${fx(a[5], 4)} °/s⁵</b></div>` +
+    `<div class="term">${t('ความเร็วสูงสุด', 'top speed')}: ${t('กำลังห้า', 'quintic')} <b>${fx(poly(a, h)[1], 2)} °/s</b> · ${t('กำลังสาม', 'cubic')} ${fx(poly(c, h)[1], 2)} °/s</div>` +
+    `<div class="term">${t('ความเร่งสูงสุด', 'top acceleration')}: ${t('กำลังห้า', 'quintic')} <b>${fx(aq[0], 2)} °/s²</b> (t = ${fx(aq[1], 2)} s) · ${t('กำลังสาม', 'cubic')} ${fx(ac[0], 2)} °/s² (t = 0, ${t('กระโดด', 'a jump')})</div>` + nowTx(M4, poly(a, M4.t)); };
+player(el('pl4'), M4, T4, read4);
+const s4 = [degS(c4, 'p4a', 'θ<sub>0</sub>', M4, 'd0', -90, 90, 5, read4), degS(c4, 'p4b', 'θ<sub>f</sub>', M4, 'df', -90, 180, 5, read4), numS(c4, 'p4c', 't<sub>f</sub>', M4, 'tf', 1, 6, 0.5, 's', 1, read4)];
+read4();
+const put4 = k => { M4.d0 = C.th0; M4.df = C.thf; M4.tf = C.tf; [C.th0, C.thf, C.tf].forEach((x, i) => s4[i].set(x)); M4.pl.at(k === 3 ? C.tf : k === 4 ? CH : 0); read4(); };
+/* the open step: 1 the six conditions at the faint links; 4 the velocity of the joint at the middle */
+M4.ov = (s, st) => { const k = st.step; if (!k) return;
+  if (k === 1) { ghostName(s, st.d0, 'θ̇ = θ̈ = 0', 'gr', { dy: 22 }); ghostName(s, st.df, 'θ̇ = θ̈ = 0', 'gr', { dy: -22 }); }
+  if (k === 4) velArrow(s, st.th, st.thd, `θ̇ = ${fx(st.thd, 1)} °/s`); };
+twin(4, M4, T4, read4, sync4, () => { const k = M4.step || 0;
+  return { T: M4.tf + MG, t0: -MG, now: M4.t, curves: [{ f: rest(a4(), M4.tf), col: 'l1' }, { f: rest(a4c(), M4.tf), col: 'muted', w: 1.5, dash: [5, 4] }],
+    marks: k === 1 ? [{ t: 0, y: M4.d0 }, { t: M4.tf, y: M4.df }] : null, blends: k === 4 ? bands([0, M4.tf]) : null }; });
+LS.ask(el('ask4'), { fields: [{ label: 'a<sub>3</sub> =', ok: x => near(x, QA[3], 0.02), w: 4.5 }, { label: 'a<sub>4</sub> =', ok: x => near(x, QA[4], 0.02), w: 4.5 }, { label: 'a<sub>5</sub> =', ok: x => near(x, QA[5], 0.005), w: 4.5 }],
+  check: v => near(v[0], CA[2], 0.02) || near(v[1], CA[3], 0.02) ? t('นั่นคือสัมประสิทธิ์ของพหุนามกำลังสาม: พหุนามกำลังห้าใช้ a<sub>3</sub> = 10Δ/t<sub>f</sub>³, a<sub>4</sub> = −15Δ/t<sub>f</sub>⁴, a<sub>5</sub> = 6Δ/t<sub>f</sub>⁵', 'those are the coefficients of the cubic: the quintic has a<sub>3</sub> = 10Δ/t<sub>f</sub>³, a<sub>4</sub> = −15Δ/t<sub>f</sub>⁴, a<sub>5</sub> = 6Δ/t<sub>f</sub>⁵')
+    : near(v[1], -QA[4], 0.02) ? t('a<sub>4</sub> เป็นลบ: −15Δ/t<sub>f</sub>⁴', 'a<sub>4</sub> is negative: −15Δ/t<sub>f</sub>⁴')
+    : near(v[0], 10 * C.thf / C.tf ** 3, 0.02) ? t('ใช้ระยะที่เคลื่อนที่ Δ = θ<sub>f</sub> − θ<sub>0</sub> ไม่ใช่ θ<sub>f</sub>', 'use the move Δ = θ<sub>f</sub> − θ<sub>0</sub>, not θ<sub>f</sub>')
+    : near(v[0], 10 * CD / C.tf ** 2, 0.02) || near(v[1], -15 * CD / C.tf ** 3, 0.02) || near(v[2], 6 * CD / C.tf ** 4, 0.005) ? t('ตรวจกำลังของ t<sub>f</sub>: a<sub>3</sub> หารด้วย t<sub>f</sub>³, a<sub>4</sub> ด้วย t<sub>f</sub>⁴, a<sub>5</sub> ด้วย t<sub>f</sub>⁵', 'check the powers of t<sub>f</sub>: a<sub>3</sub> is over t<sub>f</sub>³, a<sub>4</sub> over t<sub>f</sub>⁴, a<sub>5</sub> over t<sub>f</sub>⁵') : '' });
+LS.stepper(el('st4'), { onStep: k => { const was = M4.step; M4.step = k; if (k || was) put4(k); }, steps: [
+  { why: t('<b>หกเงื่อนไข</b> (Craig สมการ 7.16–7.17): มุม ความเร็ว และความเร่งที่ต้นและที่ปลาย ต้องใช้สัมประสิทธิ์ 6 ตัว คือพหุนามกำลังห้า (ข้อความสีเขียวที่ก้านจางในภาพ: ทั้งสองปลายนิ่งและไม่มีความเร่ง)', '<b>Six conditions</b> (Craig, equations 7.16–7.17): the angle, the velocity and the acceleration at the start and at the end need six coefficients: a quintic (the green notes at the faint links in the picture: both ends at rest, with no acceleration)'),
+    tex: '\\begin{aligned} \\theta(t) &= a_0 + a_1t + a_2t^2 \\\\ &\\quad + a_3t^3 + a_4t^4 + a_5t^5 \\\\ \\theta(0) &= \\theta_0, & \\theta(t_f) &= \\theta_f \\\\ \\dot\\theta(0) &= \\dot\\theta_0, & \\dot\\theta(t_f) &= \\dot\\theta_f \\\\ \\ddot\\theta(0) &= \\ddot\\theta_0, & \\ddot\\theta(t_f) &= \\ddot\\theta_f \\end{aligned}' },
+  { why: t('<b>สัมประสิทธิ์</b> (Craig สมการ 7.18): สามเงื่อนไขที่ \\(t = 0\\) ให้ \\(a_0, a_1, a_2\\) ทันที สามเงื่อนไขที่ \\(t = t_f\\) เป็นสมการเชิงเส้นสามสมการของ \\(a_3, a_4, a_5\\) (สูตรเต็มอยู่ใน Craig) เมื่อเริ่มและจบอย่างนิ่ง และความเร่งที่ปลายทั้งสองเป็นศูนย์ สูตรเหลือเพียง', '<b>The coefficients</b> (Craig, equation 7.18): the three conditions at \\(t = 0\\) give \\(a_0, a_1, a_2\\) at once; the three at \\(t = t_f\\) are three linear equations in \\(a_3, a_4, a_5\\) (the full formulas are in Craig). At rest and with zero acceleration at both ends they shrink to'),
+    tex: '\\begin{aligned} a_0 &= \\theta_0, \\quad a_1 = \\dot\\theta_0 = 0, \\quad a_2 = \\tfrac{1}{2}\\ddot\\theta_0 = 0 \\\\ a_3 &= \\frac{10\\Delta}{t_f^3}, \\quad a_4 = -\\frac{15\\Delta}{t_f^4}, \\quad a_5 = \\frac{6\\Delta}{t_f^5} \\end{aligned}' },
+  { why: t(`<b>ใส่ตัวเลข</b>: \\(\\Delta = ${CD}^\\circ,\\ t_f = ${C.tf}\\) s (ในภาพ ข้อต่อถึง ${C.thf}° ตอน t = ${C.tf} s)`, `<b>Put the numbers in</b>: \\(\\Delta = ${CD}^\\circ,\\ t_f = ${C.tf}\\) s (in the picture the joint reaches ${C.thf}° at t = ${C.tf} s)`),
+    tex: `\\begin{aligned} a_3 &= \\frac{10(${CD})}{${C.tf}^3} = ${tn(QA[3])}\\ ^\\circ/\\text{s}^3 \\\\ a_4 &= -\\frac{15(${CD})}{${C.tf}^4} = ${tn(QA[4])}\\ ^\\circ/\\text{s}^4 \\\\ a_5 &= \\frac{6(${CD})}{${C.tf}^5} = ${tn(QA[5])}\\ ^\\circ/\\text{s}^5 \\\\ \\theta(t) &= ${tn(QA[0])} + ${tn(QA[3])}t^3 \\\\ &\\quad ${pm(QA[4])}t^4 ${pm(QA[5])}t^5 \\end{aligned}` },
+  { why: t(`<b>ราคาของความนุ่มนวล</b>: ความเร่งเริ่มและจบที่ศูนย์ ไม่กระโดด (แถบสีในกราฟ เทียบกับเส้นประของพหุนามกำลังสามที่กระโดด ${tn(C.acc0)} °/s²) แต่ข้อต่อออกตัวช้ากว่า จึงต้องเร็วกว่าในช่วงกลางเพื่อให้ถึงทันเวลาเดิม: ความเร็วสูงสุดที่ \\(t = ${tn(CH)}\\) s สูงขึ้น ${tn((Q.vmax / C.vmax - 1) * 100, 1)} % (ลูกศรสีเขียวในภาพ) ส่วนความเร่งสูงสุดใกล้กับของพหุนามกำลังสาม แต่ค่อย ๆ ขึ้นไปถึงที่ \\(t = ${tn(QT[1], 2)}\\) s แทนที่จะกระโดดขึ้นทันทีที่ \\(t = 0\\) มอเตอร์ต้องหมุนได้เร็วขึ้น แต่แขนไม่กระตุก`, `<b>The price of smoothness</b>: the acceleration starts and ends at zero, with no jump (the shaded bands; the dashed cubic jumps by ${tn(C.acc0)} °/s²). But the joint gets away more slowly, so it must be faster in the middle to arrive in the same time: the top speed at \\(t = ${tn(CH)}\\) s is ${tn((Q.vmax / C.vmax - 1) * 100, 1)} % higher (the green arrow in the picture). The top acceleration is close to the cubic's, but it is reached gradually at \\(t = ${tn(QT[1], 2)}\\) s instead of in a jump at \\(t = 0\\). The motor must turn faster, but the arm does not jerk`),
+    tex: `\\begin{aligned} \\dot\\theta(${tn(CH)}) &= ${tn(Q.vmax)}\\ ${DS} \\quad (\\text{${t('กำลังสาม', 'cubic')} } ${tn(C.vmax)}) \\\\ |\\ddot\\theta|_{\\max} &= ${tn(Q.accMax, 2)}\\ ${DS2} \\quad (\\text{${t('กำลังสาม', 'cubic')} } ${tn(C.acc0)}) \\\\ \\ddot\\theta(0) &= \\ddot\\theta(${C.tf}) = 0 \\quad (\\text{${t('กำลังสาม', 'cubic')} } \\pm ${tn(C.acc0)}) \\end{aligned}` }],
+  answer: t(`a<sub>3</sub> = ${tn(QA[3], 2)}, a<sub>4</sub> = ${fx(QA[4], 2)}, a<sub>5</sub> = ${tn(QA[5])} · ความเร็วสูงสุด ${tn(Q.vmax)} °/s (พหุนามกำลังสาม ${tn(C.vmax)}) · ความเร่งสูงสุด ${tn(Q.accMax, 2)} °/s² และเป็นศูนย์ที่ปลายทั้งสอง`, `a<sub>3</sub> = ${tn(QA[3], 2)}, a<sub>4</sub> = ${fx(QA[4], 2)}, a<sub>5</sub> = ${tn(QA[5])} · top speed ${tn(Q.vmax)} °/s (cubic ${tn(C.vmax)}) · top acceleration ${tn(Q.accMax, 2)} °/s², and zero at both ends`) });
+});
+</script>
+</body>
+</html>

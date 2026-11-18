@@ -141,7 +141,7 @@ const G = RB.G, KEY = { ink: 'ink', mut: 'muted', o: 'l1', b: 'l2', p: 'l3', x: 
 const symW = (c, L, size) => { c.save(); c.font = `italic 500 ${size * 1.05}px ${RB.SERIF}`; let w = c.measureText(L.t).width; if (L.sub) { c.font = `500 ${Math.round(size * 1.05 * 0.68)}px ${RB.SERIF}`; w += c.measureText(L.sub).width + 0.5; } c.restore(); return w; };
 const txtW = (c, L, size) => { c.save(); c.font = `${L.b ? 700 : 500} ${size}px ${RB.FONT}`; const w = c.measureText(L.t).width; c.restore(); return w; };
 const paint = (c, W, H, s, P, st, res) => { global.R3.draw(c, W, H, s); const k = W / s.ow;
-  const items = s.labels.map(L => { const q = S3.proj(s.cam, W, H, L.p), size = max(11, L.s * 1.3 * k), w = L.m ? symW(c, L, size) : txtW(c, L, size), x = q[0] + L.dx * k; return { L, size, w, x: L.a === 'c' ? x - w / 2 : L.a === 'r' ? x - w : x, y: q[1] + L.dy * k, ax: q[0], ay: q[1] }; });
+  const items = s.labels.map(L => { const q = S3.proj(s.cam, W, H, L.p), f = L.s * 1.3 * k, size = max(11, f), r = size / f, w = L.m ? symW(c, L, size) : txtW(c, L, size), x = q[0] + L.dx * k * r; return { L, size, w, x: L.a === 'c' ? x - w / 2 : L.a === 'r' ? x - w : x, y: q[1] + L.dy * k * r, ax: q[0], ay: q[1] }; });
   S3.place(c, W, H, items, P.bg, st ? (st._lm || (st._lm = [])) : null, res); items.forEach(it => { if (it.lead) S3.leader(c, it, P.muted); });
   items.forEach(({ L, X, Y, size }) => { const col = P[KEY[L.c]] || P.ink; if (L.m) G.sym(c, L.t, L.sub, X, Y, { color: col, size: size * 1.05, align: 'left', halo: P.bg }); else G.text(c, L.t, X, Y, { color: col, size, weight: L.b ? 700 : 500, align: 'left', halo: P.bg, haloW: 3.5 }); }); };
 /* reserve(W, H): boxes the after-drawing covers (S3.place keeps labels out of them) */

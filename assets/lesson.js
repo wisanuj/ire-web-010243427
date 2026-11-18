@@ -18,8 +18,10 @@ const t = (th, en) => MC.t(th, en);
         hint: html shown while no step is open, scroll: false to stop the page following the new step } */
 /* a displayed equation wider than its card is shrunk to fit (down to 60 %), instead of running off the edge: the solution column is
    narrow on laptops and phones. Done when a step opens and again when the window changes size */
-LS.fitMath = root => (root || document).querySelectorAll('.steps .katex-display, .final .katex-display').forEach(d => { d.style.fontSize = ''; const w = d.clientWidth, sw = d.scrollWidth;
-  if (w > 0 && sw > w + 1) d.style.fontSize = Math.max(0.6, (w / sw) * 0.98).toFixed(3) + 'em'; });
+/* shrink until it fits: KaTeX does not scale every part with the font size (struts, rules), so one proportional step can leave it a little too wide (phones) */
+LS.fitMath = root => (root || document).querySelectorAll('.steps .katex-display, .final .katex-display').forEach(d => { d.style.fontSize = '';
+  for (let i = 0; i < 5; i++) { const w = d.clientWidth, sw = d.scrollWidth, cur = parseFloat(d.style.fontSize) || 1; if (!(w > 0 && sw > w + 1)) break;
+    const nf = Math.max(0.6, cur * (w / sw) * 0.98); if (nf > cur - 0.005) break; d.style.fontSize = nf.toFixed(3) + 'em'; } });
 let fitT = null; if (typeof window !== 'undefined') window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(() => LS.fitMath(), 150); });
 LS.stepper = (el, o = {}) => {
   el.classList.add('stepper');
